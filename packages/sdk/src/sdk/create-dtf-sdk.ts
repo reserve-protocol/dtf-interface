@@ -6,31 +6,8 @@ import {
 } from "../clients/create-dtf-client.js";
 import type { SupportedChainId } from "../defaults.js";
 import type { YieldDtfRef } from "../types/yield-dtf.js";
-import {
-  getAllProposals,
-  getFullIndexDTF,
-  getIndexDTF,
-  getIndexDTFPrice,
-  getIndexDTFPriceHistory,
-  getProposal,
-  getProposals,
-  getRebalance,
-  getRebalances,
-  listIndexDTFs,
-} from "./index/index.js";
-import {
-  type GetAllIndexDTFProposalsParams,
-  type GetFullIndexDTFParams,
-  type GetIndexDTFParams,
-  type GetIndexDTFPriceHistoryParams,
-  type GetIndexDTFPriceParams,
-  type GetIndexDTFProposalParams,
-  type GetIndexDTFProposalsParams,
-  type GetIndexDTFRebalanceParams,
-  type GetIndexDTFRebalancesParams,
-  type IndexDTFRef,
-  type ListIndexDTFsParams,
-} from "../types/index-dtf.js";
+import { createIndexNamespace } from "./index/index.js";
+import { type IndexDTFRef } from "../types/index-dtf.js";
 
 export type RefInput = {
   readonly address: Address | string;
@@ -38,23 +15,13 @@ export type RefInput = {
 };
 
 export type DtfSdkConfig = DtfClientConfig & {
-  readonly client?: DtfClient;
+  readonly client?: DtfClient | undefined;
 };
 
 export type DtfSdk = {
   readonly client: DtfClient;
-  readonly index: {
+  readonly index: ReturnType<typeof createIndexNamespace> & {
     readonly ref: (input: RefInput) => IndexDTFRef;
-    readonly get: typeof getIndexDTF;
-    readonly list: typeof listIndexDTFs;
-    readonly getFull: typeof getFullIndexDTF;
-    readonly getPrice: typeof getIndexDTFPrice;
-    readonly getPriceHistory: typeof getIndexDTFPriceHistory;
-    readonly getProposals: typeof getProposals;
-    readonly getProposal: typeof getProposal;
-    readonly getAllProposals: typeof getAllProposals;
-    readonly getRebalances: typeof getRebalances;
-    readonly getRebalance: typeof getRebalance;
   };
   readonly yield: {
     readonly ref: (input: RefInput) => YieldDtfRef;
@@ -67,26 +34,13 @@ export type DtfSdk = {
 
 export function createDtfSdk(config: DtfSdkConfig = {}): DtfSdk {
   const client = config.client ?? createDtfClient(config);
+  const index = createIndexNamespace(client);
 
   return {
     client,
     index: {
+      ...index,
       ref: createRef,
-      get: (params: GetIndexDTFParams) => getIndexDTF({ ...params, client }),
-      list: (params?: ListIndexDTFsParams) => listIndexDTFs(params),
-      getFull: (params: GetFullIndexDTFParams) => getFullIndexDTF(params),
-      getPrice: (params: GetIndexDTFPriceParams) => getIndexDTFPrice(params),
-      getPriceHistory: (params: GetIndexDTFPriceHistoryParams) =>
-        getIndexDTFPriceHistory(params),
-      getProposals: (params: GetIndexDTFProposalsParams) =>
-        getProposals(params),
-      getProposal: (params: GetIndexDTFProposalParams) => getProposal(params),
-      getAllProposals: (params: GetAllIndexDTFProposalsParams) =>
-        getAllProposals(params),
-      getRebalances: (params: GetIndexDTFRebalancesParams) =>
-        getRebalances(params),
-      getRebalance: (params: GetIndexDTFRebalanceParams) =>
-        getRebalance(params),
     },
     yield: {
       ref: createRef,

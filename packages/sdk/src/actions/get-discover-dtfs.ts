@@ -31,7 +31,7 @@ export async function getDiscoverDtfs({
       offset,
       sort,
     },
-    ...(client ? { client } : {}),
+    client,
   });
 
   return dtfs.map((dtf) => ({

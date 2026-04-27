@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 import { getAddress } from "viem";
-import type { DtfClientOptions } from "../../clients/create-dtf-client.js";
+import type { DtfClient } from "../../clients/create-dtf-client.js";
 import { GetIndexDtfDocument } from "../../graphql/index/generated/graphql.js";
 import { dedupeAddresses } from "../../lib/utils.js";
 import { queryIndexSubgraph } from "../../transports/subgraph.js";
@@ -26,6 +26,21 @@ import { mapIndexDTF } from "./mappers.js";
 
 export type * from "../../types/index-dtf.js";
 
+export function createIndexNamespace(client: DtfClient) {
+  return {
+    get: (params: GetIndexDTFParams) => getIndexDTF(params, client),
+    list: listIndexDTFs,
+    getFull: getFullIndexDTF,
+    getPrice: getIndexDTFPrice,
+    getPriceHistory: getIndexDTFPriceHistory,
+    getProposals,
+    getProposal,
+    getAllProposals,
+    getRebalances,
+    getRebalance,
+  };
+}
+
 export function getIndexDTFProposalGovernanceAddresses(
   dtf: IndexDTF,
 ): readonly Address[] {
@@ -43,7 +58,8 @@ export function getIndexDTFProposalGovernanceAddresses(
 }
 
 export async function getIndexDTF(
-  params: GetIndexDTFParams & DtfClientOptions,
+  params: GetIndexDTFParams,
+  client?: DtfClient,
 ): Promise<IndexDTF> {
   const { dtf } = await queryIndexSubgraph({
     chainId: params.chainId,
@@ -51,7 +67,7 @@ export async function getIndexDTF(
     variables: {
       id: getAddress(params.address).toLowerCase(),
     },
-    ...(params.client ? { client: params.client } : {}),
+    client,
   });
 
   if (!dtf) {

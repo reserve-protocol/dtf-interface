@@ -76,7 +76,7 @@ sdk.index.price()
 sdk.index.proposals()
 ```
 
-The client holds runtime configuration:
+The client holds runtime configuration. `createDtfSdk(config)` returns an isolated plain object; it must not mutate global SDK state.
 
 ```ts
 createDtfSdk({
@@ -90,6 +90,8 @@ createDtfSdk({
   },
 });
 ```
+
+Module-level helpers may use production defaults, but custom configuration belongs to a created SDK instance or an explicitly passed transport client. Do not add global mutable SDK configuration.
 
 Transports should be thin wrappers around known libraries:
 

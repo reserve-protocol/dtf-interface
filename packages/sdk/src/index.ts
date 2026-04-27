@@ -1,8 +1,5 @@
 export {
   createDtfClient,
-  getDefaultDtfClient,
-  resolveDtfClient,
-  setDefaultDtfClient,
 } from "./clients/create-dtf-client.js";
 export { createDtfSdk } from "./sdk/create-dtf-sdk.js";
 export type {

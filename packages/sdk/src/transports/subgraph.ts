@@ -22,26 +22,26 @@ export type SubgraphDocument<
   | TypedDocumentNode<TResult, TVariables>
   | TypedDocumentString<TResult, TVariables>;
 
-type QueryProductSubgraphOptions<
+type QuerySubgraphOptions<
   TResult,
   TVariables extends Variables = Record<string, never>,
 > = DtfClientOptions & {
   readonly chainId: SupportedChainId;
   readonly product: SubgraphProduct;
   readonly query: SubgraphDocument<TResult, TVariables>;
-  readonly requestHeaders?: HeadersInit;
-  readonly variables?: TVariables;
+  readonly requestHeaders?: HeadersInit | undefined;
+  readonly variables?: TVariables | undefined;
 };
 
 export type QueryIndexSubgraphOptions<
   TResult,
   TVariables extends Variables = Record<string, never>,
-> = Omit<QueryProductSubgraphOptions<TResult, TVariables>, "product">;
+> = Omit<QuerySubgraphOptions<TResult, TVariables>, "product">;
 
 export type QueryYieldSubgraphOptions<
   TResult,
   TVariables extends Variables = Record<string, never>,
-> = Omit<QueryProductSubgraphOptions<TResult, TVariables>, "product">;
+> = Omit<QuerySubgraphOptions<TResult, TVariables>, "product">;
 
 export type QueryIndexSubgraphsOptions<
   TResult,
@@ -49,7 +49,7 @@ export type QueryIndexSubgraphsOptions<
 > = DtfClientOptions & {
   readonly chainIds?: readonly SupportedChainId[];
   readonly query: SubgraphDocument<TResult, TVariables>;
-  readonly requestHeaders?: HeadersInit;
+  readonly requestHeaders?: HeadersInit | undefined;
   readonly variables?: TVariables | ((chainId: SupportedChainId) => TVariables);
 };
 
@@ -63,7 +63,7 @@ async function queryProductSubgraph<
   query,
   requestHeaders,
   variables,
-}: QueryProductSubgraphOptions<TResult, TVariables>): Promise<TResult> {
+}: QuerySubgraphOptions<TResult, TVariables>): Promise<TResult> {
   const dtfClient = resolveDtfClient(client);
   const url =
     product === "index"
@@ -128,16 +128,10 @@ export async function queryIndexSubgraphs<
       const data = await queryIndexSubgraph<TResult, TVariables>({
         chainId,
         query,
-        ...(client === undefined ? {} : { client }),
-        ...(requestHeaders === undefined ? {} : { requestHeaders }),
-        ...(variables === undefined
-          ? {}
-          : {
-              variables:
-                typeof variables === "function"
-                  ? variables(chainId)
-                  : variables,
-            }),
+        client,
+        requestHeaders,
+        variables:
+          typeof variables === "function" ? variables(chainId) : variables,
       });
 
       return [chainId, data] as const;

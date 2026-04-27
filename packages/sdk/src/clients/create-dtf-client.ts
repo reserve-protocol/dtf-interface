@@ -44,10 +44,8 @@ export type DtfClient = {
 };
 
 export type DtfClientOptions = {
-  readonly client?: DtfClient;
+  readonly client?: DtfClient | undefined;
 };
-
-let defaultClient: DtfClient | undefined;
 
 export function createDtfClient(config: DtfClientConfig = {}): DtfClient {
   const chains = createChainConfig(config.chains);
@@ -93,17 +91,8 @@ export function createDtfClient(config: DtfClientConfig = {}): DtfClient {
   };
 }
 
-export function getDefaultDtfClient(): DtfClient {
-  defaultClient ??= createDtfClient();
-  return defaultClient;
-}
-
-export function setDefaultDtfClient(client: DtfClient): void {
-  defaultClient = client;
-}
-
 export function resolveDtfClient(client?: DtfClient): DtfClient {
-  return client ?? getDefaultDtfClient();
+  return client ?? createDtfClient();
 }
 
 function createDefaultPublicClient(

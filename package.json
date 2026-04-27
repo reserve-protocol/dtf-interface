@@ -1,0 +1,22 @@
+{
+  "name": "dtf-interface",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TypeScript interface SDK for DTF integrations.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "clean": "pnpm -r --if-present clean",
+    "dev": "pnpm -r --if-present --parallel dev",
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}

@@ -31,5 +31,3 @@ export const INDEX_DTF_SUBGRAPH_URL = {
   [bsc.id]:
     "https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-index-bsc/prod/gn",
 } as const satisfies Partial<Record<SupportedChainId, string>>;
-
-export const DEFAULT_SUBGRAPH_URLS = INDEX_DTF_SUBGRAPH_URL;

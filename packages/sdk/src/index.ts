@@ -20,10 +20,17 @@ export {
   supportedChainIds,
 } from "./defaults.js";
 export type { SupportedChainId } from "./defaults.js";
-export { apiGet } from "./transports/api.js";
-export type { ApiRequestOptions } from "./transports/api.js";
-export { querySubgraph } from "./transports/subgraph.js";
-export type { SubgraphRequestOptions } from "./transports/subgraph.js";
+export {
+  queryIndexSubgraph,
+  queryIndexSubgraphs,
+  queryYieldSubgraph,
+} from "./transports/subgraph.js";
+export type {
+  QueryIndexSubgraphOptions,
+  QueryIndexSubgraphsOptions,
+  QueryYieldSubgraphOptions,
+  SubgraphDocument,
+} from "./transports/subgraph.js";
 export { getDiscoverDtfs } from "./actions/get-discover-dtfs.js";
 export type {
   Amount,

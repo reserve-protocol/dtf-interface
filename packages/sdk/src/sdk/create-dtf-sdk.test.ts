@@ -5,34 +5,28 @@ const address = "0x0000000000000000000000000000000000000001";
 
 describe("createDtfSdk", () => {
   it("creates refs without fetching", () => {
-    const fetch = vi.fn();
-    const sdk = createDtfSdk({ fetch });
+    const sdk = createDtfSdk();
 
     expect(sdk.index.ref({ address, chainId: 1 })).toEqual({
       address,
       chainId: 1,
     });
-    expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("stores explicit index providers without fetching", () => {
-    const fetch = vi.fn();
+  it("stores explicit index providers", () => {
     const indexPricingProvider = {
       getCurrent: vi.fn(),
     };
 
     const sdk = createDtfSdk({
-      fetch,
       indexPricingProvider,
     });
 
     expect(sdk.client.indexPricingProvider).toBe(indexPricingProvider);
-    expect(fetch).not.toHaveBeenCalled();
   });
 
   it("keeps index and yield subgraph configuration separate", () => {
     const sdk = createDtfSdk({
-      fetch: vi.fn(),
       chains: {
         1: {
           indexSubgraphUrl: "https://example.com/index",

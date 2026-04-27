@@ -24,8 +24,10 @@ import { createDtfSdk } from "@dtf-interface/sdk";
 
 const sdk = createDtfSdk({
   apiBaseUrl: "https://api.reserve.org",
-  rpcUrls: {
-    1: ["https://eth-mainnet.example"],
+  chains: {
+    1: {
+      rpcUrls: ["https://eth-mainnet.example"],
+    },
   },
 });
 
@@ -34,7 +36,7 @@ const dtfs = await sdk.index.list({ chainId: 1 });
 
 ## Design
 
-The SDK uses a small domain facade over replaceable sources.
+The SDK uses a small domain facade over a runtime client.
 
 ```ts
 const ref = sdk.index.ref({ address: "0x...", chainId: 8453 }); // no fetch
@@ -45,10 +47,10 @@ await sdk.index.proposals(ref);
 
 Do not add a class-based SDK surface unless there is a strong reason.
 
-The intended long-term model:
+The intended model:
 
 ```text
-namespace methods -> client -> sources -> transports
+namespace methods -> client config -> small transports -> mappers
 ```
 
 See [../../docs/sdk-architecture.md](../../docs/sdk-architecture.md).

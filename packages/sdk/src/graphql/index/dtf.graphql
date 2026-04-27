@@ -1,0 +1,118 @@
+query GetIndexDTF($id: ID!) {
+  dtf(id: $id) {
+    id
+    proxyAdmin
+    timestamp
+    deployer
+    ownerAddress
+    admins
+    mintingFee
+    tvlFee
+    annualizedTvlFee
+    mandate
+    auctionDelay
+    auctionLength
+    auctionApprovers
+    auctionLaunchers
+    brandManagers
+    totalRevenue
+    protocolRevenue
+    governanceRevenue
+    externalRevenue
+    feeRecipients
+    bidsEnabled
+    trustedFillerRegistry
+    trustedFillerEnabled
+    weightControl
+    priceControl
+    ownerGovernance {
+      id
+      votingDelay
+      votingPeriod
+      proposalThreshold
+      quorumNumerator
+      quorumDenominator
+      timelock {
+        id
+        guardians
+        executionDelay
+      }
+    }
+    legacyAdmins
+    tradingGovernance {
+      id
+      votingDelay
+      votingPeriod
+      proposalThreshold
+      quorumNumerator
+      quorumDenominator
+      timelock {
+        id
+        guardians
+        executionDelay
+      }
+    }
+    legacyAuctionApprovers
+    token {
+      id
+      address
+      name
+      symbol
+      decimals
+      totalSupply
+      currentHolderCount
+      cumulativeHolderCount
+      transferCount
+      mintCount
+      burnCount
+      totalBurned
+      totalMinted
+    }
+    stToken {
+      id
+      token {
+        id
+        address
+        name
+        symbol
+        decimals
+        totalSupply
+        currentHolderCount
+        cumulativeHolderCount
+        transferCount
+        mintCount
+        burnCount
+        totalBurned
+        totalMinted
+      }
+      underlying {
+        name
+        symbol
+        address
+        decimals
+      }
+      governance {
+        id
+        votingDelay
+        votingPeriod
+        proposalThreshold
+        quorumNumerator
+        quorumDenominator
+        timelock {
+          id
+          guardians
+          executionDelay
+        }
+      }
+      legacyGovernance
+      rewards(where: { active: true }) {
+        rewardToken {
+          address
+          name
+          symbol
+          decimals
+        }
+      }
+    }
+  }
+}

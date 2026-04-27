@@ -17,6 +17,8 @@ import {
   getRebalance,
   getRebalances,
   listIndexDTFs,
+} from "./index/index.js";
+import {
   type GetAllIndexDTFProposalsParams,
   type GetFullIndexDTFParams,
   type GetIndexDTFParams,
@@ -28,7 +30,7 @@ import {
   type GetIndexDTFRebalancesParams,
   type IndexDTFRef,
   type ListIndexDTFsParams,
-} from "./index/index.js";
+} from "../types/index-dtf.js";
 
 export type RefInput = {
   readonly address: Address | string;
@@ -57,7 +59,9 @@ export type DtfSdk = {
   readonly yield: {
     readonly ref: (input: RefInput) => YieldDtfRef;
     readonly get: (params: RefInput) => Promise<never>;
-    readonly list: (params?: { readonly chainId?: SupportedChainId }) => Promise<never>;
+    readonly list: (params?: {
+      readonly chainId?: SupportedChainId;
+    }) => Promise<never>;
   };
 };
 
@@ -68,19 +72,21 @@ export function createDtfSdk(config: DtfSdkConfig = {}): DtfSdk {
     client,
     index: {
       ref: createRef,
-      get: (params: GetIndexDTFParams) => getIndexDTF(params),
+      get: (params: GetIndexDTFParams) => getIndexDTF({ ...params, client }),
       list: (params?: ListIndexDTFsParams) => listIndexDTFs(params),
       getFull: (params: GetFullIndexDTFParams) => getFullIndexDTF(params),
       getPrice: (params: GetIndexDTFPriceParams) => getIndexDTFPrice(params),
       getPriceHistory: (params: GetIndexDTFPriceHistoryParams) =>
         getIndexDTFPriceHistory(params),
-      getProposals: (params: GetIndexDTFProposalsParams) => getProposals(params),
+      getProposals: (params: GetIndexDTFProposalsParams) =>
+        getProposals(params),
       getProposal: (params: GetIndexDTFProposalParams) => getProposal(params),
       getAllProposals: (params: GetAllIndexDTFProposalsParams) =>
         getAllProposals(params),
       getRebalances: (params: GetIndexDTFRebalancesParams) =>
         getRebalances(params),
-      getRebalance: (params: GetIndexDTFRebalanceParams) => getRebalance(params),
+      getRebalance: (params: GetIndexDTFRebalanceParams) =>
+        getRebalance(params),
     },
     yield: {
       ref: createRef,

@@ -29,8 +29,6 @@ export type DtfChainConfig = {
 export type DtfClientConfig = {
   readonly apiBaseUrl?: string;
   readonly chains?: Partial<Record<SupportedChainId, DtfChainConfig>>;
-  readonly fetch?: typeof fetch;
-  readonly fetchOptions?: RequestInit;
   readonly indexBrandProvider?: IndexBrandProvider;
   readonly indexPricingProvider?: IndexPricingProvider;
 };
@@ -38,8 +36,6 @@ export type DtfClientConfig = {
 export type DtfClient = {
   readonly apiBaseUrl: string;
   readonly chains: Partial<Record<SupportedChainId, DtfChainConfig>>;
-  readonly fetch: typeof fetch;
-  readonly fetchOptions: RequestInit | undefined;
   readonly indexBrandProvider: IndexBrandProvider | undefined;
   readonly indexPricingProvider: IndexPricingProvider | undefined;
   readonly getIndexSubgraphUrl: (chainId: SupportedChainId) => string;
@@ -54,20 +50,12 @@ export type DtfClientOptions = {
 let defaultClient: DtfClient | undefined;
 
 export function createDtfClient(config: DtfClientConfig = {}): DtfClient {
-  const fetchFn = config.fetch ?? globalThis.fetch;
-
-  if (typeof fetchFn !== "function") {
-    throw new TypeError("A fetch implementation is required.");
-  }
-
   const chains = createChainConfig(config.chains);
   const publicClients = getConfiguredPublicClients(chains);
 
   return {
     apiBaseUrl: trimTrailingSlash(config.apiBaseUrl ?? DEFAULT_API_BASE_URL),
     chains,
-    fetch: fetchFn,
-    fetchOptions: config.fetchOptions,
     indexBrandProvider: config.indexBrandProvider,
     indexPricingProvider: config.indexPricingProvider,
     getIndexSubgraphUrl(chainId: SupportedChainId) {

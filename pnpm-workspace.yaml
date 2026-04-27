@@ -1,3 +1,10 @@
 packages:
   - "packages/*"
 
+catalogMode: manual
+blockExoticSubdeps: true
+cleanupUnusedCatalogs: true
+minimumReleaseAge: 1440
+
+overrides:
+  axios: ^1.15.0

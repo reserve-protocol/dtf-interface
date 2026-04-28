@@ -1,7 +1,7 @@
 import {
   resolveDtfClient,
   type DtfClientOptions,
-} from "../clients/create-dtf-client.js";
+} from "../client.js";
 
 type ApiGetOptions = DtfClientOptions & {
   readonly path: string;

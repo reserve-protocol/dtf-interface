@@ -23,6 +23,7 @@ const sdk = createDtfSdk();
 const dtf = await sdk.index.get({ address, chainId });
 const dtfs = await sdk.index.list({ chainId });
 const proposals = await sdk.index.proposals({ address, chainId });
+const price = await sdk.index.getPrice({ address, chainId });
 
 const ydtf = await sdk.yield.get({ address, chainId });
 ```
@@ -37,20 +38,11 @@ await dtf.proposals();
 
 Classes are not forbidden, but they should not be the default SDK surface. Stateless functions are easier to test, easier to compose, friendlier to tree-shaking, and less likely to hide network calls behind object lifecycle.
 
-## References
+## Method Inputs
 
-Use refs when a method only needs identity:
+Methods should take plain inputs like `{ address, chainId }`. Do not add a named ref layer around that shape unless a real workflow needs it.
 
-```ts
-const ref = sdk.index.ref({ address, chainId });
-
-await sdk.index.get(ref);
-await sdk.index.proposals(ref);
-```
-
-`index.ref()` must not fetch. It only normalizes the address/chain pair. This gives consumers a stable value they can pass around without forcing an expensive `get()` first.
-
-Methods that can accept either an explicit ref or a hydrated DTF should do so when it improves ergonomics:
+Methods that can accept either plain identity or a hydrated DTF should do so when it improves ergonomics:
 
 ```ts
 await sdk.index.proposals({ address, chainId });
@@ -72,7 +64,7 @@ Namespace methods are the public SDK:
 ```ts
 sdk.index.get()
 sdk.index.getFull()
-sdk.index.price()
+sdk.index.getPrice()
 sdk.index.proposals()
 ```
 
@@ -121,7 +113,7 @@ This boundary matters even if a high-level method later composes everything:
 
 ```ts
 await sdk.index.get({ address, chainId });      // subgraph/onchain domain model
-await sdk.index.price({ address, chainId });    // API-backed fresh price
+await sdk.index.getPrice({ address, chainId }); // API-backed fresh price
 await sdk.index.getFull({ address, chainId });  // composed convenience method
 ```
 
@@ -149,8 +141,8 @@ If the Reserve API uses the SDK, it should avoid SDK methods that call its own p
 Store GraphQL documents in `.graphql` files close to the domain:
 
 ```text
-packages/sdk/src/graphql/index/dtf.graphql
-packages/sdk/src/graphql/index/generated/
+packages/sdk/src/graphql/index-dtf/dtf.graphql
+packages/sdk/src/graphql/index-dtf/generated/
 ```
 
 Run codegen after editing documents:

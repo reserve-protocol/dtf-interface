@@ -11,12 +11,13 @@ import {
   INDEX_DTF_SUBGRAPH_URL,
   SUPPORTED_CHAINS,
   YIELD_DTF_SUBGRAPH_URL,
+  supportedChainIds,
   type SupportedChainId,
-} from "../defaults.js";
+} from "./defaults.js";
 import type {
   IndexBrandProvider,
   IndexPricingProvider,
-} from "../sdk/index/index.js";
+} from "./index-dtf/index.js";
 
 export type DtfChainConfig = {
   readonly chain?: Chain;
@@ -121,7 +122,11 @@ function createChainConfig(
       {
         chain,
         indexSubgraphUrl: INDEX_DTF_SUBGRAPH_URL[chainId],
-        yieldSubgraphUrl: YIELD_DTF_SUBGRAPH_URL[chainId],
+        ...(chainId in YIELD_DTF_SUBGRAPH_URL
+          ? {
+              yieldSubgraphUrl: YIELD_DTF_SUBGRAPH_URL[chainId],
+            }
+          : {}),
         ...overrides[chainId],
       },
     ]),
@@ -144,10 +149,7 @@ function getConfiguredPublicClients(
 }
 
 function supportedChainEntries(): readonly (readonly [SupportedChainId, Chain])[] {
-  return Object.entries(SUPPORTED_CHAINS).map(([chainId, chain]) => [
-    Number(chainId) as SupportedChainId,
-    chain,
-  ]);
+  return supportedChainIds.map((chainId) => [chainId, SUPPORTED_CHAINS[chainId]]);
 }
 
 function trimTrailingSlash(value: string): string {

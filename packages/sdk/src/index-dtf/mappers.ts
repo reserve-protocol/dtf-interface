@@ -1,6 +1,6 @@
 import { formatEther, formatUnits, getAddress } from "viem";
-import type { SupportedChainId } from "../../defaults.js";
-import type { GetIndexDtfQuery } from "../../graphql/index/generated/graphql.js";
+import type { SupportedChainId } from "../defaults.js";
+import type { GetIndexDtfQuery } from "../graphql/index-dtf/dtf.generated.js";
 import type {
   Amount,
   Authority,
@@ -11,7 +11,7 @@ import type {
   Token,
   TokenSnapshot,
   TokenWithSnapshot,
-} from "../../types/index-dtf.js";
+} from "../types/index-dtf.js";
 
 type SubgraphIndexDTF = NonNullable<GetIndexDtfQuery["dtf"]>;
 type NullableSubgraphGovernance = SubgraphIndexDTF["ownerGovernance"];

@@ -1,14 +1,19 @@
 export {
   createDtfClient,
-} from "./clients/create-dtf-client.js";
-export { createDtfSdk } from "./sdk/create-dtf-sdk.js";
+} from "./client.js";
+export { createDtfSdk } from "./create-dtf-sdk.js";
+export {
+  default as dtfCatalog,
+  indexDtfs as indexDtfCatalog,
+  yieldDtfs as yieldDtfCatalog,
+} from "@dtf-interface/dtf-catalog";
 export type {
   DtfClient,
   DtfChainConfig,
   DtfClientConfig,
   DtfClientOptions,
-} from "./clients/create-dtf-client.js";
-export type { DtfSdk, DtfSdkConfig } from "./sdk/create-dtf-sdk.js";
+} from "./client.js";
+export type { DtfSdk, DtfSdkConfig } from "./create-dtf-sdk.js";
 export {
   DEFAULT_API_BASE_URL,
   INDEX_DTF_SUBGRAPH_URL,
@@ -62,7 +67,6 @@ export type {
   IndexDTFProposalSummary,
   IndexDTFProposalVote,
   IndexDTFRebalanceConfig,
-  IndexDTFRef,
   IndexDTFRoles,
   IndexDTFWithPrice,
   IndexPricingProvider,
@@ -75,12 +79,11 @@ export type {
   TokenSnapshot,
   TokenWithSnapshot,
   VoteLockVault,
-} from "./sdk/index/index.js";
+} from "./index-dtf/index.js";
 export type { DtfBrand } from "./types/common.js";
 export type {
   YieldDtf,
   YieldDtfListItem,
-  YieldDtfRef,
 } from "./types/yield-dtf.js";
 export type {
   DiscoverDtf,

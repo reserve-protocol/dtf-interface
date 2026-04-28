@@ -2,26 +2,41 @@ overwrite: true
 ignoreNoDocuments: true
 
 generates:
-  src/graphql/index/generated/:
+  src/graphql/index-dtf/dtf.generated.ts:
     schema: https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-index-base/prod/gn
     documents:
-      - src/graphql/index/**/*.graphql
-    preset: client
-    presetConfig:
-      fragmentMasking: false
+      - src/graphql/index-dtf/**/*.graphql
+    plugins:
+      - add:
+          content: |
+            type Maybe<T> = T | null;
+            type InputMaybe<T> = Maybe<T>;
+            type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+            type Scalars = {
+              ID: { input: string; output: string };
+              String: { input: string; output: string };
+              Boolean: { input: boolean; output: boolean };
+              Int: { input: number; output: number };
+              Float: { input: number; output: number };
+              BigDecimal: { input: string; output: string };
+              BigInt: { input: string; output: string };
+              Bytes: { input: string; output: string };
+              Int8: { input: string; output: string };
+              Timestamp: { input: string; output: string };
+            };
+      - typescript-operations
+      - typed-document-node
     config:
+      documentMode: string
       emitLegacyCommonJSImports: false
       importExtension: .js
-      useTypeImports: true
-
-  src/graphql/yield/generated/:
-    schema: https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-yield-base/4.2.0-v2/gn
-    documents:
-      - src/graphql/yield/**/*.graphql
-    preset: client
-    presetConfig:
-      fragmentMasking: false
-    config:
-      emitLegacyCommonJSImports: false
-      importExtension: .js
+      onlyOperationTypes: true
+      preResolveTypes: true
+      scalars:
+        BigDecimal: string
+        BigInt: string
+        Bytes: string
+        Int8: string
+        Timestamp: string
+      skipTypename: true
       useTypeImports: true

@@ -9,7 +9,7 @@ import type { TypedDocumentNode } from "@graphql-typed-document-node/core";
 import {
   resolveDtfClient,
   type DtfClientOptions,
-} from "../clients/create-dtf-client.js";
+} from "../client.js";
 import { supportedChainIds, type SupportedChainId } from "../defaults.js";
 
 type SubgraphProduct = "index" | "yield";

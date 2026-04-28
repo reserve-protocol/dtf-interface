@@ -1,5 +1,4 @@
 import type { Address } from "viem";
-import type { SupportedChainId } from "../defaults.js";
 
 export type Token = {
   readonly address: Address;
@@ -9,12 +8,6 @@ export type Token = {
 };
 
 export type DtfStatus = "active" | "deprecated" | "unsupported";
-
-// TODO: do we need this at all? let's see
-export type DtfRef = {
-  readonly address: Address;
-  readonly chainId: SupportedChainId;
-};
 
 export type DtfBasketAsset = {
   readonly address: Address;

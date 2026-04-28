@@ -4,6 +4,11 @@ Core TypeScript SDK for DTF integrations.
 
 This package is environment-agnostic. It should work in modern Node, browser apps, React wrappers, scripts, and bots.
 
+Supported products and chains:
+
+- Index DTFs: Ethereum mainnet, Base, BSC.
+- Yield DTFs: Ethereum mainnet, Base.
+
 ## Usage
 
 ```ts
@@ -36,14 +41,7 @@ const dtfs = await sdk.index.list({ chainId: 1 });
 
 ## Design
 
-The SDK uses a small domain facade over a runtime client.
-
-```ts
-const ref = sdk.index.ref({ address: "0x...", chainId: 8453 }); // no fetch
-
-await sdk.index.get(ref);
-await sdk.index.proposals(ref);
-```
+The SDK uses a small domain facade over a runtime client. Methods take plain inputs like `{ address, chainId }`.
 
 Do not add a class-based SDK surface unless there is a strong reason.
 

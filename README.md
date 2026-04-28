@@ -11,6 +11,11 @@ TypeScript monorepo for DTF interface packages.
 
 This SDK is intentionally more opinionated than low-level libraries like viem. It should make common DTF workflows easy for apps, bots, scripts, and server code while still allowing advanced callers to override RPC providers, subgraph URLs, and the few API-backed providers that need replacement.
 
+Supported products and chains:
+
+- Index DTFs: Ethereum mainnet, Base, BSC.
+- Yield DTFs: Ethereum mainnet, Base.
+
 The core rule is:
 
 > Namespace methods are the public SDK surface. The client holds runtime configuration. Transports stay small. Defaults make the SDK easy to use.

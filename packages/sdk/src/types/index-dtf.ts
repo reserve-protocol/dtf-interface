@@ -189,20 +189,18 @@ export type IndexDTF = {
   readonly financials: Financials;
 };
 
-export type IndexDTFRef = {
+export type GetIndexDTFParams = {
   readonly address: Address;
   readonly chainId: SupportedChainId;
 };
 
-export type IndexDTFInput = IndexDTF | IndexDTFRef;
+export type IndexDTFInput = IndexDTF | GetIndexDTFParams;
 
-export type GetIndexDTFParams = IndexDTFRef;
+export type GetFullIndexDTFParams = GetIndexDTFParams;
 
-export type GetFullIndexDTFParams = IndexDTFRef;
+export type GetIndexDTFPriceParams = GetIndexDTFParams;
 
-export type GetIndexDTFPriceParams = IndexDTFRef;
-
-export type GetIndexDTFPriceHistoryParams = IndexDTFRef & {
+export type GetIndexDTFPriceHistoryParams = GetIndexDTFParams & {
   readonly from?: number;
   readonly to?: number;
   readonly interval?: "hour" | "day" | "week" | "month";
@@ -212,8 +210,7 @@ export type ListIndexDTFsParams = {
   readonly chainId?: SupportedChainId;
 };
 
-export type GetIndexDTFProposalsParams = {
-  readonly dtf: IndexDTFInput;
+export type GetIndexDTFProposalsParams = IndexDTFInput & {
   readonly limit?: number;
   readonly offset?: number;
 };
@@ -230,8 +227,7 @@ export type GetIndexDTFProposalParams = {
   readonly chainId: SupportedChainId;
 };
 
-export type GetIndexDTFRebalancesParams = {
-  readonly dtf: IndexDTFInput;
+export type GetIndexDTFRebalancesParams = IndexDTFInput & {
   readonly limit?: number;
   readonly offset?: number;
 };
@@ -266,7 +262,7 @@ export type IndexDTFProposalSummary = {
   readonly id: string;
   readonly chainId: SupportedChainId;
   readonly governance: Address;
-  readonly dtf?: IndexDTFRef;
+  readonly dtf?: GetIndexDTFParams;
   readonly proposer?: Address;
   readonly description: string;
   readonly state: ProposalState;
@@ -328,5 +324,5 @@ export type IndexPricingProvider = {
 };
 
 export type IndexBrandProvider = {
-  readonly get: (params: IndexDTFRef) => Promise<DtfBrand | undefined>;
+  readonly get: (params: GetIndexDTFParams) => Promise<DtfBrand | undefined>;
 };

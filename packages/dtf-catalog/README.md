@@ -8,6 +8,10 @@ This replaces the old `@reserve-protocol/rtokens` naming. RTokens are now called
 
 ```ts
 import dtfs, { indexDtfs, yieldDtfs } from "@dtf-interface/dtf-catalog";
+import type {
+  CatalogIndexDTF,
+  CatalogYieldDTF,
+} from "@dtf-interface/dtf-catalog";
 
 const baseDtfs = dtfs[8453];
 const baseIndexDtfs = indexDtfs[8453];

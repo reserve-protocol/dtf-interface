@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createDtfClient } from "../clients/create-dtf-client.js";
+import { createDtfClient } from "../client.js";
 import {
   queryIndexSubgraph,
   queryIndexSubgraphs,

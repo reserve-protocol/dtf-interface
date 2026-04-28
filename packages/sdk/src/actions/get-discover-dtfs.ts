@@ -1,5 +1,5 @@
 import { apiGet } from "../transports/api.js";
-import type { DtfClientOptions } from "../clients/create-dtf-client.js";
+import type { DtfClientOptions } from "../client.js";
 import type { SupportedChainId } from "../defaults.js";
 import type { DtfStatus } from "../types/common.js";
 

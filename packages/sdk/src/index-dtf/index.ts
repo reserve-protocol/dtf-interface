@@ -1,9 +1,9 @@
 import type { Address } from "viem";
 import { getAddress } from "viem";
-import type { DtfClient } from "../../clients/create-dtf-client.js";
-import { GetIndexDtfDocument } from "../../graphql/index/generated/graphql.js";
-import { dedupeAddresses } from "../../lib/utils.js";
-import { queryIndexSubgraph } from "../../transports/subgraph.js";
+import type { DtfClient } from "../client.js";
+import { GetIndexDtfDocument } from "../graphql/index-dtf/dtf.generated.js";
+import { dedupeAddresses } from "../lib/utils.js";
+import { queryIndexSubgraph } from "../transports/subgraph.js";
 import type {
   GetAllIndexDTFProposalsParams,
   GetFullIndexDTFParams,
@@ -21,10 +21,10 @@ import type {
   IndexDTFProposalDetail,
   IndexDTFProposalSummary,
   ListIndexDTFsParams,
-} from "../../types/index-dtf.js";
+} from "../types/index-dtf.js";
 import { mapIndexDTF } from "./mappers.js";
 
-export type * from "../../types/index-dtf.js";
+export type * from "../types/index-dtf.js";
 
 export function getIndexDTFProposalGovernanceAddresses(
   dtf: IndexDTF,
@@ -125,10 +125,10 @@ export function createIndexNamespace(client: DtfClient) {
     getFull: getFullIndexDTF,
     getPrice: getIndexDTFPrice,
     getPriceHistory: getIndexDTFPriceHistory,
-    getProposals,
-    getProposal,
+    proposals: getProposals,
+    proposal: getProposal,
     getAllProposals,
-    getRebalances,
-    getRebalance,
+    rebalances: getRebalances,
+    rebalance: getRebalance,
   };
 }

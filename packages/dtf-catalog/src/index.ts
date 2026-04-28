@@ -3,41 +3,27 @@ import indexBnb from "../index-dtf/bnb.json" with { type: "json" };
 import indexMainnet from "../index-dtf/mainnet.json" with { type: "json" };
 import yieldBase from "../yield-dtf/base.json" with { type: "json" };
 import yieldMainnet from "../yield-dtf/mainnet.json" with { type: "json" };
-import type {
-  CatalogChainId,
-  DTFCatalogByChain,
-  DTFCatalogMap,
-  IndexDTFCatalogItem,
-  YieldDTFCatalogItem,
-} from "./types.js";
+import type { CatalogIndexDTF, CatalogYieldDTF } from "./types.js";
 
-export type {
-  BaseDTFCatalogItem,
-  DTFCatalogByChain,
-  CatalogChainId,
-  DTFCatalogLinks,
-  DTFCatalogMap,
-  DTFCatalogStatus,
-  IndexDTFCatalogItem,
-  YieldDTFCatalogItem,
-} from "./types.js";
+export type { CatalogIndexDTF, CatalogYieldDTF } from "./types.js";
 
-export const indexDtfs: Partial<
-  Record<CatalogChainId, DTFCatalogMap<IndexDTFCatalogItem>>
-> = {
-  1: indexMainnet as DTFCatalogMap<IndexDTFCatalogItem>,
-  56: indexBnb as DTFCatalogMap<IndexDTFCatalogItem>,
-  8453: indexBase as DTFCatalogMap<IndexDTFCatalogItem>,
+export const indexDtfs: Record<1 | 56 | 8453, Record<string, CatalogIndexDTF>> = {
+  1: indexMainnet as Record<string, CatalogIndexDTF>,
+  56: indexBnb as Record<string, CatalogIndexDTF>,
+  8453: indexBase as Record<string, CatalogIndexDTF>,
 };
 
 export const yieldDtfs: Partial<
-  Record<CatalogChainId, DTFCatalogMap<YieldDTFCatalogItem>>
+  Record<1 | 56 | 8453, Record<string, CatalogYieldDTF>>
 > = {
-  1: yieldMainnet as DTFCatalogMap<YieldDTFCatalogItem>,
-  8453: yieldBase as DTFCatalogMap<YieldDTFCatalogItem>,
+  1: yieldMainnet as Record<string, CatalogYieldDTF>,
+  8453: yieldBase as Record<string, CatalogYieldDTF>,
 };
 
-const dtfs: DTFCatalogByChain = {
+const dtfs: Record<
+  1 | 56 | 8453,
+  Record<string, CatalogIndexDTF | CatalogYieldDTF>
+> = {
   1: {
     ...yieldDtfs[1],
     ...indexDtfs[1],

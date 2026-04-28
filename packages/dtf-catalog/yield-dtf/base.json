@@ -1,0 +1,67 @@
+{
+  "0xCb327b99fF831bF8223cCEd12B1338FF3aA322Ff": {
+    "address": "0xCb327b99fF831bF8223cCEd12B1338FF3aA322Ff",
+    "name": "Based ETH",
+    "symbol": "bsdETH",
+    "logo": "bsdeth.svg",
+    "decimals": 18,
+    "about": "A yield generating Ethereum Liquid Staking Token basket with over-collateralization protection.",
+    "status": "active"
+  },
+  "0xCc7FF230365bD730eE4B352cC2492CEdAC49383e": {
+    "address": "0xCc7FF230365bD730eE4B352cC2492CEdAC49383e",
+    "name": "High Yield USD",
+    "symbol": "hyUSD",
+    "logo": "hyusd.svg",
+    "decimals": 18,
+    "about": "hyUSD is a secure high yield savings flatcoin with up to 6% rewards outpacing inflation in over 100 countries around the world 🌎",
+    "website": "https://linktr.ee/hyusd",
+    "support": {
+      "email": "contact@high-yield.io",
+      "url": ""
+    },
+    "social": {
+      "twitter": "https://twitter.com/HighYieldUSD"
+    },
+    "status": "deprecated"
+  },
+  "0x8f0987DDb485219c767770e2080E5cC01ddc772a": {
+    "address": "0x8f0987DDb485219c767770e2080E5cC01ddc772a",
+    "name": "Base Yield Index",
+    "symbol": "BSDX",
+    "logo": "bsdx.svg",
+    "decimals": 18,
+    "status": "deprecated"
+  },
+  "0xC9a3e2B3064c1c0546D3D0edc0A748E9f93Cf18d": {
+    "address": "0xC9a3e2B3064c1c0546D3D0edc0A748E9f93Cf18d",
+    "name": "Vaya",
+    "symbol": "Vaya",
+    "logo": "vaya.svg",
+    "decimals": 18,
+    "about": "A decentralized stablecoin which is striking to get the ideal balance between maximizing the worth of your finances and safeguarding its security.",
+    "website": "https://vaya-stablecoin.com",
+    "support": {
+      "url": "https://twitter.com/Vaya_stablecoin"
+    },
+    "social": {
+      "twitter": "https://twitter.com/Vaya_stablecoin"
+    },
+    "status": "deprecated"
+  },
+  "0x641B0453487C9D14c5df96d45a481ef1dc84e31f": {
+    "address": "0x641B0453487C9D14c5df96d45a481ef1dc84e31f",
+    "name": "Maat",
+    "symbol": "MAAT",
+    "logo": "maat.svg",
+    "decimals": 18,
+    "about": "Monetary Average Across Time. The Dollar, Bitcoin, Ether unified.",
+    "support": {
+      "email": "maatcurrency@gmail.com"
+    },
+    "social": {
+      "twitter": "https://twitter.com/FlatcoinMaat"
+    },
+    "status": "deprecated"
+  }
+}

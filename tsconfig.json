@@ -3,8 +3,10 @@
   "files": [],
   "references": [
     {
+      "path": "./packages/dtf-catalog"
+    },
+    {
       "path": "./packages/sdk"
     }
   ]
 }
-

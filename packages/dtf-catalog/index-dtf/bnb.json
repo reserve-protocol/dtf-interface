@@ -1,0 +1,12 @@
+{
+  "0x2f8a339b5889ffac4c5a956787cda593b3c36867": {
+    "chainId": 56,
+    "address": "0x2f8a339b5889ffac4c5a956787cda593b3c36867",
+    "name": "CoinMarketCap 20 Index DTF",
+    "symbol": "CMC20",
+    "logo": "cmc20.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["Majors", "Bitcoin", "L1", "DeFi", "Perps", "Ecosystem"]
+  }
+}

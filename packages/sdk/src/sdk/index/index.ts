@@ -26,21 +26,6 @@ import { mapIndexDTF } from "./mappers.js";
 
 export type * from "../../types/index-dtf.js";
 
-export function createIndexNamespace(client: DtfClient) {
-  return {
-    get: (params: GetIndexDTFParams) => getIndexDTF(params, client),
-    list: listIndexDTFs,
-    getFull: getFullIndexDTF,
-    getPrice: getIndexDTFPrice,
-    getPriceHistory: getIndexDTFPriceHistory,
-    getProposals,
-    getProposal,
-    getAllProposals,
-    getRebalances,
-    getRebalance,
-  };
-}
-
 export function getIndexDTFProposalGovernanceAddresses(
   dtf: IndexDTF,
 ): readonly Address[] {
@@ -131,4 +116,19 @@ export async function getRebalances(
   _params: GetIndexDTFRebalancesParams,
 ): Promise<readonly unknown[]> {
   throw new Error("getRebalances is not implemented yet.");
+}
+
+export function createIndexNamespace(client: DtfClient) {
+  return {
+    get: (params: GetIndexDTFParams) => getIndexDTF(params, client),
+    list: listIndexDTFs,
+    getFull: getFullIndexDTF,
+    getPrice: getIndexDTFPrice,
+    getPriceHistory: getIndexDTFPriceHistory,
+    getProposals,
+    getProposal,
+    getAllProposals,
+    getRebalances,
+    getRebalance,
+  };
 }

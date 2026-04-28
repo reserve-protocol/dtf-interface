@@ -1,0 +1,48 @@
+{
+  "name": "@dtf-interface/dtf-catalog",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Curated DTF catalog for yield and index DTFs.",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "index-dtf",
+    "yield-dtf",
+    "images"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./images/*": "./images/*",
+    "./index-dtf/*": "./index-dtf/*",
+    "./yield-dtf/*": "./yield-dtf/*",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [
+    "dtf",
+    "catalog",
+    "yield-dtf",
+    "index-dtf"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

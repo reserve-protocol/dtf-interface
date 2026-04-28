@@ -1,0 +1,141 @@
+{
+  "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8": {
+    "chainId": 8453,
+    "address": "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8",
+    "name": "CF Large Cap Index",
+    "symbol": "LCAP",
+    "logo": "lcap.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["Majors", "Bitcoin", "L1"]
+  },
+  "0xe00cfa595841fb331105b93c19827797c925e3e4": {
+    "chainId": 8453,
+    "address": "0xe00cfa595841fb331105b93c19827797c925e3e4",
+    "name": "Reserve Venionaire L1 Select DTF",
+    "symbol": "VLONE",
+    "logo": "vlone.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["L1", "Majors"]
+  },
+  "0x23418de10d422ad71c9d5713a2b8991a9c586443": {
+    "chainId": 8453,
+    "address": "0x23418de10d422ad71c9d5713a2b8991a9c586443",
+    "name": "Bloomberg Galaxy Crypto Index",
+    "symbol": "BGCI",
+    "logo": "bgci.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["Majors", "Bitcoin", "L1"]
+  },
+  "0xebcda5b80f62dd4dd2a96357b42bb6facbf30267": {
+    "chainId": 8453,
+    "address": "0xebcda5b80f62dd4dd2a96357b42bb6facbf30267",
+    "name": "Alpha Base Index",
+    "symbol": "ABX",
+    "logo": "abx.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["AI", "RWA", "DeFi", "Memes"]
+  },
+  "0x44551ca46fa5592bb572e20043f7c3d54c85cad7": {
+    "chainId": 8453,
+    "address": "0x44551ca46fa5592bb572e20043f7c3d54c85cad7",
+    "name": "Clanker Index",
+    "symbol": "CLX",
+    "logo": "clx.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["Memes", "SocialFi"]
+  },
+  "0xe8b46b116d3bdfa787ce9cf3f5acc78dc7ca380e": {
+    "chainId": 8453,
+    "address": "0xe8b46b116d3bdfa787ce9cf3f5acc78dc7ca380e",
+    "name": "MarketVector Token Terminal Fundamental Index",
+    "symbol": "MVTT10F",
+    "logo": "mvtt10f.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["Majors", "L1", "DeFi", "Bitcoin"]
+  },
+  "0x47686106181b3cefe4eaf94c4c10b48ac750370b": {
+    "chainId": 8453,
+    "address": "0x47686106181b3cefe4eaf94c4c10b48ac750370b",
+    "name": "Virtuals Index",
+    "symbol": "VTF",
+    "logo": "default.webp",
+    "decimals": 18,
+    "status": "deprecated",
+    "tags": ["AI", "Ecosystem", "Memes"]
+  },
+  "0xfe45eda533e97198d9f3deeda9ae6c147141f6f9": {
+    "chainId": 8453,
+    "address": "0xfe45eda533e97198d9f3deeda9ae6c147141f6f9",
+    "name": "AIndex",
+    "symbol": "AI",
+    "logo": "default.webp",
+    "decimals": 18,
+    "status": "deprecated",
+    "tags": ["AI", "Memes"]
+  },
+  "0xb8753941196692e322846cfee9c14c97ac81928a": {
+    "chainId": 8453,
+    "address": "0xb8753941196692e322846cfee9c14c97ac81928a",
+    "name": "Base MemeIndexer DTF",
+    "symbol": "BDTF",
+    "logo": "bdtf.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["Memes", "Ecosystem"]
+  },
+  "0xf8ef6e785473e82527908b06023ac3e401ccfdcd": {
+    "chainId": 8453,
+    "address": "0xf8ef6e785473e82527908b06023ac3e401ccfdcd",
+    "name": "Club Night DTF",
+    "symbol": "CLUB",
+    "logo": "default.webp",
+    "decimals": 18,
+    "status": "deprecated"
+  },
+  "0xd600e748c17ca237fcb5967fa13d688aff17be78": {
+    "chainId": 8453,
+    "address": "0xd600e748c17ca237fcb5967fa13d688aff17be78",
+    "name": "MarketVector Digital Assets 25 Index",
+    "symbol": "MVDA25",
+    "logo": "default.webp",
+    "decimals": 18,
+    "status": "deprecated",
+    "tags": ["Majors", "L1", "DeFi", "Ecosystem", "Bitcoin"]
+  },
+  "0x89ff8f639d402839205a6bf03cc01bdffa4768b7": {
+    "chainId": 8453,
+    "address": "0x89ff8f639d402839205a6bf03cc01bdffa4768b7",
+    "name": "Strategic Base Reserve by SSR",
+    "symbol": "SBR",
+    "logo": "default.webp",
+    "decimals": 18,
+    "status": "deprecated",
+    "tags": [
+      "AI",
+      "DeFi",
+      "SocialFi",
+      "RWA",
+      "DeSci",
+      "LST",
+      "Oracles",
+      "Ecosystem",
+      "Memes"
+    ]
+  },
+  "0x160c18476f6f5099f374033fbc695c9234cda495": {
+    "chainId": 8453,
+    "address": "0x160c18476f6f5099f374033fbc695c9234cda495",
+    "name": "Zora Index",
+    "symbol": "ZINDEX",
+    "logo": "default.webp",
+    "decimals": 18,
+    "status": "deprecated",
+    "tags": ["SocialFi", "Ecosystem"]
+  }
+}

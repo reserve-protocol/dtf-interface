@@ -5,6 +5,7 @@ TypeScript monorepo for DTF interface packages.
 ## Packages
 
 - `@dtf-interface/sdk`: Core environment-agnostic SDK for Node and browser/React consumers.
+- `@dtf-interface/dtf-catalog`: Curated Yield DTF and Index DTF catalog, exported as chain maps like the old `@reserve-protocol/rtokens` package.
 
 ## Design Goal
 

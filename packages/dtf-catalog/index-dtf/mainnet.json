@@ -1,0 +1,82 @@
+{
+  "0x323c03c48660fe31186fa82c289b0766d331ce21": {
+    "chainId": 1,
+    "address": "0x323c03c48660fe31186fa82c289b0766d331ce21",
+    "name": "Open Stablecoin Index",
+    "symbol": "OPEN",
+    "logo": "open.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["Stablecoins", "DeFi", "Majors", "Ecosystem"]
+  },
+  "0x4e3b170dcbe704b248df5f56d488114ace01b1c5": {
+    "chainId": 1,
+    "address": "0x4e3b170dcbe704b248df5f56d488114ace01b1c5",
+    "name": "BTC ETH DCA Index",
+    "symbol": "BED",
+    "logo": "bed.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["Majors", "Bitcoin", "DeFi", "Stablecoins"]
+  },
+  "0xf91384484f4717314798e8975bcd904a35fc2bf1": {
+    "chainId": 1,
+    "address": "0xf91384484f4717314798e8975bcd904a35fc2bf1",
+    "name": "Imagine The SMEL",
+    "symbol": "SMEL",
+    "logo": "smel.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["DeFi", "Stablecoins", "LST"]
+  },
+  "0x188d12eb13a5eadd0867074ce8354b1ad6f4790b": {
+    "chainId": 1,
+    "address": "0x188d12eb13a5eadd0867074ce8354b1ad6f4790b",
+    "name": "CoinDesk DeFi Select Index",
+    "symbol": "DFX",
+    "logo": "dfx.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["DeFi"]
+  },
+  "0x9a1741e151233a82cf69209a2f1bc7442b1fb29c": {
+    "chainId": 1,
+    "address": "0x9a1741e151233a82cf69209a2f1bc7442b1fb29c",
+    "name": "DeFi Growth Index",
+    "symbol": "DGI",
+    "logo": "dgi.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["DeFi"]
+  },
+  "0xe4a10951f962e6cb93cb843a4ef05d2f99db1f94": {
+    "chainId": 1,
+    "address": "0xe4a10951f962e6cb93cb843a4ef05d2f99db1f94",
+    "name": "Sagix Club Edelweiss",
+    "symbol": "ixEdel",
+    "logo": "ixedel.webp",
+    "decimals": 18,
+    "status": "active",
+    "tags": ["RWA", "Stablecoins", "Bitcoin"]
+  },
+  "0xa5cdea03b11042fc10b52af9eca48bb17a2107d2": {
+    "chainId": 1,
+    "address": "0xa5cdea03b11042fc10b52af9eca48bb17a2107d2",
+    "name": "RWA Index",
+    "symbol": "mvRWA",
+    "logo": "default.webp",
+    "decimals": 18,
+    "status": "deprecated",
+    "tags": ["RWA"]
+  },
+  "0x20d81101d254729a6e689418526be31e2c544290": {
+    "chainId": 1,
+    "address": "0x20d81101d254729a6e689418526be31e2c544290",
+    "name": "Large Cap DeFi Index",
+    "symbol": "mvDEFI",
+    "logo": "default.webp",
+    "decimals": 18,
+    "status": "deprecated",
+    "tags": ["DeFi"]
+  }
+}

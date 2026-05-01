@@ -2,10 +2,10 @@ overwrite: true
 ignoreNoDocuments: true
 
 generates:
-  src/graphql/index-dtf/dtf.generated.ts:
+  src/index-dtf/dtf/subgraph/dtf.generated.ts:
     schema: https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-index-base/prod/gn
     documents:
-      - src/graphql/index-dtf/**/*.graphql
+      - src/index-dtf/dtf/subgraph/**/*.graphql
     plugins:
       - add:
           content: |
@@ -23,6 +23,11 @@ generates:
               Bytes: { input: string; output: string };
               Int8: { input: string; output: string };
               Timestamp: { input: string; output: string };
+            };
+            type Block_Height = {
+              hash?: InputMaybe<Scalars['Bytes']['input']>;
+              number?: InputMaybe<Scalars['Int']['input']>;
+              number_gte?: InputMaybe<Scalars['Int']['input']>;
             };
       - typescript-operations
       - typed-document-node

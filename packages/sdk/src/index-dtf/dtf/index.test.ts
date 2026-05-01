@@ -1,0 +1,218 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { getAddress, type PublicClient } from "viem";
+import { createDtfClient, type DtfClient } from "../../client.js";
+import {
+  getIndexDtf,
+  getIndexDtfBasket,
+  getIndexDtfBrand,
+  getIndexDtfPrice,
+} from "./index.js";
+
+describe("Index DTF getters", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("passes blockNumber to subgraph-backed Index DTF get", async () => {
+    const queryIndex = vi.fn(async () => ({ dtf: null }));
+    const subgraphClient = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    await expect(
+      getIndexDtf(subgraphClient, {
+        address: "0x0000000000000000000000000000000000000001",
+        chainId: 1,
+        blockNumber: 123n,
+      }),
+    ).rejects.toMatchObject({ code: "INDEX_DTF_NOT_FOUND" });
+
+    expect(queryIndex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chainId: 1,
+        variables: {
+          id: "0x0000000000000000000000000000000000000001",
+          block: { number: 123 },
+        },
+      }),
+    );
+  });
+
+  it("fetches and maps API-backed Index DTF price", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({
+        price: 152.96,
+        marketCap: 16101233.28,
+        totalSupply: 105259.21,
+        basket: [
+          {
+            address: "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
+            amount: 0.001443507783055415,
+            amountRaw: "1443507783055415",
+            decimals: 18,
+            price: 75816.19,
+            weight: "71.53",
+            priceSource: "cmc",
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetch);
+
+    const apiClient = createDtfClient({
+      apiBaseUrl: "https://api.example",
+    });
+
+    const price = await getIndexDtfPrice(apiClient, {
+      address: "0x0000000000000000000000000000000000000001",
+      chainId: 8453,
+    });
+
+    expect(price.address).toBe("0x0000000000000000000000000000000000000001");
+    expect(price.chainId).toBe(8453);
+    expect(price.price).toBe(152.96);
+    expect(price.basket[0]?.token.address).toBe(
+      "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+    );
+    expect(price.basket[0]?.amount.raw).toBe(1443507783055415n);
+    expect(fetch).toHaveBeenCalledOnce();
+
+    const [priceUrl] = fetch.mock.calls[0] as unknown as [URL];
+    expect(String(priceUrl)).toBe(
+      "https://api.example/current/dtf?address=0x0000000000000000000000000000000000000001&chainId=8453",
+    );
+  });
+
+  it("fetches and maps API-backed Index DTF brand", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({
+        status: "ok",
+        parsedData: {
+          hidden: false,
+          dtf: {
+            icon: "https://example.com/icon.png",
+            cover: "",
+            mobileCover: "",
+            description: "CMC20 brand",
+            notesFromCreator: "",
+            prospectus: "",
+            tags: ["Majors", "DeFi"],
+            basketType: "percentage-based",
+          },
+          creator: {
+            name: "ListaDAO",
+            icon: "https://example.com/creator.png",
+            link: "https://lista.org/",
+          },
+          curator: {
+            name: "",
+            icon: "",
+            link: "",
+          },
+          socials: {
+            twitter: "https://x.com/CoinMarketCap",
+            telegram: "",
+            discord: "",
+            website: "https://coinmarketcap.com/charts/cmc20/",
+          },
+        },
+      }),
+    );
+    vi.stubGlobal("fetch", fetch);
+
+    const apiClient = createDtfClient({
+      apiBaseUrl: "https://api.example",
+    });
+
+    const brand = await getIndexDtfBrand(apiClient, {
+      address: "0x0000000000000000000000000000000000000001",
+      chainId: 8453,
+    });
+
+    expect(brand).toMatchObject({
+      hidden: false,
+      icon: "https://example.com/icon.png",
+      description: "CMC20 brand",
+      tags: ["Majors", "DeFi"],
+      basketType: "percentage-based",
+      creator: {
+        name: "ListaDAO",
+        icon: "https://example.com/creator.png",
+        link: "https://lista.org/",
+      },
+      socials: {
+        twitter: "https://x.com/CoinMarketCap",
+        website: "https://coinmarketcap.com/charts/cmc20/",
+      },
+    });
+    expect(brand?.cover).toBeUndefined();
+    expect(brand?.curator).toBeUndefined();
+    expect(fetch).toHaveBeenCalledOnce();
+
+    const [brandUrl] = fetch.mock.calls[0] as unknown as [URL];
+    expect(String(brandUrl)).toBe(
+      "https://api.example/folio-manager/read?folio=0x0000000000000000000000000000000000000001&chainId=8453",
+    );
+  });
+
+  it("fetches and maps onchain Index DTF basket holdings", async () => {
+    const usdc = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+    const weth = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+    const readContract = vi.fn(async () => [
+      [usdc, weth],
+      [1_000_000n, 2_000_000_000_000_000_000n],
+    ]);
+    const multicall = vi.fn(
+      async () => ["USD Coin", "USDC", 6, "Wrapped Ether", "WETH", 18],
+    );
+    const client = createDtfClient({
+      chains: {
+        1: {
+          publicClient: {
+            readContract,
+            multicall,
+          } as unknown as PublicClient,
+        },
+      },
+    });
+
+    const basket = await getIndexDtfBasket(client, {
+      address: "0x0000000000000000000000000000000000000001",
+      chainId: 1,
+    });
+
+    const usdcAddress = getAddress(usdc);
+    const wethAddress = getAddress(weth);
+
+    expect(basket).toEqual({
+      [usdcAddress]: {
+        token: {
+          address: usdcAddress,
+          name: "USD Coin",
+          symbol: "USDC",
+          decimals: 6,
+        },
+        balance: {
+          raw: 1_000_000n,
+          formatted: "1",
+        },
+      },
+      [wethAddress]: {
+        token: {
+          address: wethAddress,
+          name: "Wrapped Ether",
+          symbol: "WETH",
+          decimals: 18,
+        },
+        balance: {
+          raw: 2_000_000_000_000_000_000n,
+          formatted: "2",
+        },
+      },
+    });
+    expect(readContract).toHaveBeenCalledOnce();
+    expect(multicall).toHaveBeenCalledOnce();
+  });
+});

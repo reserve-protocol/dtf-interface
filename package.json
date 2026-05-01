@@ -13,6 +13,7 @@
     "clean": "pnpm -r --if-present clean",
     "dev": "pnpm -r --if-present --parallel dev",
     "graphql:codegen": "pnpm --filter @dtf-interface/sdk graphql:codegen",
+    "playground:index": "pnpm --filter @dtf-interface/sdk playground:index",
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck"
   },

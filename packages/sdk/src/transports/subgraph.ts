@@ -6,11 +6,8 @@ import {
   type Variables,
 } from "graphql-request";
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core";
-import {
-  resolveDtfClient,
-  type DtfClientOptions,
-} from "../client.js";
-import { supportedChainIds, type SupportedChainId } from "../defaults.js";
+import type { SupportedChainId } from "../defaults.js";
+import { SdkError, type SdkErrorMeta } from "../errors.js";
 
 type SubgraphProduct = "index" | "yield";
 
@@ -22,54 +19,29 @@ export type SubgraphDocument<
   | TypedDocumentNode<TResult, TVariables>
   | TypedDocumentString<TResult, TVariables>;
 
-type QuerySubgraphOptions<
+export type QuerySubgraphOptions<
   TResult,
   TVariables extends Variables = Record<string, never>,
-> = DtfClientOptions & {
+> = {
   readonly chainId: SupportedChainId;
   readonly product: SubgraphProduct;
   readonly query: SubgraphDocument<TResult, TVariables>;
-  readonly requestHeaders?: HeadersInit | undefined;
-  readonly variables?: TVariables | undefined;
+  readonly requestHeaders?: HeadersInit;
+  readonly url: string;
+  readonly variables?: TVariables;
 };
 
-export type QueryIndexSubgraphOptions<
-  TResult,
-  TVariables extends Variables = Record<string, never>,
-> = Omit<QuerySubgraphOptions<TResult, TVariables>, "product">;
-
-export type QueryYieldSubgraphOptions<
-  TResult,
-  TVariables extends Variables = Record<string, never>,
-> = Omit<QuerySubgraphOptions<TResult, TVariables>, "product">;
-
-export type QueryIndexSubgraphsOptions<
-  TResult,
-  TVariables extends Variables = Record<string, never>,
-> = DtfClientOptions & {
-  readonly chainIds?: readonly SupportedChainId[];
-  readonly query: SubgraphDocument<TResult, TVariables>;
-  readonly requestHeaders?: HeadersInit | undefined;
-  readonly variables?: TVariables | ((chainId: SupportedChainId) => TVariables);
-};
-
-async function queryProductSubgraph<
+export async function querySubgraph<
   TResult,
   TVariables extends Variables = Record<string, never>,
 >({
   chainId,
-  client,
   product,
   query,
   requestHeaders,
+  url,
   variables,
 }: QuerySubgraphOptions<TResult, TVariables>): Promise<TResult> {
-  const dtfClient = resolveDtfClient(client);
-  const url =
-    product === "index"
-      ? dtfClient.getIndexSubgraphUrl(chainId)
-      : dtfClient.getYieldSubgraphUrl(chainId);
-
   try {
     const requestGraphql = request as (
       url: string,
@@ -80,67 +52,49 @@ async function queryProductSubgraph<
 
     return await requestGraphql(url, query, variables, requestHeaders);
   } catch (cause) {
-    throw new Error(
-      formatSubgraphErrorMessage({
+    throw new SdkError({
+      code: "SUBGRAPH_REQUEST_FAILED",
+      message: formatSubgraphErrorMessage({
         cause,
         chainId,
         product,
       }),
-      { cause },
-    );
+      cause,
+      meta: getSubgraphErrorMeta({ cause, chainId, product, url }),
+    });
   }
 }
 
-export function queryIndexSubgraph<
-  TResult,
-  TVariables extends Variables = Record<string, never>,
->(options: QueryIndexSubgraphOptions<TResult, TVariables>): Promise<TResult> {
-  return queryProductSubgraph<TResult, TVariables>({
-    ...options,
-    product: "index",
-  });
-}
+function getSubgraphErrorMeta({
+  cause,
+  chainId,
+  product,
+  url,
+}: {
+  readonly cause: unknown;
+  readonly chainId: SupportedChainId;
+  readonly product: SubgraphProduct;
+  readonly url: string;
+}): SdkErrorMeta {
+  if (cause instanceof ClientError) {
+    const errors = cause.response.errors
+      ?.map((error) => error.message)
+      .filter(Boolean);
 
-export function queryYieldSubgraph<
-  TResult,
-  TVariables extends Variables = Record<string, never>,
->(options: QueryYieldSubgraphOptions<TResult, TVariables>): Promise<TResult> {
-  return queryProductSubgraph<TResult, TVariables>({
-    ...options,
-    product: "yield",
-  });
-}
+    return {
+      chainId,
+      product,
+      url,
+      ...(errors?.length ? { errors } : {}),
+      ...(cause.response.status ? { status: cause.response.status } : {}),
+    };
+  }
 
-export async function queryIndexSubgraphs<
-  TResult,
-  TVariables extends Variables = Record<string, never>,
->({
-  chainIds = supportedChainIds,
-  client,
-  query,
-  requestHeaders,
-  variables,
-}: QueryIndexSubgraphsOptions<TResult, TVariables>): Promise<
-  Partial<Record<SupportedChainId, TResult>>
-> {
-  const results = await Promise.all(
-    chainIds.map(async (chainId) => {
-      const data = await queryIndexSubgraph<TResult, TVariables>({
-        chainId,
-        query,
-        client,
-        requestHeaders,
-        variables:
-          typeof variables === "function" ? variables(chainId) : variables,
-      });
-
-      return [chainId, data] as const;
-    }),
-  );
-
-  return Object.fromEntries(results) as Partial<
-    Record<SupportedChainId, TResult>
-  >;
+  return {
+    chainId,
+    product,
+    url,
+  };
 }
 
 function formatSubgraphErrorMessage({

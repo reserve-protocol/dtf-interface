@@ -1,13 +1,14 @@
 import type { Address } from "viem";
 import type { SupportedChainId } from "../defaults.js";
-import type { DtfBrand } from "./common.js";
+import type {
+  BlockNumber,
+  BlockNumberParams,
+  DtfParams,
+  DtfStatus,
+  Token as BaseToken,
+} from "./common.js";
 
-export type Token = {
-  readonly address: Address;
-  readonly name: string;
-  readonly symbol: string;
-  readonly decimals: number;
-};
+export type Token = BaseToken;
 
 export type Amount = {
   readonly raw: bigint;
@@ -76,7 +77,7 @@ export type AuthorityGroup = {
   readonly all: readonly Authority[];
 };
 
-export type IndexDTFGovernance = {
+export type IndexDtfGovernance = {
   readonly admin: AuthorityGroup;
   readonly rebalance: AuthorityGroup;
   readonly voteLock?: Authority;
@@ -93,7 +94,7 @@ export type VoteLockVault = {
   readonly rewardTokens: readonly Token[];
 };
 
-export type IndexDTFAdminRoles = {
+export type IndexDtfAdminRoles = {
   // The protocol can expose multiple admin role members. In production this is
   // normally one timelock/admin. `primary` is what product workflows usually
   // care about; `all` preserves the raw role state.
@@ -104,8 +105,8 @@ export type IndexDTFAdminRoles = {
   readonly legacy: readonly Address[];
 };
 
-export type IndexDTFRoles = {
-  readonly admin: IndexDTFAdminRoles;
+export type IndexDtfRoles = {
+  readonly admin: IndexDtfAdminRoles;
   readonly rebalance: {
     // Raw role state. These can be governance contracts or plain addresses.
     // The interpreted controller lives in `governance`.
@@ -126,7 +127,7 @@ export type IndexDTFRoles = {
 
 export type PriceControl = 0 | 1 | 2;
 
-export type IndexDTFRebalanceConfig = {
+export type IndexDtfRebalanceConfig = {
   readonly auctionDelay: number;
   readonly auctionLength: number;
   readonly bidsEnabled?: boolean;
@@ -144,95 +145,172 @@ export type Financials = {
   readonly externalRevenue: number;
 };
 
-export type IndexDTFPriceBasketAsset = {
-  readonly token: Token;
+export type IndexDtfPriceBasketToken = {
+  readonly address: Address;
+  readonly decimals: number;
+  readonly name?: string;
+  readonly symbol?: string;
+};
+
+export type IndexDtfPriceBasketAsset = {
+  readonly token: IndexDtfPriceBasketToken;
   readonly amount: Amount;
   readonly weight: string;
   readonly price: number;
   readonly priceSource?: string;
 };
 
-export type IndexDTFPrice = {
+export type IndexDtfPrice = {
   readonly address: Address;
   readonly chainId: SupportedChainId;
   readonly price: number;
   readonly marketCap: number;
-  readonly totalSupply: Amount;
-  readonly basket: readonly IndexDTFPriceBasketAsset[];
+  readonly totalSupply: number;
+  readonly basket: readonly IndexDtfPriceBasketAsset[];
   readonly timestamp: number;
 };
 
-export type IndexDTFPricePoint = {
+export type IndexDtfBasketAsset = {
+  readonly token: Token;
+  readonly balance: Amount;
+};
+
+export type IndexDtfBasketAssetWithPrice = IndexDtfBasketAsset &
+  Omit<IndexDtfPriceBasketAsset, "token">;
+
+export type IndexDtfBasket = Record<Address, IndexDtfBasketAsset>;
+
+export type IndexDtfBasketWithPrice = Omit<IndexDtfPrice, "basket"> & {
+  basket: Record<Address, IndexDtfBasketAssetWithPrice>;
+};
+
+export type IndexDtfPricePoint = {
   readonly timestamp: number;
   readonly price: number;
 };
 
-export type IndexDTFWithPrice = IndexDTF & {
-  readonly price: IndexDTFPrice;
+export type IndexDtfBrandProfile = {
+  readonly name?: string;
+  readonly icon?: string;
+  readonly link?: string;
 };
 
-export type IndexDTFFull = IndexDTFWithPrice & {
-  readonly brand?: DtfBrand;
+export type IndexDtfBrandSocials = {
+  readonly twitter?: string;
+  readonly telegram?: string;
+  readonly discord?: string;
+  readonly website?: string;
 };
 
-export type IndexDTF = {
+export type IndexDtfBrand = {
+  readonly hidden: boolean;
+  readonly icon?: string;
+  readonly cover?: string;
+  readonly mobileCover?: string;
+  readonly description?: string;
+  readonly notesFromCreator?: string;
+  readonly prospectus?: string;
+  readonly tags: readonly string[];
+  readonly basketType?: string;
+  readonly creator?: IndexDtfBrandProfile;
+  readonly curator?: IndexDtfBrandProfile;
+  readonly socials: IndexDtfBrandSocials;
+};
+
+export type IndexDtfMarket = {
+  readonly price: number;
+  readonly marketCap: number;
+  readonly totalSupply: number;
+  readonly fetchedAt: number;
+};
+
+export type IndexDtfFull = IndexDtf & {
+  readonly market: IndexDtfMarket;
+  readonly basket: Record<Address, IndexDtfBasketAssetWithPrice>;
+  readonly brand?: IndexDtfBrand;
+};
+
+export type IndexDtf = {
   readonly id: Address;
   readonly chainId: SupportedChainId;
   readonly token: TokenWithSnapshot;
   readonly mandate: string;
   readonly createdAt: number;
-  readonly roles: IndexDTFRoles;
-  readonly governance: IndexDTFGovernance;
+  readonly roles: IndexDtfRoles;
+  readonly governance: IndexDtfGovernance;
   readonly voteLockVault?: VoteLockVault;
-  readonly rebalance: IndexDTFRebalanceConfig;
+  readonly rebalance: IndexDtfRebalanceConfig;
   readonly fees: Fees;
   readonly financials: Financials;
 };
 
-export type GetIndexDTFParams = {
-  readonly address: Address;
-  readonly chainId: SupportedChainId;
+export type IndexDtfInput = IndexDtf | DtfParams;
+
+export type GetFullIndexDtfOptions = {
+  readonly brand?: boolean;
 };
 
-export type IndexDTFInput = IndexDTF | GetIndexDTFParams;
+export type GetFullIndexDtfParams = DtfParams & GetFullIndexDtfOptions;
 
-export type GetFullIndexDTFParams = GetIndexDTFParams;
+export type GetIndexDtfParams = DtfParams & BlockNumberParams;
 
-export type GetIndexDTFPriceParams = GetIndexDTFParams;
+export type GetIndexDtfOptions = BlockNumberParams;
 
-export type GetIndexDTFPriceHistoryParams = GetIndexDTFParams & {
+export type GetIndexDtfBasketParams = DtfParams & BlockNumberParams;
+
+export type GetIndexDtfBasketOptions = BlockNumber | BlockNumberParams;
+
+export type GetIndexDtfPriceParams = DtfParams;
+
+export type GetIndexDtfPriceHistoryParams = DtfParams & {
   readonly from?: number;
   readonly to?: number;
   readonly interval?: "hour" | "day" | "week" | "month";
 };
 
-export type ListIndexDTFsParams = {
+export type GetIndexDtfPriceHistoryOptions = Pick<
+  GetIndexDtfPriceHistoryParams,
+  "from" | "interval" | "to"
+>;
+
+export type ListIndexDtfsParams = {
   readonly chainId?: SupportedChainId;
+  readonly status?: DtfStatus | readonly DtfStatus[];
 };
 
-export type GetIndexDTFProposalsParams = IndexDTFInput & {
+export type GetIndexDtfProposalsParams = IndexDtfInput & {
   readonly limit?: number;
   readonly offset?: number;
 };
 
-export type GetAllIndexDTFProposalsParams = {
+export type GetIndexDtfProposalsOptions = Pick<
+  GetIndexDtfProposalsParams,
+  "limit" | "offset"
+>;
+
+export type GetAllIndexDtfProposalsParams = {
   readonly chainId: SupportedChainId;
   readonly limit?: number;
   readonly offset?: number;
   readonly states?: readonly ProposalState[];
 };
 
-export type GetIndexDTFProposalParams = {
+export type GetIndexDtfProposalParams = {
   readonly id: string;
   readonly chainId: SupportedChainId;
 };
 
-export type GetIndexDTFRebalancesParams = IndexDTFInput & {
+export type GetIndexDtfRebalancesParams = IndexDtfInput & {
   readonly limit?: number;
   readonly offset?: number;
 };
 
-export type GetIndexDTFRebalanceParams = {
+export type GetIndexDtfRebalancesOptions = Pick<
+  GetIndexDtfRebalancesParams,
+  "limit" | "offset"
+>;
+
+export type GetIndexDtfRebalanceParams = {
   readonly id: string;
   readonly chainId: SupportedChainId;
 };
@@ -258,11 +336,11 @@ export type ProposalVotingState = {
   readonly abstain: number;
 };
 
-export type IndexDTFProposalSummary = {
+export type IndexDtfProposalSummary = {
   readonly id: string;
   readonly chainId: SupportedChainId;
   readonly governance: Address;
-  readonly dtf?: GetIndexDTFParams;
+  readonly dtf?: DtfParams;
   readonly proposer?: Address;
   readonly description: string;
   readonly state: ProposalState;
@@ -279,20 +357,20 @@ export type IndexDTFProposalSummary = {
   readonly abstainWeightedVotes: Amount;
 };
 
-export type IndexDTFProposalVote = {
+export type IndexDtfProposalVote = {
   readonly voter: Address;
   readonly choice: string;
   readonly weight: Amount;
 };
 
-export type IndexDTFProposalDetail = IndexDTFProposalSummary & {
+export type IndexDtfProposalDetail = IndexDtfProposalSummary & {
   readonly timelockId?: string;
   readonly queueBlock?: number;
   readonly queueTime?: number;
   readonly cancellationTime?: number;
   readonly targets: readonly Address[];
   readonly calldatas: readonly `0x${string}`[];
-  readonly votes: readonly IndexDTFProposalVote[];
+  readonly votes: readonly IndexDtfProposalVote[];
   readonly forDelegateVotes: Amount;
   readonly againstDelegateVotes: Amount;
   readonly abstainDelegateVotes: Amount;
@@ -300,29 +378,29 @@ export type IndexDTFProposalDetail = IndexDTFProposalSummary & {
   readonly votingState: ProposalVotingState;
 };
 
-export type IndexDTFDelegate = {
+export type IndexDtfDelegate = {
   readonly address: Address;
   readonly delegatedVotes: Amount;
   readonly numberVotes: number;
 };
 
-export type IndexDTFGovernanceOverview = {
-  readonly proposals: readonly IndexDTFProposalSummary[];
+export type IndexDtfGovernanceOverview = {
+  readonly proposals: readonly IndexDtfProposalSummary[];
   readonly proposalCount: number;
-  readonly delegates: readonly IndexDTFDelegate[];
+  readonly delegates: readonly IndexDtfDelegate[];
   readonly delegatesCount: number;
   readonly voteSupply: Amount;
 };
 
 export type IndexPricingProvider = {
   readonly getCurrent: (
-    params: GetIndexDTFPriceParams,
-  ) => Promise<IndexDTFPrice>;
+    params: GetIndexDtfPriceParams,
+  ) => Promise<IndexDtfPrice>;
   readonly getHistory?: (
-    params: GetIndexDTFPriceHistoryParams,
-  ) => Promise<readonly IndexDTFPricePoint[]>;
+    params: GetIndexDtfPriceHistoryParams,
+  ) => Promise<readonly IndexDtfPricePoint[]>;
 };
 
 export type IndexBrandProvider = {
-  readonly get: (params: GetIndexDTFParams) => Promise<DtfBrand | undefined>;
+  readonly get: (params: DtfParams) => Promise<IndexDtfBrand | undefined>;
 };

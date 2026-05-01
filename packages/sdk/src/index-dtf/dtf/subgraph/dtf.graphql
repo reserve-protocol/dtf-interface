@@ -1,5 +1,5 @@
-query GetIndexDTF($id: ID!) {
-  dtf(id: $id) {
+query GetIndexDTF($id: ID!, $block: Block_height) {
+  dtf(id: $id, block: $block) {
     id
     proxyAdmin
     timestamp

@@ -1,12 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDtfClient } from "../client.js";
-import {
-  queryIndexSubgraph,
-  queryIndexSubgraphs,
-  queryYieldSubgraph,
-} from "./subgraph.js";
+import type { SdkError } from "../errors.js";
 
-describe("subgraph transport", () => {
+describe("subgraph client", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -41,8 +37,7 @@ describe("subgraph transport", () => {
       readonly id: string;
     };
 
-    const data = await queryIndexSubgraph<Result, Variables>({
-      client,
+    const data = await client.subgraph.queryIndex<Result, Variables>({
       chainId: 1,
       query: "query GetDtf($id: String!) { dtf(id: $id) { id } }",
       variables: { id: "0x0000000000000000000000000000000000000001" },
@@ -84,10 +79,9 @@ describe("subgraph transport", () => {
     });
 
     await expect(
-      queryYieldSubgraph<{
+      client.subgraph.queryYield<{
         readonly vaults: readonly { readonly id: string }[];
       }>({
-        client,
         chainId: 1,
         query: "{ vaults { id } }",
       }),
@@ -113,13 +107,12 @@ describe("subgraph transport", () => {
     });
 
     await expect(
-      queryIndexSubgraph<{ readonly dtfs: readonly { readonly id: string }[] }>(
-        {
-          client,
-          chainId: 1,
-          query: "{ dtfs { id } }",
-        },
-      ),
+      client.subgraph.queryIndex<{
+        readonly dtfs: readonly { readonly id: string }[];
+      }>({
+        chainId: 1,
+        query: "{ dtfs { id } }",
+      }),
     ).resolves.toEqual({ dtfs: [{ id: "dtf" }] });
   });
 
@@ -144,11 +137,10 @@ describe("subgraph transport", () => {
       },
     });
 
-    const result = await queryIndexSubgraphs<
+    const result = await client.subgraph.queryIndexAll<
       { readonly endpoint: string },
       { readonly limit: number; readonly chainId: number }
     >({
-      client,
       chainIds: [1, 8453],
       query: "query Dtfs($limit: Int!, $chainId: Int!) { dtfs(first: $limit) { id } }",
       variables: (chainId) => ({ limit: 10, chainId }),
@@ -178,13 +170,20 @@ describe("subgraph transport", () => {
     });
 
     await expect(
-      queryIndexSubgraph({
-        client,
+      client.subgraph.queryIndex({
         chainId: 1,
         query: "{ broken }",
       }),
-    ).rejects.toThrow(
-      "DTF SDK index subgraph request failed on chain 1 (200): bad query",
-    );
+    ).rejects.toMatchObject({
+      code: "SUBGRAPH_REQUEST_FAILED",
+      message: "DTF SDK index subgraph request failed on chain 1 (200): bad query",
+      meta: {
+        chainId: 1,
+        errors: ["bad query"],
+        product: "index",
+        status: 200,
+        url: "https://example.com/index",
+      },
+    } satisfies Partial<SdkError>);
   });
 });

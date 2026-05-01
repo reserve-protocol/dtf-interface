@@ -1,10 +1,24 @@
 import type { Address } from "viem";
+import type { SupportedChainId } from "../defaults.js";
+
+export type BlockNumber = bigint;
+
+export type BlockNumberParams = {
+  readonly blockNumber?: BlockNumber;
+};
+
+export type DtfParams = {
+  readonly address: Address;
+  readonly chainId: SupportedChainId;
+};
+
+export type DtfParamsWithBlock = DtfParams & BlockNumberParams;
 
 export type Token = {
   readonly address: Address;
   readonly symbol: string;
-  readonly decimals: string;
   readonly name: string;
+  readonly decimals: number;
 };
 
 export type DtfStatus = "active" | "deprecated" | "unsupported";

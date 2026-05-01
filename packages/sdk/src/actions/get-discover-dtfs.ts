@@ -1,5 +1,4 @@
-import { apiGet } from "../transports/api.js";
-import type { DtfClientOptions } from "../client.js";
+import type { DtfClient } from "../client.js";
 import type { SupportedChainId } from "../defaults.js";
 import type { DtfStatus } from "../types/common.js";
 
@@ -9,21 +8,23 @@ export type DiscoverDtf = {
   readonly status: DtfStatus;
 };
 
-export type GetDiscoverDtfsOptions = DtfClientOptions & {
+export type GetDiscoverDtfsOptions = {
   readonly chainId?: SupportedChainId;
   readonly limit?: number;
   readonly offset?: number;
   readonly sort?: string;
 };
 
-export async function getDiscoverDtfs({
-  chainId,
-  client,
-  limit,
-  offset,
-  sort,
-}: GetDiscoverDtfsOptions = {}): Promise<readonly DiscoverDtf[]> {
-  const dtfs = await apiGet<readonly DiscoverDtf[]>({
+export async function getDiscoverDtfs(
+  client: DtfClient,
+  {
+    chainId,
+    limit,
+    offset,
+    sort,
+  }: GetDiscoverDtfsOptions = {},
+): Promise<readonly DiscoverDtf[]> {
+  const dtfs = await client.api.get<readonly DiscoverDtf[]>({
     path: "/discover/dtfs",
     query: {
       chainId,
@@ -31,7 +32,6 @@ export async function getDiscoverDtfs({
       offset,
       sort,
     },
-    client,
   });
 
   return dtfs.map((dtf) => ({

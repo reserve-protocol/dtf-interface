@@ -25,10 +25,18 @@ const dtfs = await sdk.index.list({ chainId });
 const proposals = await sdk.index.proposals({ address, chainId });
 const price = await sdk.index.getPrice({ address, chainId });
 
+const cmc20 = sdk.index.ref({ address, chainId });
+const cmc20Details = await cmc20.get();
+const cmc20Historical = await cmc20.get({ blockNumber: 123n });
+const cmc20Basket = await cmc20.basket(123n);
+const cmc20Proposals = await cmc20.proposals();
+
 const ydtf = await sdk.yield.get({ address, chainId });
 ```
 
-This gives the readability of a domain SDK without creating stateful DTF objects:
+`sdk.index.ref()` is a zero-network bound handle. It captures `{ client, address, chainId }` and forwards to the same functional actions used by the namespace methods.
+
+This gives the readability of a domain SDK without creating stateful DTF model objects:
 
 ```ts
 // Avoid this as the main public model.
@@ -40,7 +48,20 @@ Classes are not forbidden, but they should not be the default SDK surface. State
 
 ## Method Inputs
 
-Methods should take plain inputs like `{ address, chainId }`. Do not add a named ref layer around that shape unless a real workflow needs it.
+One-off methods should take plain inputs like `{ address, chainId }`.
+
+Repeated workflows can bind that identity once:
+
+```ts
+const dtf = sdk.index.ref({ address, chainId });
+
+await dtf.get();
+await dtf.getPrice();
+await dtf.proposals();
+await dtf.rebalances();
+```
+
+The ref must not fetch or cache data by itself. It is only a convenience layer over the functional methods.
 
 Methods that can accept either plain identity or a hydrated DTF should do so when it improves ergonomics:
 
@@ -49,14 +70,22 @@ await sdk.index.proposals({ address, chainId });
 await sdk.index.proposals(dtf);
 ```
 
-The SDK should not require `getIndexDTF()` before fetching proposals. Consumers can decide whether their cache layer should hydrate the DTF first.
+The SDK should not require `getIndexDtf()` before fetching proposals. Consumers can decide whether their cache layer should hydrate the DTF first.
+
+Block-aware reads should stay granular. Source-specific methods that can read historical state may accept `blockNumber`; composed methods should not unless every source in the composition is pinned to the same point in time.
+
+```ts
+await sdk.index.get({ address, chainId, blockNumber: 123n });       // subgraph time travel
+await sdk.index.getBasket({ address, chainId, blockNumber: 123n }); // onchain read at block
+await sdk.index.getFull({ address, chainId });                      // current-state composition only
+```
 
 ## Layers
 
 Keep the runtime model boring:
 
 ```text
-namespace methods -> client config -> small transports -> mappers
+namespace methods -> client -> small transports -> mappers
 ```
 
 Namespace methods are the public SDK:
@@ -64,8 +93,10 @@ Namespace methods are the public SDK:
 ```ts
 sdk.index.get()
 sdk.index.getFull()
+sdk.index.getBrand()
 sdk.index.getPrice()
 sdk.index.proposals()
+sdk.index.ref()
 ```
 
 The client holds runtime configuration. `createDtfSdk(config)` returns an isolated plain object; it must not mutate global SDK state.
@@ -83,6 +114,16 @@ createDtfSdk({
 });
 ```
 
+Keep `client.ts` as the assembly point. Client capabilities can live in small modules and be assembled into explicit namespaces:
+
+```ts
+const client = {
+  api: createDtfClientApi({ baseUrl }),
+  subgraph: createDtfClientSubgraph({ chains }),
+  viem: createDtfClientViem({ chains }),
+};
+```
+
 Module-level helpers may use production defaults, but custom configuration belongs to a created SDK instance or an explicitly passed transport client. Do not add global mutable SDK configuration.
 
 Transports should be thin wrappers around known libraries:
@@ -91,7 +132,39 @@ Transports should be thin wrappers around known libraries:
 - Native `fetch` for REST API calls.
 - viem public clients for RPC reads.
 
+Future write/setter methods should follow the same shape: the action receives `client` plus params, and `sdk.index.ref()` only binds the DTF identity. Wallet handling belongs at the viem/action boundary, not in DTF model objects.
+
 Mappers translate raw GraphQL/API/RPC data into SDK domain types. They are where nullability, amount formatting, address normalization, and legacy fields should become clear.
+
+## Wallet Clients
+
+Do not store a browser wallet client as stable SDK state.
+
+Viem treats public clients and wallet clients as low-level primitives. Public clients are stable enough to keep on the SDK client because they are chain/RPC configuration. Wallet clients are different: in React apps the connected account, connector, and chain can change while the SDK object continues to exist.
+
+Follow the Wagmi shape when we add setters:
+
+```ts
+await sdk.index.ref({ address, chainId }).setMandate({
+  walletClient,
+  mandate,
+});
+```
+
+Core write actions should receive the wallet client at call time:
+
+```ts
+await setIndexDtfMandate(client, {
+  address,
+  chainId,
+  walletClient,
+  mandate,
+});
+```
+
+The future React wrapper should resolve the current wallet client inside the hook or mutation, not when `createDtfSdk()` runs and not when `sdk.index.ref()` is created. That keeps wallet/account/chain changes fresh and prevents stale wallet clients from being captured by long-lived refs.
+
+For non-React bots or server scripts, passing a static Viem wallet client directly to the write method is fine because the caller owns that lifecycle.
 
 ## Data Boundaries
 
@@ -113,11 +186,15 @@ This boundary matters even if a high-level method later composes everything:
 
 ```ts
 await sdk.index.get({ address, chainId });      // subgraph/onchain domain model
+await sdk.index.getBasket({ address, chainId }); // onchain current holdings
 await sdk.index.getPrice({ address, chainId }); // API-backed fresh price
+await sdk.index.getBrand({ address, chainId }); // API-backed branding
 await sdk.index.getFull({ address, chainId });  // composed convenience method
 ```
 
 Price is live data and should be treated differently from slow-changing governance or token metadata. Consumers should be able to refresh price often without refetching the full DTF model.
+
+Avoid mixing historical subgraph/onchain reads with current API data in the same result. If a future method needs historical composition, make it explicit instead of expanding `getFull()`.
 
 ## Overrides
 
@@ -141,8 +218,8 @@ If the Reserve API uses the SDK, it should avoid SDK methods that call its own p
 Store GraphQL documents in `.graphql` files close to the domain:
 
 ```text
-packages/sdk/src/graphql/index-dtf/dtf.graphql
-packages/sdk/src/graphql/index-dtf/generated/
+packages/sdk/src/index-dtf/dtf/subgraph/dtf.graphql
+packages/sdk/src/index-dtf/dtf/subgraph/dtf.generated.ts
 ```
 
 Run codegen after editing documents:
@@ -154,7 +231,7 @@ pnpm graphql:codegen
 The SDK should import generated typed documents and pass them to the subgraph transport:
 
 ```ts
-const { dtf } = await queryIndexSubgraph({
+const { dtf } = await client.subgraph.queryIndex({
   chainId,
   query: GetIndexDtfDocument,
   variables: { id },
@@ -168,17 +245,17 @@ This keeps query strings out of domain methods while still making the request pa
 Use the small helpers by intent:
 
 ```ts
-await queryIndexSubgraph({ chainId, query, variables });
-await queryYieldSubgraph({ chainId, query, variables });
-await queryIndexSubgraphs({ query, variables });
+await client.subgraph.queryIndex({ chainId, query, variables });
+await client.subgraph.queryYield({ chainId, query, variables });
+await client.subgraph.queryIndexAll({ query, variables });
 ```
 
 Use product-specific helpers. Callers should not pass `product: "index"` or `product: "yield"` around application code.
 
-`queryIndexSubgraphs` exists for "same query across every supported index subgraph" cases. It returns a chain-keyed result:
+`queryIndexAll` exists for "same query across every supported index subgraph" cases. It returns a chain-keyed result:
 
 ```ts
-const results = await queryIndexSubgraphs({ query });
+const results = await client.subgraph.queryIndexAll({ query });
 // { 1: Result, 56: Result, 8453: Result }
 ```
 

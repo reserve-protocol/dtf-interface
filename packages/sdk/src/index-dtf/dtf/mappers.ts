@@ -1,29 +1,81 @@
 import { formatEther, formatUnits, getAddress } from "viem";
-import type { SupportedChainId } from "../defaults.js";
-import type { GetIndexDtfQuery } from "../graphql/index-dtf/dtf.generated.js";
+import type { SupportedChainId } from "../../defaults.js";
+import { SdkError } from "../../errors.js";
+import type { DtfParams } from "../../types/common.js";
 import type {
   Amount,
   Authority,
   FeeRecipients,
   Governance,
-  IndexDTF,
+  IndexDtfBrand,
+  IndexDtfBrandProfile,
+  IndexDtfBrandSocials,
+  IndexDtf,
   PriceControl,
+  IndexDtfPrice,
   Token,
   TokenSnapshot,
   TokenWithSnapshot,
-} from "../types/index-dtf.js";
+} from "../../types/index-dtf.js";
+import type { GetIndexDtfQuery } from "./subgraph/dtf.generated.js";
 
-type SubgraphIndexDTF = NonNullable<GetIndexDtfQuery["dtf"]>;
-type NullableSubgraphGovernance = SubgraphIndexDTF["ownerGovernance"];
+type SubgraphIndexDtf = NonNullable<GetIndexDtfQuery["dtf"]>;
+type NullableSubgraphGovernance = SubgraphIndexDtf["ownerGovernance"];
 type SubgraphGovernance = NonNullable<NullableSubgraphGovernance>;
-type SubgraphStToken = NonNullable<SubgraphIndexDTF["stToken"]>;
-type SubgraphToken = SubgraphIndexDTF["token"];
+type SubgraphStToken = NonNullable<SubgraphIndexDtf["stToken"]>;
+type SubgraphToken = SubgraphIndexDtf["token"];
 type SubgraphVoteLockToken = SubgraphStToken["token"];
 
-export function mapIndexDTF(
-  dtf: SubgraphIndexDTF,
+export type IndexDtfBrandResponse = {
+  readonly status: string;
+  readonly parsedData?: {
+    readonly hidden: boolean;
+    readonly dtf: {
+      readonly icon: string;
+      readonly cover: string;
+      readonly mobileCover: string;
+      readonly description: string;
+      readonly notesFromCreator: string;
+      readonly prospectus: string;
+      readonly tags: readonly string[];
+      readonly basketType: string;
+    };
+    readonly creator: IndexDtfBrandResponseProfile;
+    readonly curator: IndexDtfBrandResponseProfile;
+    readonly socials: {
+      readonly twitter: string;
+      readonly telegram: string;
+      readonly discord: string;
+      readonly website: string;
+    };
+  };
+};
+
+type IndexDtfBrandResponseProfile = {
+  readonly name: string;
+  readonly icon: string;
+  readonly link: string;
+};
+
+export type IndexDtfPriceResponse = {
+  readonly price: number;
+  readonly marketCap: number;
+  readonly totalSupply: number;
+  readonly basket: readonly {
+    readonly address: string;
+    readonly amount: number;
+    readonly amountRaw: string;
+    readonly decimals: number;
+    readonly price: number;
+    readonly weight: string;
+    readonly priceSource?: string;
+  }[];
+};
+
+export function mapIndexDtf(
+  dtf: SubgraphIndexDtf,
   chainId: SupportedChainId,
-): IndexDTF {
+): IndexDtf {
   const adminAuthority = mapAuthority(dtf.ownerAddress, dtf.ownerGovernance);
   const rebalanceAuthorities = dtf.tradingGovernance
     ? [mapAuthority(dtf.tradingGovernance.id, dtf.tradingGovernance)]
@@ -121,6 +173,66 @@ export function mapIndexDTF(
       governanceRevenue: Number(dtf.governanceRevenue),
       externalRevenue: Number(dtf.externalRevenue),
     },
+  };
+}
+
+export function mapIndexDtfBrand(
+  response: IndexDtfBrandResponse,
+): IndexDtfBrand | undefined {
+  if (!response.parsedData) {
+    return undefined;
+  }
+
+  const { curator, creator, dtf, hidden, socials } = response.parsedData;
+  const mappedCreator = mapBrandProfile(creator);
+  const mappedCurator = mapBrandProfile(curator);
+
+  return {
+    hidden,
+    tags: dtf.tags,
+    socials: mapBrandSocials(socials),
+    ...(nonEmpty(dtf.icon) ? { icon: dtf.icon } : {}),
+    ...(nonEmpty(dtf.cover) ? { cover: dtf.cover } : {}),
+    ...(nonEmpty(dtf.mobileCover) ? { mobileCover: dtf.mobileCover } : {}),
+    ...(nonEmpty(dtf.description) ? { description: dtf.description } : {}),
+    ...(nonEmpty(dtf.notesFromCreator)
+      ? { notesFromCreator: dtf.notesFromCreator }
+      : {}),
+    ...(nonEmpty(dtf.prospectus) ? { prospectus: dtf.prospectus } : {}),
+    ...(nonEmpty(dtf.basketType) ? { basketType: dtf.basketType } : {}),
+    ...(mappedCreator ? { creator: mappedCreator } : {}),
+    ...(mappedCurator ? { curator: mappedCurator } : {}),
+  };
+}
+
+export function mapIndexDtfPrice(
+  response: IndexDtfPriceResponse,
+  params: DtfParams,
+): IndexDtfPrice {
+  return {
+    address: getAddress(params.address),
+    chainId: params.chainId,
+    price: response.price,
+    marketCap: response.marketCap,
+    totalSupply: response.totalSupply,
+    basket: response.basket.map((asset) => {
+      const raw = toBigInt(asset.amountRaw);
+
+      return {
+        token: {
+          address: getAddress(asset.address),
+          decimals: asset.decimals,
+        },
+        amount: {
+          raw,
+          formatted: formatUnits(raw, asset.decimals),
+        },
+        weight: asset.weight,
+        price: asset.price,
+        ...(asset.priceSource ? { priceSource: asset.priceSource } : {}),
+      };
+    }),
+    timestamp: Date.now(),
   };
 }
 
@@ -233,6 +345,41 @@ function mapTokenAmount(value: unknown, decimals: number): Amount {
   };
 }
 
+function mapBrandProfile(
+  profile: IndexDtfBrandResponseProfile,
+): IndexDtfBrandProfile | undefined {
+  const name = nonEmpty(profile.name);
+  const icon = nonEmpty(profile.icon);
+  const link = nonEmpty(profile.link);
+
+  return name || icon || link
+    ? {
+        ...(name ? { name } : {}),
+        ...(icon ? { icon } : {}),
+        ...(link ? { link } : {}),
+      }
+    : undefined;
+}
+
+function mapBrandSocials(socials: {
+  readonly twitter: string;
+  readonly telegram: string;
+  readonly discord: string;
+  readonly website: string;
+}): IndexDtfBrandSocials {
+  const twitter = nonEmpty(socials.twitter);
+  const telegram = nonEmpty(socials.telegram);
+  const discord = nonEmpty(socials.discord);
+  const website = nonEmpty(socials.website);
+
+  return {
+    ...(twitter ? { twitter } : {}),
+    ...(telegram ? { telegram } : {}),
+    ...(discord ? { discord } : {}),
+    ...(website ? { website } : {}),
+  };
+}
+
 function mapFeeRecipients(raw: string): FeeRecipients {
   if (!raw) {
     return [];
@@ -286,9 +433,19 @@ function mapPriceControl(value: number): PriceControl {
     return value;
   }
 
-  throw new Error(`Unknown Index DTF price control value: ${value}`);
+  throw new SdkError({
+    code: "UNKNOWN_INDEX_DTF_PRICE_CONTROL",
+    message: `Unknown Index DTF price control value: ${value}`,
+    meta: { value },
+  });
 }
 
 function toBigInt(value: unknown): bigint {
   return typeof value === "bigint" ? value : BigInt(String(value));
+}
+
+function nonEmpty(value: string): string | undefined {
+  const trimmed = value.trim();
+
+  return trimmed ? trimmed : undefined;
 }

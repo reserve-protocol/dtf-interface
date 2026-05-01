@@ -1,20 +1,60 @@
-import {
-  resolveDtfClient,
-  type DtfClientOptions,
-} from "../client.js";
+import { SdkError } from "../errors.js";
 
-type ApiGetOptions = DtfClientOptions & {
+type Query = Record<string, boolean | number | string | null | undefined>;
+
+export type GetOptions = {
+  readonly baseUrl: string;
   readonly path: string;
-  readonly query?: Record<string, boolean | number | string | null | undefined>;
+  readonly query?: Query;
 };
 
-export async function apiGet<TResult>({
-  client,
+export type PostOptions<TBody = unknown> = GetOptions & {
+  readonly body?: TBody;
+};
+
+export async function get<TResult>({
+  baseUrl,
   path,
   query,
-}: ApiGetOptions): Promise<TResult> {
-  const dtfClient = resolveDtfClient(client);
-  const url = new URL(`${dtfClient.apiBaseUrl}/${path.replace(/^\/+/, "")}`);
+}: GetOptions): Promise<TResult> {
+  const url = createUrl({
+    baseUrl,
+    path,
+    ...(query === undefined ? {} : { query }),
+  });
+  const response = await fetch(url);
+
+  return readResponse<TResult>(response, url);
+}
+
+export async function post<TResult, TBody = unknown>({
+  baseUrl,
+  body,
+  path,
+  query,
+}: PostOptions<TBody>): Promise<TResult> {
+  const url = createUrl({
+    baseUrl,
+    path,
+    ...(query === undefined ? {} : { query }),
+  });
+  const response = await fetch(url, {
+    method: "POST",
+    ...(body === undefined
+      ? {}
+      : {
+          body: JSON.stringify(body),
+          headers: {
+            "content-type": "application/json",
+          },
+        }),
+  });
+
+  return readResponse<TResult>(response, url);
+}
+
+function createUrl({ baseUrl, path, query }: GetOptions): URL {
+  const url = new URL(`${baseUrl}/${path.replace(/^\/+/, "")}`);
 
   for (const [key, value] of Object.entries(query ?? {})) {
     if (value !== undefined && value !== null) {
@@ -22,12 +62,23 @@ export async function apiGet<TResult>({
     }
   }
 
-  const response = await fetch(url);
+  return url;
+}
 
+async function readResponse<TResult>(
+  response: Response,
+  url: URL,
+): Promise<TResult> {
   if (!response.ok) {
-    throw new Error(
-      `Reserve API request failed: ${response.status} ${response.statusText}`,
-    );
+    throw new SdkError({
+      code: "API_REQUEST_FAILED",
+      message: `Reserve API request failed: ${response.status} ${response.statusText}`,
+      meta: {
+        status: response.status,
+        statusText: response.statusText,
+        url: String(url),
+      },
+    });
   }
 
   return response.json() as Promise<TResult>;

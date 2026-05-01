@@ -5,15 +5,16 @@ import {
   type DtfClientConfig,
 } from "./client.js";
 import type { SupportedChainId } from "./defaults.js";
-import { createIndexNamespace } from "./index-dtf/index.js";
+import { SdkError } from "./errors.js";
+import { createIndexDtfNamespace } from "./index-dtf/index.js";
 
 export type DtfSdkConfig = DtfClientConfig & {
-  readonly client?: DtfClient | undefined;
+  readonly client?: DtfClient;
 };
 
 export type DtfSdk = {
   readonly client: DtfClient;
-  readonly index: ReturnType<typeof createIndexNamespace>;
+  readonly index: ReturnType<typeof createIndexDtfNamespace>;
   readonly yield: {
     readonly get: (params: {
       readonly address: Address | string;
@@ -27,17 +28,25 @@ export type DtfSdk = {
 
 export function createDtfSdk(config: DtfSdkConfig = {}): DtfSdk {
   const client = config.client ?? createDtfClient(config);
-  const index = createIndexNamespace(client);
+  const index = createIndexDtfNamespace(client);
 
   return {
     client,
     index,
     yield: {
       get: async () => {
-        throw new Error("yield.get is not implemented yet.");
+        throw new SdkError({
+          code: "NOT_IMPLEMENTED",
+          message: "yield.get is not implemented yet.",
+          meta: { method: "yield.get" },
+        });
       },
       list: async () => {
-        throw new Error("yield.list is not implemented yet.");
+        throw new SdkError({
+          code: "NOT_IMPLEMENTED",
+          message: "yield.list is not implemented yet.",
+          meta: { method: "yield.list" },
+        });
       },
     },
   };

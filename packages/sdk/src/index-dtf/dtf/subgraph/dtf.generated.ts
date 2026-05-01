@@ -14,9 +14,15 @@ type Scalars = {
   Int8: { input: string; output: string };
   Timestamp: { input: string; output: string };
 };
+type Block_Height = {
+  hash?: InputMaybe<Scalars['Bytes']['input']>;
+  number?: InputMaybe<Scalars['Int']['input']>;
+  number_gte?: InputMaybe<Scalars['Int']['input']>;
+};
 
 export type GetIndexDtfQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  block?: InputMaybe<Block_Height>;
 }>;
 
 
@@ -42,8 +48,8 @@ export class TypedDocumentString<TResult, TVariables>
 }
 
 export const GetIndexDtfDocument = new TypedDocumentString(`
-    query GetIndexDTF($id: ID!) {
-  dtf(id: $id) {
+    query GetIndexDTF($id: ID!, $block: Block_height) {
+  dtf(id: $id, block: $block) {
     id
     proxyAdmin
     timestamp

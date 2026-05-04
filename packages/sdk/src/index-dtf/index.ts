@@ -78,15 +78,11 @@ export type IndexDtfRef = {
   readonly proposals: (
     params?: GetIndexDtfProposalsOptions,
   ) => Promise<readonly IndexDtfProposalSummary[]>;
-  readonly proposal: (
-    params: Pick<GetIndexDtfProposalParams, "id">,
-  ) => Promise<IndexDtfProposalDetail>;
+  readonly proposal: (proposalId: string) => Promise<IndexDtfProposalDetail>;
   readonly rebalances: (
     params?: GetIndexDtfRebalancesOptions,
   ) => Promise<readonly unknown[]>;
-  readonly rebalance: (
-    params: Pick<GetIndexDtfRebalanceParams, "id">,
-  ) => Promise<unknown>;
+  readonly rebalance: (id: GetIndexDtfRebalanceParams["id"]) => Promise<unknown>;
 };
 
 export function createIndexDtfRef(
@@ -131,10 +127,11 @@ export function createIndexDtfRef(
       getIndexDtfPriceHistory(client, { ...options, address, chainId }),
     proposals: (options = {}) =>
       getIndexDtfProposals(client, { ...options, address, chainId }),
-    proposal: ({ id }) => getIndexDtfProposal(client, { id, chainId }),
+    proposal: (proposalId) =>
+      getIndexDtfProposal(client, { proposalId, address, chainId }),
     rebalances: (options = {}) =>
       getIndexDtfRebalances(client, { ...options, address, chainId }),
-    rebalance: ({ id }) => getIndexDtfRebalance(client, { id, chainId }),
+    rebalance: (id) => getIndexDtfRebalance(client, { id, chainId }),
   };
 }
 

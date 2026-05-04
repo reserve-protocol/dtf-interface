@@ -4,22 +4,24 @@ import { SdkError, isSdkError } from "./errors.js";
 describe("SdkError", () => {
   it("exposes a deterministic code, message, and metadata", () => {
     const error = new SdkError({
-      code: "INDEX_DTF_NOT_FOUND",
+      code: "RECORD_NOT_FOUND",
       message: "Index DTF not found",
       meta: {
         address: "0x0000000000000000000000000000000000000001",
         chainId: 1,
+        entity: "indexDtf",
       },
     });
 
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(SdkError);
     expect(error.name).toBe("SdkError");
-    expect(error.code).toBe("INDEX_DTF_NOT_FOUND");
+    expect(error.code).toBe("RECORD_NOT_FOUND");
     expect(error.message).toBe("Index DTF not found");
     expect(error.meta).toEqual({
       address: "0x0000000000000000000000000000000000000001",
       chainId: 1,
+      entity: "indexDtf",
     });
     expect(isSdkError(error)).toBe(true);
   });

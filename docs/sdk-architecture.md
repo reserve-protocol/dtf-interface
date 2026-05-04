@@ -218,8 +218,8 @@ If the Reserve API uses the SDK, it should avoid SDK methods that call its own p
 Store GraphQL documents in `.graphql` files close to the domain:
 
 ```text
-packages/sdk/src/index-dtf/dtf/subgraph/dtf.graphql
-packages/sdk/src/index-dtf/dtf/subgraph/dtf.generated.ts
+packages/sdk/src/index-dtf/subgraph/dtf.graphql
+packages/sdk/src/index-dtf/subgraph/dtf.generated.ts
 ```
 
 Run codegen after editing documents:

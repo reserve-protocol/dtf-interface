@@ -1,7 +1,8 @@
 import type { Address } from "viem";
-import { formatUnits, getAddress } from "viem";
+import { getAddress } from "viem";
 import type { DtfClient } from "../../client.js";
 import { SdkError } from "../../errors.js";
+import { mapAmount } from "../../lib/utils.js";
 import { getTokensData } from "../../tokens/index.js";
 import type { DtfParams, DtfParamsWithBlock } from "../../types/common.js";
 import type {
@@ -25,7 +26,7 @@ import {
   type IndexDtfBrandResponse,
   type IndexDtfPriceResponse,
 } from "./mappers.js";
-import { GetIndexDtfDocument } from "./subgraph/dtf.generated.js";
+import { GetIndexDtfDocument } from "../subgraph/dtf.generated.js";
 
 export async function getIndexDtf(
   client: DtfClient,
@@ -44,11 +45,12 @@ export async function getIndexDtf(
 
   if (!dtf) {
     throw new SdkError({
-      code: "INDEX_DTF_NOT_FOUND",
+      code: "RECORD_NOT_FOUND",
       message: `Index DTF not found: ${getAddress(params.address)} on chain ${params.chainId}`,
       meta: {
         address: getAddress(params.address),
         chainId: params.chainId,
+        entity: "indexDtf",
       },
     });
   }
@@ -96,11 +98,12 @@ export async function getIndexDtfBasketWithPrice(
 
     if (!asset) {
       throw new SdkError({
-        code: "INDEX_DTF_BASKET_INVALID",
+        code: "INVALID_RESPONSE",
         message: `Basket onchain mismatch with API for token: ${tokenAddress}`,
         meta: {
           address: params.address,
           chainId: params.chainId,
+          entity: "indexDtfBasket",
           token: tokenAddress,
         },
       });
@@ -139,11 +142,12 @@ export async function getIndexDtfBasket(
 
     if (!token || balance === undefined) {
       throw new SdkError({
-        code: "INDEX_DTF_BASKET_INVALID",
+        code: "INVALID_RESPONSE",
         message: `Invalid Index DTF basket response: ${params.address} on chain ${params.chainId}`,
         meta: {
           address: params.address,
           chainId: params.chainId,
+          entity: "indexDtfBasket",
         },
       });
     }
@@ -155,10 +159,7 @@ export async function getIndexDtfBasket(
         ...token,
         address: tokenAddress,
       },
-      balance: {
-        raw: balance,
-        formatted: formatUnits(balance, token.decimals),
-      },
+      balance: mapAmount(balance, token.decimals),
     };
   }
 

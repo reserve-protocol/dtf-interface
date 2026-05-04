@@ -278,15 +278,22 @@ export type ListIndexDtfsParams = {
   readonly status?: DtfStatus | readonly DtfStatus[];
 };
 
-export type GetIndexDtfProposalsParams = IndexDtfInput & {
+export type IndexDtfGovernanceInput = Address | readonly Address[];
+
+export type GetIndexDtfProposalsOptions = {
   readonly limit?: number;
-  readonly offset?: number;
 };
 
-export type GetIndexDtfProposalsOptions = Pick<
-  GetIndexDtfProposalsParams,
-  "limit" | "offset"
->;
+export type GetIndexDtfProposalsParams = GetIndexDtfProposalsOptions &
+  (
+    | DtfParams
+    | { readonly dtf: IndexDtf }
+    | {
+        readonly address?: Address;
+        readonly chainId: SupportedChainId;
+        readonly governanceAddresses: IndexDtfGovernanceInput;
+      }
+  );
 
 export type GetAllIndexDtfProposalsParams = {
   readonly chainId: SupportedChainId;
@@ -296,9 +303,8 @@ export type GetAllIndexDtfProposalsParams = {
 };
 
 export type GetIndexDtfProposalParams = {
-  readonly id: string;
-  readonly chainId: SupportedChainId;
-};
+  readonly proposalId: string;
+} & DtfParams;
 
 export type GetIndexDtfRebalancesParams = IndexDtfInput & {
   readonly limit?: number;
@@ -324,6 +330,7 @@ export type ProposalState =
   | "QUEUED"
   | "EXPIRED"
   | "EXECUTED"
+  | "VETOED"
   | "QUORUM_NOT_REACHED"
   | string;
 
@@ -331,6 +338,8 @@ export type ProposalVotingState = {
   readonly state: ProposalState;
   readonly deadline: number | null;
   readonly quorum: boolean;
+  readonly forVotesReachedQuorum: boolean;
+  readonly participationQuorumReached: boolean;
   readonly for: number;
   readonly against: number;
   readonly abstain: number;
@@ -355,12 +364,51 @@ export type IndexDtfProposalSummary = {
   readonly forWeightedVotes: Amount;
   readonly againstWeightedVotes: Amount;
   readonly abstainWeightedVotes: Amount;
+  readonly votingState: ProposalVotingState;
 };
 
 export type IndexDtfProposalVote = {
   readonly voter: Address;
   readonly choice: string;
   readonly weight: Amount;
+};
+
+export type IndexDtfDecodedCalldata = {
+  readonly index: number;
+  readonly target: Address;
+  readonly contract: string;
+  readonly functionName: string;
+  readonly signature: string;
+  readonly parameters: readonly string[];
+  readonly params: readonly unknown[];
+  readonly callData: `0x${string}`;
+};
+
+export type IndexDtfUnknownCalldata = {
+  readonly index: number;
+  readonly target: Address;
+  readonly contract: string;
+  readonly callData: `0x${string}`;
+};
+
+export type IndexDtfDecodedContractGroup = {
+  readonly target: Address;
+  readonly contract: string;
+  readonly calls: readonly IndexDtfDecodedCalldata[];
+};
+
+export type IndexDtfUnknownContractGroup = {
+  readonly target: Address;
+  readonly contract: string;
+  readonly calls: readonly IndexDtfUnknownCalldata[];
+};
+
+export type IndexDtfProposalDecoded = {
+  readonly contracts: Readonly<Record<Address, string>>;
+  readonly dataByContract: readonly IndexDtfDecodedContractGroup[];
+  readonly unknownContracts: readonly IndexDtfUnknownContractGroup[];
+  readonly calls: readonly IndexDtfDecodedCalldata[];
+  readonly unknownCalls: readonly IndexDtfUnknownCalldata[];
 };
 
 export type IndexDtfProposalDetail = IndexDtfProposalSummary & {
@@ -371,11 +419,11 @@ export type IndexDtfProposalDetail = IndexDtfProposalSummary & {
   readonly targets: readonly Address[];
   readonly calldatas: readonly `0x${string}`[];
   readonly votes: readonly IndexDtfProposalVote[];
-  readonly forDelegateVotes: Amount;
-  readonly againstDelegateVotes: Amount;
-  readonly abstainDelegateVotes: Amount;
+  readonly forDelegateVotes: number;
+  readonly againstDelegateVotes: number;
+  readonly abstainDelegateVotes: number;
   readonly executionTxnHash?: `0x${string}`;
-  readonly votingState: ProposalVotingState;
+  readonly decoded: IndexDtfProposalDecoded;
 };
 
 export type IndexDtfDelegate = {

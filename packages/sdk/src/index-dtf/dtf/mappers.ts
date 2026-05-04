@@ -1,9 +1,9 @@
-import { formatEther, formatUnits, getAddress } from "viem";
+import { getAddress } from "viem";
 import type { SupportedChainId } from "../../defaults.js";
 import { SdkError } from "../../errors.js";
+import { mapAmount } from "../../lib/utils.js";
 import type { DtfParams } from "../../types/common.js";
 import type {
-  Amount,
   Authority,
   FeeRecipients,
   Governance,
@@ -17,7 +17,7 @@ import type {
   TokenSnapshot,
   TokenWithSnapshot,
 } from "../../types/index-dtf.js";
-import type { GetIndexDtfQuery } from "./subgraph/dtf.generated.js";
+import type { GetIndexDtfQuery } from "../subgraph/dtf.generated.js";
 
 type SubgraphIndexDtf = NonNullable<GetIndexDtfQuery["dtf"]>;
 type NullableSubgraphGovernance = SubgraphIndexDtf["ownerGovernance"];
@@ -162,9 +162,9 @@ export function mapIndexDtf(
       priceControl: mapPriceControl(dtf.priceControl),
     },
     fees: {
-      mintingFee: mapD18Amount(dtf.mintingFee),
-      tvlFee: mapD18Amount(dtf.tvlFee),
-      annualizedTvlFee: Number(formatEther(toBigInt(dtf.annualizedTvlFee))),
+      mintingFee: mapAmount(dtf.mintingFee, 18),
+      tvlFee: mapAmount(dtf.tvlFee, 18),
+      annualizedTvlFee: Number(mapAmount(dtf.annualizedTvlFee, 18).formatted),
       recipients: mapFeeRecipients(dtf.feeRecipients),
     },
     financials: {
@@ -216,17 +216,12 @@ export function mapIndexDtfPrice(
     marketCap: response.marketCap,
     totalSupply: response.totalSupply,
     basket: response.basket.map((asset) => {
-      const raw = toBigInt(asset.amountRaw);
-
       return {
         token: {
           address: getAddress(asset.address),
           decimals: asset.decimals,
         },
-        amount: {
-          raw,
-          formatted: formatUnits(raw, asset.decimals),
-        },
+        amount: mapAmount(asset.amountRaw, asset.decimals),
         weight: asset.weight,
         price: asset.price,
         ...(asset.priceSource ? { priceSource: asset.priceSource } : {}),
@@ -321,27 +316,9 @@ function mapTokenSnapshot(token: {
     transferCount: Number(token.transferCount),
     mintCount: Number(token.mintCount),
     burnCount: Number(token.burnCount),
-    totalSupply: mapTokenAmount(token.totalSupply, token.decimals),
-    totalBurned: mapTokenAmount(token.totalBurned, token.decimals),
-    totalMinted: mapTokenAmount(token.totalMinted, token.decimals),
-  };
-}
-
-function mapD18Amount(value: unknown): Amount {
-  const raw = toBigInt(value);
-
-  return {
-    raw,
-    formatted: formatEther(raw),
-  };
-}
-
-function mapTokenAmount(value: unknown, decimals: number): Amount {
-  const raw = toBigInt(value);
-
-  return {
-    raw,
-    formatted: formatUnits(raw, decimals),
+    totalSupply: mapAmount(token.totalSupply, token.decimals),
+    totalBurned: mapAmount(token.totalBurned, token.decimals),
+    totalMinted: mapAmount(token.totalMinted, token.decimals),
   };
 }
 
@@ -395,7 +372,7 @@ function mapFeeRecipients(raw: string): FeeRecipients {
     return [
       {
         address: getAddress(address),
-        percentage: formatEther(toBigInt(percentage) * 100n),
+        percentage: mapAmount(BigInt(percentage) * 100n, 18).formatted,
       },
     ];
   });
@@ -434,14 +411,10 @@ function mapPriceControl(value: number): PriceControl {
   }
 
   throw new SdkError({
-    code: "UNKNOWN_INDEX_DTF_PRICE_CONTROL",
+    code: "INVALID_RESPONSE",
     message: `Unknown Index DTF price control value: ${value}`,
-    meta: { value },
+    meta: { field: "priceControl", value },
   });
-}
-
-function toBigInt(value: unknown): bigint {
-  return typeof value === "bigint" ? value : BigInt(String(value));
 }
 
 function nonEmpty(value: string): string | undefined {

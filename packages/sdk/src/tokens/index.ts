@@ -11,10 +11,11 @@ export async function getTokenData(
 
   if (!token) {
     throw new SdkError({
-      code: "TOKEN_NOT_FOUND",
+      code: "RECORD_NOT_FOUND",
       message: `Token metadata not found: ${address}`,
       meta: {
         address,
+        entity: "token",
       },
     });
   }

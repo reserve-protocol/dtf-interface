@@ -74,9 +74,9 @@ export function createDtfClientSubgraph({
 
       if (!url) {
         throw new SdkError({
-          code: "SUBGRAPH_NOT_CONFIGURED",
+          code: "NOT_CONFIGURED",
           message: `No Index DTF subgraph configured for chain id: ${chainId}`,
-          meta: { chainId, product: "index" },
+          meta: { chainId, product: "index", resource: "subgraph" },
         });
       }
 
@@ -87,9 +87,9 @@ export function createDtfClientSubgraph({
 
       if (!url) {
         throw new SdkError({
-          code: "SUBGRAPH_NOT_CONFIGURED",
+          code: "NOT_CONFIGURED",
           message: `No Yield DTF subgraph configured for chain id: ${chainId}`,
-          meta: { chainId, product: "yield" },
+          meta: { chainId, product: "yield", resource: "subgraph" },
         });
       }
 

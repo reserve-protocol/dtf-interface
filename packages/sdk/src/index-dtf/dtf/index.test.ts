@@ -27,7 +27,7 @@ describe("Index DTF getters", () => {
         chainId: 1,
         blockNumber: 123n,
       }),
-    ).rejects.toMatchObject({ code: "INDEX_DTF_NOT_FOUND" });
+    ).rejects.toMatchObject({ code: "RECORD_NOT_FOUND" });
 
     expect(queryIndex).toHaveBeenCalledWith(
       expect.objectContaining({

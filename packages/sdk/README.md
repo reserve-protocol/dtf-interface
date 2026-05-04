@@ -49,6 +49,16 @@ const sdk = createDtfSdk({
 const dtfs = await sdk.index.list({ chainId: 1 });
 ```
 
+## GraphQL Codegen
+
+The SDK imports typed GraphQL documents from generated source files. After changing `.graphql` files or `codegen.yml`, regenerate them before running the SDK, build, or typecheck:
+
+```sh
+pnpm graphql:codegen
+```
+
+Generated GraphQL files are checked in so consumers do not need to run codegen after installing the package.
+
 ## Playground
 
 Run a live Index DTF fetch and print real data:
@@ -75,7 +85,7 @@ import { isSdkError } from "@dtf-interface/sdk";
 try {
   await sdk.index.get({ address, chainId });
 } catch (error) {
-  if (isSdkError(error) && error.code === "INDEX_DTF_NOT_FOUND") {
+  if (isSdkError(error) && error.code === "RECORD_NOT_FOUND") {
     // handle known SDK error
   }
 }

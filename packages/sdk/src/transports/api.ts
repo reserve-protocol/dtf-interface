@@ -71,11 +71,12 @@ async function readResponse<TResult>(
 ): Promise<TResult> {
   if (!response.ok) {
     throw new SdkError({
-      code: "API_REQUEST_FAILED",
+      code: "REQUEST_FAILED",
       message: `Reserve API request failed: ${response.status} ${response.statusText}`,
       meta: {
         status: response.status,
         statusText: response.statusText,
+        transport: "api",
         url: String(url),
       },
     });

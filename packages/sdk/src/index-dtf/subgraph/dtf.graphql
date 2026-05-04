@@ -1,0 +1,340 @@
+query GetIndexDTF($id: ID!, $block: Block_height) {
+  dtf(id: $id, block: $block) {
+    id
+    proxyAdmin
+    timestamp
+    deployer
+    ownerAddress
+    admins
+    mintingFee
+    tvlFee
+    annualizedTvlFee
+    mandate
+    auctionDelay
+    auctionLength
+    auctionApprovers
+    auctionLaunchers
+    brandManagers
+    totalRevenue
+    protocolRevenue
+    governanceRevenue
+    externalRevenue
+    feeRecipients
+    bidsEnabled
+    trustedFillerRegistry
+    trustedFillerEnabled
+    weightControl
+    priceControl
+    ownerGovernance {
+      id
+      votingDelay
+      votingPeriod
+      proposalThreshold
+      quorumNumerator
+      quorumDenominator
+      timelock {
+        id
+        guardians
+        executionDelay
+      }
+    }
+    legacyAdmins
+    tradingGovernance {
+      id
+      votingDelay
+      votingPeriod
+      proposalThreshold
+      quorumNumerator
+      quorumDenominator
+      timelock {
+        id
+        guardians
+        executionDelay
+      }
+    }
+    legacyAuctionApprovers
+    token {
+      id
+      address
+      name
+      symbol
+      decimals
+      totalSupply
+      currentHolderCount
+      cumulativeHolderCount
+      transferCount
+      mintCount
+      burnCount
+      totalBurned
+      totalMinted
+    }
+    stToken {
+      id
+      token {
+        id
+        address
+        name
+        symbol
+        decimals
+        totalSupply
+        currentHolderCount
+        cumulativeHolderCount
+        transferCount
+        mintCount
+        burnCount
+        totalBurned
+        totalMinted
+      }
+      underlying {
+        name
+        symbol
+        address
+        decimals
+      }
+      governance {
+        id
+        votingDelay
+        votingPeriod
+        proposalThreshold
+        quorumNumerator
+        quorumDenominator
+        timelock {
+          id
+          guardians
+          executionDelay
+        }
+      }
+      legacyGovernance
+      rewards(where: { active: true }) {
+        rewardToken {
+          address
+          name
+          symbol
+          decimals
+        }
+      }
+    }
+  }
+}
+
+query GetIndexDtfProposals($governanceIds: [ID!]!, $limit: Int = 100) {
+  governances(where: { id_in: $governanceIds }) {
+    id
+    proposals(
+      first: $limit
+      orderBy: creationTime
+      orderDirection: desc
+    ) {
+      id
+      description
+      creationTime
+      state
+      forWeightedVotes
+      abstainWeightedVotes
+      againstWeightedVotes
+      executionETA
+      executionTime
+      quorumVotes
+      voteStart
+      voteEnd
+      executionBlock
+      creationBlock
+      proposer {
+        address
+      }
+      governance {
+        id
+      }
+    }
+    proposalCount
+  }
+}
+
+query GetIndexDtfProposalGovernanceAddresses($dtfId: ID!) {
+  dtf(id: $dtfId) {
+    ownerGovernance {
+      id
+    }
+    tradingGovernance {
+      id
+    }
+    legacyAdmins
+    legacyAuctionApprovers
+    stToken {
+      governance {
+        id
+      }
+      legacyGovernance
+    }
+  }
+}
+
+fragment IndexDtfProposalContractContext on DTF {
+  id
+  proxyAdmin
+  legacyAdmins
+  legacyAuctionApprovers
+  ownerGovernance {
+    id
+    timelock {
+      id
+    }
+  }
+  tradingGovernance {
+    id
+    timelock {
+      id
+    }
+  }
+  stToken {
+    id
+    legacyGovernance
+    governance {
+      id
+      timelock {
+        id
+      }
+    }
+  }
+}
+
+query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
+  dtf(id: $dtfId) {
+    ...IndexDtfProposalContractContext
+  }
+  proposal(id: $proposalId) {
+    id
+    timelockId
+    description
+    creationTime
+    voteStart
+    voteEnd
+    queueBlock
+    queueTime
+    state
+    executionETA
+    executionTime
+    executionBlock
+    creationBlock
+    cancellationTime
+    calldatas
+    targets
+    proposer {
+      address
+    }
+    votes {
+      choice
+      voter {
+        address
+      }
+      weight
+    }
+    forWeightedVotes
+    againstWeightedVotes
+    abstainWeightedVotes
+    quorumVotes
+    forDelegateVotes
+    abstainDelegateVotes
+    againstDelegateVotes
+    executionTxnHash
+    governance {
+      id
+      timelock {
+        id
+        type
+      }
+    }
+  }
+}
+
+query GetIndexDtfDelegates($stToken: ID!) {
+  stakingToken(id: $stToken) {
+    id
+    totalDelegates
+    token {
+      totalSupply
+    }
+    delegates(
+      orderBy: delegatedVotes
+      orderDirection: desc
+      where: { address_not: "0x0000000000000000000000000000000000000000" }
+    ) {
+      address
+      delegatedVotes
+      numberVotes
+    }
+  }
+}
+
+query GetIndexDtfRebalances($dtf: String!) {
+  rebalances(where: { dtf: $dtf }, orderBy: timestamp, orderDirection: desc) {
+    id
+    nonce
+    tokens {
+      address
+      name
+      symbol
+      decimals
+    }
+    priceControl
+    weightLowLimit
+    weightSpotLimit
+    weightHighLimit
+    rebalanceLowLimit
+    rebalanceSpotLimit
+    rebalanceHighLimit
+    priceLowLimit
+    priceHighLimit
+    restrictedUntil
+    availableUntil
+    transactionHash
+    blockNumber
+    timestamp
+  }
+}
+
+query GetIndexDtfRebalanceAuctions($rebalanceId: String!) {
+  auctions(where: { rebalance: $rebalanceId }) {
+    id
+    tokens {
+      address
+      name
+      symbol
+      decimals
+    }
+    weightLowLimit
+    weightSpotLimit
+    weightHighLimit
+    rebalanceLowLimit
+    rebalanceSpotLimit
+    rebalanceHighLimit
+    priceLowLimit
+    priceHighLimit
+    startTime
+    endTime
+    blockNumber
+    timestamp
+    transactionHash
+    bids {
+      id
+      bidder
+      sellToken {
+        address
+        name
+        symbol
+        decimals
+      }
+      buyToken {
+        address
+        name
+        symbol
+        decimals
+      }
+      sellAmount
+      buyAmount
+      blockNumber
+      timestamp
+      transactionHash
+    }
+  }
+}

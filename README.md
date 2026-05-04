@@ -44,8 +44,10 @@ const index = await sdk.index.get({
 });
 
 const proposals = await sdk.index.proposals({
-  address: "0x...",
-  chainId: 8453,
+  dtf: {
+    address: "0x...",
+    chainId: 8453,
+  },
 });
 ```
 

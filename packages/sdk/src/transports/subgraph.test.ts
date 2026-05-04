@@ -175,7 +175,7 @@ describe("subgraph client", () => {
         query: "{ broken }",
       }),
     ).rejects.toMatchObject({
-      code: "SUBGRAPH_REQUEST_FAILED",
+      code: "REQUEST_FAILED",
       message: "DTF SDK index subgraph request failed on chain 1 (200): bad query",
       meta: {
         chainId: 1,

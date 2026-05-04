@@ -53,7 +53,7 @@ export async function querySubgraph<
     return await requestGraphql(url, query, variables, requestHeaders);
   } catch (cause) {
     throw new SdkError({
-      code: "SUBGRAPH_REQUEST_FAILED",
+      code: "REQUEST_FAILED",
       message: formatSubgraphErrorMessage({
         cause,
         chainId,

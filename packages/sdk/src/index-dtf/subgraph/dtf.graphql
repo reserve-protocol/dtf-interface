@@ -144,6 +144,9 @@ query GetIndexDtfProposals($governanceIds: [ID!]!, $limit: Int = 100) {
       }
       governance {
         id
+        timelock {
+          id
+        }
       }
     }
     proposalCount
@@ -247,7 +250,7 @@ query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
   }
 }
 
-query GetIndexDtfDelegates($stToken: ID!) {
+query GetIndexDtfDelegates($stToken: ID!, $limit: Int = 10) {
   stakingToken(id: $stToken) {
     id
     totalDelegates
@@ -255,6 +258,7 @@ query GetIndexDtfDelegates($stToken: ID!) {
       totalSupply
     }
     delegates(
+      first: $limit
       orderBy: delegatedVotes
       orderDirection: desc
       where: { address_not: "0x0000000000000000000000000000000000000000" }

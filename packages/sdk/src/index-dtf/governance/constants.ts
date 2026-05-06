@@ -1,0 +1,2 @@
+export const DEFAULT_PROPOSAL_LIMIT = 100;
+export const DEFAULT_DELEGATE_LIMIT = 10;

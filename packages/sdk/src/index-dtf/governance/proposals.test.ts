@@ -1,11 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { encodeFunctionData } from "viem";
 import type { DtfClient } from "../../client.js";
-import { dtfIndexFolioProposalAbi } from "../abis/proposal-decoder.js";
-import { buildProposalContractMap, getContractAliases } from "./contract-map.js";
+import { dtfIndexProposalAbi } from "../abis/proposal-decoder.js";
 import { getIndexDtfProposal, getIndexDtfProposals } from "./index.js";
 
-describe("Index DTF governance", () => {
+describe("Index DTF governance proposals", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -13,7 +12,7 @@ describe("Index DTF governance", () => {
   it("maps proposal detail and derives Register-compatible voting state", async () => {
     vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
     const setMandateCalldata = encodeFunctionData({
-      abi: dtfIndexFolioProposalAbi,
+      abi: dtfIndexProposalAbi,
       functionName: "setMandate",
       args: ["New mandate"],
     });
@@ -39,7 +38,8 @@ describe("Index DTF governance", () => {
       },
       proposal: {
         id: "42",
-        timelockId: "timelock-operation",
+        timelockId:
+          "0x0000000000000000000000000000000000000000000000000000000000000042",
         description: "Proposal description",
         creationTime: "999000",
         voteStart: "999900",
@@ -123,7 +123,8 @@ describe("Index DTF governance", () => {
       creationBlock: 123,
       voteStart: 999900,
       voteEnd: 1000100,
-      timelockId: "timelock-operation",
+      timelockId:
+        "0x0000000000000000000000000000000000000000000000000000000000000042",
       votingState: {
         state: "ACTIVE",
         deadline: 100,
@@ -161,7 +162,7 @@ describe("Index DTF governance", () => {
       {
         index: 0,
         target: "0x0000000000000000000000000000000000000003",
-        contract: "Folio",
+        contract: "Index DTF",
         functionName: "setMandate",
         signature: "setMandate(_newMandate: string)",
         parameters: ["_newMandate: string"],
@@ -172,7 +173,7 @@ describe("Index DTF governance", () => {
     expect(proposal.decoded.dataByContract).toEqual([
       {
         target: "0x0000000000000000000000000000000000000003",
-        contract: "Folio",
+        contract: "Index DTF",
         calls: proposal.decoded.calls,
       },
     ]);
@@ -186,7 +187,7 @@ describe("Index DTF governance", () => {
       {
         index: 2,
         target: "0x0000000000000000000000000000000000000003",
-        contract: "Folio",
+        contract: "Index DTF",
         callData: "0x12345678",
       },
     ]);
@@ -198,7 +199,7 @@ describe("Index DTF governance", () => {
       },
       {
         target: "0x0000000000000000000000000000000000000003",
-        contract: "Folio",
+        contract: "Index DTF",
         calls: [proposal.decoded.unknownCalls[1]],
       },
     ]);
@@ -258,56 +259,42 @@ describe("Index DTF governance", () => {
             id: "0x0000000000000000000000000000000000000001",
             proposalCount: "1",
             proposals: [
-              {
+              createProposalSummary({
                 id: "older",
-                description: "Older proposal",
                 creationTime: "999000",
                 state: "PENDING",
                 forWeightedVotes: "2000000000000000000",
                 abstainWeightedVotes: "2000000000000000000",
                 againstWeightedVotes: "1000000000000000000",
-                executionETA: null,
-                executionTime: null,
                 quorumVotes: "3000000000000000000",
                 voteStart: "999900",
                 voteEnd: "1000100",
-                executionBlock: null,
                 creationBlock: "10",
-                proposer: {
-                  address: "0x0000000000000000000000000000000000000002",
-                },
-                governance: {
-                  id: "0x0000000000000000000000000000000000000001",
-                },
-              },
+                proposer: "0x0000000000000000000000000000000000000002",
+                governance: "0x0000000000000000000000000000000000000001",
+                timelock: "0x0000000000000000000000000000000000000008",
+              }),
             ],
           },
           {
             id: "0x0000000000000000000000000000000000000003",
             proposalCount: "1",
             proposals: [
-              {
+              createProposalSummary({
                 id: "newer",
-                description: "Newer proposal",
                 creationTime: "999500",
                 state: "ACTIVE",
                 forWeightedVotes: "1000000000000000000",
                 abstainWeightedVotes: "0",
                 againstWeightedVotes: "0",
-                executionETA: null,
-                executionTime: null,
                 quorumVotes: "2000000000000000000",
                 voteStart: "999000",
                 voteEnd: "999900",
-                executionBlock: null,
                 creationBlock: "11",
-                proposer: {
-                  address: "0x0000000000000000000000000000000000000006",
-                },
-                governance: {
-                  id: "0x0000000000000000000000000000000000000003",
-                },
-              },
+                proposer: "0x0000000000000000000000000000000000000006",
+                governance: "0x0000000000000000000000000000000000000003",
+                timelock: "0x0000000000000000000000000000000000000009",
+              }),
             ],
           },
         ],
@@ -390,7 +377,7 @@ describe("Index DTF governance", () => {
           id: "0x0000000000000000000000000000000000000001",
           proposalCount: "1",
           proposals: [
-            {
+            createProposalSummary({
               id: "known-governor-proposal",
               description: "Known governor proposal",
               creationTime: "999000",
@@ -398,20 +385,14 @@ describe("Index DTF governance", () => {
               forWeightedVotes: "0",
               abstainWeightedVotes: "0",
               againstWeightedVotes: "0",
-              executionETA: null,
-              executionTime: null,
               quorumVotes: "1000000000000000000",
               voteStart: "999900",
               voteEnd: "1000100",
-              executionBlock: null,
               creationBlock: "10",
-              proposer: {
-                address: "0x0000000000000000000000000000000000000002",
-              },
-              governance: {
-                id: "0x0000000000000000000000000000000000000001",
-              },
-            },
+              proposer: "0x0000000000000000000000000000000000000002",
+              governance: "0x0000000000000000000000000000000000000001",
+              timelock: "0x0000000000000000000000000000000000000008",
+            }),
           ],
         },
       ],
@@ -448,35 +429,62 @@ describe("Index DTF governance", () => {
       state: "ACTIVE",
     });
   });
-
-  it("labels shared owner and basket governance without losing the timelock", () => {
-    const contractMap = buildProposalContractMap({
-      chainId: 1,
-      dtf: {
-        address: "0x0000000000000000000000000000000000000003",
-        proxyAdmin: "0x0000000000000000000000000000000000000008",
-        legacyAdminGovernance: [],
-        legacyTradingGovernance: [],
-        ownerGovernance: {
-          address: "0x0000000000000000000000000000000000000001",
-          timelock: "0x0000000000000000000000000000000000000006",
-        },
-        tradingGovernance: {
-          address: "0x0000000000000000000000000000000000000001",
-          timelock: "0x0000000000000000000000000000000000000006",
-        },
-        stakingToken: {
-          address: "0x0000000000000000000000000000000000000007",
-          legacyGovernance: [],
-        },
-      },
-    });
-
-    expect(getContractAliases(contractMap)).toMatchObject({
-      "0x0000000000000000000000000000000000000001":
-        "Owner/Basket Governance",
-      "0x0000000000000000000000000000000000000006":
-        "Owner/Basket Governance Timelock",
-    });
-  });
 });
+
+function createProposalSummary({
+  id,
+  description = `${id} proposal`,
+  creationTime,
+  state,
+  forWeightedVotes,
+  abstainWeightedVotes,
+  againstWeightedVotes,
+  quorumVotes,
+  voteStart,
+  voteEnd,
+  creationBlock,
+  proposer,
+  governance,
+  timelock,
+}: {
+  readonly id: string;
+  readonly description?: string;
+  readonly creationTime: string;
+  readonly state: string;
+  readonly forWeightedVotes: string;
+  readonly abstainWeightedVotes: string;
+  readonly againstWeightedVotes: string;
+  readonly quorumVotes: string;
+  readonly voteStart: string;
+  readonly voteEnd: string;
+  readonly creationBlock: string;
+  readonly proposer: string;
+  readonly governance: string;
+  readonly timelock: string;
+}) {
+  return {
+    id,
+    description,
+    creationTime,
+    state,
+    forWeightedVotes,
+    abstainWeightedVotes,
+    againstWeightedVotes,
+    executionETA: null,
+    executionTime: null,
+    quorumVotes,
+    voteStart,
+    voteEnd,
+    executionBlock: null,
+    creationBlock,
+    proposer: {
+      address: proposer,
+    },
+    governance: {
+      id: governance,
+      timelock: {
+        id: timelock,
+      },
+    },
+  };
+}

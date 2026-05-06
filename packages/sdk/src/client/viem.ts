@@ -6,12 +6,18 @@ import {
   type Chain,
   type ContractFunctionArgs,
   type ContractFunctionName,
+  type Hex,
   type PublicClient,
   type ReadContractParameters,
   type ReadContractReturnType,
   type Transport,
+  type WalletClient,
 } from "viem";
-import type { SupportedChainId } from "../defaults.js";
+import {
+  SUPPORTED_CHAINS,
+  supportedChainIds,
+  type SupportedChainId,
+} from "../defaults.js";
 import { SdkError } from "../errors.js";
 
 export type DtfClientViemChainConfig = {
@@ -23,6 +29,15 @@ export type DtfClientViemChainConfig = {
 export type DtfClientViemConfig = {
   readonly chains: Partial<Record<SupportedChainId, DtfClientViemChainConfig>>;
 };
+
+type WalletClientWriteContractParameters = Parameters<
+  WalletClient["writeContract"]
+>[0];
+
+export type DtfClientWriteContractParameters = Omit<
+  WalletClientWriteContractParameters,
+  "chain"
+>;
 
 export type DtfClientReadContractParameters<
   abi extends Abi | readonly unknown[] = Abi,
@@ -90,6 +105,38 @@ export function createDtfClientViem({
   };
 
   return viem;
+}
+
+export async function getLatestBlockTimepoint(
+  viem: DtfClientViem,
+  chainId: SupportedChainId,
+): Promise<bigint> {
+  const block = await viem.getPublicClient(chainId).getBlock();
+
+  return block.timestamp > 0n ? block.timestamp - 1n : 0n;
+}
+
+export function writeContract(
+  walletClient: WalletClient,
+  chainId: SupportedChainId,
+  params: DtfClientWriteContractParameters,
+): Promise<Hex> {
+  return walletClient.writeContract({
+    ...params,
+    chain: getWriteChain(chainId),
+  } as WalletClientWriteContractParameters) as Promise<Hex>;
+}
+
+export function getWriteChain(chainId: SupportedChainId) {
+  if (supportedChainIds.includes(chainId as SupportedChainId)) {
+    return SUPPORTED_CHAINS[chainId];
+  }
+
+  throw new SdkError({
+    code: "UNSUPPORTED_CHAIN",
+    message: `Unsupported chain id: ${chainId}`,
+    meta: { chainId },
+  });
 }
 
 function createDefaultPublicClient(

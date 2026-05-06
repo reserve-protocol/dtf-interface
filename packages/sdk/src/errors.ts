@@ -1,4 +1,5 @@
 export type SdkErrorCode =
+  | "INVALID_INPUT"
   | "INVALID_RESPONSE"
   | "NOT_CONFIGURED"
   | "NOT_IMPLEMENTED"

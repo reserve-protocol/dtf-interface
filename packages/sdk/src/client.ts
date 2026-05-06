@@ -7,10 +7,6 @@ import {
   supportedChainIds,
   type SupportedChainId,
 } from "./defaults.js";
-import type {
-  IndexBrandProvider,
-  IndexPricingProvider,
-} from "./index-dtf/index.js";
 import { createDtfClientApi, type DtfClientApi } from "./client/api.js";
 import {
   createDtfClientSubgraph,
@@ -29,16 +25,12 @@ export type DtfChainConfig = DtfClientSubgraphChainConfig &
 export type DtfClientConfig = {
   readonly apiBaseUrl?: string;
   readonly chains?: Partial<Record<SupportedChainId, DtfChainConfig>>;
-  readonly indexBrandProvider?: IndexBrandProvider;
-  readonly indexPricingProvider?: IndexPricingProvider;
 };
 
 export type DtfClient = {
   readonly api: DtfClientApi;
   readonly subgraph: DtfClientSubgraph;
   readonly viem: DtfClientViem;
-  readonly indexBrandProvider: IndexBrandProvider | undefined;
-  readonly indexPricingProvider: IndexPricingProvider | undefined;
 };
 
 export function createDtfClient(config: DtfClientConfig = {}): DtfClient {
@@ -51,8 +43,6 @@ export function createDtfClient(config: DtfClientConfig = {}): DtfClient {
     api: createDtfClientApi({ baseUrl: apiBaseUrl }),
     subgraph: createDtfClientSubgraph({ chains }),
     viem: createDtfClientViem({ chains }),
-    indexBrandProvider: config.indexBrandProvider,
-    indexPricingProvider: config.indexPricingProvider,
   };
 }
 

@@ -1,5 +1,5 @@
 import { formatUnits, type Address } from "viem";
-import type { Amount } from "../types/index-dtf.js";
+import type { Amount } from "../types/common.js";
 
 export function dedupeAddresses(
   addresses: readonly Address[],
@@ -11,7 +11,7 @@ export function getCurrentTime(): number {
   return Math.floor(Date.now() / 1000);
 }
 
-export function mapAmount(value: unknown, decimals: number): Amount {
+export function mapAmount(value: unknown, decimals = 18): Amount {
   const raw = typeof value === "bigint" ? value : BigInt(String(value));
 
   return {

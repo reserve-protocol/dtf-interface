@@ -6,7 +6,7 @@ import type {
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
   ProposalState,
-} from "../../types/index-dtf.js";
+} from "../../types/governance.js";
 import type { GetIndexDtfProposalQuery } from "../subgraph/dtf.generated.js";
 import type { IndexDtfProposalDtfContractContext } from "./contract-map.js";
 
@@ -33,6 +33,7 @@ type SubgraphIndexDtfProposalSummary = {
   };
   readonly governance: {
     readonly id: string;
+    readonly timelock: { readonly id: string };
   };
 };
 type SubgraphIndexDtfProposalDtf = NonNullable<GetIndexDtfProposalQuery["dtf"]>;
@@ -65,6 +66,7 @@ export function mapIndexDtfProposalSummary(
     id: proposal.id,
     chainId,
     governance: getAddress(proposal.governance.id),
+    timelock: getAddress(proposal.governance.timelock.id),
     proposer: getAddress(proposal.proposer.address),
     description: proposal.description,
     state: proposal.state,
@@ -72,10 +74,10 @@ export function mapIndexDtfProposalSummary(
     creationBlock: Number(proposal.creationBlock),
     voteStart: Number(proposal.voteStart),
     voteEnd: Number(proposal.voteEnd),
-    quorumVotes: mapAmount(proposal.quorumVotes, 18),
-    forWeightedVotes: mapAmount(proposal.forWeightedVotes, 18),
-    againstWeightedVotes: mapAmount(proposal.againstWeightedVotes, 18),
-    abstainWeightedVotes: mapAmount(proposal.abstainWeightedVotes, 18),
+    quorumVotes: mapAmount(proposal.quorumVotes),
+    forWeightedVotes: mapAmount(proposal.forWeightedVotes),
+    againstWeightedVotes: mapAmount(proposal.againstWeightedVotes),
+    abstainWeightedVotes: mapAmount(proposal.abstainWeightedVotes),
     ...(dtf
       ? { dtf: { address: getAddress(dtf.address), chainId: dtf.chainId } }
       : {}),
@@ -109,12 +111,12 @@ export function mapIndexDtfProposal(
     votes: proposal.votes.map((vote) => ({
       voter: getAddress(vote.voter.address),
       choice: vote.choice,
-      weight: mapAmount(vote.weight, 18),
+      weight: mapAmount(vote.weight),
     })),
     forDelegateVotes: Number(proposal.forDelegateVotes),
     againstDelegateVotes: Number(proposal.againstDelegateVotes),
     abstainDelegateVotes: Number(proposal.abstainDelegateVotes),
-    ...(proposal.timelockId ? { timelockId: proposal.timelockId } : {}),
+    ...(proposal.timelockId ? { timelockId: toHex(proposal.timelockId) } : {}),
     ...(queueBlock === undefined ? {} : { queueBlock }),
     ...(queueTime === undefined ? {} : { queueTime }),
     ...(cancellationTime === undefined ? {} : { cancellationTime }),
@@ -153,16 +155,10 @@ export function mapProposalGovernanceContractContext(
 ) {
   return {
     address: getAddress(governance.id),
-    ...(governance.timelock
-      ? {
-          timelock: {
-            address: getAddress(governance.timelock.id),
-            ...(governance.timelock.type
-              ? { type: governance.timelock.type }
-              : {}),
-          },
-        }
-      : {}),
+    timelock: {
+      address: getAddress(governance.timelock!.id),
+      ...(governance.timelock!.type ? { type: governance.timelock!.type } : {}),
+    },
   };
 }
 
@@ -175,12 +171,10 @@ type SubgraphStakingToken = NonNullable<SubgraphIndexDtfProposalDtf["stToken"]>;
 
 function mapGovernanceWithTimelock(
   governance: SubgraphGovernanceWithTimelock,
-): { readonly address: Address; readonly timelock?: Address } {
+): { readonly address: Address; readonly timelock: Address } {
   return {
     address: getAddress(governance.id),
-    ...(governance.timelock
-      ? { timelock: getAddress(governance.timelock.id) }
-      : {}),
+    timelock: getAddress(governance.timelock!.id),
   };
 }
 

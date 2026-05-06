@@ -1,34 +1,16 @@
 import type { Address } from "viem";
 import type { SupportedChainId } from "../defaults.js";
 import type {
+  Amount,
+  Authority,
+  AuthorityGroup,
   BlockNumber,
   BlockNumberParams,
   DtfParams,
-  DtfStatus,
-  Token as BaseToken,
+  Governance,
+  Token,
+  TokenWithSnapshot,
 } from "./common.js";
-
-export type Token = BaseToken;
-
-export type Amount = {
-  readonly raw: bigint;
-  readonly formatted: string;
-};
-
-export type TokenSnapshot = {
-  readonly currentHolderCount: number;
-  readonly cumulativeHolderCount: number;
-  readonly transferCount: number;
-  readonly mintCount: number;
-  readonly burnCount: number;
-  readonly totalSupply: Amount;
-  readonly totalBurned: Amount;
-  readonly totalMinted: Amount;
-};
-
-export type TokenWithSnapshot = Token & {
-  readonly snapshot: TokenSnapshot;
-};
 
 export type FeeRecipients = readonly {
   readonly address: Address;
@@ -40,41 +22,6 @@ export type Fees = {
   readonly tvlFee: Amount;
   readonly annualizedTvlFee: number;
   readonly recipients: FeeRecipients;
-};
-
-export type Timelock = {
-  readonly address: Address;
-  readonly guardians: readonly Address[];
-  readonly executionDelay: number;
-};
-
-export type Governance = {
-  readonly address: Address;
-  readonly votingDelay: number;
-  readonly votingPeriod: number;
-  readonly proposalThreshold: number;
-  readonly quorumNumerator: number;
-  readonly quorumDenominator: number;
-  readonly quorum: number;
-  readonly timelock?: Timelock;
-};
-
-export type GovernanceAuthority = {
-  readonly address: Address;
-  readonly type: "governance";
-  readonly governance: Governance;
-};
-
-export type AddressAuthority = {
-  readonly address: Address;
-  readonly type: "address";
-};
-
-export type Authority = GovernanceAuthority | AddressAuthority;
-
-export type AuthorityGroup = {
-  readonly primary?: Authority;
-  readonly all: readonly Authority[];
 };
 
 export type IndexDtfGovernance = {
@@ -180,6 +127,12 @@ export type IndexDtfBasketAssetWithPrice = IndexDtfBasketAsset &
 
 export type IndexDtfBasket = Record<Address, IndexDtfBasketAsset>;
 
+export type IndexDtfTotalAssets = {
+  readonly tokens: readonly Address[];
+  readonly balances: readonly bigint[];
+  readonly balanceByToken: Readonly<Record<Address, bigint>>;
+};
+
 export type IndexDtfBasketWithPrice = Omit<IndexDtfPrice, "basket"> & {
   basket: Record<Address, IndexDtfBasketAssetWithPrice>;
 };
@@ -260,6 +213,12 @@ export type GetIndexDtfBasketParams = DtfParams & BlockNumberParams;
 
 export type GetIndexDtfBasketOptions = BlockNumber | BlockNumberParams;
 
+export type GetIndexDtfVersionParams = DtfParams & BlockNumberParams;
+
+export type GetIndexDtfTotalSupplyParams = DtfParams & BlockNumberParams;
+
+export type GetIndexDtfTotalAssetsParams = DtfParams & BlockNumberParams;
+
 export type GetIndexDtfPriceParams = DtfParams;
 
 export type GetIndexDtfPriceHistoryParams = DtfParams & {
@@ -272,39 +231,6 @@ export type GetIndexDtfPriceHistoryOptions = Pick<
   GetIndexDtfPriceHistoryParams,
   "from" | "interval" | "to"
 >;
-
-export type ListIndexDtfsParams = {
-  readonly chainId?: SupportedChainId;
-  readonly status?: DtfStatus | readonly DtfStatus[];
-};
-
-export type IndexDtfGovernanceInput = Address | readonly Address[];
-
-export type GetIndexDtfProposalsOptions = {
-  readonly limit?: number;
-};
-
-export type GetIndexDtfProposalsParams = GetIndexDtfProposalsOptions &
-  (
-    | DtfParams
-    | { readonly dtf: IndexDtf }
-    | {
-        readonly address?: Address;
-        readonly chainId: SupportedChainId;
-        readonly governanceAddresses: IndexDtfGovernanceInput;
-      }
-  );
-
-export type GetAllIndexDtfProposalsParams = {
-  readonly chainId: SupportedChainId;
-  readonly limit?: number;
-  readonly offset?: number;
-  readonly states?: readonly ProposalState[];
-};
-
-export type GetIndexDtfProposalParams = {
-  readonly proposalId: string;
-} & DtfParams;
 
 export type GetIndexDtfRebalancesParams = IndexDtfInput & {
   readonly limit?: number;
@@ -319,136 +245,4 @@ export type GetIndexDtfRebalancesOptions = Pick<
 export type GetIndexDtfRebalanceParams = {
   readonly id: string;
   readonly chainId: SupportedChainId;
-};
-
-export type ProposalState =
-  | "PENDING"
-  | "ACTIVE"
-  | "CANCELED"
-  | "DEFEATED"
-  | "SUCCEEDED"
-  | "QUEUED"
-  | "EXPIRED"
-  | "EXECUTED"
-  | "VETOED"
-  | "QUORUM_NOT_REACHED"
-  | string;
-
-export type ProposalVotingState = {
-  readonly state: ProposalState;
-  readonly deadline: number | null;
-  readonly quorum: boolean;
-  readonly forVotesReachedQuorum: boolean;
-  readonly participationQuorumReached: boolean;
-  readonly for: number;
-  readonly against: number;
-  readonly abstain: number;
-};
-
-export type IndexDtfProposalSummary = {
-  readonly id: string;
-  readonly chainId: SupportedChainId;
-  readonly governance: Address;
-  readonly dtf?: DtfParams;
-  readonly proposer?: Address;
-  readonly description: string;
-  readonly state: ProposalState;
-  readonly creationTime: number;
-  readonly creationBlock: number;
-  readonly voteStart: number;
-  readonly voteEnd: number;
-  readonly executionETA?: number;
-  readonly executionTime?: number;
-  readonly executionBlock?: number;
-  readonly quorumVotes: Amount;
-  readonly forWeightedVotes: Amount;
-  readonly againstWeightedVotes: Amount;
-  readonly abstainWeightedVotes: Amount;
-  readonly votingState: ProposalVotingState;
-};
-
-export type IndexDtfProposalVote = {
-  readonly voter: Address;
-  readonly choice: string;
-  readonly weight: Amount;
-};
-
-export type IndexDtfDecodedCalldata = {
-  readonly index: number;
-  readonly target: Address;
-  readonly contract: string;
-  readonly functionName: string;
-  readonly signature: string;
-  readonly parameters: readonly string[];
-  readonly params: readonly unknown[];
-  readonly callData: `0x${string}`;
-};
-
-export type IndexDtfUnknownCalldata = {
-  readonly index: number;
-  readonly target: Address;
-  readonly contract: string;
-  readonly callData: `0x${string}`;
-};
-
-export type IndexDtfDecodedContractGroup = {
-  readonly target: Address;
-  readonly contract: string;
-  readonly calls: readonly IndexDtfDecodedCalldata[];
-};
-
-export type IndexDtfUnknownContractGroup = {
-  readonly target: Address;
-  readonly contract: string;
-  readonly calls: readonly IndexDtfUnknownCalldata[];
-};
-
-export type IndexDtfProposalDecoded = {
-  readonly contracts: Readonly<Record<Address, string>>;
-  readonly dataByContract: readonly IndexDtfDecodedContractGroup[];
-  readonly unknownContracts: readonly IndexDtfUnknownContractGroup[];
-  readonly calls: readonly IndexDtfDecodedCalldata[];
-  readonly unknownCalls: readonly IndexDtfUnknownCalldata[];
-};
-
-export type IndexDtfProposalDetail = IndexDtfProposalSummary & {
-  readonly timelockId?: string;
-  readonly queueBlock?: number;
-  readonly queueTime?: number;
-  readonly cancellationTime?: number;
-  readonly targets: readonly Address[];
-  readonly calldatas: readonly `0x${string}`[];
-  readonly votes: readonly IndexDtfProposalVote[];
-  readonly forDelegateVotes: number;
-  readonly againstDelegateVotes: number;
-  readonly abstainDelegateVotes: number;
-  readonly executionTxnHash?: `0x${string}`;
-  readonly decoded: IndexDtfProposalDecoded;
-};
-
-export type IndexDtfDelegate = {
-  readonly address: Address;
-  readonly delegatedVotes: Amount;
-  readonly numberVotes: number;
-};
-
-export type IndexDtfGovernanceOverview = {
-  readonly proposals: readonly IndexDtfProposalSummary[];
-  readonly proposalCount: number;
-  readonly delegates: readonly IndexDtfDelegate[];
-  readonly delegatesCount: number;
-  readonly voteSupply: Amount;
-};
-
-export type IndexPricingProvider = {
-  readonly getCurrent: (
-    params: GetIndexDtfPriceParams,
-  ) => Promise<IndexDtfPrice>;
-  readonly getHistory?: (
-    params: GetIndexDtfPriceHistoryParams,
-  ) => Promise<readonly IndexDtfPricePoint[]>;
-};
-
-export type IndexBrandProvider = {
-  readonly get: (params: DtfParams) => Promise<IndexDtfBrand | undefined>;
 };

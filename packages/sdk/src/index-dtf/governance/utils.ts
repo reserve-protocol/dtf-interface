@@ -1,11 +1,13 @@
 import { getAddress, type Address } from "viem";
 import { dedupeAddresses, getCurrentTime } from "../../lib/utils.js";
+import type { Authority } from "../../types/common.js";
 import type {
-  IndexDtf,
+  IndexDtfGuardianGroup,
   IndexDtfProposalSummary,
   ProposalState,
   ProposalVotingState,
-} from "../../types/index-dtf.js";
+} from "../../types/governance.js";
+import type { IndexDtf } from "../../types/index-dtf.js";
 
 export type DtfGovernanceAddressContext = {
   readonly ownerGovernance?: { readonly id: string } | null;
@@ -70,15 +72,6 @@ export function getDtfProposalGovernanceIds(
   ]);
 }
 
-export function isProposalForDtf(
-  governanceId: string,
-  dtf: DtfGovernanceAddressContext,
-): boolean {
-  const proposalGovernance = getAddress(governanceId).toLowerCase();
-
-  return getDtfProposalGovernanceIds(dtf).includes(proposalGovernance);
-}
-
 export function normalizeGovernanceIds(
   governanceAddresses: string | readonly string[],
 ): readonly string[] {
@@ -89,6 +82,24 @@ export function normalizeGovernanceIds(
   return [
     ...new Set(addresses.map((address) => getAddress(address).toLowerCase())),
   ];
+}
+
+export function mapGuardianGroup(
+  authority: Authority | undefined,
+): IndexDtfGuardianGroup {
+  if (!authority || authority.type !== "governance") {
+    return { governance: undefined, timelock: undefined, guardians: [] };
+  }
+
+  return {
+    governance: authority.address,
+    timelock: authority.governance.timelock.address,
+    guardians: authority.governance.timelock.guardians,
+  };
+}
+
+export function getZeroValues(length: number): bigint[] {
+  return Array.from({ length }, () => 0n);
 }
 
 export function getVoteState(

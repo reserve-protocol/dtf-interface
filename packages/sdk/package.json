@@ -24,18 +24,21 @@
     "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "playground:index": "tsx playground/index-dtf.ts",
-    "prebuild": "pnpm run clean",
-    "pretest": "pnpm --filter @dtf-interface/dtf-catalog build",
-    "pretypecheck": "pnpm --filter @dtf-interface/dtf-catalog build",
+    "prebuild": "pnpm --filter @dtf-interface/dtf-catalog build && pnpm --filter @reserve-protocol/dtf-rebalance-lib build && pnpm run clean",
+    "pretest": "pnpm --filter @dtf-interface/dtf-catalog build && pnpm --filter @reserve-protocol/dtf-rebalance-lib build",
+    "pretypecheck": "pnpm --filter @dtf-interface/dtf-catalog build && pnpm --filter @reserve-protocol/dtf-rebalance-lib build",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@dtf-interface/dtf-catalog": "workspace:*",
+    "@reserve-protocol/dtf-rebalance-lib": "workspace:*",
     "@graphql-typed-document-node/core": "^3.2.0",
+    "decimal.js-light": "^2.5.1",
     "graphql": "^16.13.2",
     "graphql-request": "^7.4.0",
-    "viem": "^2.48.0"
+    "viem": "^2.48.0",
+    "zod": "^4.4.2"
   },
   "keywords": [
     "dtf",

@@ -7,6 +7,7 @@ import {
   getIndexDtfBrand,
   getIndexDtfPrice,
 } from "./index.js";
+import { mapIndexDtf } from "./mappers.js";
 
 describe("Index DTF getters", () => {
   afterEach(() => {
@@ -157,6 +158,17 @@ describe("Index DTF getters", () => {
     );
   });
 
+  it("maps governance proposal thresholds from D18 fractions to percentages", () => {
+    const dtf = mapIndexDtf(createSubgraphDtf(), 1);
+
+    expect(dtf.governance.admin.primary).toMatchObject({
+      type: "governance",
+      governance: {
+        proposalThreshold: 1,
+      },
+    });
+  });
+
   it("fetches and maps onchain Index DTF basket holdings", async () => {
     const usdc = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
     const weth = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
@@ -216,3 +228,65 @@ describe("Index DTF getters", () => {
     expect(multicall).toHaveBeenCalledOnce();
   });
 });
+
+function createSubgraphDtf() {
+  return {
+    id: "0x0000000000000000000000000000000000000001",
+    proxyAdmin: "0x0000000000000000000000000000000000000002",
+    timestamp: "1",
+    deployer: "0x0000000000000000000000000000000000000003",
+    ownerAddress: "0x0000000000000000000000000000000000000004",
+    admins: ["0x0000000000000000000000000000000000000004"],
+    mintingFee: "0",
+    tvlFee: "0",
+    annualizedTvlFee: "0",
+    mandate: "Mandate",
+    auctionDelay: "0",
+    auctionLength: "3600",
+    auctionApprovers: [],
+    auctionLaunchers: [],
+    brandManagers: [],
+    totalRevenue: "0",
+    protocolRevenue: "0",
+    governanceRevenue: "0",
+    externalRevenue: "0",
+    feeRecipients: "",
+    bidsEnabled: true,
+    trustedFillerRegistry: null,
+    trustedFillerEnabled: null,
+    weightControl: true,
+    priceControl: 0,
+    legacyAdmins: [],
+    legacyAuctionApprovers: [],
+    ownerGovernance: {
+      id: "0x0000000000000000000000000000000000000004",
+      votingDelay: "1",
+      votingPeriod: "2",
+      proposalThreshold: "10000000000000000",
+      quorumNumerator: "10000000000000000",
+      quorumDenominator: "1000000000000000000",
+      timelock: {
+        id: "0x0000000000000000000000000000000000000005",
+        guardians: [],
+        executionDelay: "3",
+      },
+    },
+    tradingGovernance: null,
+    token: {
+      id: "0x0000000000000000000000000000000000000001",
+      address: "0x0000000000000000000000000000000000000001",
+      name: "DTF",
+      symbol: "DTF",
+      decimals: 18,
+      totalSupply: "0",
+      currentHolderCount: "0",
+      cumulativeHolderCount: "0",
+      transferCount: "0",
+      mintCount: "0",
+      burnCount: "0",
+      totalBurned: "0",
+      totalMinted: "0",
+    },
+    stToken: null,
+  } as never;
+}

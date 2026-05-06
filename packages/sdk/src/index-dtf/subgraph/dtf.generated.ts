@@ -5954,7 +5954,7 @@ export type GetIndexDtfProposalsQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalsQuery = { governances: Array<{ id: string, proposalCount: string, proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string } }> }> };
+export type GetIndexDtfProposalsQuery = { governances: Array<{ id: string, proposalCount: string, proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, timelock: { id: string } } }> }> };
 
 export type GetIndexDtfProposalGovernanceAddressesQueryVariables = Exact<{
   dtfId: Scalars['ID']['input'];
@@ -5975,6 +5975,7 @@ export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string,
 
 export type GetIndexDtfDelegatesQueryVariables = Exact<{
   stToken: Scalars['ID']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -6186,6 +6187,9 @@ export const GetIndexDtfProposalsDocument = new TypedDocumentString(`
       }
       governance {
         id
+        timelock {
+          id
+        }
       }
     }
     proposalCount
@@ -6290,7 +6294,7 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
   }
 }`) as unknown as TypedDocumentString<GetIndexDtfProposalQuery, GetIndexDtfProposalQueryVariables>;
 export const GetIndexDtfDelegatesDocument = new TypedDocumentString(`
-    query GetIndexDtfDelegates($stToken: ID!) {
+    query GetIndexDtfDelegates($stToken: ID!, $limit: Int = 10) {
   stakingToken(id: $stToken) {
     id
     totalDelegates
@@ -6298,6 +6302,7 @@ export const GetIndexDtfDelegatesDocument = new TypedDocumentString(`
       totalSupply
     }
     delegates(
+      first: $limit
       orderBy: delegatedVotes
       orderDirection: desc
       where: {address_not: "0x0000000000000000000000000000000000000000"}

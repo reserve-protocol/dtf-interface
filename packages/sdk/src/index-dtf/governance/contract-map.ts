@@ -2,7 +2,7 @@ import { getAddress, type Abi, type Address } from "viem";
 import type { SupportedChainId } from "../../defaults.js";
 import {
   dtfAdminProposalAbi,
-  dtfIndexFolioProposalAbi,
+  dtfIndexProposalAbi,
   dtfIndexGovernanceProposalAbi,
   dtfIndexStakingVaultProposalAbi,
   timelockProposalAbi,
@@ -17,7 +17,7 @@ export type ProposalContractDecoder = {
 
 export type IndexDtfProposalGovernanceContractContext = {
   readonly address: Address;
-  readonly timelock?: {
+  readonly timelock: {
     readonly address: Address;
     readonly type?: string | null;
   };
@@ -30,18 +30,18 @@ export type IndexDtfProposalDtfContractContext = {
   readonly legacyTradingGovernance: readonly Address[];
   readonly ownerGovernance?: {
     readonly address: Address;
-    readonly timelock?: Address;
+    readonly timelock: Address;
   };
   readonly tradingGovernance?: {
     readonly address: Address;
-    readonly timelock?: Address;
+    readonly timelock: Address;
   };
   readonly stakingToken: {
     readonly address: Address;
     readonly legacyGovernance: readonly Address[];
     readonly governance?: {
       readonly address: Address;
-      readonly timelock?: Address;
+      readonly timelock: Address;
     };
   };
 };
@@ -93,7 +93,7 @@ export function buildProposalContractMap({
 }: BuildProposalContractMapParams): Map<string, ProposalContractDecoder> {
   const contracts = new Map<string, ProposalContractDecoder>();
 
-  addContract(contracts, dtf.address, "Folio", dtfIndexFolioProposalAbi);
+  addContract(contracts, dtf.address, "Index DTF", dtfIndexProposalAbi);
   addContract(contracts, dtf.proxyAdmin, "ProxyAdmin", dtfAdminProposalAbi);
 
   const hasSharedOwnerAndBasketGovernance =
@@ -198,13 +198,13 @@ export function buildProposalContractMap({
     addContract(
       contracts,
       proposalGovernance.address,
-      getGovernanceContractName(proposalGovernance.timelock?.type),
+      getGovernanceContractName(proposalGovernance.timelock.type),
       dtfIndexGovernanceProposalAbi,
     );
     addContract(
       contracts,
-      proposalGovernance.timelock?.address,
-      getTimelockContractName(proposalGovernance.timelock?.type),
+      proposalGovernance.timelock.address,
+      getTimelockContractName(proposalGovernance.timelock.type),
       timelockProposalAbi,
     );
   }

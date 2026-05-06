@@ -9,6 +9,9 @@ import type {
   GetFullIndexDtfParams,
   GetIndexDtfParams,
   GetIndexDtfPriceHistoryParams,
+  GetIndexDtfTotalAssetsParams,
+  GetIndexDtfTotalSupplyParams,
+  GetIndexDtfVersionParams,
   IndexDtf,
   IndexDtfBasket,
   IndexDtfBasketAssetWithPrice,
@@ -17,6 +20,7 @@ import type {
   IndexDtfFull,
   IndexDtfPrice,
   IndexDtfPricePoint,
+  IndexDtfTotalAssets,
 } from "../../types/index-dtf.js";
 import { folioAbi } from "../abis/folio.js";
 import {
@@ -127,12 +131,10 @@ export async function getIndexDtfBasket(
   params: DtfParamsWithBlock,
 ): Promise<IndexDtfBasket> {
   const publicClient = client.viem.getPublicClient(params.chainId);
-  const [assetAddresses, balances] = await publicClient.readContract({
-    address: params.address,
-    abi: folioAbi,
-    functionName: "totalAssets",
-    blockNumber: params.blockNumber,
-  });
+  const { tokens: assetAddresses, balances } = await getIndexDtfTotalAssets(
+    client,
+    params,
+  );
   const tokens = await getTokensData(publicClient, [...assetAddresses]);
   const basket: IndexDtfBasket = {};
 
@@ -166,14 +168,62 @@ export async function getIndexDtfBasket(
   return basket;
 }
 
+export async function getIndexDtfVersion(
+  client: DtfClient,
+  params: GetIndexDtfVersionParams,
+): Promise<string> {
+  const publicClient = client.viem.getPublicClient(params.chainId);
+
+  return publicClient.readContract({
+    address: getAddress(params.address),
+    abi: folioAbi,
+    functionName: "version",
+    blockNumber: params.blockNumber,
+  });
+}
+
+export async function getIndexDtfTotalSupply(
+  client: DtfClient,
+  params: GetIndexDtfTotalSupplyParams,
+): Promise<bigint> {
+  const publicClient = client.viem.getPublicClient(params.chainId);
+
+  return publicClient.readContract({
+    address: getAddress(params.address),
+    abi: folioAbi,
+    functionName: "totalSupply",
+    blockNumber: params.blockNumber,
+  });
+}
+
+export async function getIndexDtfTotalAssets(
+  client: DtfClient,
+  params: GetIndexDtfTotalAssetsParams,
+): Promise<IndexDtfTotalAssets> {
+  const publicClient = client.viem.getPublicClient(params.chainId);
+  const [tokens, balances] = await publicClient.readContract({
+    address: getAddress(params.address),
+    abi: folioAbi,
+    functionName: "totalAssets",
+    blockNumber: params.blockNumber,
+  });
+  const balanceByToken: Record<Address, bigint> = {};
+
+  for (let i = 0; i < tokens.length; i++) {
+    balanceByToken[tokens[i]!] = balances[i]!;
+  }
+
+  return {
+    tokens,
+    balances,
+    balanceByToken,
+  };
+}
+
 export async function getIndexDtfPrice(
   client: DtfClient,
   params: DtfParams,
 ): Promise<IndexDtfPrice> {
-  if (client.indexPricingProvider) {
-    return client.indexPricingProvider.getCurrent(params);
-  }
-
   const address = getAddress(params.address);
   const response = await client.api.get<IndexDtfPriceResponse>({
     path: "/current/dtf",
@@ -190,10 +240,6 @@ export async function getIndexDtfBrand(
   client: DtfClient,
   params: DtfParams,
 ): Promise<IndexDtfBrand | undefined> {
-  if (client.indexBrandProvider) {
-    return client.indexBrandProvider.get(params);
-  }
-
   const address = getAddress(params.address);
   const response = await client.api.get<IndexDtfBrandResponse>({
     path: "/folio-manager/read",
@@ -210,10 +256,6 @@ export async function getIndexDtfPriceHistory(
   client: DtfClient,
   params: GetIndexDtfPriceHistoryParams,
 ): Promise<readonly IndexDtfPricePoint[]> {
-  if (client.indexPricingProvider?.getHistory) {
-    return client.indexPricingProvider.getHistory(params);
-  }
-
   throw new SdkError({
     code: "NOT_IMPLEMENTED",
     message: "getIndexDtfPriceHistory is not implemented yet.",

@@ -1,19 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createDtfSdk } from "./create-dtf-sdk.js";
 
 describe("createDtfSdk", () => {
-  it("stores explicit index providers", () => {
-    const indexPricingProvider = {
-      getCurrent: vi.fn(),
-    };
-
-    const sdk = createDtfSdk({
-      indexPricingProvider,
-    });
-
-    expect(sdk.client.indexPricingProvider).toBe(indexPricingProvider);
-  });
-
   it("exposes the intended index namespace names", () => {
     const sdk = createDtfSdk();
 
@@ -21,9 +9,18 @@ describe("createDtfSdk", () => {
     expect(typeof sdk.index.get).toBe("function");
     expect(typeof sdk.index.getBrand).toBe("function");
     expect(typeof sdk.index.getPrice).toBe("function");
+    expect(typeof sdk.index.version).toBe("function");
+    expect(typeof sdk.index.totalSupply).toBe("function");
+    expect(typeof sdk.index.totalAssets).toBe("function");
     expect(typeof sdk.index.proposals).toBe("function");
     expect(typeof sdk.index.proposal).toBe("function");
     expect(typeof sdk.index.getAllProposals).toBe("function");
+    expect(typeof sdk.index.buildBasketProposal).toBe("function");
+    expect(typeof sdk.index.buildBasketSettingsProposal).toBe("function");
+    expect(typeof sdk.index.buildDaoSettingsProposal).toBe("function");
+    expect(typeof sdk.index.buildSettingsProposal).toBe("function");
+    expect("buildSettingsCalls" in sdk.index).toBe(false);
+    expect("write" in sdk.index).toBe(false);
     expect(typeof sdk.index.rebalances).toBe("function");
     expect(typeof sdk.index.rebalance).toBe("function");
   });
@@ -40,7 +37,16 @@ describe("createDtfSdk", () => {
     expect(typeof dtf.get).toBe("function");
     expect(typeof dtf.getBrand).toBe("function");
     expect(typeof dtf.getPrice).toBe("function");
+    expect(typeof dtf.version).toBe("function");
+    expect(typeof dtf.totalSupply).toBe("function");
+    expect(typeof dtf.totalAssets).toBe("function");
     expect(typeof dtf.proposals).toBe("function");
+    expect(typeof dtf.buildBasketProposal).toBe("function");
+    expect(typeof dtf.buildBasketSettingsProposal).toBe("function");
+    expect(typeof dtf.buildDaoSettingsProposal).toBe("function");
+    expect(typeof dtf.buildSettingsProposal).toBe("function");
+    expect("buildSettingsCalls" in dtf).toBe(false);
+    expect(typeof dtf.write).toBe("function");
     expect(typeof dtf.rebalances).toBe("function");
   });
 

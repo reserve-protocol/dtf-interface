@@ -21,6 +21,61 @@ export type Token = {
   readonly decimals: number;
 };
 
+export type Amount = {
+  readonly raw: bigint;
+  readonly formatted: string;
+};
+
+export type TokenSnapshot = {
+  readonly currentHolderCount: number;
+  readonly cumulativeHolderCount: number;
+  readonly transferCount: number;
+  readonly mintCount: number;
+  readonly burnCount: number;
+  readonly totalSupply: Amount;
+  readonly totalBurned: Amount;
+  readonly totalMinted: Amount;
+};
+
+export type TokenWithSnapshot = Token & {
+  readonly snapshot: TokenSnapshot;
+};
+
+export type Timelock = {
+  readonly address: Address;
+  readonly guardians: readonly Address[];
+  readonly executionDelay: number;
+};
+
+export type Governance = {
+  readonly address: Address;
+  readonly votingDelay: number;
+  readonly votingPeriod: number;
+  readonly proposalThreshold: number;
+  readonly quorumNumerator: number;
+  readonly quorumDenominator: number;
+  readonly quorum: number;
+  readonly timelock: Timelock;
+};
+
+export type GovernanceAuthority = {
+  readonly address: Address;
+  readonly type: "governance";
+  readonly governance: Governance;
+};
+
+export type AddressAuthority = {
+  readonly address: Address;
+  readonly type: "address";
+};
+
+export type Authority = GovernanceAuthority | AddressAuthority;
+
+export type AuthorityGroup = {
+  readonly primary?: Authority;
+  readonly all: readonly Authority[];
+};
+
 export type DtfStatus = "active" | "deprecated" | "unsupported";
 
 export type DtfBasketAsset = {
@@ -67,3 +122,12 @@ export type TokenPrice = {
   readonly priceSources?: readonly string[];
   readonly source?: string;
 };
+
+export type TokenVolatility = "low" | "medium" | "high" | "degen";
+
+export type GetTokenPricesParams = {
+  readonly chainId: SupportedChainId;
+  readonly addresses: readonly Address[];
+};
+
+export type GetTokenVolatilitiesParams = GetTokenPricesParams;

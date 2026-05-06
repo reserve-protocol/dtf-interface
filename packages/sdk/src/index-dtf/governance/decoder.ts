@@ -1,10 +1,15 @@
-import { decodeFunctionData, getAbiItem, getAddress, type Abi, type Address } from "viem";
-import { SdkError } from "../../errors.js";
+import {
+  decodeFunctionData,
+  getAbiItem,
+  getAddress,
+  type Abi,
+  type Address,
+} from "viem";
 import type {
   IndexDtfDecodedCalldata,
   IndexDtfProposalDecoded,
   IndexDtfUnknownCalldata,
-} from "../../types/index-dtf.js";
+} from "../../types/governance.js";
 import {
   getContractAliases,
   type ProposalContractDecoder,
@@ -40,7 +45,6 @@ export function decodeIndexDtfProposalCalldatas({
   calldatas,
   contractMap,
 }: DecodeIndexDtfProposalCalldatasParams): IndexDtfProposalDecoded {
-  assertProposalCalldataShape(targets, calldatas);
   const calls: IndexDtfDecodedCalldata[] = [];
   const unknownCalls: IndexDtfUnknownCalldata[] = [];
   const dataByContract: MutableDecodedContractGroup[] = [];
@@ -65,11 +69,7 @@ export function decodeIndexDtfProposalCalldatas({
       };
 
       unknownCalls.push(unknownCall);
-      pushUnknownContractGroup(
-        unknownContracts,
-        unknownGroupMap,
-        unknownCall,
-      );
+      pushUnknownContractGroup(unknownContracts, unknownGroupMap, unknownCall);
       continue;
     }
 
@@ -92,11 +92,7 @@ export function decodeIndexDtfProposalCalldatas({
       };
 
       unknownCalls.push(unknownCall);
-      pushUnknownContractGroup(
-        unknownContracts,
-        unknownGroupMap,
-        unknownCall,
-      );
+      pushUnknownContractGroup(unknownContracts, unknownGroupMap, unknownCall);
     }
   }
 
@@ -107,22 +103,6 @@ export function decodeIndexDtfProposalCalldatas({
     calls,
     unknownCalls,
   };
-}
-
-function assertProposalCalldataShape(
-  targets: readonly Address[],
-  calldatas: readonly `0x${string}`[],
-) {
-  if (targets.length !== calldatas.length) {
-    throw new SdkError({
-      code: "INVALID_RESPONSE",
-      message: "Index DTF proposal targets and calldatas length mismatch.",
-      meta: {
-        targets: targets.length,
-        calldatas: calldatas.length,
-      },
-    });
-  }
 }
 
 function decodeProposalCalldata(
@@ -152,10 +132,9 @@ function decodeProposalCalldata(
 function tryDecodeCalldata(
   abi: Abi,
   callData: `0x${string}`,
-): Omit<
-  IndexDtfDecodedCalldata,
-  "callData" | "contract" | "index" | "target"
-> | undefined {
+):
+  | Omit<IndexDtfDecodedCalldata, "callData" | "contract" | "index" | "target">
+  | undefined {
   try {
     const { args, functionName } = decodeFunctionData({
       abi,

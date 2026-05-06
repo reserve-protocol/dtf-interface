@@ -2,20 +2,22 @@ import { getAddress } from "viem";
 import type { SupportedChainId } from "../../defaults.js";
 import { SdkError } from "../../errors.js";
 import { mapAmount } from "../../lib/utils.js";
-import type { DtfParams } from "../../types/common.js";
 import type {
   Authority,
-  FeeRecipients,
+  DtfParams,
   Governance,
+  Token,
+  TokenSnapshot,
+  TokenWithSnapshot,
+} from "../../types/common.js";
+import type {
+  FeeRecipients,
   IndexDtfBrand,
   IndexDtfBrandProfile,
   IndexDtfBrandSocials,
   IndexDtf,
   PriceControl,
   IndexDtfPrice,
-  Token,
-  TokenSnapshot,
-  TokenWithSnapshot,
 } from "../../types/index-dtf.js";
 import type { GetIndexDtfQuery } from "../subgraph/dtf.generated.js";
 
@@ -252,7 +254,7 @@ function mapGovernance(governance: SubgraphGovernance): Governance {
     address: getAddress(governance.id),
     votingDelay: Number(governance.votingDelay),
     votingPeriod: Number(governance.votingPeriod),
-    proposalThreshold: Number(governance.proposalThreshold) * 100,
+    proposalThreshold: mapD18Percentage(governance.proposalThreshold),
     quorumNumerator: Number(governance.quorumNumerator ?? 0),
     quorumDenominator: Number(governance.quorumDenominator ?? 0),
     quorum: calculateQuorum(
@@ -403,6 +405,10 @@ function calculateQuorum(
   return quorumDenominator === 0
     ? 0
     : (Number(numerator ?? 0) / quorumDenominator) * 100;
+}
+
+function mapD18Percentage(value: unknown): number {
+  return Number(mapAmount(value, 18).formatted) * 100;
 }
 
 function mapPriceControl(value: number): PriceControl {

@@ -1,0 +1,118 @@
+import { describe, expect, it, vi } from "vitest";
+import type { DtfClient } from "../../client.js";
+import {
+  getIndexDtfProposalVoterState,
+  getIndexDtfProposerState,
+  getIndexDtfVoterState,
+} from "./index.js";
+
+describe("Index DTF governance voting", () => {
+  it("reads current vote-lock voter state", async () => {
+    const readContract = vi
+      .fn()
+      .mockResolvedValueOnce("0x0000000000000000000000000000000000000002")
+      .mockResolvedValueOnce(5000000000000000000n)
+      .mockResolvedValueOnce(3000000000000000000n)
+      .mockResolvedValueOnce(10000000000000000000n);
+    const client = {
+      viem: {
+        readContract,
+      },
+    } as unknown as DtfClient;
+
+    const state = await getIndexDtfVoterState(client, {
+      chainId: 1,
+      stToken: "0x0000000000000000000000000000000000000001",
+      account: "0x0000000000000000000000000000000000000002",
+    });
+
+    expect(readContract).toHaveBeenCalledTimes(4);
+    expect(state).toMatchObject({
+      account: "0x0000000000000000000000000000000000000002",
+      delegate: "0x0000000000000000000000000000000000000002",
+      balance: { raw: 5000000000000000000n, formatted: "5" },
+      votingPower: { raw: 3000000000000000000n, formatted: "3" },
+      voteSupply: { raw: 10000000000000000000n, formatted: "10" },
+      isSelfDelegated: true,
+      hasVotingPower: true,
+    });
+  });
+
+  it("reads proposer state at the latest block timepoint", async () => {
+    const getBlock = vi.fn(async () => ({ timestamp: 1_000n }));
+    const readContract = vi
+      .fn()
+      .mockResolvedValueOnce(5000000000000000000n)
+      .mockResolvedValueOnce(3000000000000000000n);
+    const client = {
+      viem: {
+        getPublicClient: vi.fn(() => ({ getBlock })),
+        readContract,
+      },
+    } as unknown as DtfClient;
+
+    const state = await getIndexDtfProposerState(client, {
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      account: "0x0000000000000000000000000000000000000002",
+    });
+
+    expect(getBlock).toHaveBeenCalledOnce();
+    expect(readContract).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        functionName: "getVotes",
+        args: ["0x0000000000000000000000000000000000000002", 999n],
+      }),
+    );
+    expect(state).toMatchObject({
+      account: "0x0000000000000000000000000000000000000002",
+      governance: "0x0000000000000000000000000000000000000001",
+      votingPower: { raw: 5000000000000000000n, formatted: "5" },
+      proposalThreshold: { raw: 3000000000000000000n, formatted: "3" },
+      canPropose: true,
+    });
+  });
+
+  it("reads proposal voter state at the proposal snapshot timepoint", async () => {
+    const getBlock = vi.fn(async () => ({ timestamp: 1_000_000_000n }));
+    const readContract = vi.fn(async () => 4000000000000000000n);
+    const client = {
+      viem: {
+        getPublicClient: vi.fn(() => ({ getBlock })),
+        readContract,
+      },
+    } as unknown as DtfClient;
+
+    const state = await getIndexDtfProposalVoterState(client, {
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      account: "0x0000000000000000000000000000000000000002",
+      proposal: {
+        id: "1",
+        voteStart: 999_900,
+        votes: [
+          {
+            voter: "0x0000000000000000000000000000000000000002",
+            choice: "FOR",
+            weight: { raw: 1n, formatted: "1" },
+          },
+        ],
+      },
+    });
+
+    expect(readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: "getVotes",
+        args: ["0x0000000000000000000000000000000000000002", 999899n],
+      }),
+    );
+    expect(state).toMatchObject({
+      account: "0x0000000000000000000000000000000000000002",
+      votingPower: { raw: 4000000000000000000n, formatted: "4" },
+      vote: "FOR",
+      hasVoted: true,
+      hasVotingPower: true,
+    });
+  });
+});

@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { writeAccountDelegate } from "./delegation-actions.js";
+import { delegate } from "./delegation-actions.js";
 
 describe("Index DTF delegation actions", () => {
   it("writes account delegation through the staking vault", async () => {
     const writeContract = vi.fn(async () => "0xabc");
 
-    await writeAccountDelegate({ writeContract } as never, {
+    await delegate({ writeContract } as never, {
       account: "0x0000000000000000000000000000000000000009",
       chainId: 1,
       stToken: "0x0000000000000000000000000000000000000001",

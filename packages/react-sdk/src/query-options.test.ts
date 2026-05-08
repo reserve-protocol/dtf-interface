@@ -12,14 +12,14 @@ describe("react SDK query options", () => {
     const options = indexDtfQueryOptions(sdk, undefined);
 
     expect(options.enabled).toBe(false);
-    expect(options.queryKey).toEqual(dtfQueryKeys.index.dtf(undefined));
+    expect(options.queryKey).toEqual(dtfQueryKeys.index.full(undefined));
   });
 
   it("calls the core SDK from query functions", async () => {
     const proposal = { id: "1" };
     const sdk = {
       index: {
-        proposal: vi.fn(async () => proposal),
+        getProposal: vi.fn(async () => proposal),
       },
     } as unknown as DtfSdk;
     const params = {
@@ -30,6 +30,6 @@ describe("react SDK query options", () => {
     const options = indexDtfProposalQueryOptions(sdk, params);
 
     await expect(options.queryFn()).resolves.toBe(proposal);
-    expect(sdk.index.proposal).toHaveBeenCalledWith(params);
+    expect(sdk.index.getProposal).toHaveBeenCalledWith(params);
   });
 });

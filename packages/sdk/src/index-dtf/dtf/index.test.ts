@@ -2,10 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { getAddress, type PublicClient } from "viem";
 import { createDtfClient, type DtfClient } from "../../client.js";
 import {
-  getIndexDtf,
-  getIndexDtfBasket,
-  getIndexDtfBrand,
-  getIndexDtfPrice,
+  getDtf,
+  getBasket,
+  getBasketSnapshot,
+  getBrand,
+  getPrice,
+  getPriceHistory,
 } from "./index.js";
 import { mapIndexDtf } from "./mappers.js";
 
@@ -23,7 +25,7 @@ describe("Index DTF getters", () => {
     } as unknown as DtfClient;
 
     await expect(
-      getIndexDtf(subgraphClient, {
+      getDtf(subgraphClient, {
         address: "0x0000000000000000000000000000000000000001",
         chainId: 1,
         blockNumber: 123n,
@@ -66,7 +68,7 @@ describe("Index DTF getters", () => {
       apiBaseUrl: "https://api.example",
     });
 
-    const price = await getIndexDtfPrice(apiClient, {
+    const price = await getPrice(apiClient, {
       address: "0x0000000000000000000000000000000000000001",
       chainId: 8453,
     });
@@ -83,6 +85,90 @@ describe("Index DTF getters", () => {
     const [priceUrl] = fetch.mock.calls[0] as unknown as [URL];
     expect(String(priceUrl)).toBe(
       "https://api.example/current/dtf?address=0x0000000000000000000000000000000000000001&chainId=8453",
+    );
+  });
+
+  it("fetches current API-backed Index DTF basket snapshots", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({
+        price: 152.96,
+        basket: [
+          {
+            address: "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
+            symbol: "BTCB",
+            decimals: 18,
+            price: 75816.19,
+            weight: "71.53",
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetch);
+
+    const apiClient = createDtfClient({
+      apiBaseUrl: "https://api.example",
+    });
+
+    const snapshot = await getBasketSnapshot(apiClient, {
+      address: "0x0000000000000000000000000000000000000001",
+      chainId: 8453,
+    });
+
+    expect(snapshot).toEqual({
+      price: 152.96,
+      basket: [
+        {
+          address: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+          symbol: "BTCB",
+          decimals: 18,
+          price: 75816.19,
+          weight: "71.53",
+        },
+      ],
+    });
+    expect(fetch).toHaveBeenCalledOnce();
+
+    const [snapshotUrl] = fetch.mock.calls[0] as unknown as [URL];
+    expect(String(snapshotUrl)).toBe(
+      "https://api.example/current/dtf?address=0x0000000000000000000000000000000000000001&chainId=8453&cache=false",
+    );
+  });
+
+  it("fetches block API-backed Index DTF basket snapshots", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({
+        price: 149.5,
+        basket: [
+          {
+            address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            symbol: "USDC",
+            decimals: 6,
+            price: 1,
+            weight: "10.00",
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetch);
+
+    const apiClient = createDtfClient({
+      apiBaseUrl: "https://api.example",
+    });
+
+    const snapshot = await getBasketSnapshot(apiClient, {
+      address: "0x0000000000000000000000000000000000000001",
+      chainId: 8453,
+      blockNumber: 123n,
+    });
+
+    expect(snapshot.basket[0]?.address).toBe(
+      "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    );
+    expect(fetch).toHaveBeenCalledOnce();
+
+    const [snapshotUrl] = fetch.mock.calls[0] as unknown as [URL];
+    expect(String(snapshotUrl)).toBe(
+      "https://api.example/snapshot/dtf?address=0x0000000000000000000000000000000000000001&chainId=8453&blockNumber=123&cache=false",
     );
   });
 
@@ -127,7 +213,7 @@ describe("Index DTF getters", () => {
       apiBaseUrl: "https://api.example",
     });
 
-    const brand = await getIndexDtfBrand(apiClient, {
+    const brand = await getBrand(apiClient, {
       address: "0x0000000000000000000000000000000000000001",
       chainId: 8453,
     });
@@ -155,6 +241,64 @@ describe("Index DTF getters", () => {
     const [brandUrl] = fetch.mock.calls[0] as unknown as [URL];
     expect(String(brandUrl)).toBe(
       "https://api.example/folio-manager/read?folio=0x0000000000000000000000000000000000000001&chainId=8453",
+    );
+  });
+
+  it("fetches and maps API-backed Index DTF price history", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({
+        address: "0x0000000000000000000000000000000000000001",
+        timeseries: [
+          {
+            timestamp: 1_715_000_000,
+            price: 151.25,
+            marketCap: 15_125_000,
+            totalSupply: 100_000,
+            basket: [
+              {
+                address: "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
+                price: 75_000,
+                amount: 0.001,
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetch);
+
+    const apiClient = createDtfClient({
+      apiBaseUrl: "https://api.example",
+    });
+
+    const history = await getPriceHistory(apiClient, {
+      address: "0x0000000000000000000000000000000000000001",
+      chainId: 8453,
+      from: 1_714_000_000,
+      to: 1_715_000_000,
+      interval: "1h",
+    });
+
+    expect(history).toEqual([
+      {
+        timestamp: 1_715_000_000,
+        price: 151.25,
+        marketCap: 15_125_000,
+        totalSupply: 100_000,
+        basket: [
+          {
+            address: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+            price: 75_000,
+            amount: 0.001,
+          },
+        ],
+      },
+    ]);
+    expect(fetch).toHaveBeenCalledOnce();
+
+    const [historyUrl] = fetch.mock.calls[0] as unknown as [URL];
+    expect(String(historyUrl)).toBe(
+      "https://api.example/historical/dtf?chainId=8453&address=0x0000000000000000000000000000000000000001&from=1714000000&to=1715000000&interval=1h",
     );
   });
 
@@ -190,7 +334,7 @@ describe("Index DTF getters", () => {
       },
     });
 
-    const basket = await getIndexDtfBasket(client, {
+    const basket = await getBasket(client, {
       address: "0x0000000000000000000000000000000000000001",
       chainId: 1,
     });

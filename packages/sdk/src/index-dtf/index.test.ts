@@ -27,7 +27,7 @@ describe("Index DTF namespace", () => {
       chainId: 1,
     });
 
-    await dtf.basket(123n);
+    await dtf.getBasket(123n);
 
     expect(readContract).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -60,9 +60,9 @@ describe("Index DTF namespace", () => {
       chainId: 1,
     });
 
-    await expect(dtf.version()).resolves.toBe("5.0.0");
-    await expect(dtf.totalSupply()).resolves.toBe(10n ** 18n);
-    await expect(dtf.totalAssets()).resolves.toMatchObject({
+    await expect(dtf.getVersion()).resolves.toBe("5.0.0");
+    await expect(dtf.getTotalSupply()).resolves.toBe(10n ** 18n);
+    await expect(dtf.getTotalAssets()).resolves.toMatchObject({
       tokens: ["0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"],
       balances: [1_000_000n],
     });
@@ -76,7 +76,7 @@ describe("Index DTF namespace", () => {
       chainId: 8453,
     });
 
-    await dtf.write({ writeContract } as never).vote({
+    await dtf.governance({ writeContract } as never).vote({
       account,
       governance: "0x0000000000000000000000000000000000000002",
       proposalId: "1",
@@ -100,16 +100,16 @@ describe("Index DTF namespace", () => {
       chainId: 8453,
     });
 
-    await dtf.write({ writeContract } as never).queue(
-      {
+    await dtf.governance({ writeContract } as never).queue({
+      account,
+      proposal: {
         governance: "0x0000000000000000000000000000000000000002",
         timelock: "0x0000000000000000000000000000000000000003",
         targets: ["0x0000000000000000000000000000000000000004"],
         calldatas: ["0x1234"],
         description: "Queue me",
       },
-      { account },
-    );
+    });
 
     expect(writeContract).toHaveBeenCalledWith(
       expect.objectContaining({

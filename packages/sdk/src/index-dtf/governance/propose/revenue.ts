@@ -42,6 +42,27 @@ export function buildRevenueDistributionCall(
   if (!distribution) {
     return undefined;
   }
+
+  validateRevenueDistributionInput(dtf, distribution);
+
+  const recipients = getFeeRecipients({
+    platformFee: distribution.platformFee,
+    governanceShare: distribution.governanceShare,
+    deployerShare: distribution.deployerShare,
+    additionalRecipients: distribution.additionalRecipients,
+    deployer: dtf.roles.deployment.deployer,
+    ...(dtf.voteLockVault ? { voteLock: dtf.voteLockVault.token.address } : {}),
+  });
+
+  return recipients.length > 0
+    ? buildIndexDtfSetFeeRecipientsCall({ address: dtfAddress, recipients, version })
+    : undefined;
+}
+
+export function validateRevenueDistributionInput(
+  dtf: IndexDtf | undefined,
+  distribution: IndexDtfRevenueDistributionInput,
+): asserts dtf is IndexDtf {
   if (!dtf) {
     throw new SdkError({
       code: "INVALID_INPUT",
@@ -63,19 +84,6 @@ export function buildRevenueDistributionCall(
     additionalRecipients: distribution.additionalRecipients,
     hasVoteLock: !!dtf.voteLockVault,
   });
-
-  const recipients = getFeeRecipients({
-    platformFee: distribution.platformFee,
-    governanceShare: distribution.governanceShare,
-    deployerShare: distribution.deployerShare,
-    additionalRecipients: distribution.additionalRecipients,
-    deployer: dtf.roles.deployment.deployer,
-    ...(dtf.voteLockVault ? { voteLock: dtf.voteLockVault.token.address } : {}),
-  });
-
-  return recipients.length > 0
-    ? buildIndexDtfSetFeeRecipientsCall({ address: dtfAddress, recipients, version })
-    : undefined;
 }
 
 function validateRevenueDistribution(

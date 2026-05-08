@@ -1,4 +1,3 @@
-import { FolioVersion as RebalanceLibVersion } from "@reserve-protocol/dtf-rebalance-lib";
 import { encodeFunctionData, getAddress, type Address, type Hex } from "viem";
 import type { DtfClient } from "../../../client.js";
 import { SdkError } from "../../../errors.js";
@@ -6,27 +5,22 @@ import type { DtfParams } from "../../../types/common.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import type { IndexDtf } from "../../../types/index-dtf.js";
 import {
-  buildIndexDtfBasketRebalance,
+  DEFAULT_AUCTION_LAUNCHER_WINDOW,
+  buildIndexDtfStartRebalance,
   indexDtfBasketSchema,
   indexDtfBasketSharesSchema,
   indexDtfBasketTokenSchema,
   indexDtfBasketUnitsSchema,
-  type BuildIndexDtfBasketRebalanceParams,
-  type BuiltIndexDtfBasketRebalance,
-  type IndexDtfBasketBuildAsset,
-  type IndexDtfBasketBuildVersion,
+  type BuildIndexDtfStartRebalanceParams,
+  type BuiltIndexDtfStartRebalance,
   type IndexDtfBasketInput,
   type IndexDtfBasketSharesInput,
   type IndexDtfBasketTokenInput,
   type IndexDtfBasketUnitsInput,
-  type StartRebalanceArgsV4,
   type StartRebalanceArgsV5,
-} from "../../dtf/basket/index.js";
-import {
-  dtfIndexProposalAbiV4,
-  dtfIndexProposalAbiV5,
-} from "../../abis/dtf-index-proposal.js";
-import { getIndexDtf } from "../../dtf/index.js";
+} from "../../dtf/basket-utils.js";
+import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
+import { getDtf } from "../../dtf/index.js";
 
 export {
   indexDtfBasketSchema as indexDtfBasketProposalSchema,
@@ -35,25 +29,31 @@ export {
   indexDtfBasketUnitsSchema as indexDtfBasketUnitsProposalSchema,
 };
 
-export type IndexDtfBasketProposalVersion = IndexDtfBasketBuildVersion;
 export type IndexDtfBasketProposalBaseToken = IndexDtfBasketTokenInput;
 export type IndexDtfBasketProposalSharesInput = IndexDtfBasketSharesInput;
 export type IndexDtfBasketProposalUnitsInput = IndexDtfBasketUnitsInput;
 export type IndexDtfBasketProposalInput = IndexDtfBasketInput;
-export type IndexDtfBasketProposalAsset = IndexDtfBasketBuildAsset;
 
 export type BuildIndexDtfBasketProposalParams =
-  BuildIndexDtfBasketRebalanceParams & {
+  BuildIndexDtfStartRebalanceParams & {
     readonly description?: string;
     readonly governance?: Address;
+    readonly auctionLauncherWindow?: number | bigint;
+    readonly permissionlessWindow?: number | bigint;
+    readonly ttl?: number | bigint;
   };
+
+export type BuiltIndexDtfBasketProposalContext = BuiltIndexDtfStartRebalance & {
+  readonly auctionLauncherWindow: bigint;
+  readonly ttl: bigint;
+};
 
 export type BuiltIndexDtfBasketProposal = {
   readonly governance: Address;
   readonly targets: readonly Address[];
   readonly calldatas: readonly Hex[];
   readonly description: string;
-  readonly context: BuiltIndexDtfBasketRebalance;
+  readonly context: BuiltIndexDtfBasketProposalContext;
 };
 
 export async function buildIndexDtfBasketProposal(
@@ -61,10 +61,24 @@ export async function buildIndexDtfBasketProposal(
   params: BuildIndexDtfBasketProposalParams,
 ): Promise<BuiltIndexDtfBasketProposal> {
   const dtf = await getDtfForProposal(client, params);
-  const context = await buildIndexDtfBasketRebalance(client, {
+  const rebalance = await buildIndexDtfStartRebalance(client, {
     ...params,
     ...(dtf ? { dtf } : {}),
   });
+  const auctionLauncherWindow = toSeconds(
+    params.auctionLauncherWindow ?? DEFAULT_AUCTION_LAUNCHER_WINDOW,
+    "auctionLauncherWindow",
+  );
+  const ttl =
+    params.ttl === undefined
+      ? auctionLauncherWindow +
+        toSeconds(params.permissionlessWindow ?? 0, "permissionlessWindow")
+      : toSeconds(params.ttl, "ttl");
+  const context: BuiltIndexDtfBasketProposalContext = {
+    ...rebalance,
+    auctionLauncherWindow,
+    ttl,
+  };
   const authority = getProposalAuthority(params, dtf);
 
   return {
@@ -77,7 +91,7 @@ export async function buildIndexDtfBasketProposal(
 }
 
 function buildIndexDtfBasketRebalanceCall(
-  context: BuiltIndexDtfBasketRebalance,
+  context: BuiltIndexDtfBasketProposalContext,
 ): IndexDtfCall {
   return {
     target: context.address,
@@ -97,39 +111,22 @@ async function getDtfForProposal(
     return params.dtf;
   }
 
-  return getIndexDtf(client, params);
+  return getDtf(client, params);
 }
 
 function encodeStartRebalanceCalldata(
-  context: BuiltIndexDtfBasketRebalance,
+  context: BuiltIndexDtfBasketProposalContext,
 ): Hex {
-  if (context.version === RebalanceLibVersion.V5) {
-    const args = context.startRebalanceArgs as StartRebalanceArgsV5;
-
-    return encodeFunctionData({
-      abi: dtfIndexProposalAbiV5,
-      functionName: "startRebalance",
-      args: [
-        args.tokens.map((token) => ({
-          ...token,
-          token: getAddress(token.token),
-        })),
-        args.limits,
-        context.auctionLauncherWindow,
-        context.ttl,
-      ],
-    });
-  }
-
-  const args = context.startRebalanceArgs as StartRebalanceArgsV4;
+  const args = context.startRebalanceArgs as StartRebalanceArgsV5;
 
   return encodeFunctionData({
-    abi: dtfIndexProposalAbiV4,
+    abi: dtfIndexAbi,
     functionName: "startRebalance",
     args: [
-      context.tokenOrder,
-      args.weights,
-      args.prices,
+      args.tokens.map((token) => ({
+        ...token,
+        token: getAddress(token.token as Address),
+      })),
       args.limits,
       context.auctionLauncherWindow,
       context.ttl,
@@ -155,4 +152,27 @@ function getProposalAuthority(
   }
 
   return { governance: resolvedGovernance };
+}
+
+function toSeconds(value: number | bigint, field: string): bigint {
+  if (typeof value === "bigint") {
+    if (value < 0n) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: `${field} must be a positive number of seconds`,
+        meta: { [field]: value },
+      });
+    }
+
+    return value;
+  }
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `${field} must be a positive number of seconds`,
+      meta: { [field]: value },
+    });
+  }
+
+  return BigInt(Math.round(value));
 }

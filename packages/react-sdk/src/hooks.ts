@@ -22,7 +22,6 @@ import type {
   GetIndexDtfProposalsParams,
   GetIndexDtfProposerStateParams,
   GetIndexDtfVoterStateParams,
-  IndexDtf,
   IndexDtfBasket,
   IndexDtfBrand,
   IndexDtfDelegate,
@@ -82,9 +81,9 @@ export function useIndexDtfList<TData = IndexDtfList>(
   return useQuery(indexDtfListQueryOptions(sdk, params, options));
 }
 
-export function useIndexDtf<TData = IndexDtf>(
+export function useIndexDtf<TData = IndexDtfFull>(
   params: GetIndexDtfParams | undefined,
-  options?: DtfQueryOptions<IndexDtf, TData>,
+  options?: DtfQueryOptions<IndexDtfFull, TData>,
 ) {
   const sdk = useDtfSdk();
 

@@ -15,11 +15,12 @@ import {
 import { writeContract } from "../../client/viem.js";
 import { SdkError } from "../../errors.js";
 import type {
+  CancelIndexDtfProposalParams,
+  ExecuteIndexDtfProposalParams,
   IndexDtfProposalPayload,
-  WriteIndexDtfCancelParams,
-  WriteIndexDtfProposalParams,
-  WriteIndexDtfProposeParams,
-  WriteIndexDtfVoteParams,
+  ProposeIndexDtfProposalParams,
+  QueueIndexDtfProposalParams,
+  VoteIndexDtfProposalParams,
 } from "../../types/governance.js";
 import { dtfIndexGovernanceAbi } from "../abis/dtf-index-governance.js";
 import { timelockAbi } from "../abis/timelock.js";
@@ -29,9 +30,9 @@ const TIMELOCK_OPERATION_PARAMS = parseAbiParameters(
   "address[], uint256[], bytes[], bytes32, bytes32",
 );
 
-export async function writeProposalVote(
+export async function vote(
   walletClient: WalletClient,
-  params: WriteIndexDtfVoteParams,
+  params: VoteIndexDtfProposalParams,
 ): Promise<Hex> {
   return writeContract(walletClient, params.chainId, {
     account: getAddress(params.account),
@@ -42,9 +43,9 @@ export async function writeProposalVote(
   });
 }
 
-export async function writeProposalQueue(
+export async function queue(
   walletClient: WalletClient,
-  params: WriteIndexDtfProposalParams,
+  params: QueueIndexDtfProposalParams,
 ): Promise<Hex> {
   const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(
     params.proposal,
@@ -59,9 +60,9 @@ export async function writeProposalQueue(
   });
 }
 
-export async function writeProposalExecute(
+export async function execute(
   walletClient: WalletClient,
-  params: WriteIndexDtfProposalParams,
+  params: ExecuteIndexDtfProposalParams,
 ): Promise<Hex> {
   const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(
     params.proposal,
@@ -76,9 +77,9 @@ export async function writeProposalExecute(
   });
 }
 
-export async function writeProposalCancel(
+export async function cancel(
   walletClient: WalletClient,
-  params: WriteIndexDtfCancelParams,
+  params: CancelIndexDtfProposalParams,
 ): Promise<Hex> {
   if (!params.proposal.timelock) {
     throw new SdkError({
@@ -96,9 +97,9 @@ export async function writeProposalCancel(
   });
 }
 
-export async function writeProposal(
+export async function propose(
   walletClient: WalletClient,
-  params: WriteIndexDtfProposeParams,
+  params: ProposeIndexDtfProposalParams,
 ): Promise<Hex> {
   const targets = params.proposal.targets.map(getAddress);
   const calldatas = [...params.proposal.calldatas];

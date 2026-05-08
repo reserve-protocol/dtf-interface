@@ -564,6 +564,7 @@ describe("settings proposal builders", () => {
       chainId: 1,
       governance: GOVERNANCE,
       dtf: createDtfContext(),
+      version: "6.0.0",
       revenueDistribution: {
         platformFee: 20,
         governanceShare: 0,
@@ -592,6 +593,7 @@ describe("settings proposal builders", () => {
       chainId: 1,
       governance: GOVERNANCE,
       dtf: createDtfContext(),
+      version: "5.0.0",
       revenueDistribution: {
         platformFee: 97,
         governanceShare: 0,
@@ -647,6 +649,7 @@ describe("settings proposal builders", () => {
           { address: GUARDIAN_B, percentage: "33.333333333333333334" },
         ],
       }),
+      version: "5.0.0",
       revenueDistribution: {
         platformFee: 20,
         governanceShare: 0,

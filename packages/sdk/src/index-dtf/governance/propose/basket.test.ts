@@ -1,43 +1,152 @@
 import { describe, expect, it, vi } from "vitest";
-import { decodeFunctionData, type PublicClient } from "viem";
+import {
+  decodeFunctionData,
+  parseEther,
+  parseUnits,
+  type Address,
+  type PublicClient,
+} from "viem";
 import { createDtfClient } from "../../../client.js";
-import { buildIndexDtfTargetBasket } from "../../dtf/basket/index.js";
+import {
+  buildInitialBasket,
+  getBasketSharesFromUnits,
+  getBasketUnitsFromShares,
+  getDtfPriceFromBalances,
+  type IndexDtfBasketToken,
+} from "../../dtf/basket-utils.js";
 import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
-import { dtfIndexProposalAbiV4 } from "../../abis/dtf-index-proposal.js";
 import { buildIndexDtfBasketProposal } from "./basket.js";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const GOVERNANCE = "0x0000000000000000000000000000000000000002";
 const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 const DAI = "0x6b175474e89094c44da98b954eedeac495271d0f";
+const WBTC = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599";
+
+describe("basket conversion helpers", () => {
+  it("converts raw units to D18 basket shares", () => {
+    const shares = getBasketSharesFromUnits({
+      tokens: [token(USDC, 6, 1), token(DAI, 18, 1)],
+      units: [parseUnits("1", 6), parseUnits("1", 18)],
+    });
+
+    expect(shares).toEqual([
+      500000000000000000n,
+      500000000000000000n,
+    ]);
+  });
+
+  it("converts D18 basket shares to raw units for a target value", () => {
+    const units = getBasketUnitsFromShares({
+      tokens: [token(USDC, 6, 1), token(WBTC, 8, 50_000)],
+      shares: [500000000000000000n, 500000000000000000n],
+      targetValueUsd: 100,
+    });
+
+    expect(units).toEqual([parseUnits("50", 6), parseUnits("0.001", 8)]);
+  });
+
+  it("calculates DTF price from balances and supply", () => {
+    const price = getDtfPriceFromBalances({
+      supply: parseEther("10"),
+      tokens: [token(USDC, 6, 1), token(DAI, 18, 1)],
+      balances: [parseUnits("25", 6), parseUnits("25", 18)],
+    });
+
+    expect(price).toBe(5);
+  });
+
+  it("rejects duplicate tokens and missing prices", () => {
+    expect(() =>
+      getBasketSharesFromUnits({
+        tokens: [token(USDC, 6, 1), token(USDC, 6, 1)],
+        units: [1n, 1n],
+      }),
+    ).toThrow("Duplicate basket token");
+
+    expect(() =>
+      getBasketSharesFromUnits({
+        tokens: [token(USDC, 6, 0)],
+        units: [1n],
+      }),
+    ).toThrow("positive number");
+
+    expect(() =>
+      getBasketUnitsFromShares({
+        tokens: [token(USDC, 6, 1)],
+        shares: [500000000000000000n, 500000000000000000n],
+        targetValueUsd: 100,
+      }),
+    ).toThrow("same length");
+  });
+});
+
+describe("buildInitialBasket", () => {
+  it("builds deploy amounts from target shares", () => {
+    const basket = buildInitialBasket({
+      tokens: [token(USDC, 6, 1), token(DAI, 18, 1)],
+      basket: {
+        type: "shares",
+        shares: [500000000000000000n, 500000000000000000n],
+      },
+      initialSharePriceUsd: 1,
+      initialShares: parseEther("100"),
+    });
+
+    expect(basket.assets).toEqual([USDC, DAI]);
+    expect(basket.amounts).toEqual([parseUnits("50", 6), parseUnits("50", 18)]);
+    expect(basket.initialShares).toBe(parseEther("100"));
+  });
+
+  it("uses unit input as ratios, then scales to the initial share price", () => {
+    const basket = buildInitialBasket({
+      tokens: [token(USDC, 6, 1), token(DAI, 18, 1)],
+      basket: {
+        type: "units",
+        units: [parseUnits("1", 6), parseUnits("2", 18)],
+      },
+      initialSharePriceUsd: 6,
+      initialShares: parseEther("1"),
+    });
+
+    expect(basket.amounts).toEqual([parseUnits("2", 6), parseUnits("4", 18)]);
+  });
+
+  it("scales fractional initial shares without bigint truncation", () => {
+    const basket = buildInitialBasket({
+      tokens: [token(DAI, 18, 2)],
+      basket: { type: "shares", shares: [1000000000000000000n] },
+      initialSharePriceUsd: 100,
+      initialShares: parseEther("0.5"),
+    });
+
+    expect(basket.amounts).toEqual([parseUnits("25", 18)]);
+  });
+
+  it("handles mixed decimals with non-1 prices", () => {
+    const basket = buildInitialBasket({
+      tokens: [token(USDC, 6, 1), token(WBTC, 8, 50_000)],
+      basket: {
+        type: "shares",
+        shares: [500000000000000000n, 500000000000000000n],
+      },
+      initialSharePriceUsd: 100,
+      initialShares: parseEther("1"),
+    });
+
+    expect(basket.amounts).toEqual([parseUnits("50", 6), parseUnits("0.001", 8)]);
+  });
+});
 
 describe("buildIndexDtfBasketProposal", () => {
   it("builds a v5 startRebalance proposal from target shares", async () => {
-    const client = createDtfClient({
-      chains: {
-        1: {
-          publicClient: {
-            multicall: vi.fn(async () => [
-              "USD Coin",
-              "USDC",
-              6,
-              "Dai Stablecoin",
-              "DAI",
-              18,
-            ]),
-          } as unknown as PublicClient,
-        },
-      },
-    });
-
-    const proposal = await buildIndexDtfBasketProposal(client, {
+    const proposal = await buildIndexDtfBasketProposal(testClient(), {
       address: DTF,
       chainId: 1,
       governance: GOVERNANCE,
-      version: "6.0.0",
-      supply: 10n ** 18n,
+      supply: parseEther("1"),
       currentBalances: {
-        [USDC]: 1_000_000n,
+        [USDC]: parseUnits("1", 6),
         [DAI]: 0n,
       },
       prices: {
@@ -67,9 +176,10 @@ describe("buildIndexDtfBasketProposal", () => {
       description: "Rebalance basket",
     });
     expect(proposal.context.ttl).toBe(10_800n);
-    expect(
-      proposal.context.assets.map((asset) => asset.targetBasketShare),
-    ).toEqual([500000000000000000n, 500000000000000000n]);
+    expect(proposal.context.assets.map((asset) => asset.targetShare)).toEqual([
+      500000000000000000n,
+      500000000000000000n,
+    ]);
 
     const decoded = decodeFunctionData({
       abi: dtfIndexAbi,
@@ -79,35 +189,40 @@ describe("buildIndexDtfBasketProposal", () => {
     expect(decoded.functionName).toBe("startRebalance");
     expect(decoded.args[2]).toBe(3600n);
     expect(decoded.args[3]).toBe(10_800n);
+
+    const decodedTokens = decoded.args[0] as readonly {
+      readonly token: Address;
+      readonly inRebalance: boolean;
+      readonly maxAuctionSize: bigint;
+      readonly weight: { readonly low: bigint; readonly spot: bigint; readonly high: bigint };
+      readonly price: { readonly low: bigint; readonly high: bigint };
+    }[];
+
+    expect(decodedTokens.map((tokenParams) => tokenParams.token.toLowerCase())).toEqual([
+      USDC,
+      DAI,
+    ]);
+    expect(decodedTokens.every((tokenParams) => tokenParams.inRebalance)).toBe(true);
+    expect(decodedTokens.every((tokenParams) => tokenParams.maxAuctionSize > 0n)).toBe(true);
+    expect(
+      decodedTokens.every(
+        (tokenParams) =>
+          tokenParams.weight.low <= tokenParams.weight.spot &&
+          tokenParams.weight.spot <= tokenParams.weight.high &&
+          tokenParams.price.low < tokenParams.price.high,
+      ),
+    ).toBe(true);
   });
 
-  it("does not require timelock to build a basket proposal", async () => {
-    const client = createDtfClient({
-      chains: {
-        1: {
-          publicClient: {
-            multicall: vi.fn(async () => [
-              "USD Coin",
-              "USDC",
-              6,
-              "Dai Stablecoin",
-              "DAI",
-              18,
-            ]),
-          } as unknown as PublicClient,
-        },
-      },
-    });
-
-    const proposal = await buildIndexDtfBasketProposal(client, {
+  it("builds tracking rebalance args from unit input", async () => {
+    const proposal = await buildIndexDtfBasketProposal(testClient(), {
       address: DTF,
       chainId: 1,
       governance: GOVERNANCE,
-      version: "5.0.0",
-      supply: 10n ** 18n,
+      supply: parseEther("1"),
       currentBalances: {
-        [USDC]: 1_000_000n,
-        [DAI]: 0n,
+        [USDC]: parseUnits("1", 6),
+        [DAI]: parseUnits("1", 18),
       },
       prices: {
         [USDC]: 1,
@@ -117,58 +232,7 @@ describe("buildIndexDtfBasketProposal", () => {
         [USDC]: 0.5,
         [DAI]: 0.5,
       },
-      weightControl: true,
-      basket: {
-        type: "shares",
-        tokens: [
-          { address: USDC, share: "50" },
-          { address: DAI, share: "50" },
-        ],
-      },
-    });
-
-    expect(proposal.governance).toBe(GOVERNANCE);
-    expect("timelock" in proposal).toBe(false);
-    expect(proposal.targets).toEqual([DTF]);
-  });
-
-  it("converts target units into basket shares", async () => {
-    const client = createDtfClient({
-      chains: {
-        1: {
-          publicClient: {
-            multicall: vi.fn(async () => [
-              "USD Coin",
-              "USDC",
-              6,
-              "Dai Stablecoin",
-              "DAI",
-              18,
-            ]),
-          } as unknown as PublicClient,
-        },
-      },
-    });
-
-    const params = {
-      address: DTF,
-      chainId: 1,
-      governance: GOVERNANCE,
-      version: "5.0.0",
-      supply: 10n ** 18n,
-      currentBalances: {
-        [USDC]: 1_000_000n,
-        [DAI]: 0n,
-      },
-      prices: {
-        [USDC]: 1,
-        [DAI]: 1,
-      },
-      priceErrors: {
-        [USDC]: 0.5,
-        [DAI]: 0.5,
-      },
-      weightControl: true,
+      weightControl: false,
       basket: {
         type: "units",
         tokens: [
@@ -176,47 +240,67 @@ describe("buildIndexDtfBasketProposal", () => {
           { address: DAI, units: "1" },
         ],
       },
-    } as const;
-    const proposal = await buildIndexDtfBasketProposal(client, params);
-    const deferredProposal = await buildIndexDtfBasketProposal(client, {
-      ...params,
-      deferWeights: true,
     });
 
-    expect(proposal.context.deferWeights).toBe(false);
-    expect(deferredProposal.context.deferWeights).toBe(true);
-    expect(
-      proposal.context.assets.map((asset) => asset.targetBasketShare),
-    ).toEqual([500000000000000000n, 500000000000000000n]);
+    const weights = proposal.context.startRebalanceArgs.tokens.map(
+      (tokenParams) => tokenParams.weight,
+    );
+
+    expect(proposal.context.weightControl).toBe(false);
+    expect(proposal.context.assets.map((asset) => asset.targetShare)).toEqual([
+      500000000000000000n,
+      500000000000000000n,
+    ]);
+    expect(weights.every((weight) => weight.low === weight.spot)).toBe(true);
+    expect(weights.every((weight) => weight.spot === weight.high)).toBe(true);
   });
 
-  it("builds a v4 startRebalance proposal", async () => {
-    const client = createDtfClient({
-      chains: {
-        1: {
-          publicClient: {
-            multicall: vi.fn(async () => [
-              "USD Coin",
-              "USDC",
-              6,
-              "Dai Stablecoin",
-              "DAI",
-              18,
-            ]),
-          } as unknown as PublicClient,
-        },
-      },
-    });
-
-    const proposal = await buildIndexDtfBasketProposal(client, {
+  it("builds hybrid rebalance args from unit input with deferred weights", async () => {
+    const proposal = await buildIndexDtfBasketProposal(testClient(), {
       address: DTF,
       chainId: 1,
       governance: GOVERNANCE,
-      version: "4.0.0",
-      supply: 10n ** 18n,
+      supply: parseEther("1"),
       currentBalances: {
-        [USDC]: 1_000_000n,
-        [DAI]: 0n,
+        [USDC]: parseUnits("1", 6),
+        [DAI]: parseUnits("1", 18),
+      },
+      prices: {
+        [USDC]: 1,
+        [DAI]: 1,
+      },
+      priceErrors: {
+        [USDC]: 0.5,
+        [DAI]: 0.5,
+      },
+      weightControl: true,
+      deferWeights: true,
+      basket: {
+        type: "units",
+        tokens: [
+          { address: USDC, units: "1" },
+          { address: DAI, units: "1" },
+        ],
+      },
+    });
+
+    expect(proposal.context.weightControl).toBe(true);
+    expect(proposal.context.deferWeights).toBe(true);
+    expect(
+      proposal.context.startRebalanceArgs.tokens.every(
+        (tokenParams) => tokenParams.weight.low === 0n,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps current token order before new basket additions", async () => {
+    const proposal = await buildIndexDtfBasketProposal(testClient(), {
+      address: DTF,
+      chainId: 1,
+      governance: GOVERNANCE,
+      supply: parseEther("1"),
+      currentBalances: {
+        [USDC]: parseUnits("1", 6),
       },
       prices: {
         [USDC]: 1,
@@ -230,107 +314,84 @@ describe("buildIndexDtfBasketProposal", () => {
       basket: {
         type: "shares",
         tokens: [
-          { address: USDC, share: "50" },
           { address: DAI, share: "50" },
+          { address: USDC, share: "50" },
         ],
       },
-      auctionLauncherWindow: 3600,
-      permissionlessWindow: 7200,
     });
 
-    const decoded = decodeFunctionData({
-      abi: dtfIndexProposalAbiV4,
-      data: proposal.calldatas[0]!,
-    });
-
-    expect(decoded.functionName).toBe("startRebalance");
     expect(
-      (decoded.args[0] as readonly string[]).map((address) =>
-        address.toLowerCase(),
-      ),
+      proposal.context.assets.map((asset) => asset.token.address.toLowerCase()),
     ).toEqual([USDC, DAI]);
-    expect(decoded.args[4]).toBe(3600n);
-    expect(decoded.args[5]).toBe(10_800n);
+    expect(proposal.context.assets.map((asset) => asset.targetShare)).toEqual([
+      500000000000000000n,
+      500000000000000000n,
+    ]);
+  });
+
+  it("rejects negative bigint proposal windows", async () => {
+    await expect(
+      buildIndexDtfBasketProposal(testClient(), {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        supply: parseEther("1"),
+        currentBalances: {
+          [USDC]: parseUnits("1", 6),
+        },
+        prices: {
+          [USDC]: 1,
+        },
+        priceErrors: {
+          [USDC]: 0.5,
+        },
+        weightControl: true,
+        ttl: -1n,
+        basket: {
+          type: "shares",
+          tokens: [{ address: USDC, share: "100" }],
+        },
+      }),
+    ).rejects.toThrow("ttl must be a positive number of seconds");
   });
 });
 
-describe("buildIndexDtfTargetBasket", () => {
-  it("rejects basket tokens missing from token metadata", () => {
-    expect(() =>
-      buildIndexDtfTargetBasket({
-        tokens: [createToken(USDC, 6)],
-        prices: [1],
-        basket: {
-          type: "shares",
-          tokens: [
-            { address: USDC, share: 50 },
-            { address: DAI, share: 50 },
-          ],
-        },
-      }),
-    ).toThrow("Missing token metadata");
+function testClient() {
+  return createDtfClient({
+    chains: {
+      1: {
+        publicClient: {
+          multicall: vi.fn(async ({ contracts }: { contracts: unknown[] }) => {
+            const tokens = [USDC, DAI, WBTC];
+            const metadata: Record<string, readonly [string, string, number]> = {
+              [USDC]: ["USD Coin", "USDC", 6],
+              [DAI]: ["Dai Stablecoin", "DAI", 18],
+              [WBTC]: ["Wrapped Bitcoin", "WBTC", 8],
+            };
+
+            return contracts.map((_, index) => {
+              const tokenAddress = tokens[Math.floor(index / 3)]!;
+              const field = (index % 3) as 0 | 1 | 2;
+
+              return metadata[tokenAddress]![field];
+            });
+          }),
+        } as unknown as PublicClient,
+      },
+    },
   });
+}
 
-  it("rejects invalid direct prices", () => {
-    expect(() =>
-      buildIndexDtfTargetBasket({
-        tokens: [createToken(USDC, 6)],
-        prices: [0],
-        basket: {
-          type: "shares",
-          tokens: [{ address: USDC, share: 100 }],
-        },
-      }),
-    ).toThrow("Invalid price");
-
-    expect(() =>
-      buildIndexDtfTargetBasket({
-        tokens: [createToken(USDC, 6)],
-        prices: [Number.NaN],
-        basket: {
-          type: "shares",
-          tokens: [{ address: USDC, share: 100 }],
-        },
-      }),
-    ).toThrow("Invalid price");
-  });
-
-  it("rejects negative basket shares and units", () => {
-    expect(() =>
-      buildIndexDtfTargetBasket({
-        tokens: [createToken(USDC, 6), createToken(DAI, 18)],
-        prices: [1, 1],
-        basket: {
-          type: "shares",
-          tokens: [
-            { address: USDC, share: -1 },
-            { address: DAI, share: 101 },
-          ],
-        },
-      }),
-    ).toThrow("Basket token shares");
-
-    expect(() =>
-      buildIndexDtfTargetBasket({
-        tokens: [createToken(USDC, 6), createToken(DAI, 18)],
-        prices: [1, 1],
-        basket: {
-          type: "units",
-          tokens: [
-            { address: USDC, units: "-1" },
-            { address: DAI, units: "1" },
-          ],
-        },
-      }),
-    ).toThrow("Basket token units");
-  });
-});
-
-function createToken(address: typeof USDC | typeof DAI, decimals: number) {
+function token(
+  address: typeof USDC | typeof DAI | typeof WBTC,
+  decimals: number,
+  price: number,
+): IndexDtfBasketToken {
   return {
-    address,
+    address: address as Address,
     decimals,
-    name: address === USDC ? "USD Coin" : "Dai Stablecoin",
-    symbol: address === USDC ? "USDC" : "DAI",
+    price,
+    name: address === USDC ? "USD Coin" : address === DAI ? "Dai Stablecoin" : "Wrapped Bitcoin",
+    symbol: address === USDC ? "USDC" : address === DAI ? "DAI" : "WBTC",
   };
 }

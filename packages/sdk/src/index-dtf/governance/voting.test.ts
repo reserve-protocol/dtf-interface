@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { DtfClient } from "../../client.js";
 import {
-  getIndexDtfProposalVoterState,
-  getIndexDtfProposerState,
-  getIndexDtfVoterState,
+  getProposalVoterState,
+  getProposerState,
+  getVoterState,
 } from "./index.js";
 
 describe("Index DTF governance voting", () => {
@@ -20,7 +20,7 @@ describe("Index DTF governance voting", () => {
       },
     } as unknown as DtfClient;
 
-    const state = await getIndexDtfVoterState(client, {
+    const state = await getVoterState(client, {
       chainId: 1,
       stToken: "0x0000000000000000000000000000000000000001",
       account: "0x0000000000000000000000000000000000000002",
@@ -51,7 +51,7 @@ describe("Index DTF governance voting", () => {
       },
     } as unknown as DtfClient;
 
-    const state = await getIndexDtfProposerState(client, {
+    const state = await getProposerState(client, {
       chainId: 1,
       governance: "0x0000000000000000000000000000000000000001",
       account: "0x0000000000000000000000000000000000000002",
@@ -84,7 +84,7 @@ describe("Index DTF governance voting", () => {
       },
     } as unknown as DtfClient;
 
-    const state = await getIndexDtfProposalVoterState(client, {
+    const state = await getProposalVoterState(client, {
       chainId: 1,
       governance: "0x0000000000000000000000000000000000000001",
       account: "0x0000000000000000000000000000000000000002",

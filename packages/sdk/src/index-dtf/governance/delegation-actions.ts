@@ -1,11 +1,11 @@
 import { getAddress, type Hex, type WalletClient } from "viem";
 import { writeContract } from "../../client/viem.js";
-import type { WriteIndexDtfDelegateParams } from "../../types/governance.js";
+import type { DelegateIndexDtfVotesParams } from "../../types/governance.js";
 import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
 
-export async function writeAccountDelegate(
+export async function delegate(
   walletClient: WalletClient,
-  params: WriteIndexDtfDelegateParams,
+  params: DelegateIndexDtfVotesParams,
 ): Promise<Hex> {
   return writeContract(walletClient, params.chainId, {
     account: getAddress(params.account),

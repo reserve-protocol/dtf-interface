@@ -27,13 +27,13 @@ import {
 } from "./mapper.js";
 import {
   getDtfProposalGovernanceIds,
-  getIndexDtfProposalGovernanceAddresses,
+  getProposalGovernanceAddresses,
   normalizeGovernanceIds,
   withVoteState,
   type DtfGovernanceAddressContext,
 } from "./utils.js";
 
-export async function getIndexDtfProposals(
+export async function getProposals(
   client: DtfClient,
   params: GetIndexDtfProposalsParams,
 ): Promise<readonly IndexDtfProposalSummary[]> {
@@ -60,7 +60,7 @@ export async function getIndexDtfProposals(
       chainId: params.dtf.chainId,
     };
     const governanceIds = normalizeGovernanceIds(
-      getIndexDtfProposalGovernanceAddresses(params.dtf),
+      getProposalGovernanceAddresses(params.dtf),
     );
 
     return getProposalsByGovernanceIds(
@@ -84,7 +84,7 @@ export async function getIndexDtfProposals(
   );
 }
 
-export async function getAllIndexDtfProposals(
+export async function getAllProposals(
   _client: DtfClient,
   _params: GetAllIndexDtfProposalsParams,
 ): Promise<readonly IndexDtfProposalSummary[]> {
@@ -95,7 +95,7 @@ export async function getAllIndexDtfProposals(
   });
 }
 
-export async function getIndexDtfProposal(
+export async function getProposal(
   client: DtfClient,
   params: GetIndexDtfProposalParams,
 ): Promise<IndexDtfProposalDetail> {

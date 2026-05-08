@@ -9,7 +9,7 @@ import type {
 import { GetIndexDtfDelegatesDocument } from "../subgraph/dtf.generated.js";
 import { DEFAULT_DELEGATE_LIMIT } from "./constants.js";
 
-export async function getIndexDtfDelegates(
+export async function getDelegates(
   client: DtfClient,
   params: GetIndexDtfDelegatesParams,
 ): Promise<readonly IndexDtfDelegate[]> {

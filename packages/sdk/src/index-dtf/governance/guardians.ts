@@ -4,14 +4,14 @@ import type {
   GetIndexDtfGuardiansParams,
   IndexDtfGuardians,
 } from "../../types/governance.js";
-import { getIndexDtf } from "../dtf/index.js";
+import { getDtf } from "../dtf/index.js";
 import { mapGuardianGroup } from "./utils.js";
 
-export async function getIndexDtfGuardians(
+export async function getGuardians(
   client: DtfClient,
   params: GetIndexDtfGuardiansParams,
 ): Promise<IndexDtfGuardians> {
-  const dtf = "dtf" in params ? params.dtf : await getIndexDtf(client, params);
+  const dtf = "dtf" in params ? params.dtf : await getDtf(client, params);
   const owner = mapGuardianGroup(dtf.governance.admin.primary);
   const basket = mapGuardianGroup(dtf.governance.rebalance.primary);
   const dao = mapGuardianGroup(dtf.governance.voteLock);

@@ -7,13 +7,6 @@ import type {
   TokenVolatility,
 } from "../types/common.js";
 
-type TokenPriceResponse = {
-  readonly address: string;
-  readonly price?: number;
-  readonly priceSources?: readonly string[];
-  readonly source?: string;
-};
-
 type TokenListResponse = {
   readonly address: string;
   readonly volatility?: TokenVolatility;
@@ -23,30 +16,7 @@ export async function getTokenPrices(
   client: DtfClient,
   params: GetTokenPricesParams,
 ): Promise<readonly TokenPrice[]> {
-  const addresses = normalizeAddresses(params.addresses);
-
-  if (addresses.length === 0) {
-    return [];
-  }
-
-  const response = await client.api.get<readonly TokenPriceResponse[]>({
-    path: "/current/prices",
-    query: {
-      chainId: params.chainId,
-      tokens: addresses.join(","),
-    },
-  });
-
-  return normalizeTokenPrices(
-    addresses,
-    response.map((token) => ({
-      address: getAddress(token.address),
-      price: token.price ?? 0,
-      timestamp: Date.now(),
-      ...(token.priceSources ? { priceSources: token.priceSources } : {}),
-      ...(token.source ? { source: token.source } : {}),
-    })),
-  );
+  return client.api.getTokenPrices(params);
 }
 
 export async function getTokenVolatilities(
@@ -96,25 +66,4 @@ function normalizeAddresses(addresses: readonly Address[]): Address[] {
   }
 
   return result;
-}
-
-function normalizeTokenPrices(
-  addresses: readonly Address[],
-  prices: readonly TokenPrice[],
-): readonly TokenPrice[] {
-  const priceByAddress = new Map(
-    prices.map((token) => [token.address.toLowerCase(), token]),
-  );
-
-  return addresses.map((address) => {
-    const price = priceByAddress.get(address.toLowerCase());
-
-    return {
-      address,
-      price: price?.price ?? 0,
-      timestamp: price?.timestamp ?? Date.now(),
-      ...(price?.priceSources ? { priceSources: price.priceSources } : {}),
-      ...(price?.source ? { source: price.source } : {}),
-    };
-  });
 }

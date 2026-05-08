@@ -5,18 +5,19 @@ import {
   type UseMutationOptions,
 } from "@tanstack/react-query";
 import {
+  cancelIndexDtfProposal,
+  delegateIndexDtfVotes,
+  executeIndexDtfProposal,
+  proposeIndexDtfProposal,
+  queueIndexDtfProposal,
   SdkError,
-  writeAccountDelegate,
-  writeProposal,
-  writeProposalCancel,
-  writeProposalExecute,
-  writeProposalQueue,
-  writeProposalVote,
-  type WriteIndexDtfCancelParams,
-  type WriteIndexDtfDelegateParams,
-  type WriteIndexDtfProposalParams,
-  type WriteIndexDtfProposeParams,
-  type WriteIndexDtfVoteParams,
+  voteIndexDtfProposal,
+  type CancelIndexDtfProposalParams,
+  type DelegateIndexDtfVotesParams,
+  type ExecuteIndexDtfProposalParams,
+  type ProposeIndexDtfProposalParams,
+  type QueueIndexDtfProposalParams,
+  type VoteIndexDtfProposalParams,
 } from "@dtf-interface/sdk";
 import type { Hex, WalletClient } from "viem";
 import { dtfQueryKeys } from "./query-keys.js";
@@ -30,53 +31,53 @@ export type DtfMutationOptions<TVariables, TContext = unknown> = Omit<
 
 export function useIndexDtfDelegateMutation<TContext = unknown>(
   walletClient: WalletClient | undefined,
-  options?: DtfMutationOptions<WriteIndexDtfDelegateParams, TContext>,
+  options?: DtfMutationOptions<DelegateIndexDtfVotesParams, TContext>,
 ) {
   return useWalletClientMutation(
     walletClient,
-    writeAccountDelegate,
+    delegateIndexDtfVotes,
     options,
   );
 }
 
 export function useIndexDtfVoteMutation<TContext = unknown>(
   walletClient: WalletClient | undefined,
-  options?: DtfMutationOptions<WriteIndexDtfVoteParams, TContext>,
+  options?: DtfMutationOptions<VoteIndexDtfProposalParams, TContext>,
 ) {
-  return useWalletClientMutation(walletClient, writeProposalVote, options);
+  return useWalletClientMutation(walletClient, voteIndexDtfProposal, options);
 }
 
 export function useIndexDtfQueueMutation<TContext = unknown>(
   walletClient: WalletClient | undefined,
-  options?: DtfMutationOptions<WriteIndexDtfProposalParams, TContext>,
+  options?: DtfMutationOptions<QueueIndexDtfProposalParams, TContext>,
 ) {
-  return useWalletClientMutation(walletClient, writeProposalQueue, options);
+  return useWalletClientMutation(walletClient, queueIndexDtfProposal, options);
 }
 
 export function useIndexDtfExecuteMutation<TContext = unknown>(
   walletClient: WalletClient | undefined,
-  options?: DtfMutationOptions<WriteIndexDtfProposalParams, TContext>,
+  options?: DtfMutationOptions<ExecuteIndexDtfProposalParams, TContext>,
 ) {
-  return useWalletClientMutation(walletClient, writeProposalExecute, options);
+  return useWalletClientMutation(walletClient, executeIndexDtfProposal, options);
 }
 
 export function useIndexDtfCancelMutation<TContext = unknown>(
   walletClient: WalletClient | undefined,
-  options?: DtfMutationOptions<WriteIndexDtfCancelParams, TContext>,
+  options?: DtfMutationOptions<CancelIndexDtfProposalParams, TContext>,
 ) {
-  return useWalletClientMutation(walletClient, writeProposalCancel, options);
+  return useWalletClientMutation(walletClient, cancelIndexDtfProposal, options);
 }
 
 export function useIndexDtfProposeMutation<TContext = unknown>(
   walletClient: WalletClient | undefined,
-  options?: DtfMutationOptions<WriteIndexDtfProposeParams, TContext>,
+  options?: DtfMutationOptions<ProposeIndexDtfProposalParams, TContext>,
 ) {
-  return useWalletClientMutation(walletClient, writeProposal, options);
+  return useWalletClientMutation(walletClient, proposeIndexDtfProposal, options);
 }
 
 function useWalletClientMutation<TVariables, TContext>(
   walletClient: WalletClient | undefined,
-  write: (walletClient: WalletClient, params: TVariables) => Promise<Hex>,
+  action: (walletClient: WalletClient, params: TVariables) => Promise<Hex>,
   options: DtfMutationOptions<TVariables, TContext> = {},
 ) {
   const queryClient = useQueryClient();
@@ -84,7 +85,7 @@ function useWalletClientMutation<TVariables, TContext>(
 
   return useMutation<Hex, DefaultError, TVariables, TContext>({
     ...mutationOptions,
-    mutationFn: (params) => write(getWalletClient(walletClient), params),
+    mutationFn: (params) => action(getWalletClient(walletClient), params),
     onSuccess: async (data, variables, onMutateResult, context) => {
       if (invalidateQueries) {
         await queryClient.invalidateQueries({

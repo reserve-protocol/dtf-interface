@@ -75,9 +75,9 @@ The SDK should not require `getIndexDtf()` before fetching proposals. Consumers 
 Block-aware reads should stay granular. Source-specific methods that can read historical state may accept `blockNumber`; composed methods should not unless every source in the composition is pinned to the same point in time.
 
 ```ts
-await sdk.index.get({ address, chainId, blockNumber: 123n });       // subgraph time travel
+await sdk.index.getDtf({ address, chainId, blockNumber: 123n });    // subgraph time travel
 await sdk.index.getBasket({ address, chainId, blockNumber: 123n }); // onchain read at block
-await sdk.index.getFull({ address, chainId });                      // current-state composition only
+await sdk.index.get({ address, chainId });                          // current-state composition only
 ```
 
 ## Layers

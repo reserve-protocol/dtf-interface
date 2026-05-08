@@ -1,16 +1,14 @@
 import type { Address, WalletClient } from "viem";
 import { getAddress } from "viem";
 import type { DtfClient } from "../client.js";
-import type {
-  BlockNumber,
-  BlockNumberParams,
-  DtfParams,
-} from "../types/common.js";
+import type { BlockNumber, DtfParams } from "../types/common.js";
 import type {
   GetFullIndexDtfOptions,
   GetFullIndexDtfParams,
   GetIndexDtfBasketOptions,
   GetIndexDtfBasketParams,
+  GetIndexDtfBasketSnapshotOptions,
+  GetIndexDtfBasketSnapshotParams,
   GetIndexDtfOptions,
   GetIndexDtfParams,
   GetIndexDtfPriceHistoryOptions,
@@ -24,6 +22,7 @@ import type {
   GetIndexDtfVersionParams,
   IndexDtf,
   IndexDtfBasket,
+  IndexDtfBasketSnapshot,
   IndexDtfBrand,
   IndexDtfFull,
   IndexDtfPrice,
@@ -62,32 +61,30 @@ import type {
 } from "./governance/propose/index.js";
 import { listIndexDtfs } from "./protocol/index.js";
 import {
-  getFullIndexDtf,
-  getIndexDtf,
-  getIndexDtfBasket,
-  getIndexDtfBrand,
-  getIndexDtfPrice,
-  getIndexDtfPriceHistory,
-  getIndexDtfTotalAssets,
-  getIndexDtfTotalSupply,
-  getIndexDtfVersion,
+  getBasket as readBasket,
+  getBasketSnapshot as readBasketSnapshot,
+  getBrand as readBrand,
+  getDtf as readDtf,
+  getFull as readFull,
+  getPrice as readPrice,
+  getPriceHistory as readPriceHistory,
+  getTotalAssets as readTotalAssets,
+  getTotalSupply as readTotalSupply,
+  getVersion as readVersion,
 } from "./dtf/index.js";
 import {
-  getIndexDtfDelegates,
-  getAllIndexDtfProposals,
-  getIndexDtfGuardians,
-  getIndexDtfProposal,
-  getIndexDtfProposalVoterState,
-  getIndexDtfProposalVotes,
-  getIndexDtfProposals,
-  getIndexDtfProposerState,
-  getIndexDtfVoterState,
   createIndexDtfRefGovernanceWriter,
+  getAllProposals,
+  getDelegates,
+  getGuardians,
+  getProposal,
+  getProposalVoterState,
+  getProposalVotes,
+  getProposals,
+  getProposerState,
+  getVoterState,
 } from "./governance/index.js";
-import {
-  getIndexDtfRebalance,
-  getIndexDtfRebalances,
-} from "./rebalance/index.js";
+import { getRebalance, getRebalances } from "./rebalance/index.js";
 import {
   buildIndexDtfBasketProposal,
   buildIndexDtfBasketSettingsProposal,
@@ -96,39 +93,46 @@ import {
 } from "./governance/propose/index.js";
 
 export {
-  buildIndexDtfBasket,
-  buildIndexDtfTargetBasket,
+  buildIndexDtfStartRebalance,
+  buildInitialBasket as buildIndexDtfInitialBasket,
+  buildStartRebalanceArgs as buildIndexDtfStartRebalanceArgs,
+  getBasketSharesFromUnits as getIndexDtfBasketSharesFromUnits,
+  getBasketUnitsFromShares as getIndexDtfBasketUnitsFromShares,
+  getDtfPriceFromBalances as getIndexDtfPriceFromBalances,
   indexDtfBasketSchema,
   indexDtfBasketSharesSchema,
   indexDtfBasketTokenSchema,
   indexDtfBasketUnitsSchema,
-} from "./dtf/basket/index.js";
+} from "./dtf/basket-utils.js";
 export {
-  getFullIndexDtf,
-  getIndexDtf,
-  getIndexDtfBasket,
-  getIndexDtfBasketWithPrice,
-  getIndexDtfBrand,
-  getIndexDtfPrice,
-  getIndexDtfPriceHistory,
-  getIndexDtfTotalAssets,
-  getIndexDtfTotalSupply,
-  getIndexDtfVersion,
+  getDtf,
+  getBasket as getIndexDtfBasket,
+  getBasketSnapshot as getIndexDtfBasketSnapshot,
+  getBasketWithPrice as getIndexDtfBasketWithPrice,
+  getBrand as getIndexDtfBrand,
+  getFull as getIndexDtf,
+  getFull as getFullIndexDtf,
+  getMandate as getIndexDtfMandate,
+  getPrice as getIndexDtfPrice,
+  getPriceHistory as getIndexDtfPriceHistory,
+  getTotalAssets as getIndexDtfTotalAssets,
+  getTotalSupply as getIndexDtfTotalSupply,
+  getVersion as getIndexDtfVersion,
 } from "./dtf/index.js";
-export { getIndexDtfDelegates } from "./governance/delegates.js";
-export { writeAccountDelegate } from "./governance/delegation-actions.js";
-export { getIndexDtfGuardians } from "./governance/guardians.js";
+export { getDelegates as getIndexDtfDelegates } from "./governance/delegates.js";
+export { delegate as delegateIndexDtfVotes } from "./governance/delegation-actions.js";
+export { getGuardians as getIndexDtfGuardians } from "./governance/guardians.js";
 export {
-  writeProposal,
-  writeProposalCancel,
-  writeProposalExecute,
-  writeProposalQueue,
-  writeProposalVote,
+  cancel as cancelIndexDtfProposal,
+  execute as executeIndexDtfProposal,
+  propose as proposeIndexDtfProposal,
+  queue as queueIndexDtfProposal,
+  vote as voteIndexDtfProposal,
 } from "./governance/proposal-actions.js";
 export {
-  getAllIndexDtfProposals,
-  getIndexDtfProposal,
-  getIndexDtfProposals,
+  getAllProposals as getAllIndexDtfProposals,
+  getProposal as getIndexDtfProposal,
+  getProposals as getIndexDtfProposals,
 } from "./governance/proposals.js";
 export {
   buildIndexDtfBasketProposal,
@@ -144,67 +148,70 @@ export {
   indexDtfGovernanceChangesSchema,
   indexDtfSettingsProposalSchema,
 } from "./governance/propose/index.js";
-export { getIndexDtfProposalGovernanceAddresses } from "./governance/utils.js";
+export { getProposalGovernanceAddresses as getIndexDtfProposalGovernanceAddresses } from "./governance/utils.js";
 export {
-  getIndexDtfProposalVoterState,
-  getIndexDtfProposalVotes,
-  getIndexDtfProposerState,
-  getIndexDtfVoterState,
+  getProposalVoterState as getIndexDtfProposalVoterState,
+  getProposalVotes as getIndexDtfProposalVotes,
+  getProposerState as getIndexDtfProposerState,
+  getVoterState as getIndexDtfVoterState,
 } from "./governance/voting.js";
 export { listIndexDtfs } from "./protocol/index.js";
 export {
-  getIndexDtfRebalance,
-  getIndexDtfRebalances,
+  getRebalance as getIndexDtfRebalance,
+  getRebalances as getIndexDtfRebalances,
 } from "./rebalance/index.js";
+
+type BlockNumberOption = Pick<DtfParams, "blockNumber">;
 
 export type IndexDtfRef = {
   readonly address: Address;
   readonly chainId: DtfParams["chainId"];
-  readonly get: (
-    params?: GetIndexDtfOptions | BlockNumber,
+  readonly get: (params?: GetIndexDtfOptions) => Promise<IndexDtfFull>;
+  readonly getDtf: (
+    params?: BlockNumberOption | BlockNumber,
   ) => Promise<IndexDtf>;
   readonly getFull: (params?: GetFullIndexDtfOptions) => Promise<IndexDtfFull>;
   readonly getBasket: (
     params?: GetIndexDtfBasketOptions,
   ) => Promise<IndexDtfBasket>;
-  readonly basket: (
-    params?: GetIndexDtfBasketOptions,
-  ) => Promise<IndexDtfBasket>;
-  readonly version: (
-    params?: BlockNumberParams | BlockNumber,
+  readonly getBasketSnapshot: (
+    params?: GetIndexDtfBasketSnapshotOptions,
+  ) => Promise<IndexDtfBasketSnapshot>;
+  readonly getVersion: (
+    params?: BlockNumberOption | BlockNumber,
   ) => Promise<string>;
-  readonly totalSupply: (
-    params?: BlockNumberParams | BlockNumber,
+  readonly getTotalSupply: (
+    params?: BlockNumberOption | BlockNumber,
   ) => Promise<bigint>;
-  readonly totalAssets: (
-    params?: BlockNumberParams | BlockNumber,
+  readonly getTotalAssets: (
+    params?: BlockNumberOption | BlockNumber,
   ) => Promise<IndexDtfTotalAssets>;
   readonly getBrand: () => Promise<IndexDtfBrand | undefined>;
   readonly getPrice: () => Promise<IndexDtfPrice>;
   readonly getPriceHistory: (
-    params?: GetIndexDtfPriceHistoryOptions,
+    params: GetIndexDtfPriceHistoryOptions,
   ) => Promise<readonly IndexDtfPricePoint[]>;
-  readonly proposals: (
+  readonly getProposals: (
     params?: GetIndexDtfProposalsOptions,
   ) => Promise<readonly IndexDtfProposalSummary[]>;
-  readonly proposal: (proposalId: string) => Promise<IndexDtfProposalDetail>;
-  readonly delegates: (
+  readonly getProposal: (proposalId: string) => Promise<IndexDtfProposalDetail>;
+  readonly getDelegates: (
     params: Pick<GetIndexDtfDelegatesParams, "stToken" | "limit">,
   ) => Promise<readonly IndexDtfDelegate[]>;
-  readonly guardians: () => Promise<IndexDtfGuardians>;
-  readonly voterState: (
+  readonly getGuardians: () => Promise<IndexDtfGuardians>;
+  readonly getVoterState: (
     params: Pick<GetIndexDtfVoterStateParams, "account" | "stToken">,
   ) => Promise<IndexDtfVoterState>;
-  readonly proposerState: (
+  readonly getProposerState: (
     params: Pick<
       GetIndexDtfProposerStateParams,
       "account" | "governance" | "timepoint"
     >,
   ) => Promise<IndexDtfProposerState>;
-  readonly proposalVotes: (
+  readonly getProposalVotes: (
     params: Pick<GetIndexDtfProposalVotesParams, "governance" | "proposalId">,
   ) => Promise<IndexDtfProposalVotes>;
-  readonly proposalVoterState: (
+  readonly getProposalVoterState: (
     params: Pick<
       GetIndexDtfProposalVoterStateParams,
       "account" | "governance" | "proposal"
@@ -225,11 +232,11 @@ export type IndexDtfRef = {
   readonly buildSettingsProposal: (
     params: Omit<BuildIndexDtfSettingsProposalParams, "address" | "chainId">,
   ) => Promise<BuiltIndexDtfProposal>;
-  readonly write: (walletClient: WalletClient) => IndexDtfGovernanceWriter;
-  readonly rebalances: (
+  readonly governance: (walletClient: WalletClient) => IndexDtfGovernanceWriter;
+  readonly getRebalances: (
     params?: GetIndexDtfRebalancesOptions,
   ) => Promise<readonly unknown[]>;
-  readonly rebalance: (
+  readonly getRebalance: (
     id: GetIndexDtfRebalanceParams["id"],
   ) => Promise<unknown>;
 };
@@ -241,48 +248,61 @@ export function createIndexDtfRef(
   const address = getAddress(params.address);
   const chainId = params.chainId;
   const resolveBlockNumber = (
-    options: BlockNumber | BlockNumberParams | undefined,
+    options: BlockNumber | BlockNumberOption | undefined,
   ) => (typeof options === "bigint" ? options : options?.blockNumber);
-  const get = (options?: GetIndexDtfOptions | BlockNumber) => {
+  const get = (options: GetIndexDtfOptions = {}) =>
+    readFull(client, { ...options, address, chainId });
+  const getDtfRef = (options?: BlockNumberOption | BlockNumber) => {
     const blockNumber = resolveBlockNumber(options);
 
-    return getIndexDtf(client, {
+    return readDtf(client, {
       address,
       chainId,
       ...(blockNumber === undefined ? {} : { blockNumber }),
     });
   };
-  const getBasket = (options?: GetIndexDtfBasketOptions) => {
+  const getFullRef = (options: GetFullIndexDtfOptions = {}) =>
+    readFull(client, { ...options, address, chainId });
+  const getBasketRef = (options?: GetIndexDtfBasketOptions) => {
     const blockNumber = resolveBlockNumber(options);
 
-    return getIndexDtfBasket(client, {
+    return readBasket(client, {
       address,
       chainId,
       ...(blockNumber === undefined ? {} : { blockNumber }),
     });
   };
-  const version = (options?: BlockNumberParams | BlockNumber) => {
+  const getBasketSnapshotRef = (options?: GetIndexDtfBasketSnapshotOptions) => {
     const blockNumber = resolveBlockNumber(options);
 
-    return getIndexDtfVersion(client, {
+    return readBasketSnapshot(client, {
       address,
       chainId,
       ...(blockNumber === undefined ? {} : { blockNumber }),
     });
   };
-  const totalSupply = (options?: BlockNumberParams | BlockNumber) => {
+  const getVersionRef = (options?: BlockNumberOption | BlockNumber) => {
     const blockNumber = resolveBlockNumber(options);
 
-    return getIndexDtfTotalSupply(client, {
+    return readVersion(client, {
       address,
       chainId,
       ...(blockNumber === undefined ? {} : { blockNumber }),
     });
   };
-  const totalAssets = (options?: BlockNumberParams | BlockNumber) => {
+  const getTotalSupplyRef = (options?: BlockNumberOption | BlockNumber) => {
     const blockNumber = resolveBlockNumber(options);
 
-    return getIndexDtfTotalAssets(client, {
+    return readTotalSupply(client, {
+      address,
+      chainId,
+      ...(blockNumber === undefined ? {} : { blockNumber }),
+    });
+  };
+  const getTotalAssetsRef = (options?: BlockNumberOption | BlockNumber) => {
+    const blockNumber = resolveBlockNumber(options);
+
+    return readTotalAssets(client, {
       address,
       chainId,
       ...(blockNumber === undefined ? {} : { blockNumber }),
@@ -293,32 +313,30 @@ export function createIndexDtfRef(
     address,
     chainId,
     get,
-    getFull: (options = {}) =>
-      getFullIndexDtf(client, { ...options, address, chainId }),
-    getBasket,
-    basket: getBasket,
-    version,
-    totalSupply,
-    totalAssets,
-    getBrand: () => getIndexDtfBrand(client, { address, chainId }),
-    getPrice: () => getIndexDtfPrice(client, { address, chainId }),
-    getPriceHistory: (options = {}) =>
-      getIndexDtfPriceHistory(client, { ...options, address, chainId }),
-    proposals: (options = {}) =>
-      getIndexDtfProposals(client, { ...options, address, chainId }),
-    proposal: (proposalId) =>
-      getIndexDtfProposal(client, { proposalId, address, chainId }),
-    delegates: (options) =>
-      getIndexDtfDelegates(client, { ...options, chainId }),
-    guardians: () => getIndexDtfGuardians(client, { address, chainId }),
-    voterState: (params) =>
-      getIndexDtfVoterState(client, { ...params, chainId }),
-    proposerState: (params) =>
-      getIndexDtfProposerState(client, { ...params, chainId }),
-    proposalVotes: (params) =>
-      getIndexDtfProposalVotes(client, { ...params, chainId }),
-    proposalVoterState: (params) =>
-      getIndexDtfProposalVoterState(client, { ...params, chainId }),
+    getDtf: getDtfRef,
+    getFull: getFullRef,
+    getBasket: getBasketRef,
+    getBasketSnapshot: getBasketSnapshotRef,
+    getVersion: getVersionRef,
+    getTotalSupply: getTotalSupplyRef,
+    getTotalAssets: getTotalAssetsRef,
+    getBrand: () => readBrand(client, { address, chainId }),
+    getPrice: () => readPrice(client, { address, chainId }),
+    getPriceHistory: (options) =>
+      readPriceHistory(client, { ...options, address, chainId }),
+    getProposals: (options = {}) =>
+      getProposals(client, { ...options, address, chainId }),
+    getProposal: (proposalId) =>
+      getProposal(client, { proposalId, address, chainId }),
+    getDelegates: (options) => getDelegates(client, { ...options, chainId }),
+    getGuardians: () => getGuardians(client, { address, chainId }),
+    getVoterState: (params) => getVoterState(client, { ...params, chainId }),
+    getProposerState: (params) =>
+      getProposerState(client, { ...params, chainId }),
+    getProposalVotes: (params) =>
+      getProposalVotes(client, { ...params, chainId }),
+    getProposalVoterState: (params) =>
+      getProposalVoterState(client, { ...params, chainId }),
     buildBasketProposal: (params) =>
       buildIndexDtfBasketProposal(client, { ...params, address, chainId }),
     buildBasketSettingsProposal: (params) =>
@@ -331,51 +349,52 @@ export function createIndexDtfRef(
       buildIndexDtfDaoSettingsProposal(client, { ...params, address, chainId }),
     buildSettingsProposal: (params) =>
       buildIndexDtfSettingsProposal(client, { ...params, address, chainId }),
-    write: (walletClient) =>
+    governance: (walletClient) =>
       createIndexDtfRefGovernanceWriter(walletClient, chainId),
-    rebalances: (options = {}) =>
-      getIndexDtfRebalances(client, { ...options, address, chainId }),
-    rebalance: (id) => getIndexDtfRebalance(client, { id, chainId }),
+    getRebalances: (options = {}) =>
+      getRebalances(client, { ...options, address, chainId }),
+    getRebalance: (id) => getRebalance(client, { id, chainId }),
   };
 }
 
 export function createIndexDtfNamespace(client: DtfClient) {
   return {
     ref: (params: DtfParams) => createIndexDtfRef(client, params),
-    get: (params: GetIndexDtfParams) => getIndexDtf(client, params),
+    get: (params: GetIndexDtfParams) => readFull(client, params),
+    getDtf: (params: DtfParams) => readDtf(client, params),
     list: (params?: ListIndexDtfsParams) => listIndexDtfs(client, params),
-    getFull: (params: GetFullIndexDtfParams) => getFullIndexDtf(client, params),
-    getBasket: (params: GetIndexDtfBasketParams) =>
-      getIndexDtfBasket(client, params),
-    version: (params: GetIndexDtfVersionParams) =>
-      getIndexDtfVersion(client, params),
-    totalSupply: (params: GetIndexDtfTotalSupplyParams) =>
-      getIndexDtfTotalSupply(client, params),
-    totalAssets: (params: GetIndexDtfTotalAssetsParams) =>
-      getIndexDtfTotalAssets(client, params),
-    getBrand: (params: DtfParams) => getIndexDtfBrand(client, params),
-    getPrice: (params: GetIndexDtfPriceParams) =>
-      getIndexDtfPrice(client, params),
+    getFull: (params: GetFullIndexDtfParams) => readFull(client, params),
+    getBasket: (params: GetIndexDtfBasketParams) => readBasket(client, params),
+    getBasketSnapshot: (params: GetIndexDtfBasketSnapshotParams) =>
+      readBasketSnapshot(client, params),
+    getVersion: (params: GetIndexDtfVersionParams) =>
+      readVersion(client, params),
+    getTotalSupply: (params: GetIndexDtfTotalSupplyParams) =>
+      readTotalSupply(client, params),
+    getTotalAssets: (params: GetIndexDtfTotalAssetsParams) =>
+      readTotalAssets(client, params),
+    getBrand: (params: DtfParams) => readBrand(client, params),
+    getPrice: (params: GetIndexDtfPriceParams) => readPrice(client, params),
     getPriceHistory: (params: GetIndexDtfPriceHistoryParams) =>
-      getIndexDtfPriceHistory(client, params),
-    proposals: (params: GetIndexDtfProposalsParams) =>
-      getIndexDtfProposals(client, params),
-    proposal: (params: GetIndexDtfProposalParams) =>
-      getIndexDtfProposal(client, params),
+      readPriceHistory(client, params),
+    getProposals: (params: GetIndexDtfProposalsParams) =>
+      getProposals(client, params),
+    getProposal: (params: GetIndexDtfProposalParams) =>
+      getProposal(client, params),
     getAllProposals: (params: GetAllIndexDtfProposalsParams) =>
-      getAllIndexDtfProposals(client, params),
-    delegates: (params: GetIndexDtfDelegatesParams) =>
-      getIndexDtfDelegates(client, params),
-    guardians: (params: GetIndexDtfGuardiansParams) =>
-      getIndexDtfGuardians(client, params),
-    voterState: (params: GetIndexDtfVoterStateParams) =>
-      getIndexDtfVoterState(client, params),
-    proposerState: (params: GetIndexDtfProposerStateParams) =>
-      getIndexDtfProposerState(client, params),
-    proposalVotes: (params: GetIndexDtfProposalVotesParams) =>
-      getIndexDtfProposalVotes(client, params),
-    proposalVoterState: (params: GetIndexDtfProposalVoterStateParams) =>
-      getIndexDtfProposalVoterState(client, params),
+      getAllProposals(client, params),
+    getDelegates: (params: GetIndexDtfDelegatesParams) =>
+      getDelegates(client, params),
+    getGuardians: (params: GetIndexDtfGuardiansParams) =>
+      getGuardians(client, params),
+    getVoterState: (params: GetIndexDtfVoterStateParams) =>
+      getVoterState(client, params),
+    getProposerState: (params: GetIndexDtfProposerStateParams) =>
+      getProposerState(client, params),
+    getProposalVotes: (params: GetIndexDtfProposalVotesParams) =>
+      getProposalVotes(client, params),
+    getProposalVoterState: (params: GetIndexDtfProposalVoterStateParams) =>
+      getProposalVoterState(client, params),
     buildBasketProposal: (params: BuildIndexDtfBasketProposalParams) =>
       buildIndexDtfBasketProposal(client, params),
     buildBasketSettingsProposal: (
@@ -386,9 +405,9 @@ export function createIndexDtfNamespace(client: DtfClient) {
     ) => buildIndexDtfDaoSettingsProposal(client, params),
     buildSettingsProposal: (params: BuildIndexDtfSettingsProposalParams) =>
       buildIndexDtfSettingsProposal(client, params),
-    rebalances: (params: GetIndexDtfRebalancesParams) =>
-      getIndexDtfRebalances(client, params),
-    rebalance: (params: GetIndexDtfRebalanceParams) =>
-      getIndexDtfRebalance(client, params),
+    getRebalances: (params: GetIndexDtfRebalancesParams) =>
+      getRebalances(client, params),
+    getRebalance: (params: GetIndexDtfRebalanceParams) =>
+      getRebalance(client, params),
   };
 }

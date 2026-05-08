@@ -1,13 +1,13 @@
 import type { WalletClient } from "viem";
 import type { SupportedChainId } from "../../defaults.js";
 import type { IndexDtfGovernanceWriter } from "../../types/governance.js";
-import { writeAccountDelegate } from "./delegation-actions.js";
+import { delegate } from "./delegation-actions.js";
 import {
-  writeProposal,
-  writeProposalCancel,
-  writeProposalExecute,
-  writeProposalQueue,
-  writeProposalVote,
+  cancel,
+  execute,
+  propose,
+  queue,
+  vote,
 } from "./proposal-actions.js";
 
 export * from "./delegates.js";
@@ -24,15 +24,11 @@ export function createIndexDtfRefGovernanceWriter(
   chainId: SupportedChainId,
 ): IndexDtfGovernanceWriter {
   return {
-    delegate: (params) =>
-      writeAccountDelegate(walletClient, { ...params, chainId }),
-    vote: (params) => writeProposalVote(walletClient, { ...params, chainId }),
-    queue: (proposal, options) =>
-      writeProposalQueue(walletClient, { ...options, chainId, proposal }),
-    execute: (proposal, options) =>
-      writeProposalExecute(walletClient, { ...options, chainId, proposal }),
-    cancel: (proposal, options) =>
-      writeProposalCancel(walletClient, { ...options, chainId, proposal }),
-    propose: (params) => writeProposal(walletClient, { ...params, chainId }),
+    delegate: (params) => delegate(walletClient, { ...params, chainId }),
+    vote: (params) => vote(walletClient, { ...params, chainId }),
+    queue: (params) => queue(walletClient, { ...params, chainId }),
+    execute: (params) => execute(walletClient, { ...params, chainId }),
+    cancel: (params) => cancel(walletClient, { ...params, chainId }),
+    propose: (params) => propose(walletClient, { ...params, chainId }),
   };
 }

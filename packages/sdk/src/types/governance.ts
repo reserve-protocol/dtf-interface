@@ -263,62 +263,52 @@ export type IndexDtfCall = {
   readonly calldata: Hex;
 };
 
-export type IndexDtfWriteOptions = {
+export type IndexDtfTransactionOptions = {
   readonly account: Address;
 };
 
-export type IndexDtfChainWriteOptions = IndexDtfWriteOptions & {
+type IndexDtfChainTransactionOptions = IndexDtfTransactionOptions & {
   readonly chainId: SupportedChainId;
 };
 
-export type IndexDtfDelegateWriteParams = IndexDtfWriteOptions & {
+export type IndexDtfDelegateVotesParams = IndexDtfTransactionOptions & {
   readonly stToken: Address;
   readonly delegatee: Address;
 };
 
-export type WriteIndexDtfDelegateParams = IndexDtfDelegateWriteParams &
-  IndexDtfChainWriteOptions;
+export type DelegateIndexDtfVotesParams = IndexDtfDelegateVotesParams &
+  IndexDtfChainTransactionOptions;
 
-export type IndexDtfVoteWriteParams = IndexDtfWriteOptions & {
+export type IndexDtfVoteParams = IndexDtfTransactionOptions & {
   readonly governance: Address;
   readonly proposalId: string | bigint;
   readonly support: IndexDtfVoteSupport;
 };
 
-export type WriteIndexDtfVoteParams = IndexDtfVoteWriteParams &
-  IndexDtfChainWriteOptions;
+export type VoteIndexDtfProposalParams = IndexDtfVoteParams &
+  IndexDtfChainTransactionOptions;
 
-export type IndexDtfProposalWriteParams = IndexDtfWriteOptions & {
+export type IndexDtfProposalTransactionParams = IndexDtfTransactionOptions & {
   readonly proposal: IndexDtfProposalPayload;
 };
 
-export type WriteIndexDtfProposalParams = IndexDtfProposalWriteParams &
-  IndexDtfChainWriteOptions;
+export type QueueIndexDtfProposalParams = IndexDtfProposalTransactionParams &
+  IndexDtfChainTransactionOptions;
 
-export type IndexDtfCancelWriteParams = IndexDtfProposalWriteParams;
+export type ExecuteIndexDtfProposalParams = IndexDtfProposalTransactionParams &
+  IndexDtfChainTransactionOptions;
 
-export type WriteIndexDtfCancelParams = IndexDtfCancelWriteParams &
-  IndexDtfChainWriteOptions;
+export type CancelIndexDtfProposalParams = IndexDtfProposalTransactionParams &
+  IndexDtfChainTransactionOptions;
 
-export type IndexDtfProposeWriteParams = IndexDtfProposalWriteParams;
-
-export type WriteIndexDtfProposeParams = IndexDtfProposeWriteParams &
-  IndexDtfChainWriteOptions;
+export type ProposeIndexDtfProposalParams = IndexDtfProposalTransactionParams &
+  IndexDtfChainTransactionOptions;
 
 export type IndexDtfGovernanceWriter = {
-  readonly delegate: (params: IndexDtfDelegateWriteParams) => Promise<Hex>;
-  readonly vote: (params: IndexDtfVoteWriteParams) => Promise<Hex>;
-  readonly queue: (
-    proposal: IndexDtfProposalPayload,
-    options: IndexDtfWriteOptions,
-  ) => Promise<Hex>;
-  readonly execute: (
-    proposal: IndexDtfProposalPayload,
-    options: IndexDtfWriteOptions,
-  ) => Promise<Hex>;
-  readonly cancel: (
-    proposal: IndexDtfProposalPayload,
-    options: IndexDtfWriteOptions,
-  ) => Promise<Hex>;
-  readonly propose: (params: IndexDtfProposalWriteParams) => Promise<Hex>;
+  readonly delegate: (params: IndexDtfDelegateVotesParams) => Promise<Hex>;
+  readonly vote: (params: IndexDtfVoteParams) => Promise<Hex>;
+  readonly queue: (params: IndexDtfProposalTransactionParams) => Promise<Hex>;
+  readonly execute: (params: IndexDtfProposalTransactionParams) => Promise<Hex>;
+  readonly cancel: (params: IndexDtfProposalTransactionParams) => Promise<Hex>;
+  readonly propose: (params: IndexDtfProposalTransactionParams) => Promise<Hex>;
 };

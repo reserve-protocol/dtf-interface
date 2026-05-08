@@ -10,10 +10,10 @@ import {
   zeroHash,
 } from "viem";
 import {
-  writeProposal,
-  writeProposalCancel,
-  writeProposalQueue,
-  writeProposalVote,
+  cancel,
+  propose,
+  queue,
+  vote,
 } from "./proposal-actions.js";
 
 const account = "0x0000000000000000000000000000000000000009";
@@ -26,7 +26,7 @@ describe("Index DTF proposal actions", () => {
     const writeContract = vi.fn(async () => "0xabc");
     const walletClient = { writeContract } as never;
 
-    await writeProposal(walletClient, {
+    await propose(walletClient, {
       account,
       chainId: 1,
       proposal: {
@@ -65,8 +65,8 @@ describe("Index DTF proposal actions", () => {
       description: "Proposal description",
     } as const;
 
-    await writeProposalQueue(walletClient, { account, chainId: 1, proposal });
-    await writeProposalCancel(walletClient, { account, chainId: 1, proposal });
+    await queue(walletClient, { account, chainId: 1, proposal });
+    await cancel(walletClient, { account, chainId: 1, proposal });
 
     expect(writeContract).toHaveBeenNthCalledWith(1, {
       chain: expect.objectContaining({ id: 1 }),
@@ -98,7 +98,7 @@ describe("Index DTF proposal actions", () => {
     const walletClient = { writeContract } as never;
 
     await expect(
-      writeProposalVote(walletClient, {
+      vote(walletClient, {
         account,
         chainId: 999 as never,
         governance: "0x0000000000000000000000000000000000000001",
@@ -125,7 +125,7 @@ describe("Index DTF proposal actions", () => {
       description: "Legacy proposal",
     } as const;
 
-    await writeProposalCancel(walletClient, {
+    await cancel(walletClient, {
       account,
       chainId: 1,
       proposal,

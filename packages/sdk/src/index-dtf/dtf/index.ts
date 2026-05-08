@@ -4,16 +4,16 @@ import type { DtfClient } from "../../client.js";
 import { SdkError } from "../../errors.js";
 import { mapAmount } from "../../lib/utils.js";
 import { getTokensData } from "../../tokens/index.js";
-import type { DtfParams, DtfParamsWithBlock } from "../../types/common.js";
+import type { DtfParams } from "../../types/common.js";
 import type {
   GetFullIndexDtfParams,
-  GetIndexDtfParams,
   GetIndexDtfPriceHistoryParams,
   GetIndexDtfTotalAssetsParams,
   GetIndexDtfTotalSupplyParams,
   GetIndexDtfVersionParams,
   IndexDtf,
   IndexDtfBasket,
+  IndexDtfBasketSnapshot,
   IndexDtfBasketAssetWithPrice,
   IndexDtfBasketWithPrice,
   IndexDtfBrand,
@@ -22,19 +22,20 @@ import type {
   IndexDtfPricePoint,
   IndexDtfTotalAssets,
 } from "../../types/index-dtf.js";
-import { folioAbi } from "../abis/folio.js";
+import dtfAbi from "../abis/dtf-index-abi-v6.js";
+import { GetIndexDtfDocument } from "../subgraph/dtf.generated.js";
 import {
   mapIndexDtf,
+  mapIndexDtfBasketSnapshot,
   mapIndexDtfBrand,
   mapIndexDtfPrice,
+  mapIndexDtfPriceHistory,
   type IndexDtfBrandResponse,
-  type IndexDtfPriceResponse,
 } from "./mappers.js";
-import { GetIndexDtfDocument } from "../subgraph/dtf.generated.js";
 
-export async function getIndexDtf(
+export async function getDtf(
   client: DtfClient,
-  params: GetIndexDtfParams,
+  params: DtfParams,
 ): Promise<IndexDtf> {
   const { dtf } = await client.subgraph.queryIndex({
     chainId: params.chainId,
@@ -62,14 +63,14 @@ export async function getIndexDtf(
   return mapIndexDtf(dtf, params.chainId);
 }
 
-export async function getFullIndexDtf(
+export async function getFull(
   client: DtfClient,
   params: GetFullIndexDtfParams,
 ): Promise<IndexDtfFull> {
   const [dtf, market, brand] = await Promise.all([
-    getIndexDtf(client, params),
-    getIndexDtfBasketWithPrice(client, params),
-    params.brand ? getIndexDtfBrand(client, params) : undefined,
+    getDtf(client, params),
+    getBasketWithPrice(client, params),
+    params.brand ? getBrand(client, params) : undefined,
   ]);
 
   return {
@@ -85,13 +86,13 @@ export async function getFullIndexDtf(
   };
 }
 
-export async function getIndexDtfBasketWithPrice(
+export async function getBasketWithPrice(
   client: DtfClient,
   params: DtfParams,
 ): Promise<IndexDtfBasketWithPrice> {
   const [basket, price] = await Promise.all([
-    getIndexDtfBasket(client, params),
-    getIndexDtfPrice(client, params),
+    getBasket(client, params),
+    getPrice(client, params),
   ]);
 
   const basketWithPrice: Record<Address, IndexDtfBasketAssetWithPrice> = {};
@@ -126,12 +127,12 @@ export async function getIndexDtfBasketWithPrice(
   };
 }
 
-export async function getIndexDtfBasket(
+export async function getBasket(
   client: DtfClient,
-  params: DtfParamsWithBlock,
+  params: DtfParams,
 ): Promise<IndexDtfBasket> {
   const publicClient = client.viem.getPublicClient(params.chainId);
-  const { tokens: assetAddresses, balances } = await getIndexDtfTotalAssets(
+  const { tokens: assetAddresses, balances } = await getTotalAssets(
     client,
     params,
   );
@@ -168,7 +169,16 @@ export async function getIndexDtfBasket(
   return basket;
 }
 
-export async function getIndexDtfVersion(
+export async function getBasketSnapshot(
+  client: DtfClient,
+  params: DtfParams,
+): Promise<IndexDtfBasketSnapshot> {
+  const response = await client.api.getIndexDtfBasketSnapshot(params);
+
+  return mapIndexDtfBasketSnapshot(response);
+}
+
+export async function getVersion(
   client: DtfClient,
   params: GetIndexDtfVersionParams,
 ): Promise<string> {
@@ -176,13 +186,13 @@ export async function getIndexDtfVersion(
 
   return publicClient.readContract({
     address: getAddress(params.address),
-    abi: folioAbi,
+    abi: dtfAbi,
     functionName: "version",
     blockNumber: params.blockNumber,
   });
 }
 
-export async function getIndexDtfTotalSupply(
+export async function getTotalSupply(
   client: DtfClient,
   params: GetIndexDtfTotalSupplyParams,
 ): Promise<bigint> {
@@ -190,53 +200,48 @@ export async function getIndexDtfTotalSupply(
 
   return publicClient.readContract({
     address: getAddress(params.address),
-    abi: folioAbi,
+    abi: dtfAbi,
     functionName: "totalSupply",
     blockNumber: params.blockNumber,
   });
 }
 
-export async function getIndexDtfTotalAssets(
+export async function getTotalAssets(
   client: DtfClient,
   params: GetIndexDtfTotalAssetsParams,
 ): Promise<IndexDtfTotalAssets> {
   const publicClient = client.viem.getPublicClient(params.chainId);
   const [tokens, balances] = await publicClient.readContract({
     address: getAddress(params.address),
-    abi: folioAbi,
+    abi: dtfAbi,
     functionName: "totalAssets",
     blockNumber: params.blockNumber,
   });
+  const normalizedTokens = tokens.map((token) => getAddress(token));
   const balanceByToken: Record<Address, bigint> = {};
 
-  for (let i = 0; i < tokens.length; i++) {
-    balanceByToken[tokens[i]!] = balances[i]!;
+  for (let i = 0; i < normalizedTokens.length; i++) {
+    balanceByToken[normalizedTokens[i]!] = balances[i]!;
   }
 
   return {
-    tokens,
+    tokens: normalizedTokens,
     balances,
     balanceByToken,
   };
 }
 
-export async function getIndexDtfPrice(
+export async function getPrice(
   client: DtfClient,
   params: DtfParams,
 ): Promise<IndexDtfPrice> {
   const address = getAddress(params.address);
-  const response = await client.api.get<IndexDtfPriceResponse>({
-    path: "/current/dtf",
-    query: {
-      address: address.toLowerCase(),
-      chainId: params.chainId,
-    },
-  });
+  const response = await client.api.getIndexDtfPrice(params);
 
   return mapIndexDtfPrice(response, { address, chainId: params.chainId });
 }
 
-export async function getIndexDtfBrand(
+export async function getBrand(
   client: DtfClient,
   params: DtfParams,
 ): Promise<IndexDtfBrand | undefined> {
@@ -252,13 +257,30 @@ export async function getIndexDtfBrand(
   return mapIndexDtfBrand(response);
 }
 
-export async function getIndexDtfPriceHistory(
+export async function getPriceHistory(
   client: DtfClient,
   params: GetIndexDtfPriceHistoryParams,
 ): Promise<readonly IndexDtfPricePoint[]> {
-  throw new SdkError({
-    code: "NOT_IMPLEMENTED",
-    message: "getIndexDtfPriceHistory is not implemented yet.",
-    meta: { method: "getIndexDtfPriceHistory" },
+  const response = await client.api.getIndexDtfPriceHistory(params);
+
+  return mapIndexDtfPriceHistory(response);
+}
+
+export async function getMandate(
+  client: DtfClient,
+  params: DtfParams,
+): Promise<string> {
+  const { address, chainId, blockNumber } = params;
+  const publicClient = client.viem.getPublicClient(chainId);
+
+  return publicClient.readContract({
+    address,
+    abi: dtfAbi,
+    functionName: "mandate",
+    blockNumber,
   });
 }
+
+// // Setter methods
+// // ONLY available for the ADMIN role, solidity runs the validation
+// export async function setIndexDtfTvlFee

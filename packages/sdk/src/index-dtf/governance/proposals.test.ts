@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { encodeFunctionData } from "viem";
 import type { DtfClient } from "../../client.js";
 import { dtfIndexProposalAbi } from "../abis/proposal-decoder.js";
-import { getIndexDtfProposal, getIndexDtfProposals } from "./index.js";
+import { getProposal, getProposals } from "./index.js";
 
 describe("Index DTF governance proposals", () => {
   afterEach(() => {
@@ -93,7 +93,7 @@ describe("Index DTF governance proposals", () => {
       },
     } as unknown as DtfClient;
 
-    const proposal = await getIndexDtfProposal(client, {
+    const proposal = await getProposal(client, {
       proposalId: "42",
       address: "0x0000000000000000000000000000000000000003",
       chainId: 1,
@@ -214,7 +214,7 @@ describe("Index DTF governance proposals", () => {
     } as unknown as DtfClient;
 
     await expect(
-      getIndexDtfProposal(client, {
+      getProposal(client, {
         proposalId: "missing",
         address: "0x0000000000000000000000000000000000000003",
         chainId: 1,
@@ -305,7 +305,7 @@ describe("Index DTF governance proposals", () => {
       },
     } as unknown as DtfClient;
 
-    const proposals = await getIndexDtfProposals(client, {
+    const proposals = await getProposals(client, {
       address: "0x0000000000000000000000000000000000000007",
       chainId: 1,
     });
@@ -403,7 +403,7 @@ describe("Index DTF governance proposals", () => {
       },
     } as unknown as DtfClient;
 
-    const proposals = await getIndexDtfProposals(client, {
+    const proposals = await getProposals(client, {
       address: "0x0000000000000000000000000000000000000007",
       chainId: 1,
       governanceAddresses: [

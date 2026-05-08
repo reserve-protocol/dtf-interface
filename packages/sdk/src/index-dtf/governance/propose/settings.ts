@@ -19,7 +19,7 @@ import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import { dtfIndexGovernanceAbi } from "../../abis/dtf-index-governance.js";
 import { dtfIndexStakingVaultAbi } from "../../abis/dtf-index-staking-vault.js";
 import { timelockAbi } from "../../abis/timelock.js";
-import { getIndexDtf, getIndexDtfVersion } from "../../dtf/index.js";
+import { getDtf, getVersion } from "../../dtf/index.js";
 import {
   buildIndexDtfRemoveFromBasketCall,
   buildIndexDtfSetAuctionLengthCall,
@@ -33,6 +33,7 @@ import {
 import type { IndexDtfVersion } from "../../versions.js";
 import {
   buildRevenueDistributionCall,
+  validateRevenueDistributionInput,
   type IndexDtfRevenueDistributionInput,
   type IndexDtfRevenueRecipientInput,
 } from "./revenue.js";
@@ -359,10 +360,25 @@ async function buildIndexDtfSettingsCalls(
       (params.governanceChanges?.quorumPercent !== undefined &&
         params.quorumDenominator === undefined));
   const hasIndexDtfCall = hasIndexDtfSettingsCall(params);
-  const [dtf, indexDtfVersion] = await Promise.all([
-    getDtfIfNeeded(client, params, needsDtf),
-    hasIndexDtfCall ? getIndexDtfSettingsVersion(client, params) : undefined,
-  ]);
+
+  if (
+    hasIndexDtfCall &&
+    !needsDtf &&
+    params.timelock === undefined &&
+    params.dtf === undefined
+  ) {
+    getProposalTimelock(undefined);
+  }
+
+  const dtf = await getDtfIfNeeded(client, params, needsDtf);
+
+  if (params.revenueDistribution) {
+    validateRevenueDistributionInput(dtf, params.revenueDistribution);
+  }
+
+  const indexDtfVersion = hasIndexDtfCall
+    ? await getIndexDtfSettingsVersion(client, params)
+    : undefined;
   const dtfAddress = getAddress(params.address);
   const adminGovernance = getAuthorityGovernance(dtf?.governance.admin.primary);
   const governance = params.governance ?? adminGovernance?.address;
@@ -566,7 +582,7 @@ async function getDtfIfNeeded(
   params: DtfParams & { readonly dtf?: IndexDtf },
   needed: boolean,
 ): Promise<IndexDtf | undefined> {
-  return params.dtf ?? (needed ? getIndexDtf(client, params) : undefined);
+  return params.dtf ?? (needed ? getDtf(client, params) : undefined);
 }
 
 async function getIndexDtfSettingsVersion(
@@ -577,7 +593,7 @@ async function getIndexDtfSettingsVersion(
     return params.version;
   }
 
-  return await getIndexDtfVersion(client, params) as IndexDtfVersion;
+  return await getVersion(client, params) as IndexDtfVersion;
 }
 
 function hasIndexDtfSettingsCall(params: BuildIndexDtfSettingsProposalParams): boolean {

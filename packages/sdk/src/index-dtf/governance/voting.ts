@@ -15,7 +15,7 @@ import type {
 import { dtfIndexGovernanceAbi } from "../abis/dtf-index-governance.js";
 import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
 
-export async function getIndexDtfVoterState(
+export async function getVoterState(
   client: DtfClient,
   params: GetIndexDtfVoterStateParams,
 ): Promise<IndexDtfVoterState> {
@@ -59,7 +59,7 @@ export async function getIndexDtfVoterState(
   };
 }
 
-export async function getIndexDtfProposerState(
+export async function getProposerState(
   client: DtfClient,
   params: GetIndexDtfProposerStateParams,
 ): Promise<IndexDtfProposerState> {
@@ -94,7 +94,7 @@ export async function getIndexDtfProposerState(
   };
 }
 
-export async function getIndexDtfProposalVotes(
+export async function getProposalVotes(
   client: DtfClient,
   params: GetIndexDtfProposalVotesParams,
 ): Promise<IndexDtfProposalVotes> {
@@ -115,7 +115,7 @@ export async function getIndexDtfProposalVotes(
   };
 }
 
-export async function getIndexDtfProposalVoterState(
+export async function getProposalVoterState(
   client: DtfClient,
   params: GetIndexDtfProposalVoterStateParams,
 ): Promise<IndexDtfProposalVoterState> {

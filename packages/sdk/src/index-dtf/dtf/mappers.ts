@@ -3,6 +3,11 @@ import type { SupportedChainId } from "../../defaults.js";
 import { SdkError } from "../../errors.js";
 import { mapAmount } from "../../lib/utils.js";
 import type {
+  ReserveApiIndexDtfBasketSnapshot,
+  ReserveApiIndexDtfPrice,
+  ReserveApiIndexDtfPriceHistory,
+} from "../../client/api.js";
+import type {
   Authority,
   DtfParams,
   Governance,
@@ -18,6 +23,8 @@ import type {
   IndexDtf,
   PriceControl,
   IndexDtfPrice,
+  IndexDtfBasketSnapshot,
+  IndexDtfPricePoint,
 } from "../../types/index-dtf.js";
 import type { GetIndexDtfQuery } from "../subgraph/dtf.generated.js";
 
@@ -57,21 +64,6 @@ type IndexDtfBrandResponseProfile = {
   readonly name: string;
   readonly icon: string;
   readonly link: string;
-};
-
-export type IndexDtfPriceResponse = {
-  readonly price: number;
-  readonly marketCap: number;
-  readonly totalSupply: number;
-  readonly basket: readonly {
-    readonly address: string;
-    readonly amount: number;
-    readonly amountRaw: string;
-    readonly decimals: number;
-    readonly price: number;
-    readonly weight: string;
-    readonly priceSource?: string;
-  }[];
 };
 
 export function mapIndexDtf(
@@ -208,7 +200,7 @@ export function mapIndexDtfBrand(
 }
 
 export function mapIndexDtfPrice(
-  response: IndexDtfPriceResponse,
+  response: ReserveApiIndexDtfPrice,
   params: DtfParams,
 ): IndexDtfPrice {
   return {
@@ -230,6 +222,37 @@ export function mapIndexDtfPrice(
       };
     }),
     timestamp: Date.now(),
+  };
+}
+
+export function mapIndexDtfPriceHistory(
+  response: ReserveApiIndexDtfPriceHistory,
+): readonly IndexDtfPricePoint[] {
+  return response.timeseries.map((point) => ({
+    timestamp: point.timestamp,
+    price: point.price,
+    marketCap: point.marketCap,
+    totalSupply: point.totalSupply,
+    basket: point.basket.map((asset) => ({
+      address: getAddress(asset.address),
+      price: asset.price,
+      amount: asset.amount,
+    })),
+  }));
+}
+
+export function mapIndexDtfBasketSnapshot(
+  response: ReserveApiIndexDtfBasketSnapshot,
+): IndexDtfBasketSnapshot {
+  return {
+    price: response.price,
+    basket: response.basket.map((asset) => ({
+      address: getAddress(asset.address),
+      symbol: asset.symbol,
+      decimals: asset.decimals,
+      price: asset.price,
+      weight: asset.weight,
+    })),
   };
 }
 

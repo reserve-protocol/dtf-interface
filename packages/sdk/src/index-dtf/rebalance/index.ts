@@ -5,7 +5,7 @@ import type {
   GetIndexDtfRebalancesParams,
 } from "../../types/index-dtf.js";
 
-export async function getIndexDtfRebalance(
+export async function getRebalance(
   _client: DtfClient,
   _params: GetIndexDtfRebalanceParams,
 ): Promise<unknown> {
@@ -16,7 +16,7 @@ export async function getIndexDtfRebalance(
   });
 }
 
-export async function getIndexDtfRebalances(
+export async function getRebalances(
   _client: DtfClient,
   _params: GetIndexDtfRebalancesParams,
 ): Promise<readonly unknown[]> {

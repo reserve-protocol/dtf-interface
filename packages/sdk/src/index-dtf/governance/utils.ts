@@ -43,7 +43,7 @@ type MutableProposalVotingState = {
   abstain: number;
 };
 
-export function getIndexDtfProposalGovernanceAddresses(
+export function getProposalGovernanceAddresses(
   dtf: IndexDtf,
 ): readonly Address[] {
   return dedupeAddresses([

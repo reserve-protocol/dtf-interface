@@ -5,7 +5,6 @@ import type {
   Authority,
   AuthorityGroup,
   BlockNumber,
-  BlockNumberParams,
   DtfParams,
   Governance,
   Token,
@@ -137,9 +136,27 @@ export type IndexDtfBasketWithPrice = Omit<IndexDtfPrice, "basket"> & {
   basket: Record<Address, IndexDtfBasketAssetWithPrice>;
 };
 
+export type IndexDtfBasketSnapshot = {
+  readonly price: number;
+  readonly basket: readonly {
+    readonly address: Address;
+    readonly symbol: string;
+    readonly decimals: number;
+    readonly price: number;
+    readonly weight: string;
+  }[];
+};
+
 export type IndexDtfPricePoint = {
   readonly timestamp: number;
   readonly price: number;
+  readonly marketCap: number;
+  readonly totalSupply: number;
+  readonly basket: readonly {
+    readonly address: Address;
+    readonly price: number;
+    readonly amount: number;
+  }[];
 };
 
 export type IndexDtfBrandProfile = {
@@ -199,32 +216,42 @@ export type IndexDtf = {
 
 export type IndexDtfInput = IndexDtf | DtfParams;
 
+type IndexDtfIdentityParams = Omit<DtfParams, "blockNumber">;
+
 export type GetFullIndexDtfOptions = {
   readonly brand?: boolean;
 };
 
-export type GetFullIndexDtfParams = DtfParams & GetFullIndexDtfOptions;
+export type GetFullIndexDtfParams = IndexDtfIdentityParams &
+  GetFullIndexDtfOptions;
 
-export type GetIndexDtfParams = DtfParams & BlockNumberParams;
+export type GetIndexDtfParams = GetFullIndexDtfParams;
 
-export type GetIndexDtfOptions = BlockNumberParams;
+export type GetIndexDtfOptions = GetFullIndexDtfOptions;
 
-export type GetIndexDtfBasketParams = DtfParams & BlockNumberParams;
+export type GetIndexDtfBasketParams = DtfParams;
 
-export type GetIndexDtfBasketOptions = BlockNumber | BlockNumberParams;
+export type GetIndexDtfBasketOptions = BlockNumber | Pick<DtfParams, "blockNumber">;
 
-export type GetIndexDtfVersionParams = DtfParams & BlockNumberParams;
+export type GetIndexDtfBasketSnapshotParams = DtfParams;
 
-export type GetIndexDtfTotalSupplyParams = DtfParams & BlockNumberParams;
+export type GetIndexDtfBasketSnapshotOptions = BlockNumber | Pick<
+  DtfParams,
+  "blockNumber"
+>;
 
-export type GetIndexDtfTotalAssetsParams = DtfParams & BlockNumberParams;
+export type GetIndexDtfVersionParams = DtfParams;
+
+export type GetIndexDtfTotalSupplyParams = DtfParams;
+
+export type GetIndexDtfTotalAssetsParams = DtfParams;
 
 export type GetIndexDtfPriceParams = DtfParams;
 
-export type GetIndexDtfPriceHistoryParams = DtfParams & {
-  readonly from?: number;
-  readonly to?: number;
-  readonly interval?: "hour" | "day" | "week" | "month";
+export type GetIndexDtfPriceHistoryParams = IndexDtfIdentityParams & {
+  readonly from: number;
+  readonly to: number;
+  readonly interval: "1h" | "1d";
 };
 
 export type GetIndexDtfPriceHistoryOptions = Pick<

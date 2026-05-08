@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { DtfClient } from "../../client.js";
-import { getIndexDtfDelegates } from "./index.js";
+import { getDelegates } from "./index.js";
 
 describe("Index DTF governance delegates", () => {
   it("lists delegates ordered by delegated votes from the subgraph", async () => {
@@ -26,7 +26,7 @@ describe("Index DTF governance delegates", () => {
       },
     } as unknown as DtfClient;
 
-    const delegates = await getIndexDtfDelegates(client, {
+    const delegates = await getDelegates(client, {
       chainId: 1,
       stToken: "0x0000000000000000000000000000000000000001",
       limit: 5,

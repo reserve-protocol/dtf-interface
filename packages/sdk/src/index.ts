@@ -7,7 +7,22 @@ export {
   yieldDtfs as yieldDtfCatalog,
 } from "@dtf-interface/dtf-catalog";
 export type { DtfClient, DtfChainConfig, DtfClientConfig } from "./client.js";
-export type { DtfClientApi } from "./client/api.js";
+export type {
+  DtfClientApi,
+  GetBasketTokenPricesWithSnapshotParams,
+  GetDtfPricesParams,
+  GetHistoricalTokenPricesParams,
+  GetIndexDtfBasketSnapshotParams as GetReserveApiIndexDtfBasketSnapshotParams,
+  GetIndexDtfPriceHistoryParams as GetReserveApiIndexDtfPriceHistoryParams,
+  GetIndexDtfPriceParams as GetReserveApiIndexDtfPriceParams,
+  ReserveApiDtfBasketToken,
+  ReserveApiDtfPrice,
+  ReserveApiHistoricalTokenPrices,
+  ReserveApiIndexDtfBasketSnapshot,
+  ReserveApiIndexDtfPrice,
+  ReserveApiIndexDtfPriceHistory,
+  TokenPriceWithSnapshot,
+} from "./client/api.js";
 export type {
   DtfClientReadContractParameters,
   DtfClientViem,
@@ -36,23 +51,32 @@ export type {
 export type { SubgraphDocument } from "./transports/subgraph.js";
 export { getDiscoverDtfs } from "./actions/get-discover-dtfs.js";
 export {
-  buildIndexDtfBasket,
+  buildIndexDtfInitialBasket,
   buildIndexDtfBasketProposal,
-  buildIndexDtfTargetBasket,
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
+  buildIndexDtfStartRebalance,
+  buildIndexDtfStartRebalanceArgs,
+  cancelIndexDtfProposal,
   createIndexDtfNamespace,
   createIndexDtfRef,
+  delegateIndexDtfVotes,
+  executeIndexDtfProposal,
   getAllIndexDtfProposals,
+  getDtf,
   getFullIndexDtf,
   getIndexDtf,
   getIndexDtfBasket,
+  getIndexDtfBasketSharesFromUnits,
+  getIndexDtfBasketSnapshot,
+  getIndexDtfBasketUnitsFromShares,
   getIndexDtfBasketWithPrice,
   getIndexDtfBrand,
   getIndexDtfDelegates,
   getIndexDtfGuardians,
   getIndexDtfPrice,
+  getIndexDtfPriceFromBalances,
   getIndexDtfProposal,
   getIndexDtfProposalGovernanceAddresses,
   getIndexDtfProposalVoterState,
@@ -76,12 +100,9 @@ export {
   indexDtfGovernanceChangesSchema,
   indexDtfSettingsProposalSchema,
   listIndexDtfs,
-  writeAccountDelegate,
-  writeProposal,
-  writeProposalCancel,
-  writeProposalExecute,
-  writeProposalQueue,
-  writeProposalVote,
+  proposeIndexDtfProposal,
+  queueIndexDtfProposal,
+  voteIndexDtfProposal,
 } from "./index-dtf/index.js";
 export {
   getTokenData,
@@ -90,7 +111,7 @@ export {
   getTokensData,
 } from "./tokens/index.js";
 export type { IndexDtfRef } from "./index-dtf/index.js";
-export type * from "./index-dtf/dtf/basket/index.js";
+export type * from "./index-dtf/dtf/basket-utils.js";
 export type * from "./index-dtf/governance/propose/index.js";
 export type * from "./types/index.js";
 export type {

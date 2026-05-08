@@ -41,15 +41,10 @@ export type DtfClientWriteContractParameters = Omit<
 
 export type DtfClientReadContractParameters<
   abi extends Abi | readonly unknown[] = Abi,
-  functionName extends ContractFunctionName<
-    abi,
-    "pure" | "view"
-  > = ContractFunctionName<abi, "pure" | "view">,
-  args extends ContractFunctionArgs<
-    abi,
-    "pure" | "view",
-    functionName
-  > = ContractFunctionArgs<abi, "pure" | "view", functionName>,
+  functionName extends ContractFunctionName<abi, "pure" | "view"> =
+    ContractFunctionName<abi, "pure" | "view">,
+  args extends ContractFunctionArgs<abi, "pure" | "view", functionName> =
+    ContractFunctionArgs<abi, "pure" | "view", functionName>,
 > = ReadContractParameters<abi, functionName, args> & {
   readonly chainId: SupportedChainId;
 };
@@ -98,9 +93,11 @@ export function createDtfClientViem({
       chainId,
       ...params
     }: DtfClientReadContractParameters<abi, functionName, args>) {
-      return viem.getPublicClient(chainId).readContract(
-        params as ReadContractParameters<abi, functionName, args>,
-      ) as Promise<ReadContractReturnType<abi, functionName, args>>;
+      return viem
+        .getPublicClient(chainId)
+        .readContract(
+          params as ReadContractParameters<abi, functionName, args>,
+        ) as Promise<ReadContractReturnType<abi, functionName, args>>;
     },
   };
 

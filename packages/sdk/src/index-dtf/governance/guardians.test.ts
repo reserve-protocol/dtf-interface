@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getIndexDtfGuardians } from "./index.js";
+import { getGuardians } from "./index.js";
 
 describe("Index DTF governance guardians", () => {
   it("groups owner, basket, and dao guardians from DTF governance", async () => {
-    const guardians = await getIndexDtfGuardians({} as never, {
+    const guardians = await getGuardians({} as never, {
       dtf: {
         governance: {
           admin: {

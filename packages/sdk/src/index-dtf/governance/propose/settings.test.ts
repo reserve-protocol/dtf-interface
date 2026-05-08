@@ -5,7 +5,6 @@ import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import { dtfIndexGovernanceAbi } from "../../abis/dtf-index-governance.js";
 import { dtfIndexStakingVaultAbi } from "../../abis/dtf-index-staking-vault.js";
 import { timelockAbi } from "../../abis/timelock.js";
-import { indexDtfV6WriteAbi } from "./calls.js";
 import {
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
@@ -137,7 +136,7 @@ describe("settings proposal builders", () => {
     ).toBe("setAuctionLength");
   });
 
-  it("does not fetch the DTF version when an explicit version is passed", async () => {
+  it("does not fetch the DTF version when explicit v5 version is passed", async () => {
     const readContract = vi.fn(async () => "5.0.0");
     const client = createDtfClient({
       chains: {
@@ -153,16 +152,45 @@ describe("settings proposal builders", () => {
       governance: GOVERNANCE,
       timelock: TIMELOCK,
       auctionLength: 30,
-      version: "6.0.0",
+      version: "5.0.0",
     });
 
     expect(readContract).not.toHaveBeenCalled();
     expect(
       decodeFunctionData({
-        abi: indexDtfV6WriteAbi,
+        abi: dtfIndexAbi,
         data: proposal.calldatas[0]!,
       }).functionName,
-    ).toBe("setMaxAuctionLength");
+    ).toBe("setAuctionLength");
+  });
+
+  it("rejects non-v5 settings proposal versions", async () => {
+    await expect(
+      buildIndexDtfSettingsProposal({} as never, {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        timelock: TIMELOCK,
+        auctionLength: 30,
+        version: "6.0.0" as never,
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_INPUT" });
+  });
+
+  it("builds price-control-only settings calls", async () => {
+    const proposal = await buildIndexDtfSettingsProposal({} as never, {
+      address: DTF,
+      chainId: 1,
+      governance: GOVERNANCE,
+      timelock: TIMELOCK,
+      dtf: createDtfContext({ weightControl: true, priceControl: 0 }),
+      priceControl: 2,
+      version: "5.0.0",
+    });
+
+    const decoded = decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[0]! });
+    expect(decoded.functionName).toBe("setRebalanceControl");
+    expect(decoded.args[0]).toEqual({ weightControl: true, priceControl: 2 });
   });
 
   it("fetches the DTF version when no explicit version is passed", async () => {
@@ -564,7 +592,7 @@ describe("settings proposal builders", () => {
       chainId: 1,
       governance: GOVERNANCE,
       dtf: createDtfContext(),
-      version: "6.0.0",
+      version: "5.0.0",
       revenueDistribution: {
         platformFee: 20,
         governanceShare: 0,
@@ -574,7 +602,7 @@ describe("settings proposal builders", () => {
     });
 
     const decoded = decodeFunctionData({
-      abi: indexDtfV6WriteAbi,
+      abi: dtfIndexAbi,
       data: proposal.calldatas[0]!,
     });
     const recipients = decoded.args[0] as readonly { readonly portion: bigint }[];
@@ -680,6 +708,8 @@ describe("settings proposal builders", () => {
 function createDtfContext(
   options: {
     readonly voteLock?: boolean;
+    readonly weightControl?: boolean;
+    readonly priceControl?: 0 | 1 | 2;
     readonly feeRecipients?: readonly {
       readonly address: `0x${string}`;
       readonly percentage: string;
@@ -704,6 +734,10 @@ function createDtfContext(
       metadata: { brandManagers: [] },
       rebalance: { auctionLaunchers: [] },
       deployment: { deployer: DEPLOYER },
+    },
+    rebalance: {
+      weightControl: options.weightControl ?? false,
+      priceControl: options.priceControl ?? 0,
     },
     fees: { recipients: options.feeRecipients ?? [] },
   };

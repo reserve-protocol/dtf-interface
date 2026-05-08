@@ -4,15 +4,15 @@ import { SdkError } from "../../../errors.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import type { PriceControl } from "../../../types/index-dtf.js";
 import { dtfIndexAbi as indexDtfV5Abi } from "../../abis/dtf-index-abi.js";
-import { folioArtifactAbi as indexDtfV6Abi } from "../../abis/folio-artifact.js";
 import {
+  INDEX_DTF_VERSION_5_0_0,
   getIndexDtfOperation,
-  type IndexDtfVersion,
   type IndexDtfOperation,
 } from "../../versions.js";
 
 export const indexDtfV5WriteAbi = indexDtfV5Abi;
-export const indexDtfV6WriteAbi = indexDtfV6Abi;
+
+export type IndexDtfWriteVersion = typeof INDEX_DTF_VERSION_5_0_0;
 
 export type IndexDtfFeeRecipient = {
   readonly recipient: Address;
@@ -21,7 +21,7 @@ export type IndexDtfFeeRecipient = {
 
 export type BuildIndexDtfCallParams = {
   readonly address: Address;
-  readonly version: IndexDtfVersion;
+  readonly version: IndexDtfWriteVersion;
 };
 
 export type BuildIndexDtfTokenCallParams = BuildIndexDtfCallParams & {
@@ -226,8 +226,16 @@ function encodeIndexDtfCall(
   address: Address,
   operation: IndexDtfOperation,
   args: readonly unknown[],
-  version: IndexDtfVersion,
+  version: IndexDtfWriteVersion,
 ): IndexDtfCall {
+  if (version !== INDEX_DTF_VERSION_5_0_0) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "Index DTF call builders currently support v5 only",
+      meta: { version },
+    });
+  }
+
   const { abi, functionName } = getIndexDtfOperation(operation, version);
 
   return {

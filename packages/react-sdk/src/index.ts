@@ -53,6 +53,28 @@ export {
   useIndexDtfVoterState,
 } from "./hooks.js";
 export {
+  accountPortfolioQueryOptions,
+  indexDtfCurrentRebalanceQueryOptions,
+  indexDtfExposureQueryOptions,
+  indexDtfIssuanceStateQueryOptions,
+  indexDtfRebalancesQueryOptions,
+  indexDtfRevenueQueryOptions,
+  indexDtfStatusQueryOptions,
+  indexDtfTransactionsQueryOptions,
+  indexDtfVoteLockStateQueryOptions,
+} from "./index-dtf-query-options.js";
+export {
+  useAccountPortfolio,
+  useIndexDtfCurrentRebalance,
+  useIndexDtfExposure,
+  useIndexDtfIssuanceState,
+  useIndexDtfRebalances,
+  useIndexDtfRevenue,
+  useIndexDtfStatus,
+  useIndexDtfTransactions,
+  useIndexDtfVoteLockState,
+} from "./index-dtf-extra-hooks.js";
+export {
   useIndexDtfCancelMutation,
   useIndexDtfDelegateMutation,
   useIndexDtfExecuteMutation,

@@ -7,8 +7,7 @@ import {
 } from "viem";
 import { SdkError } from "../../../errors.js";
 import type { IndexDtf } from "../../../types/index-dtf.js";
-import type { IndexDtfVersion } from "../../versions.js";
-import { buildIndexDtfSetFeeRecipientsCall } from "./calls.js";
+import { buildIndexDtfSetFeeRecipientsCall, type IndexDtfWriteVersion } from "./calls.js";
 
 const MAX_FEE_RECIPIENTS = 64;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -37,7 +36,7 @@ export function buildRevenueDistributionCall(
   dtfAddress: Address,
   dtf: IndexDtf | undefined,
   distribution: IndexDtfRevenueDistributionInput | undefined,
-  version: IndexDtfVersion,
+  version: IndexDtfWriteVersion,
 ): RevenueDistributionCall | undefined {
   if (!distribution) {
     return undefined;

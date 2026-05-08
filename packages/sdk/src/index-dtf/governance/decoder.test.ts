@@ -1,11 +1,9 @@
 import { encodeFunctionData } from "viem";
 import { describe, expect, it } from "vitest";
 import { dtfIndexProposalAbiCatalog } from "../abis/dtf-index-proposal.js";
+import { folioArtifactAbi } from "../abis/folio-artifact.js";
 import { dtfIndexProposalAbi } from "../abis/proposal-decoder.js";
-import {
-  indexDtfV5WriteAbi,
-  indexDtfV6WriteAbi,
-} from "./propose/calls.js";
+import { indexDtfV5WriteAbi } from "./propose/calls.js";
 import { decodeIndexDtfProposalCalldatas } from "./decoder.js";
 
 const DTF = "0x0000000000000000000000000000000000000001";
@@ -28,7 +26,7 @@ describe("Index DTF proposal calldata decoder", () => {
       args: [1800n],
     });
     const latestAuctionLengthCalldata = encodeFunctionData({
-      abi: indexDtfV6WriteAbi,
+      abi: folioArtifactAbi,
       functionName: "setMaxAuctionLength",
       args: [1800n],
     });

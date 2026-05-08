@@ -13,7 +13,8 @@ Working notes for Reserve protocol context that affects SDK implementation. Keep
 
 ## Basket Model
 
-- The protocol tracks token units/weights, not human percentages.
+- The protocol tracks D27 token weights and D18 basket-unit limits, not human percentages.
+- A Basket Unit `{BU}` is usually configured 1:1 with one DTF share, but the contracts allow `{BU/share}` limits in `(0, 1e27]`.
 - A basket asset has two useful views:
   - Units: token amount per DTF share or basket unit, using token decimals.
   - Shares: percentage of basket USD value, derived from units and prices.
@@ -105,6 +106,33 @@ getStartRebalance(FolioVersion.V5, supply, tokens, balances, decimals, targetBas
 
 Current supported Index DTF basket proposal flow is v5-only. Do not add v2/v4 compatibility paths unless product support comes back.
 
+Contract constraints verified against `reserve-index-dtf` v5:
+
+- `startRebalance()` is callable only by `REBALANCE_MANAGER`.
+- `startRebalance()` ends the current auction path by replacing rebalance details for the provided token set.
+- `tokens.length` must be greater than 1.
+- Every token param must have `inRebalance = true`, a nonzero/non-self token address, and no duplicates.
+- `ttl` must be nonzero, greater than or equal to `auctionLauncherWindow`, and no more than `MAX_TTL`.
+- `MAX_TTL = 604800 * 4`, or 4 weeks.
+- Rebalance limits must satisfy `0 < low <= spot <= high <= 1e27`.
+- If `weightControl = false`, token weights must be fixed: `low == spot == high`.
+- If `weightControl = true`, weights can be ranges, but `spot == 0` requires `high == 0` so permissionless basket removal cannot be griefed.
+- Price ranges must satisfy `0 < low < high <= 1e45` and `high <= 100 * low`.
+- `bidsEnabled` is read from the Folio setting when the rebalance starts; it is not a proposal calldata arg.
+- If the Folio trade allowlist is enabled, non-allowlisted tokens can only be traded out with zero weights.
+
+Contract constants that affect SDK validation/defaults:
+
+- `AUCTION_WARMUP = 30` seconds.
+- `MIN_AUCTION_LENGTH = 120` seconds.
+- `MAX_AUCTION_LENGTH = 604800` seconds.
+- `RESTRICTED_AUCTION_BUFFER = 120` seconds.
+- `MAX_LIMIT = 1e27`.
+- `MAX_WEIGHT = 1e54`.
+- `MAX_TOKEN_BUY_AMOUNT = 1e36`.
+- `MAX_TOKEN_PRICE = 1e45`.
+- `MAX_TOKEN_PRICE_RANGE = 100`.
+
 Mode mapping:
 
 - Native proposal from shares: `weightControl = true`, `deferWeights = false`.
@@ -148,9 +176,32 @@ Governance notes:
 
 - Proposal IDs are unique and very long decimal strings.
 - Do not add DTF membership checks around Index DTF proposal IDs unless the data model changes.
+- V5 governed deployments can have separate owner and trading governors.
+- The trading timelock receives `REBALANCE_MANAGER` unless existing basket managers are provided at deploy time.
+- The owner timelock receives `DEFAULT_ADMIN_ROLE` and owns the Folio proxy admin.
 - Register labels owner timelock guardians as guardians, but the contract role is Timelock `CANCELLER_ROLE`.
 - Basket settings proposals normally target basket/rebalance governance.
 - DAO/settings proposals may target owner governance, basket governance, timelock, DTF, staking token, or vote-lock governance depending on the change.
+
+## Deploy Contract Flow
+
+- `FolioDeployer.deployFolio()` requires `assets.length == amounts.length`.
+- The deployer transfers each initial token amount from `msg.sender` into the new Folio proxy before calling `initialize()`.
+- `Folio.initialize()` requires nonzero `initialShares`, at least one asset, nonzero asset addresses, and a nonzero Folio balance for each asset.
+- Initial DTF shares are minted to the deploy caller.
+- The deployer grants roles after initialization: owner admin, basket managers as `REBALANCE_MANAGER`, auction launchers as `AUCTION_LAUNCHER`, and brand managers as `BRAND_MANAGER`.
+
+## Auction Contract Flow
+
+- `openAuction()` is callable only by `AUCTION_LAUNCHER` during the restricted window.
+- `openAuctionUnrestricted()` is callable by anyone after `restrictedUntil`, uses all in-rebalance tokens, collapses weights/limits to spot values, and uses initial prices.
+- Only one auction is intended to be live at a time; opening a new restricted auction closes the previous auction if needed.
+- Non-atomic auctions start after `AUCTION_WARMUP` and run for the selected auction length.
+- Atomic swaps require `priceControl = ATOMIC_SWAP`, use equal low/high prices for all tokens, and start/end in the same timestamp.
+- Permissionless `bid()` reverts when the rebalance's captured `bidsEnabled` is false.
+- Trusted fills are the alternative async fill path when the trusted filler registry is configured and enabled.
+- `totalAssets()` includes active trusted-fill balances, but contract docs still warn consumers to check `stateChangeActive()` before strongly relying on Folio state mid-swap.
+- `totalSupply()` includes pending fee shares, so SDK price/share calculations should use RPC `totalSupply()` rather than cached ERC20 supply assumptions.
 
 ## SDK Implementation Rules
 

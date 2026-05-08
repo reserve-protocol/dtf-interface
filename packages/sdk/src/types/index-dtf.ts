@@ -258,18 +258,3 @@ export type GetIndexDtfPriceHistoryOptions = Pick<
   GetIndexDtfPriceHistoryParams,
   "from" | "interval" | "to"
 >;
-
-export type GetIndexDtfRebalancesParams = IndexDtfInput & {
-  readonly limit?: number;
-  readonly offset?: number;
-};
-
-export type GetIndexDtfRebalancesOptions = Pick<
-  GetIndexDtfRebalancesParams,
-  "limit" | "offset"
->;
-
-export type GetIndexDtfRebalanceParams = {
-  readonly id: string;
-  readonly chainId: SupportedChainId;
-};

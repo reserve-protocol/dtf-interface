@@ -15,6 +15,12 @@ describe("createDtfSdk", () => {
     expect(typeof sdk.index.getVersion).toBe("function");
     expect(typeof sdk.index.getTotalSupply).toBe("function");
     expect(typeof sdk.index.getTotalAssets).toBe("function");
+    expect(typeof sdk.index.discover).toBe("function");
+    expect(typeof sdk.index.getStatus).toBe("function");
+    expect(typeof sdk.index.getExposure).toBe("function");
+    expect(typeof sdk.index.getTransactions).toBe("function");
+    expect(typeof sdk.index.getIssuanceState).toBe("function");
+    expect(typeof sdk.index.getRevenue).toBe("function");
     expect(typeof sdk.index.getProposals).toBe("function");
     expect(typeof sdk.index.getProposal).toBe("function");
     expect(typeof sdk.index.getAllProposals).toBe("function");
@@ -26,6 +32,9 @@ describe("createDtfSdk", () => {
     expect("write" in sdk.index).toBe(false);
     expect(typeof sdk.index.getRebalances).toBe("function");
     expect(typeof sdk.index.getRebalance).toBe("function");
+    expect(typeof sdk.index.getCurrentRebalance).toBe("function");
+    expect(typeof sdk.index.getVoteLockState).toBe("function");
+    expect(typeof sdk.portfolio.get).toBe("function");
   });
 
   it("creates a zero-network Index DTF ref", () => {
@@ -46,6 +55,11 @@ describe("createDtfSdk", () => {
     expect(typeof dtf.getVersion).toBe("function");
     expect(typeof dtf.getTotalSupply).toBe("function");
     expect(typeof dtf.getTotalAssets).toBe("function");
+    expect(typeof dtf.getStatus).toBe("function");
+    expect(typeof dtf.getExposure).toBe("function");
+    expect(typeof dtf.getTransactions).toBe("function");
+    expect(typeof dtf.getIssuanceState).toBe("function");
+    expect(typeof dtf.getRevenue).toBe("function");
     expect(typeof dtf.getProposals).toBe("function");
     expect(typeof dtf.buildBasketProposal).toBe("function");
     expect(typeof dtf.buildBasketSettingsProposal).toBe("function");
@@ -54,6 +68,8 @@ describe("createDtfSdk", () => {
     expect("buildSettingsCalls" in dtf).toBe(false);
     expect(typeof dtf.governance).toBe("function");
     expect(typeof dtf.getRebalances).toBe("function");
+    expect(typeof dtf.getCurrentRebalance).toBe("function");
+    expect(typeof dtf.getVoteLockState).toBe("function");
   });
 
   it("keeps index and yield subgraph configuration separate", () => {

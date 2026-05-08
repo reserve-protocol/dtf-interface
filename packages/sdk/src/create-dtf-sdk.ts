@@ -7,6 +7,7 @@ import {
 import type { SupportedChainId } from "./defaults.js";
 import { SdkError } from "./errors.js";
 import { createIndexDtfNamespace } from "./index-dtf/index.js";
+import { createPortfolioNamespace } from "./portfolio/index.js";
 
 export type DtfSdkConfig = DtfClientConfig & {
   readonly client?: DtfClient;
@@ -15,6 +16,7 @@ export type DtfSdkConfig = DtfClientConfig & {
 export type DtfSdk = {
   readonly client: DtfClient;
   readonly index: ReturnType<typeof createIndexDtfNamespace>;
+  readonly portfolio: ReturnType<typeof createPortfolioNamespace>;
   readonly yield: {
     readonly get: (params: {
       readonly address: Address | string;
@@ -29,10 +31,12 @@ export type DtfSdk = {
 export function createDtfSdk(config: DtfSdkConfig = {}): DtfSdk {
   const client = config.client ?? createDtfClient(config);
   const index = createIndexDtfNamespace(client);
+  const portfolio = createPortfolioNamespace(client);
 
   return {
     client,
     index,
+    portfolio,
     yield: {
       get: async () => {
         throw new SdkError({

@@ -13,7 +13,7 @@ import {
   getBasketUnitsFromShares,
   getDtfPriceFromBalances,
   type IndexDtfBasketToken,
-} from "../../dtf/basket-utils.js";
+} from "../../dtf/basket/index.js";
 import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import { buildIndexDtfBasketProposal } from "./basket.js";
 
@@ -71,13 +71,15 @@ describe("basket conversion helpers", () => {
       }),
     ).toThrow("positive number");
 
+  });
+
+  it("rejects zero address basket tokens", () => {
     expect(() =>
-      getBasketUnitsFromShares({
-        tokens: [token(USDC, 6, 1)],
-        shares: [500000000000000000n, 500000000000000000n],
-        targetValueUsd: 100,
+      getBasketSharesFromUnits({
+        tokens: [token("0x0000000000000000000000000000000000000000", 18, 1)],
+        units: [1n],
       }),
-    ).toThrow("same length");
+    ).toThrow("Basket token address cannot be the zero address");
   });
 });
 
@@ -354,6 +356,101 @@ describe("buildIndexDtfBasketProposal", () => {
       }),
     ).rejects.toThrow("ttl must be a positive number of seconds");
   });
+
+  it("rejects ttl shorter than the auction launcher window", async () => {
+    await expect(
+      buildIndexDtfBasketProposal(testClient(), {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        supply: parseEther("1"),
+        currentBalances: {
+          [USDC]: parseUnits("1", 6),
+          [DAI]: parseUnits("1", 18),
+        },
+        prices: {
+          [USDC]: 1,
+          [DAI]: 1,
+        },
+        priceErrors: {
+          [USDC]: 0.5,
+          [DAI]: 0.5,
+        },
+        weightControl: true,
+        auctionLauncherWindow: 3600,
+        ttl: 3599,
+        basket: {
+          type: "shares",
+          tokens: [
+            { address: USDC, share: "50" },
+            { address: DAI, share: "50" },
+          ],
+        },
+      }),
+    ).rejects.toThrow("ttl must be greater than or equal to auctionLauncherWindow");
+  });
+
+  it("rejects ttl longer than the protocol max", async () => {
+    await expect(
+      buildIndexDtfBasketProposal(testClient(), {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        supply: parseEther("1"),
+        currentBalances: {
+          [USDC]: parseUnits("1", 6),
+          [DAI]: parseUnits("1", 18),
+        },
+        prices: {
+          [USDC]: 1,
+          [DAI]: 1,
+        },
+        priceErrors: {
+          [USDC]: 0.5,
+          [DAI]: 0.5,
+        },
+        weightControl: true,
+        ttl: 604_800 * 4 + 1,
+        basket: {
+          type: "shares",
+          tokens: [
+            { address: USDC, share: "50" },
+            { address: DAI, share: "50" },
+          ],
+        },
+      }),
+    ).rejects.toThrow("ttl must be less than or equal to 4 weeks");
+  });
+
+  it("rejects DTF address as a basket token", async () => {
+    await expect(
+      buildIndexDtfBasketProposal(testClient(), {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        supply: parseEther("1"),
+        currentBalances: {
+          [USDC]: parseUnits("1", 6),
+        },
+        prices: {
+          [USDC]: 1,
+          [DTF]: 1,
+        },
+        priceErrors: {
+          [USDC]: 0.5,
+          [DTF]: 0.5,
+        },
+        weightControl: true,
+        basket: {
+          type: "shares",
+          tokens: [
+            { address: USDC, share: "50" },
+            { address: DTF, share: "50" },
+          ],
+        },
+      }),
+    ).rejects.toThrow("Basket token cannot be the DTF address");
+  });
 });
 
 function testClient() {
@@ -383,7 +480,7 @@ function testClient() {
 }
 
 function token(
-  address: typeof USDC | typeof DAI | typeof WBTC,
+  address: typeof USDC | typeof DAI | typeof WBTC | Address,
   decimals: number,
   price: number,
 ): IndexDtfBasketToken {

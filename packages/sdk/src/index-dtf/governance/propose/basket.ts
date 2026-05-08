@@ -1,4 +1,4 @@
-import { encodeFunctionData, getAddress, type Address, type Hex } from "viem";
+import { encodeFunctionData, getAddress, zeroAddress, type Address, type Hex } from "viem";
 import type { DtfClient } from "../../../client.js";
 import { SdkError } from "../../../errors.js";
 import type { DtfParams } from "../../../types/common.js";
@@ -18,9 +18,11 @@ import {
   type IndexDtfBasketTokenInput,
   type IndexDtfBasketUnitsInput,
   type StartRebalanceArgsV5,
-} from "../../dtf/basket-utils.js";
+} from "../../dtf/basket/index.js";
 import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import { getDtf } from "../../dtf/index.js";
+
+const MAX_REBALANCE_TTL = 604_800n * 4n;
 
 export {
   indexDtfBasketSchema as indexDtfBasketProposalSchema,
@@ -60,24 +62,16 @@ export async function buildIndexDtfBasketProposal(
   client: DtfClient,
   params: BuildIndexDtfBasketProposalParams,
 ): Promise<BuiltIndexDtfBasketProposal> {
+  const windows = getRebalanceWindows(params);
+  validateBasketTokenAddresses(params);
   const dtf = await getDtfForProposal(client, params);
   const rebalance = await buildIndexDtfStartRebalance(client, {
     ...params,
     ...(dtf ? { dtf } : {}),
   });
-  const auctionLauncherWindow = toSeconds(
-    params.auctionLauncherWindow ?? DEFAULT_AUCTION_LAUNCHER_WINDOW,
-    "auctionLauncherWindow",
-  );
-  const ttl =
-    params.ttl === undefined
-      ? auctionLauncherWindow +
-        toSeconds(params.permissionlessWindow ?? 0, "permissionlessWindow")
-      : toSeconds(params.ttl, "ttl");
   const context: BuiltIndexDtfBasketProposalContext = {
     ...rebalance,
-    auctionLauncherWindow,
-    ttl,
+    ...windows,
   };
   const authority = getProposalAuthority(params, dtf);
 
@@ -154,25 +148,98 @@ function getProposalAuthority(
   return { governance: resolvedGovernance };
 }
 
-function toSeconds(value: number | bigint, field: string): bigint {
-  if (typeof value === "bigint") {
-    if (value < 0n) {
+function validateBasketTokenAddresses(params: BuildIndexDtfBasketProposalParams) {
+  const dtfAddress = getAddress(params.address);
+
+  for (const token of params.basket.tokens) {
+    const address = getAddress(token.address);
+
+    if (address.toLowerCase() === zeroAddress) {
       throw new SdkError({
         code: "INVALID_INPUT",
-        message: `${field} must be a positive number of seconds`,
+        message: "Basket token address cannot be the zero address",
+        meta: { address },
+      });
+    }
+    if (address.toLowerCase() === dtfAddress.toLowerCase()) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: "Basket token cannot be the DTF address",
+        meta: { address, dtfAddress },
+      });
+    }
+  }
+}
+
+function getRebalanceWindows(params: {
+  readonly auctionLauncherWindow?: number | bigint;
+  readonly permissionlessWindow?: number | bigint;
+  readonly ttl?: number | bigint;
+}): { auctionLauncherWindow: bigint; ttl: bigint } {
+  const auctionLauncherWindow = toSeconds(
+    params.auctionLauncherWindow ?? DEFAULT_AUCTION_LAUNCHER_WINDOW,
+    "auctionLauncherWindow",
+  );
+  const ttl =
+    params.ttl === undefined
+      ? auctionLauncherWindow +
+        toSeconds(params.permissionlessWindow ?? 0, "permissionlessWindow")
+      : toSeconds(params.ttl, "ttl", { allowZero: false });
+
+  if (ttl === 0n) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "ttl must be a positive number of seconds",
+      meta: { ttl },
+    });
+  }
+  if (ttl < auctionLauncherWindow) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "ttl must be greater than or equal to auctionLauncherWindow",
+      meta: { ttl, auctionLauncherWindow },
+    });
+  }
+  if (ttl > MAX_REBALANCE_TTL) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "ttl must be less than or equal to 4 weeks",
+      meta: { ttl, maxTtl: MAX_REBALANCE_TTL },
+    });
+  }
+
+  return { auctionLauncherWindow, ttl };
+}
+
+function toSeconds(
+  value: number | bigint,
+  field: string,
+  options: { readonly allowZero?: boolean } = {},
+): bigint {
+  const allowZero = options.allowZero ?? true;
+  if (typeof value === "bigint") {
+    if (value < 0n || (!allowZero && value === 0n)) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: `${field} must be a ${allowZero ? "non-negative" : "positive"} number of seconds`,
         meta: { [field]: value },
       });
     }
 
     return value;
   }
-  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
+  if (
+    !Number.isFinite(value) ||
+    !Number.isInteger(value) ||
+    value < 0 ||
+    (!allowZero && value === 0)
+  ) {
     throw new SdkError({
       code: "INVALID_INPUT",
-      message: `${field} must be a positive number of seconds`,
+      message: `${field} must be a ${allowZero ? "non-negative" : "positive"} number of seconds`,
       meta: { [field]: value },
     });
   }
 
-  return BigInt(Math.round(value));
+  return BigInt(value);
 }

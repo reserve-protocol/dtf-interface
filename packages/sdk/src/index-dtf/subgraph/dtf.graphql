@@ -270,8 +270,14 @@ query GetIndexDtfDelegates($stToken: ID!, $limit: Int = 10) {
   }
 }
 
-query GetIndexDtfRebalances($dtf: String!) {
-  rebalances(where: { dtf: $dtf }, orderBy: timestamp, orderDirection: desc) {
+query GetIndexDtfRebalances($dtf: String!, $limit: Int = 100, $offset: Int = 0) {
+  rebalances(
+    where: { dtf: $dtf }
+    orderBy: timestamp
+    orderDirection: desc
+    first: $limit
+    skip: $offset
+  ) {
     id
     nonce
     tokens {
@@ -294,6 +300,82 @@ query GetIndexDtfRebalances($dtf: String!) {
     transactionHash
     blockNumber
     timestamp
+  }
+}
+
+query GetIndexDtfRebalance($id: ID!) {
+  rebalance(id: $id) {
+    id
+    nonce
+    tokens {
+      address
+      name
+      symbol
+      decimals
+    }
+    priceControl
+    weightLowLimit
+    weightSpotLimit
+    weightHighLimit
+    rebalanceLowLimit
+    rebalanceSpotLimit
+    rebalanceHighLimit
+    priceLowLimit
+    priceHighLimit
+    restrictedUntil
+    availableUntil
+    transactionHash
+    blockNumber
+    timestamp
+  }
+}
+
+query GetIndexDtfRebalanceByNonce($dtf: String!, $nonce: BigInt!) {
+  rebalances(where: { dtf: $dtf, nonce: $nonce }, first: 1) {
+    id
+    nonce
+    tokens {
+      address
+      name
+      symbol
+      decimals
+    }
+    priceControl
+    weightLowLimit
+    weightSpotLimit
+    weightHighLimit
+    rebalanceLowLimit
+    rebalanceSpotLimit
+    rebalanceHighLimit
+    priceLowLimit
+    priceHighLimit
+    restrictedUntil
+    availableUntil
+    transactionHash
+    blockNumber
+    timestamp
+  }
+}
+
+query GetIndexDtfTransactions($dtf: String!, $limit: Int = 50, $offset: Int = 0) {
+  transferEvents(
+    where: { token: $dtf, type_not: "TRANSFER" }
+    orderBy: timestamp
+    orderDirection: desc
+    first: $limit
+    skip: $offset
+  ) {
+    id
+    hash
+    amount
+    timestamp
+    to {
+      id
+    }
+    from {
+      id
+    }
+    type
   }
 }
 

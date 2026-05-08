@@ -5983,10 +5983,36 @@ export type GetIndexDtfDelegatesQuery = { stakingToken?: { id: string, totalDele
 
 export type GetIndexDtfRebalancesQueryVariables = Exact<{
   dtf: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
 export type GetIndexDtfRebalancesQuery = { rebalances: Array<{ id: string, nonce: string, priceControl: string, weightLowLimit: Array<string>, weightSpotLimit: Array<string>, weightHighLimit: Array<string>, rebalanceLowLimit: string, rebalanceSpotLimit: string, rebalanceHighLimit: string, priceLowLimit: Array<string>, priceHighLimit: Array<string>, restrictedUntil: string, availableUntil: string, transactionHash: string, blockNumber: string, timestamp: string, tokens: Array<{ address: string, name: string, symbol: string, decimals: number }> }> };
+
+export type GetIndexDtfRebalanceQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetIndexDtfRebalanceQuery = { rebalance?: { id: string, nonce: string, priceControl: string, weightLowLimit: Array<string>, weightSpotLimit: Array<string>, weightHighLimit: Array<string>, rebalanceLowLimit: string, rebalanceSpotLimit: string, rebalanceHighLimit: string, priceLowLimit: Array<string>, priceHighLimit: Array<string>, restrictedUntil: string, availableUntil: string, transactionHash: string, blockNumber: string, timestamp: string, tokens: Array<{ address: string, name: string, symbol: string, decimals: number }> } | null };
+
+export type GetIndexDtfRebalanceByNonceQueryVariables = Exact<{
+  dtf: Scalars['String']['input'];
+  nonce: Scalars['BigInt']['input'];
+}>;
+
+
+export type GetIndexDtfRebalanceByNonceQuery = { rebalances: Array<{ id: string, nonce: string, priceControl: string, weightLowLimit: Array<string>, weightSpotLimit: Array<string>, weightHighLimit: Array<string>, rebalanceLowLimit: string, rebalanceSpotLimit: string, rebalanceHighLimit: string, priceLowLimit: Array<string>, priceHighLimit: Array<string>, restrictedUntil: string, availableUntil: string, transactionHash: string, blockNumber: string, timestamp: string, tokens: Array<{ address: string, name: string, symbol: string, decimals: number }> }> };
+
+export type GetIndexDtfTransactionsQueryVariables = Exact<{
+  dtf: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetIndexDtfTransactionsQuery = { transferEvents: Array<{ id: string, hash: string, amount: string, timestamp: string, type: string, to?: { id: string } | null, from?: { id: string } | null }> };
 
 export type GetIndexDtfRebalanceAuctionsQueryVariables = Exact<{
   rebalanceId: Scalars['String']['input'];
@@ -6315,8 +6341,14 @@ export const GetIndexDtfDelegatesDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<GetIndexDtfDelegatesQuery, GetIndexDtfDelegatesQueryVariables>;
 export const GetIndexDtfRebalancesDocument = new TypedDocumentString(`
-    query GetIndexDtfRebalances($dtf: String!) {
-  rebalances(where: {dtf: $dtf}, orderBy: timestamp, orderDirection: desc) {
+    query GetIndexDtfRebalances($dtf: String!, $limit: Int = 100, $offset: Int = 0) {
+  rebalances(
+    where: {dtf: $dtf}
+    orderBy: timestamp
+    orderDirection: desc
+    first: $limit
+    skip: $offset
+  ) {
     id
     nonce
     tokens {
@@ -6342,6 +6374,85 @@ export const GetIndexDtfRebalancesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetIndexDtfRebalancesQuery, GetIndexDtfRebalancesQueryVariables>;
+export const GetIndexDtfRebalanceDocument = new TypedDocumentString(`
+    query GetIndexDtfRebalance($id: ID!) {
+  rebalance(id: $id) {
+    id
+    nonce
+    tokens {
+      address
+      name
+      symbol
+      decimals
+    }
+    priceControl
+    weightLowLimit
+    weightSpotLimit
+    weightHighLimit
+    rebalanceLowLimit
+    rebalanceSpotLimit
+    rebalanceHighLimit
+    priceLowLimit
+    priceHighLimit
+    restrictedUntil
+    availableUntil
+    transactionHash
+    blockNumber
+    timestamp
+  }
+}
+    `) as unknown as TypedDocumentString<GetIndexDtfRebalanceQuery, GetIndexDtfRebalanceQueryVariables>;
+export const GetIndexDtfRebalanceByNonceDocument = new TypedDocumentString(`
+    query GetIndexDtfRebalanceByNonce($dtf: String!, $nonce: BigInt!) {
+  rebalances(where: {dtf: $dtf, nonce: $nonce}, first: 1) {
+    id
+    nonce
+    tokens {
+      address
+      name
+      symbol
+      decimals
+    }
+    priceControl
+    weightLowLimit
+    weightSpotLimit
+    weightHighLimit
+    rebalanceLowLimit
+    rebalanceSpotLimit
+    rebalanceHighLimit
+    priceLowLimit
+    priceHighLimit
+    restrictedUntil
+    availableUntil
+    transactionHash
+    blockNumber
+    timestamp
+  }
+}
+    `) as unknown as TypedDocumentString<GetIndexDtfRebalanceByNonceQuery, GetIndexDtfRebalanceByNonceQueryVariables>;
+export const GetIndexDtfTransactionsDocument = new TypedDocumentString(`
+    query GetIndexDtfTransactions($dtf: String!, $limit: Int = 50, $offset: Int = 0) {
+  transferEvents(
+    where: {token: $dtf, type_not: "TRANSFER"}
+    orderBy: timestamp
+    orderDirection: desc
+    first: $limit
+    skip: $offset
+  ) {
+    id
+    hash
+    amount
+    timestamp
+    to {
+      id
+    }
+    from {
+      id
+    }
+    type
+  }
+}
+    `) as unknown as TypedDocumentString<GetIndexDtfTransactionsQuery, GetIndexDtfTransactionsQueryVariables>;
 export const GetIndexDtfRebalanceAuctionsDocument = new TypedDocumentString(`
     query GetIndexDtfRebalanceAuctions($rebalanceId: String!) {
   auctions(where: {rebalance: $rebalanceId}) {

@@ -3,8 +3,6 @@ import { erc20Abi } from "viem";
 import { SdkError } from "../errors.js";
 import type { Token } from "../types/common.js";
 
-export * from "./prices.js";
-
 export async function getTokenData(
   publicClient: PublicClient,
   address: Address,

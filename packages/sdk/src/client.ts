@@ -64,10 +64,7 @@ function createChainConfig(
               }
             : {}),
           ...override,
-          rpcUrls: [
-            ...(override?.rpcUrls ?? []),
-            ...DEFAULT_RPC_URLS[chainId],
-          ],
+          rpcUrls: [...(override?.rpcUrls ?? []), ...DEFAULT_RPC_URLS[chainId]],
         },
       ];
     }),

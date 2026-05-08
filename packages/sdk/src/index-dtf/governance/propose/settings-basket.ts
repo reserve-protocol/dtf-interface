@@ -46,12 +46,14 @@ async function buildIndexDtfBasketSettingsCalls(
     timelock,
     calls: [
       ...buildGovernanceCalls({
+        chainId: params.chainId,
         governance,
         timelock,
         changes: params.governanceChanges,
         quorumDenominator: params.quorumDenominator ?? rebalanceGovernance?.quorumDenominator,
       }),
       ...buildRoleDiffCalls({
+        chainId: params.chainId,
         target: timelock,
         role: CANCELLER_ROLE,
         current: currentGuardians,

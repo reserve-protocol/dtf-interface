@@ -1,4 +1,6 @@
-import { encodeFunctionData, keccak256, toBytes, type Address, type Hex } from "viem";
+import { keccak256, toBytes, type Address, type Hex } from "viem";
+import { prepareContractCall } from "../../../contract-call.js";
+import type { SupportedChainId } from "../../../defaults.js";
 import { SdkError } from "../../../errors.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
@@ -16,12 +18,14 @@ export const CANCELLER_ROLE = keccak256(toBytes("CANCELLER_ROLE"));
 
 export function buildRoleDiffCalls({
   abi,
+  chainId,
   current,
   next,
   role,
   target,
 }: {
   readonly target: Address | undefined;
+  readonly chainId: SupportedChainId;
   readonly role: Hex;
   readonly current: readonly Address[];
   readonly next: readonly Address[] | undefined;
@@ -39,29 +43,49 @@ export function buildRoleDiffCalls({
   const calls: IndexDtfCall[] = [];
   for (const address of current) {
     if (!next.some((nextAddress) => sameAddress(nextAddress, address))) {
-      calls.push(encodeRoleCall(target, abi, "revokeRole", role, address));
+      calls.push(
+        prepareRoleCall(chainId, target, abi, "revokeRole", role, address),
+      );
     }
   }
   for (const address of next) {
     if (!current.some((currentAddress) => sameAddress(currentAddress, address))) {
-      calls.push(encodeRoleCall(target, abi, "grantRole", role, address));
+      calls.push(
+        prepareRoleCall(chainId, target, abi, "grantRole", role, address),
+      );
     }
   }
 
   return calls;
 }
 
-function encodeRoleCall(
+function prepareRoleCall(
+  chainId: SupportedChainId,
   target: Address,
   abi: typeof timelockAbi | typeof dtfIndexAbi,
   functionName: "grantRole" | "revokeRole",
   role: Hex,
   address: Address,
 ): IndexDtfCall {
-  return {
-    target,
-    calldata: encodeFunctionData({ abi, functionName, args: [role, address] } as never),
-  };
+  const args = [role, address] as const;
+
+  if (abi === timelockAbi) {
+    return prepareContractCall({
+      chainId,
+      address: target,
+      abi: timelockAbi,
+      functionName,
+      args,
+    });
+  }
+
+  return prepareContractCall({
+    chainId,
+    address: target,
+    abi: dtfIndexAbi,
+    functionName,
+    args,
+  });
 }
 
 function sameAddress(a: Address, b: Address): boolean {

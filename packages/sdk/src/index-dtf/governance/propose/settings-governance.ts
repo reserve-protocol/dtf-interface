@@ -1,5 +1,7 @@
 import { Decimal } from "decimal.js-light";
-import { encodeFunctionData, parseEther, type Address } from "viem";
+import { parseEther, type Address } from "viem";
+import { prepareContractCall } from "../../../contract-call.js";
+import type { SupportedChainId } from "../../../defaults.js";
 import { SdkError } from "../../../errors.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import { dtfIndexGovernanceAbi } from "../../abis/dtf-index-governance.js";
@@ -8,11 +10,13 @@ import type { IndexDtfGovernanceChanges } from "./settings-types.js";
 
 export function buildGovernanceCalls({
   changes,
+  chainId,
   governance,
   quorumDenominator,
   timelock,
 }: {
   readonly governance: Address | undefined;
+  readonly chainId: SupportedChainId;
   readonly timelock: Address | undefined;
   readonly quorumDenominator: number | undefined;
   readonly changes: IndexDtfGovernanceChanges | undefined;
@@ -29,13 +33,37 @@ export function buildGovernanceCalls({
 
   const calls: IndexDtfCall[] = [];
   if (changes.votingDelay !== undefined) {
-    calls.push(encodeGovernanceCall(governance, "setVotingDelay", [changes.votingDelay]));
+    calls.push(
+      prepareContractCall({
+        chainId,
+        address: governance,
+        abi: dtfIndexGovernanceAbi,
+        functionName: "setVotingDelay",
+        args: [changes.votingDelay],
+      }),
+    );
   }
   if (changes.votingPeriod !== undefined) {
-    calls.push(encodeGovernanceCall(governance, "setVotingPeriod", [changes.votingPeriod]));
+    calls.push(
+      prepareContractCall({
+        chainId,
+        address: governance,
+        abi: dtfIndexGovernanceAbi,
+        functionName: "setVotingPeriod",
+        args: [changes.votingPeriod],
+      }),
+    );
   }
   if (changes.proposalThreshold !== undefined) {
-    calls.push(encodeGovernanceCall(governance, "setProposalThreshold", [encodePercent(changes.proposalThreshold)]));
+    calls.push(
+      prepareContractCall({
+        chainId,
+        address: governance,
+        abi: dtfIndexGovernanceAbi,
+        functionName: "setProposalThreshold",
+        args: [encodePercent(changes.proposalThreshold)],
+      }),
+    );
   }
   if (changes.quorumPercent !== undefined) {
     if (quorumDenominator === undefined) {
@@ -44,9 +72,15 @@ export function buildGovernanceCalls({
         message: "quorumDenominator is required to build a quorum proposal",
       });
     }
-    calls.push(encodeGovernanceCall(governance, "updateQuorumNumerator", [
-      getQuorumNumerator(changes.quorumPercent, quorumDenominator),
-    ]));
+    calls.push(
+      prepareContractCall({
+        chainId,
+        address: governance,
+        abi: dtfIndexGovernanceAbi,
+        functionName: "updateQuorumNumerator",
+        args: [getQuorumNumerator(changes.quorumPercent, quorumDenominator)],
+      }),
+    );
   }
   if (changes.executionDelay !== undefined) {
     if (!timelock) {
@@ -55,40 +89,52 @@ export function buildGovernanceCalls({
         message: "timelock is required to build an execution delay proposal",
       });
     }
-    calls.push({
-      target: timelock,
-      calldata: encodeFunctionData({
+    const functionName = "updateDelay";
+    const args = [BigInt(Math.round(changes.executionDelay))] as const;
+
+    calls.push(
+      prepareContractCall({
+        chainId,
+        address: timelock,
         abi: timelockAbi,
-        functionName: "updateDelay",
-        args: [BigInt(Math.round(changes.executionDelay))],
+        functionName,
+        args,
       }),
-    });
+    );
   }
 
   return calls;
 }
 
-function encodeGovernanceCall(target: Address, functionName: string, args: readonly unknown[]): IndexDtfCall {
-  return {
-    target,
-    calldata: encodeFunctionData({
-      abi: dtfIndexGovernanceAbi,
-      functionName,
-      args,
-    } as never),
-  };
-}
-
 function validateGovernanceChanges(changes: IndexDtfGovernanceChanges) {
-  if (changes.votingDelay !== undefined) assertNumberRange(changes.votingDelay, "votingDelay", 0);
-  if (changes.votingPeriod !== undefined) assertNumberRange(changes.votingPeriod, "votingPeriod", 0);
-  if (changes.proposalThreshold !== undefined) assertNumberRange(changes.proposalThreshold, "proposalThreshold", 0, 100);
-  if (changes.quorumPercent !== undefined) assertNumberRange(changes.quorumPercent, "quorumPercent", 0, 100);
-  if (changes.executionDelay !== undefined) assertNumberRange(changes.executionDelay, "executionDelay", 0);
+  if (changes.votingDelay !== undefined) {
+    assertNumberRange(changes.votingDelay, "votingDelay", 0);
+  }
+  if (changes.votingPeriod !== undefined) {
+    assertNumberRange(changes.votingPeriod, "votingPeriod", 0);
+  }
+  if (changes.proposalThreshold !== undefined) {
+    assertNumberRange(changes.proposalThreshold, "proposalThreshold", 0, 100);
+  }
+  if (changes.quorumPercent !== undefined) {
+    assertNumberRange(changes.quorumPercent, "quorumPercent", 0, 100);
+  }
+  if (changes.executionDelay !== undefined) {
+    assertNumberRange(changes.executionDelay, "executionDelay", 0);
+  }
 }
 
-export function assertNumberRange(value: number, field: string, min: number, max?: number) {
-  if (!Number.isFinite(value) || value < min || (max !== undefined && value > max)) {
+export function assertNumberRange(
+  value: number,
+  field: string,
+  min: number,
+  max?: number,
+) {
+  if (
+    !Number.isFinite(value) ||
+    value < min ||
+    (max !== undefined && value > max)
+  ) {
     throw new SdkError({
       code: "INVALID_INPUT",
       message: max === undefined

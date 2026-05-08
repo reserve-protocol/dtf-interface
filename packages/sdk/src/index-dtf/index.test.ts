@@ -1,11 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PublicClient } from "viem";
 import { createDtfClient } from "../client.js";
-import { createIndexDtfRef } from "./index.js";
+import { createIndexDtfNamespace, createIndexDtfRef } from "./index.js";
 
 describe("Index DTF namespace", () => {
-  const account = "0x0000000000000000000000000000000000000009";
-
   it("passes blockNumber to ref basket shorthand", async () => {
     const readContract = vi.fn(async () => [
       ["0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"],
@@ -69,39 +67,33 @@ describe("Index DTF namespace", () => {
     expect(readContract).toHaveBeenCalledTimes(3);
   });
 
-  it("binds ref governance writes to the ref chain", async () => {
-    const writeContract = vi.fn(async () => "0xabc");
+  it("binds ref proposal vote calls to the ref chain", () => {
     const dtf = createIndexDtfRef({} as never, {
       address: "0x0000000000000000000000000000000000000001",
       chainId: 8453,
     });
 
-    await dtf.governance({ writeContract } as never).vote({
-      account,
+    const call = dtf.prepareVote({
       governance: "0x0000000000000000000000000000000000000002",
       proposalId: "1",
       support: 1,
     });
 
-    expect(writeContract).toHaveBeenCalledWith({
-      chain: expect.objectContaining({ id: 8453 }),
-      account,
-      address: "0x0000000000000000000000000000000000000002",
-      abi: expect.anything(),
-      functionName: "castVote",
-      args: [1n, 1],
-    });
+    expect(call.chainId).toBe(8453);
+    expect(call.contract.address).toBe(
+      "0x0000000000000000000000000000000000000002",
+    );
+    expect(call.contract.functionName).toBe("castVote");
+    expect(call.contract.args).toEqual([1n, 1]);
   });
 
-  it("accepts proposal payloads directly for ref queue writes", async () => {
-    const writeContract = vi.fn(async () => "0xabc");
+  it("accepts proposal payloads directly for ref queue calls", () => {
     const dtf = createIndexDtfRef({} as never, {
       address: "0x0000000000000000000000000000000000000001",
       chainId: 8453,
     });
 
-    await dtf.governance({ writeContract } as never).queue({
-      account,
+    const call = dtf.prepareQueueProposal({
       proposal: {
         governance: "0x0000000000000000000000000000000000000002",
         timelock: "0x0000000000000000000000000000000000000003",
@@ -111,13 +103,51 @@ describe("Index DTF namespace", () => {
       },
     });
 
-    expect(writeContract).toHaveBeenCalledWith(
-      expect.objectContaining({
-        chain: expect.objectContaining({ id: 8453 }),
-        account,
-        address: "0x0000000000000000000000000000000000000002",
-        functionName: "queue",
-      }),
+    expect(call.chainId).toBe(8453);
+    expect(call.contract.address).toBe(
+      "0x0000000000000000000000000000000000000002",
     );
+    expect(call.contract.functionName).toBe("queue");
+  });
+
+  it("prepares write calls through namespace and ref wrappers", () => {
+    const address = "0x0000000000000000000000000000000000000001";
+    const token = "0x0000000000000000000000000000000000000002";
+    const account = "0x0000000000000000000000000000000000000003";
+    const namespace = createIndexDtfNamespace({} as never);
+    const dtf = createIndexDtfRef({} as never, { address, chainId: 8453 });
+
+    const directMint = namespace.prepareMint({
+      address,
+      chainId: 1,
+      shares: 1n,
+      receiver: account,
+      minSharesOut: 1n,
+    });
+    const refMint = dtf.prepareMint({
+      shares: 1n,
+      receiver: account,
+      minSharesOut: 1n,
+    });
+    const auction = dtf.prepareOpenAuctionUnrestricted({ rebalanceNonce: 4n });
+    const plan = dtf.prepareVoteLockDepositPlan({
+      stToken: token,
+      amount: 1n,
+      delegateToSelf: true,
+      approval: { underlying: account, amount: 1n },
+    });
+
+    expect(directMint.chainId).toBe(1);
+    expect(directMint.contract.functionName).toBe("mint");
+    expect(refMint.chainId).toBe(8453);
+    expect(refMint.contract.address).toBe(address);
+    expect(auction.chainId).toBe(8453);
+    expect(auction.contract.functionName).toBe("openAuctionUnrestricted");
+    expect(plan.type).toBe("approval-required");
+    if (plan.type !== "approval-required") {
+      throw new Error("expected approval plan");
+    }
+    expect(plan.approvals[0]?.chainId).toBe(8453);
+    expect(plan.call.contract.functionName).toBe("depositAndDelegate");
   });
 });

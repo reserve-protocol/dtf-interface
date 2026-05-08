@@ -5,17 +5,17 @@ import type { IndexDtfCall } from "../../../types/governance.js";
 import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import { timelockAbi } from "../../abis/timelock.js";
 import {
-  buildIndexDtfRemoveFromBasketCall,
-  buildIndexDtfSetAuctionLengthCall,
-  buildIndexDtfSetBidsEnabledCall,
-  buildIndexDtfSetMandateCall,
-  buildIndexDtfSetMintFeeCall,
-  buildIndexDtfSetNameCall,
-  buildIndexDtfSetRebalanceControlCall,
-  buildIndexDtfSetTvlFeeCall,
+  prepareIndexDtfRemoveFromBasket,
+  prepareIndexDtfSetAuctionLength,
+  prepareIndexDtfSetBidsEnabled,
+  prepareIndexDtfSetMandate,
+  prepareIndexDtfSetMintFee,
+  prepareIndexDtfSetName,
+  prepareIndexDtfSetRebalanceControl,
+  prepareIndexDtfSetTvlFee,
 } from "./calls.js";
 import {
-  buildRevenueDistributionCall,
+  prepareRevenueDistribution,
   validateRevenueDistributionInput,
 } from "./revenue.js";
 import { buildGovernanceCalls } from "./settings-governance.js";
@@ -93,10 +93,11 @@ async function buildIndexDtfSettingsCalls(
   }
 
   calls.push(
-    ...buildRoleDiffCalls({ target: timelock ?? dtfAddress, role: GUARDIAN_ROLE, current: currentGuardians, next: params.guardians, abi: timelock ? timelockAbi : dtfIndexAbi }),
-    ...buildRoleDiffCalls({ target: dtfAddress, role: BRAND_MANAGER_ROLE, current: dtf?.roles.metadata.brandManagers ?? [], next: params.brandManagers, abi: dtfIndexAbi }),
-    ...buildRoleDiffCalls({ target: dtfAddress, role: AUCTION_LAUNCHER_ROLE, current: dtf?.roles.rebalance.auctionLaunchers ?? [], next: params.auctionLaunchers, abi: dtfIndexAbi }),
+    ...buildRoleDiffCalls({ chainId: params.chainId, target: timelock ?? dtfAddress, role: GUARDIAN_ROLE, current: currentGuardians, next: params.guardians, abi: timelock ? timelockAbi : dtfIndexAbi }),
+    ...buildRoleDiffCalls({ chainId: params.chainId, target: dtfAddress, role: BRAND_MANAGER_ROLE, current: dtf?.roles.metadata.brandManagers ?? [], next: params.brandManagers, abi: dtfIndexAbi }),
+    ...buildRoleDiffCalls({ chainId: params.chainId, target: dtfAddress, role: AUCTION_LAUNCHER_ROLE, current: dtf?.roles.rebalance.auctionLaunchers ?? [], next: params.auctionLaunchers, abi: dtfIndexAbi }),
     ...buildGovernanceCalls({
+      chainId: params.chainId,
       governance,
       timelock,
       changes: params.governanceChanges,
@@ -105,7 +106,7 @@ async function buildIndexDtfSettingsCalls(
   );
 
   const revenueCall = version && params.revenueDistribution
-    ? buildRevenueDistributionCall(dtfAddress, dtf, params.revenueDistribution, version)
+    ? prepareRevenueDistribution(dtfAddress, params.chainId, dtf, params.revenueDistribution, version)
     : undefined;
   if (revenueCall) calls.push(revenueCall);
 
@@ -121,13 +122,13 @@ function buildDtfCalls(
   const calls: IndexDtfCall[] = [];
 
   for (const token of params.removeBasketTokens ?? []) {
-    calls.push(buildIndexDtfRemoveFromBasketCall({ address, token, version }));
+    calls.push(prepareIndexDtfRemoveFromBasket({ address, chainId: params.chainId, token, version }));
   }
-  if (params.tokenName !== undefined) calls.push(buildIndexDtfSetNameCall({ address, name: params.tokenName, version }));
-  if (params.mandate !== undefined) calls.push(buildIndexDtfSetMandateCall({ address, mandate: params.mandate, version }));
-  if (params.mintFee !== undefined) calls.push(buildIndexDtfSetMintFeeCall({ address, percentage: params.mintFee, version }));
-  if (params.tvlFee !== undefined) calls.push(buildIndexDtfSetTvlFeeCall({ address, percentage: params.tvlFee, version }));
-  if (params.auctionLength !== undefined) calls.push(buildIndexDtfSetAuctionLengthCall({ address, auctionLength: params.auctionLength * 60, version }));
+  if (params.tokenName !== undefined) calls.push(prepareIndexDtfSetName({ address, chainId: params.chainId, name: params.tokenName, version }));
+  if (params.mandate !== undefined) calls.push(prepareIndexDtfSetMandate({ address, chainId: params.chainId, mandate: params.mandate, version }));
+  if (params.mintFee !== undefined) calls.push(prepareIndexDtfSetMintFee({ address, chainId: params.chainId, percentage: params.mintFee, version }));
+  if (params.tvlFee !== undefined) calls.push(prepareIndexDtfSetTvlFee({ address, chainId: params.chainId, percentage: params.tvlFee, version }));
+  if (params.auctionLength !== undefined) calls.push(prepareIndexDtfSetAuctionLength({ address, chainId: params.chainId, auctionLength: params.auctionLength * 60, version }));
   if (params.weightControl !== undefined || params.priceControl !== undefined) {
     const weightControl = params.weightControl ?? currentRebalanceControl?.weightControl;
     const priceControl = params.priceControl ?? currentRebalanceControl?.priceControl;
@@ -145,9 +146,9 @@ function buildDtfCalls(
         meta: { address, chainId: params.chainId },
       });
     }
-    calls.push(buildIndexDtfSetRebalanceControlCall({ address, weightControl, priceControl, version }));
+    calls.push(prepareIndexDtfSetRebalanceControl({ address, chainId: params.chainId, weightControl, priceControl, version }));
   }
-  if (params.bidsEnabled !== undefined) calls.push(buildIndexDtfSetBidsEnabledCall({ address, enabled: params.bidsEnabled, version }));
+  if (params.bidsEnabled !== undefined) calls.push(prepareIndexDtfSetBidsEnabled({ address, chainId: params.chainId, enabled: params.bidsEnabled, version }));
 
   return calls;
 }

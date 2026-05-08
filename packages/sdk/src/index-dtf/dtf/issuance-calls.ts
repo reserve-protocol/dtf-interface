@@ -1,57 +1,101 @@
-import {
-  encodeFunctionData,
-  getAddress,
-  type Address,
-  type Hex,
-} from "viem";
+import { getAddress, type Address } from "viem";
+import type { SupportedChainId } from "../../defaults.js";
 import { SdkError } from "../../errors.js";
+import type { ContractCallPlan } from "../../contract-call.js";
+import {
+  prepareContractCall,
+  prepareErc20Approval,
+} from "../../contract-call.js";
 import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
-import type { BuiltIndexDtfCall } from "../calls.js";
-import { buildErc20ApprovalCall } from "../calls.js";
 
-/** Builds v5 `mint(shares, receiver, minSharesOut)` calldata. */
-export function buildIndexDtfMintCall(params: {
+type MintArgs = readonly [bigint, Address, bigint];
+type RedeemArgs = readonly [bigint, Address, readonly Address[], readonly bigint[]];
+
+export type PrepareIndexDtfMintParams = {
   readonly address: Address;
+  readonly chainId: SupportedChainId;
   readonly shares: bigint;
   readonly receiver: Address;
   readonly minSharesOut: bigint;
-}): BuiltIndexDtfCall<readonly [bigint, Address, bigint]> {
-  const args = [params.shares, getAddress(params.receiver), params.minSharesOut] as const;
+};
 
-  return {
-    target: getAddress(params.address),
-    functionName: "mint",
-    args,
-    calldata: encodeFunctionData({ abi: dtfIndexAbi, functionName: "mint", args }) as Hex,
-  };
-}
-
-/** Builds v5 `redeem(shares, receiver, assets, minAmountsOut)` calldata. */
-export function buildIndexDtfRedeemCall(params: {
+export type PrepareIndexDtfRedeemParams = {
   readonly address: Address;
+  readonly chainId: SupportedChainId;
   readonly shares: bigint;
   readonly receiver: Address;
   readonly assets: readonly Address[];
   readonly minAmountsOut: readonly bigint[];
-}): BuiltIndexDtfCall<readonly [bigint, Address, readonly Address[], readonly bigint[]]> {
-  const assets = params.assets.map(getAddress);
-  const args = [params.shares, getAddress(params.receiver), assets, params.minAmountsOut] as const;
+};
 
-  return {
-    target: getAddress(params.address),
-    functionName: "redeem",
-    args,
-    calldata: encodeFunctionData({ abi: dtfIndexAbi, functionName: "redeem", args }) as Hex,
-  };
-}
-
-/** Builds one ERC20 approval call for a basket token and the DTF as spender. */
-export function buildIndexDtfBasketApprovalCall(params: {
+export type PrepareIndexDtfBasketApprovalParams = {
   readonly token: Address;
   readonly address: Address;
+  readonly chainId: SupportedChainId;
   readonly amount: bigint;
-}) {
-  return buildErc20ApprovalCall({
+};
+
+export type PrepareIndexDtfMintPlanParams = PrepareIndexDtfMintParams & {
+  readonly approvals?: readonly {
+    readonly token: Address;
+    readonly amount: bigint;
+  }[];
+};
+
+/** Prepares a v5 `mint(shares, receiver, minSharesOut)` contract call. */
+export function prepareIndexDtfMint(
+  params: PrepareIndexDtfMintParams,
+) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.address,
+    abi: dtfIndexAbi,
+    functionName: "mint",
+    args: getMintArgs(params),
+  });
+}
+
+/** Prepares the approval calls plus mint call for manual issuance. */
+export function prepareIndexDtfMintPlan(
+  params: PrepareIndexDtfMintPlanParams,
+): ContractCallPlan<
+  ReturnType<typeof prepareIndexDtfMint>,
+  ReturnType<typeof prepareIndexDtfBasketApproval>
+> {
+  const call = prepareIndexDtfMint(params);
+  const approvals = (params.approvals ?? []).map((approval) =>
+    prepareIndexDtfBasketApproval({
+      chainId: params.chainId,
+      address: params.address,
+      token: approval.token,
+      amount: approval.amount,
+    }),
+  );
+
+  return approvals.length
+    ? { type: "approval-required", approvals, call }
+    : { type: "call", call };
+}
+
+/** Prepares a v5 `redeem(shares, receiver, assets, minAmountsOut)` contract call. */
+export function prepareIndexDtfRedeem(
+  params: PrepareIndexDtfRedeemParams,
+) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.address,
+    abi: dtfIndexAbi,
+    functionName: "redeem",
+    args: getRedeemArgs(params),
+  });
+}
+
+/** Prepares one ERC20 approval call for a basket token and the DTF as spender. */
+export function prepareIndexDtfBasketApproval(
+  params: PrepareIndexDtfBasketApprovalParams,
+) {
+  return prepareErc20Approval({
+    chainId: params.chainId,
     token: params.token,
     spender: params.address,
     amount: params.amount,
@@ -74,4 +118,26 @@ export function getIndexDtfRedeemMinAmounts(
   const keepBps = BigInt(10_000 - slippageBps);
 
   return amounts.map((amount) => (amount * keepBps) / 10_000n);
+}
+
+function getMintArgs(params: {
+  readonly shares: bigint;
+  readonly receiver: Address;
+  readonly minSharesOut: bigint;
+}): MintArgs {
+  return [params.shares, getAddress(params.receiver), params.minSharesOut] as const;
+}
+
+function getRedeemArgs(params: {
+  readonly shares: bigint;
+  readonly receiver: Address;
+  readonly assets: readonly Address[];
+  readonly minAmountsOut: readonly bigint[];
+}): RedeemArgs {
+  return [
+    params.shares,
+    getAddress(params.receiver),
+    params.assets.map(getAddress),
+    params.minAmountsOut,
+  ] as const;
 }

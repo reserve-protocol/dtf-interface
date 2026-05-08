@@ -1,5 +1,4 @@
-export type * from "@dtf-interface/sdk";
-export { SdkError, isSdkError } from "@dtf-interface/sdk";
+export * from "@dtf-interface/sdk";
 export { useDtfSdk, DtfSdkProvider } from "./provider.js";
 export type { DtfSdkProviderProps } from "./provider.js";
 export { normalizeQueryKeyValue } from "./normalize-query-key.js";
@@ -74,12 +73,3 @@ export {
   useIndexDtfTransactions,
   useIndexDtfVoteLockState,
 } from "./index-dtf-extra-hooks.js";
-export {
-  useIndexDtfCancelMutation,
-  useIndexDtfDelegateMutation,
-  useIndexDtfExecuteMutation,
-  useIndexDtfProposeMutation,
-  useIndexDtfQueueMutation,
-  useIndexDtfVoteMutation,
-} from "./mutations.js";
-export type { DtfMutationOptions } from "./mutations.js";

@@ -1,5 +1,7 @@
 import { Decimal } from "decimal.js-light";
-import { encodeFunctionData, getAddress, parseEther, type Address, type Hex } from "viem";
+import { getAddress, parseEther, type Address } from "viem";
+import { prepareContractCall } from "../../../contract-call.js";
+import type { SupportedChainId } from "../../../defaults.js";
 import { SdkError } from "../../../errors.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import type { PriceControl } from "../../../types/index-dtf.js";
@@ -19,90 +21,97 @@ export type IndexDtfFeeRecipient = {
   readonly portion: bigint;
 };
 
-export type BuildIndexDtfCallParams = {
+export type PrepareIndexDtfCallParams = {
   readonly address: Address;
+  readonly chainId: SupportedChainId;
   readonly version: IndexDtfWriteVersion;
 };
 
-export type BuildIndexDtfTokenCallParams = BuildIndexDtfCallParams & {
+export type PrepareIndexDtfTokenCallParams = PrepareIndexDtfCallParams & {
   readonly token: Address;
 };
 
-export type BuildIndexDtfPercentageCallParams = BuildIndexDtfCallParams & {
+export type PrepareIndexDtfPercentageCallParams = PrepareIndexDtfCallParams & {
   readonly percentage: number;
 };
 
-export type BuildIndexDtfAuctionLengthCallParams = BuildIndexDtfCallParams & {
+export type PrepareIndexDtfAuctionLengthCallParams = PrepareIndexDtfCallParams & {
   readonly auctionLength: number | bigint;
 };
 
-export type BuildIndexDtfSetRebalanceControlCallParams = BuildIndexDtfCallParams & {
+export type PrepareIndexDtfSetRebalanceControlParams = PrepareIndexDtfCallParams & {
   readonly weightControl: boolean;
   readonly priceControl: PriceControl;
 };
 
-export function buildIndexDtfAddToBasketCall(
-  params: BuildIndexDtfTokenCallParams,
+export function prepareIndexDtfAddToBasket(
+  params: PrepareIndexDtfTokenCallParams,
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "addToBasket",
     [getAddress(params.token)],
     params.version,
   );
 }
 
-export function buildIndexDtfRemoveFromBasketCall(
-  params: BuildIndexDtfTokenCallParams,
+export function prepareIndexDtfRemoveFromBasket(
+  params: PrepareIndexDtfTokenCallParams,
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "removeFromBasket",
     [getAddress(params.token)],
     params.version,
   );
 }
 
-export function buildIndexDtfSetTvlFeeCall(
-  params: BuildIndexDtfPercentageCallParams,
+export function prepareIndexDtfSetTvlFee(
+  params: PrepareIndexDtfPercentageCallParams,
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setTVLFee",
     [encodePercent(params.percentage)],
     params.version,
   );
 }
 
-export function buildIndexDtfSetMintFeeCall(
-  params: BuildIndexDtfPercentageCallParams,
+export function prepareIndexDtfSetMintFee(
+  params: PrepareIndexDtfPercentageCallParams,
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setMintFee",
     [encodePercent(params.percentage)],
     params.version,
   );
 }
 
-export function buildIndexDtfSetSelfFeeCall(
-  params: BuildIndexDtfPercentageCallParams,
+export function prepareIndexDtfSetSelfFee(
+  params: PrepareIndexDtfPercentageCallParams,
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setSelfFee",
     [encodePercent(params.percentage)],
     params.version,
   );
 }
 
-export function buildIndexDtfSetFeeRecipientsCall(
-  params: BuildIndexDtfCallParams & {
+export function prepareIndexDtfSetFeeRecipients(
+  params: PrepareIndexDtfCallParams & {
     readonly recipients: readonly IndexDtfFeeRecipient[];
   },
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setFeeRecipients",
     [
       params.recipients.map((recipient) => ({
@@ -114,53 +123,57 @@ export function buildIndexDtfSetFeeRecipientsCall(
   );
 }
 
-export function buildIndexDtfSetAuctionLengthCall(
-  params: BuildIndexDtfAuctionLengthCallParams,
+export function prepareIndexDtfSetAuctionLength(
+  params: PrepareIndexDtfAuctionLengthCallParams,
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setAuctionLength",
     [toSeconds(params.auctionLength)],
     params.version,
   );
 }
 
-export function buildIndexDtfSetMandateCall(
-  params: BuildIndexDtfCallParams & { readonly mandate: string },
+export function prepareIndexDtfSetMandate(
+  params: PrepareIndexDtfCallParams & { readonly mandate: string },
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setMandate",
     [params.mandate],
     params.version,
   );
 }
 
-export function buildIndexDtfSetNameCall(
-  params: BuildIndexDtfCallParams & { readonly name: string },
+export function prepareIndexDtfSetName(
+  params: PrepareIndexDtfCallParams & { readonly name: string },
 ): IndexDtfCall {
-  return encodeIndexDtfCall(params.address, "setName", [params.name], params.version);
+  return prepareIndexDtfOperation(params.address, params.chainId, "setName", [params.name], params.version);
 }
 
-export function buildIndexDtfSetTrustedFillerRegistryCall(
-  params: BuildIndexDtfCallParams & {
+export function prepareIndexDtfSetTrustedFillerRegistry(
+  params: PrepareIndexDtfCallParams & {
     readonly registry: Address;
     readonly enabled: boolean;
   },
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setTrustedFillerRegistry",
     [getAddress(params.registry), params.enabled],
     params.version,
   );
 }
 
-export function buildIndexDtfSetRebalanceControlCall(
-  params: BuildIndexDtfSetRebalanceControlCallParams,
+export function prepareIndexDtfSetRebalanceControl(
+  params: PrepareIndexDtfSetRebalanceControlParams,
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setRebalanceControl",
     [
       {
@@ -172,58 +185,63 @@ export function buildIndexDtfSetRebalanceControlCall(
   );
 }
 
-export function buildIndexDtfSetBidsEnabledCall(
-  params: BuildIndexDtfCallParams & { readonly enabled: boolean },
+export function prepareIndexDtfSetBidsEnabled(
+  params: PrepareIndexDtfCallParams & { readonly enabled: boolean },
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setBidsEnabled",
     [params.enabled],
     params.version,
   );
 }
 
-export function buildIndexDtfSetTradeAllowlistEnabledCall(
-  params: BuildIndexDtfCallParams & { readonly enabled: boolean },
+export function prepareIndexDtfSetTradeAllowlistEnabled(
+  params: PrepareIndexDtfCallParams & { readonly enabled: boolean },
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "setTradeAllowlistEnabled",
     [params.enabled],
     params.version,
   );
 }
 
-export function buildIndexDtfAddToAllowlistCall(
-  params: BuildIndexDtfCallParams & { readonly tokens: readonly Address[] },
+export function prepareIndexDtfAddToAllowlist(
+  params: PrepareIndexDtfCallParams & { readonly tokens: readonly Address[] },
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "addToAllowlist",
     [params.tokens.map(getAddress)],
     params.version,
   );
 }
 
-export function buildIndexDtfRemoveFromAllowlistCall(
-  params: BuildIndexDtfCallParams & { readonly tokens: readonly Address[] },
+export function prepareIndexDtfRemoveFromAllowlist(
+  params: PrepareIndexDtfCallParams & { readonly tokens: readonly Address[] },
 ): IndexDtfCall {
-  return encodeIndexDtfCall(
+  return prepareIndexDtfOperation(
     params.address,
+    params.chainId,
     "removeFromAllowlist",
     [params.tokens.map(getAddress)],
     params.version,
   );
 }
 
-export function buildIndexDtfDeprecateCall(
-  params: BuildIndexDtfCallParams,
+export function prepareIndexDtfDeprecate(
+  params: PrepareIndexDtfCallParams,
 ): IndexDtfCall {
-  return encodeIndexDtfCall(params.address, "deprecate", [], params.version);
+  return prepareIndexDtfOperation(params.address, params.chainId, "deprecate", [], params.version);
 }
 
-function encodeIndexDtfCall(
+function prepareIndexDtfOperation(
   address: Address,
+  chainId: SupportedChainId,
   operation: IndexDtfOperation,
   args: readonly unknown[],
   version: IndexDtfWriteVersion,
@@ -238,14 +256,13 @@ function encodeIndexDtfCall(
 
   const { abi, functionName } = getIndexDtfOperation(operation, version);
 
-  return {
-    target: getAddress(address),
-    calldata: encodeFunctionData({
-      abi,
-      functionName,
-      args,
-    } as never) as Hex,
-  };
+  return prepareContractCall({
+    chainId,
+    address,
+    abi,
+    functionName,
+    args: args as never,
+  });
 }
 
 function encodePercent(percentage: number): bigint {

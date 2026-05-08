@@ -54,8 +54,8 @@ export function buildCallPayload({
     ...(governance ? { governance } : {}),
     ...(timelock ? { timelock } : {}),
     calls,
-    targets: calls.map((call) => call.target),
-    calldatas: calls.map((call) => call.calldata),
+    targets: calls.map((call) => call.to),
+    calldatas: calls.map((call) => call.data),
   };
 }
 

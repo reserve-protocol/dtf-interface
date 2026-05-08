@@ -6,7 +6,7 @@ This is the working design guide for `dtf-interface`. The project is still early
 
 `@dtf-interface/sdk` is the shared TypeScript domain layer for DTF integrations:
 
-- React apps, through a future `@dtf-interface/react` wrapper.
+- React apps, through `@dtf-interface/react-sdk`.
 - Node scripts and bots.
 - Server-side jobs.
 - Internal Reserve code where it makes sense.
@@ -22,14 +22,14 @@ const sdk = createDtfSdk();
 
 const dtf = await sdk.index.get({ address, chainId });
 const dtfs = await sdk.index.list({ chainId });
-const proposals = await sdk.index.proposals({ address, chainId });
+const proposals = await sdk.index.getProposals({ address, chainId });
 const price = await sdk.index.getPrice({ address, chainId });
 
 const cmc20 = sdk.index.ref({ address, chainId });
 const cmc20Details = await cmc20.get();
 const cmc20Historical = await cmc20.get({ blockNumber: 123n });
-const cmc20Basket = await cmc20.basket(123n);
-const cmc20Proposals = await cmc20.proposals();
+const cmc20Basket = await cmc20.getBasket(123n);
+const cmc20Proposals = await cmc20.getProposals();
 
 const ydtf = await sdk.yield.get({ address, chainId });
 ```
@@ -41,7 +41,7 @@ This gives the readability of a domain SDK without creating stateful DTF model o
 ```ts
 // Avoid this as the main public model.
 const dtf = new DTF(address, chainId);
-await dtf.proposals();
+await dtf.getProposals();
 ```
 
 Classes are not forbidden, but they should not be the default SDK surface. Stateless functions are easier to test, easier to compose, friendlier to tree-shaking, and less likely to hide network calls behind object lifecycle.
@@ -57,8 +57,8 @@ const dtf = sdk.index.ref({ address, chainId });
 
 await dtf.get();
 await dtf.getPrice();
-await dtf.proposals();
-await dtf.rebalances();
+await dtf.getProposals();
+await dtf.getRebalances();
 ```
 
 The ref must not fetch or cache data by itself. It is only a convenience layer over the functional methods.
@@ -66,8 +66,8 @@ The ref must not fetch or cache data by itself. It is only a convenience layer o
 Methods that can accept either plain identity or a hydrated DTF should do so when it improves ergonomics:
 
 ```ts
-await sdk.index.proposals({ address, chainId });
-await sdk.index.proposals(dtf);
+await sdk.index.getProposals({ address, chainId });
+await sdk.index.getProposals({ dtf });
 ```
 
 The SDK should not require `getIndexDtf()` before fetching proposals. Consumers can decide whether their cache layer should hydrate the DTF first.
@@ -95,7 +95,7 @@ sdk.index.get()
 sdk.index.getFull()
 sdk.index.getBrand()
 sdk.index.getPrice()
-sdk.index.proposals()
+sdk.index.getProposals()
 sdk.index.ref()
 ```
 
@@ -132,7 +132,7 @@ Transports should be thin wrappers around known libraries:
 - Native `fetch` for REST API calls.
 - viem public clients for RPC reads.
 
-Future write/setter methods should follow the same shape: the action receives `client` plus params, and `sdk.index.ref()` only binds the DTF identity. Wallet handling belongs at the viem/action boundary, not in DTF model objects.
+Write builders should follow the same shape: core SDK methods prepare `ContractCall` values, and `sdk.index.ref()` only binds product identity like DTF address and chain. Wallet handling belongs to the consumer that sends the prepared call, not in DTF model objects.
 
 Mappers translate raw GraphQL/API/RPC data into SDK domain types. They are where nullability, amount formatting, address normalization, and legacy fields should become clear.
 
@@ -142,29 +142,28 @@ Do not store a browser wallet client as stable SDK state.
 
 Viem treats public clients and wallet clients as low-level primitives. Public clients are stable enough to keep on the SDK client because they are chain/RPC configuration. Wallet clients are different: in React apps the connected account, connector, and chain can change while the SDK object continues to exist.
 
-Follow the Wagmi shape when we add setters:
+Core write surfaces should build calls, not send them:
 
 ```ts
-await sdk.index.ref({ address, chainId }).setMandate({
-  walletClient,
-  mandate,
+const call = sdk.index.ref({ address, chainId }).prepareVote({
+  governance,
+  proposalId,
+  support,
 });
 ```
 
-Core write actions should receive the wallet client at call time:
+React apps should pass the built call to wagmi/viem simulation and write flows owned by the app. The SDK can provide the exact `to`, `data`, `value`, ABI, function name, and args, but it should not hide app-specific wallet state.
+
+Bots or server scripts can create a viem wallet client through the SDK dependency when they want to avoid viem version drift:
 
 ```ts
-await setIndexDtfMandate(client, {
-  address,
+const walletClient = createWalletClient({
   chainId,
-  walletClient,
-  mandate,
+  privateKey,
 });
 ```
 
-The future React wrapper should resolve the current wallet client inside the hook or mutation, not when `createDtfSdk()` runs and not when `sdk.index.ref()` is created. That keeps wallet/account/chain changes fresh and prevents stale wallet clients from being captured by long-lived refs.
-
-For non-React bots or server scripts, passing a static Viem wallet client directly to the write method is fine because the caller owns that lifecycle.
+The React wrapper should keep query hooks focused on reads/builders. It should not capture wallet clients in long-lived SDK refs or provide protocol-specific mutation hooks unless there is a concrete product need.
 
 ## Data Boundaries
 

@@ -1,4 +1,5 @@
-import { encodeFunctionData, getAddress } from "viem";
+import { getAddress } from "viem";
+import { prepareContractCall } from "../../../contract-call.js";
 import type { DtfClient } from "../../../client.js";
 import { SdkError } from "../../../errors.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
@@ -58,21 +59,23 @@ async function buildIndexDtfDaoSettingsCalls(
 
   if (stToken) {
     for (const token of params.removeRewardTokens ?? []) {
-      calls.push(encodeRewardTokenCall(stToken, "removeRewardToken", token));
+      calls.push(prepareRewardTokenCall(params.chainId, stToken, "removeRewardToken", token));
     }
     for (const token of params.addRewardTokens ?? []) {
-      calls.push(encodeRewardTokenCall(stToken, "addRewardToken", token));
+      calls.push(prepareRewardTokenCall(params.chainId, stToken, "addRewardToken", token));
     }
   }
 
   calls.push(
     ...buildGovernanceCalls({
+      chainId: params.chainId,
       governance,
       timelock,
       changes: params.governanceChanges,
       quorumDenominator: params.quorumDenominator ?? vault?.governance?.quorumDenominator,
     }),
     ...buildRoleDiffCalls({
+      chainId: params.chainId,
       target: timelock,
       role: CANCELLER_ROLE,
       current: currentGuardians,
@@ -84,17 +87,19 @@ async function buildIndexDtfDaoSettingsCalls(
   return buildCallPayload({ governance, timelock, calls });
 }
 
-function encodeRewardTokenCall(
+function prepareRewardTokenCall(
+  chainId: BuildIndexDtfDaoSettingsProposalParams["chainId"],
   target: `0x${string}`,
   functionName: "addRewardToken" | "removeRewardToken",
   token: `0x${string}`,
 ): IndexDtfCall {
-  return {
-    target,
-    calldata: encodeFunctionData({
-      abi: dtfIndexStakingVaultAbi,
-      functionName,
-      args: [getAddress(token)],
-    }),
-  };
+  const args = [getAddress(token)] as const;
+
+  return prepareContractCall({
+    chainId,
+    address: target,
+    abi: dtfIndexStakingVaultAbi,
+    functionName,
+    args,
+  });
 }

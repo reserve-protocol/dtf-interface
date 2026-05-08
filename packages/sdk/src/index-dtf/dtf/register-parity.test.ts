@@ -1,23 +1,25 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { decodeFunctionData, parseEther } from "viem";
+import { decodeFunctionData, erc20Abi, parseEther } from "viem";
 import { createDtfClient, type DtfClient } from "../../client.js";
 import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
 import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
 import { unstakingManagerAbi } from "../abis/unstaking-manager.js";
 import { getRebalance, getRebalances } from "../rebalance/index.js";
 import {
-  buildClaimVoteLockRewardsCall,
-  buildClaimVoteLockWithdrawalCall,
-  buildVoteLockDepositCall,
+  prepareVoteLockClaimRewards,
+  prepareVoteLockClaimWithdrawal,
+  prepareVoteLockDeposit,
+  prepareVoteLockDepositPlan,
 } from "../vote-lock/index.js";
 import { discoverIndexDtfs, getIndexDtfStatus } from "./discovery.js";
 import { getIndexDtfExposure } from "./exposure.js";
 import {
-  buildIndexDtfMintCall,
-  buildIndexDtfRedeemCall,
   getIndexDtfRedeemMinAmounts,
+  prepareIndexDtfMint,
+  prepareIndexDtfMintPlan,
+  prepareIndexDtfRedeem,
 } from "./issuance.js";
-import { buildIndexDtfDistributeFeesCall } from "./revenue.js";
+import { prepareIndexDtfDistributeFees } from "./revenue.js";
 import { getIndexDtfTransactions } from "./transactions.js";
 
 const DTF = "0x0000000000000000000000000000000000000001";
@@ -94,38 +96,94 @@ describe("Index DTF Register parity SDK surfaces", () => {
     expect(transactions[0]?.type).toBe("mint");
   });
 
-  it("builds v5 manual issuance calls", () => {
-    const mint = buildIndexDtfMintCall({
+  it("prepares v5 manual issuance calls", () => {
+    const mint = prepareIndexDtfMint({
       address: DTF,
+      chainId: 1,
       shares: parseEther("1"),
       receiver: ACCOUNT,
       minSharesOut: parseEther("0.99"),
     });
-    const redeem = buildIndexDtfRedeemCall({
+    const redeem = prepareIndexDtfRedeem({
       address: DTF,
+      chainId: 1,
       shares: parseEther("1"),
       receiver: ACCOUNT,
       assets: [TOKEN],
       minAmountsOut: [10n],
     });
+    const mintPlan = prepareIndexDtfMintPlan({
+      address: DTF,
+      chainId: 1,
+      shares: parseEther("1"),
+      receiver: ACCOUNT,
+      minSharesOut: parseEther("0.99"),
+      approvals: [{ token: TOKEN, amount: 10n }],
+    });
 
-    expect(decodeFunctionData({ abi: dtfIndexAbi, data: mint.calldata }).functionName).toBe("mint");
-    expect(decodeFunctionData({ abi: dtfIndexAbi, data: redeem.calldata }).functionName).toBe("redeem");
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: mint.data }).functionName).toBe("mint");
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: redeem.data }).functionName).toBe("redeem");
+    expect(mintPlan.type).toBe("approval-required");
     expect(getIndexDtfRedeemMinAmounts([100n], 500)).toEqual([95n]);
     expect(() => getIndexDtfRedeemMinAmounts([100n], 10_001)).toThrow("slippageBps");
   });
 
-  it("builds fee and vote-lock calls", () => {
-    const distribute = buildIndexDtfDistributeFeesCall({ address: DTF });
-    const deposit = buildVoteLockDepositCall({ stToken: DTF, amount: parseEther("1"), delegateToSelf: true });
-    const rewards = buildClaimVoteLockRewardsCall({ stToken: DTF, rewardTokens: [TOKEN] });
-    const withdrawal = buildClaimVoteLockWithdrawalCall({ unstakingManager: DTF, lockId: 1n });
+  it("prepares fee and vote-lock calls", () => {
+    const distribute = prepareIndexDtfDistributeFees({ address: DTF, chainId: 1 });
+    const deposit = prepareVoteLockDeposit({ stToken: DTF, chainId: 1, amount: parseEther("1"), delegateToSelf: true });
+    const rewards = prepareVoteLockClaimRewards({ stToken: DTF, chainId: 1, rewardTokens: [TOKEN] });
+    const withdrawal = prepareVoteLockClaimWithdrawal({ unstakingManager: DTF, chainId: 1, lockId: 1n });
 
-    expect(decodeFunctionData({ abi: dtfIndexAbi, data: distribute.calldata }).functionName).toBe("distributeFees");
-    expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: deposit.calldata }).functionName).toBe("depositAndDelegate");
-    expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: rewards.calldata }).functionName).toBe("claimRewards");
-    expect(decodeFunctionData({ abi: unstakingManagerAbi, data: withdrawal.calldata }).functionName).toBe("claimLock");
-    expect(() => buildVoteLockDepositCall({ stToken: DTF, amount: 1n, delegateToSelf: true, receiver: ACCOUNT } as never)).toThrow("receiver");
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: distribute.data }).functionName).toBe("distributeFees");
+    expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: deposit.data }).functionName).toBe("depositAndDelegate");
+    expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: rewards.data }).functionName).toBe("claimRewards");
+    expect(decodeFunctionData({ abi: unstakingManagerAbi, data: withdrawal.data }).functionName).toBe("claimLock");
+    expect(() => prepareVoteLockDeposit({ stToken: DTF, chainId: 1, amount: 1n, delegateToSelf: true, receiver: ACCOUNT } as never)).toThrow("receiver");
+  });
+
+  it("prepares vote-lock deposit plans", () => {
+    const depositPlan = prepareVoteLockDepositPlan({
+      stToken: DTF,
+      chainId: 1,
+      amount: parseEther("1"),
+      delegateToSelf: false,
+      receiver: ACCOUNT,
+    });
+    const approvalPlan = prepareVoteLockDepositPlan({
+      stToken: DTF,
+      chainId: 1,
+      amount: parseEther("1"),
+      delegateToSelf: false,
+      receiver: ACCOUNT,
+      approval: { underlying: TOKEN, amount: parseEther("1") },
+    });
+
+    expect(depositPlan.type).toBe("call");
+    if (depositPlan.type !== "call") throw new Error("expected call plan");
+    expect(
+      decodeFunctionData({
+        abi: dtfIndexStakingVaultAbi,
+        data: depositPlan.call.data,
+      }).functionName,
+    ).toBe("deposit");
+
+    expect(approvalPlan.type).toBe("approval-required");
+    if (approvalPlan.type !== "approval-required") {
+      throw new Error("expected approval plan");
+    }
+    expect(approvalPlan.approvals).toHaveLength(1);
+    expect(
+      decodeFunctionData({
+        abi: erc20Abi,
+        data: approvalPlan.approvals[0]!.data,
+      }).functionName,
+    ).toBe("approve");
+    expect(
+      decodeFunctionData({
+        abi: dtfIndexStakingVaultAbi,
+        data: approvalPlan.call.data,
+      }).functionName,
+    ).toBe("deposit");
   });
 
   it("reads rebalances by list and id", async () => {

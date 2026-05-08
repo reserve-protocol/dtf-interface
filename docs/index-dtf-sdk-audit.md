@@ -12,12 +12,12 @@ The good parts:
 
 - The public shape is mostly right: functional namespace methods plus `sdk.index.ref({ address, chainId })`.
 - Basic DTF reads are split by source: subgraph metadata, RPC basket/supply/assets, Reserve API price/brand/history.
-- Governance reads/actions are useful and already close to product workflows.
+- Governance reads and contract-call builders are useful and already close to product workflows.
 - Basket math now has better v5 contract validation and uses `dtf-rebalance-lib` instead of reimplementing auction math.
 
 The weak parts:
 
-- `basket-utils.ts` is still too dense and should be the next cleanup target.
+- The split basket builder files should stay boring as new inputs are added.
 - Completed rebalance metrics are still deferred to a Reserve API wrapper.
 - React SDK wrappers cover the main Register views, but not every new direct SDK read yet.
 - Deploy defaults, zapper flows, trusted filler/CowBot, and global protocol stats remain separate tracks.
@@ -46,7 +46,7 @@ Implemented and useful today:
 | Brand reads | `getBrand` via `/folio-manager/read` | Good base |
 | Version/supply/assets RPC | `getVersion`, `getTotalSupply`, `getTotalAssets` | Good |
 | Governance reads | proposals, proposal detail, votes, voter/proposer state, delegates, guardians | Good base |
-| Governance writes | propose, queue, execute, cancel, vote, delegate | Good base |
+| Governance contract calls | propose, queue, execute, cancel, vote builders | Good base |
 | Proposal builders | basket, admin settings, basket settings, DAO settings | Works, but messy |
 | Basket helpers | deploy basket, start rebalance args, units/shares conversion | Good, but file is dense |
 | Protocol list | `listIndexDtfs` from catalog | Too limited |
@@ -59,20 +59,18 @@ The builder code works, but it is the first area to clean before adding more fea
 
 Main issues:
 
-- `packages/sdk/src/index-dtf/governance/propose/settings.ts` handles too many product flows in one 800+ line file.
-- `settings.ts` uses large `needsDtf` booleans that hide why a network read is required.
-- `basket-utils.ts` mixes fetch resolution, token ordering, input parsing, validation, defaulting, and result assembly.
-- `basket.ts` and `basket-utils.ts` both care about basket address validation because proposal code wants fail-fast behavior.
-- `calls.ts` exports useful low-level call builders, but the barrel does not expose them, so its intended public/private status is unclear.
+- Settings proposal flows are split by domain, but `settings-dtf.ts`, `settings-dao.ts`, and `settings-basket.ts` still have dense optional-input branches.
+- Some `needsDtf` booleans still hide why a network read is required.
+- Basket builder logic is split under `dtf/basket/`; keep resolution, validation, and rebalance arg construction explicit as it evolves.
+- `contract-call.ts` exports generic EVM call helpers; domain proposal payload builders keep Index DTF-specific calldata in `governance/propose/calls.ts`.
 - `toSeconds` and `encodePercent` exist in multiple files with slightly different validation behavior.
 
 Cleanup should be boring, not architectural:
 
-- Split settings builders by product domain: admin settings, basket governance settings, DAO/vote-lock settings, role calls, governance parameter calls.
-- Keep the public API names stable while moving internals.
+- Continue simplifying the split settings builders without changing public API names unnecessarily.
 - Replace `needsDtf` mega-booleans with explicit top-to-bottom branches.
-- Separate `resolve rebalance inputs` from `build startRebalance args` in `basket-utils.ts`.
-- Keep `calls.ts` internal unless we intentionally want low-level calldata builders as public API.
+- Keep `resolve rebalance inputs` separate from `build startRebalance args` in `dtf/basket/`.
+- Keep `governance/propose/calls.ts` internal unless we intentionally want low-level Index DTF settings prepare helpers as public API.
 - Do not introduce a generic proposal framework.
 
 ## Register Parity Gaps
@@ -136,9 +134,9 @@ Product decisions that remain after the manual v5 builder pass:
 Recommended SDK shape:
 
 - `sdk.index.getIssuanceState({ address, chainId, account })` for manual issuance reads.
-- `sdk.index.buildMint({ address, chainId, shares, receiver, minSharesOut })` for calldata/args.
-- `sdk.index.buildRedeem({ address, chainId, shares, receiver, assets, minAmountsOut })` for calldata/args; `assets` must use the same stable basket order as the redeem preview/state.
-- Wallet writes should stay separate and receive `walletClient` at call time.
+- `sdk.index.prepareMint({ address, chainId, shares, receiver, minSharesOut })` for the contract call.
+- `sdk.index.prepareRedeem({ address, chainId, shares, receiver, assets, minAmountsOut })` for the contract call; `assets` must use the same stable basket order as the redeem preview/state.
+- Consumers own wallet-client sending.
 
 ### Rebalances And Auctions
 
@@ -170,8 +168,8 @@ SDK requirements:
 - Add `getCurrentRebalance({ address, chainId, blockNumber? })` for the v5 RPC `getRebalance()` transform.
 - Add `getRebalanceAuctions({ rebalanceId, chainId })` from subgraph.
 - Add `getRebalanceMetrics({ address, chainId, nonce })` from Reserve API. Deferred for this pass.
-- Add `buildOpenAuction(...)` around `dtf-rebalance-lib/getOpenAuction` using explicit historical/current inputs.
-- Add v5 `openAuction` and `openAuctionUnrestricted` write helpers only after read/build surfaces are stable.
+- Add `prepareOpenAuctionArgs(...)` around `dtf-rebalance-lib/getOpenAuction` using explicit historical/current inputs.
+- `openAuction` and `openAuctionUnrestricted` contract-call builders are implemented; completed metrics remain deferred.
 - Leave trusted filler/CowBot integration to consumers. Register already uses `@reserve-protocol/trusted-fillers-sdk`; the core SDK should not own that workflow now.
 
 The open-auction builder should not hide the historical/current split. It needs these inputs either directly or from a prior SDK context read. In this table, `rebalance` means the v5-transformed RPC `getRebalance()` struct, `initialPrices` and `initialWeights` mean values derived from the historical rebalance price/weight ranges, and `prices` means the current/snapshot token price map used by `dtf-rebalance-lib`.
@@ -207,13 +205,13 @@ Currently covered:
 - `IndexDtf.financials` has subgraph totals: total, protocol, governance, external revenue.
 - Settings proposal builder can build revenue distribution changes through fee recipients.
 
-Still missing or deferred reads/actions:
+Implemented or deferred reads/actions:
 
-| Missing Surface | Source / Logic |
+| Surface | Source / Logic |
 | --- | --- |
 | Pending fee shares | RPC `getPendingFeeShares()` implemented |
-| Pending fees USD | pending shares times current DTF price |
-| Distribute fees action | calldata builder implemented; wallet write wrapper deferred |
+| Pending fees USD | pending shares times current DTF price implemented in `getRevenue()` |
+| Distribute fees contract call | `prepareDistributeFees({ address, chainId })` implemented; consumers own wallet-client sending |
 | Approved reward tokens | staking vault `getAllRewardTokens()` plus token metadata implemented |
 | Reward token settings | already partly in DAO settings proposal builder |
 | Revenue stats over time | Reserve API/subgraph decision needed |
@@ -223,7 +221,7 @@ Recommended SDK shape:
 
 - `sdk.index.getRevenue({ address, chainId })` for current financial totals, pending fee shares, pending USD value, fee recipients, and platform fee.
 - `sdk.index.getApprovedRevenueTokens({ address, chainId })` for vote-lock reward token display.
-- Start with a direct `distributeFees(walletClient, { address, chainId, account })` action or calldata builder. Do not add a nested `fees(walletClient)` namespace unless more fee writes justify it.
+- Use `sdk.index.prepareDistributeFees({ address, chainId })` for the contract call. Consumers own wallet-client sending; do not add a nested fees namespace unless more fee flows justify it.
 
 ### Settings View Parity
 
@@ -244,31 +242,36 @@ Already covered by `getDtf` or existing governance helpers:
 | Fee recipients | `IndexDtf.fees.recipients` |
 | Settings proposal builders | basket/admin/DAO settings proposal builders exist, but need cleanup |
 
-Missing for settings parity:
+Implemented settings parity reads/actions:
 
-| Missing Surface | Source / Logic |
+| Surface | Source / Logic |
 | --- | --- |
 | Live permissionless bids flag | v5 RPC `bidsEnabled()`; subgraph value exists but Register reads live |
 | Live approved revenue tokens | staking vault `getAllRewardTokens()` plus token metadata |
 | Platform fee | DAO fee registry `getFeeDetails(dtf)` or deployer registry defaults |
-| Effective revenue distribution | fee recipients adjusted by platform fee |
 | Pending fee shares | Folio `getPendingFeeShares()` |
 | Pending fee shares USD | pending shares times current DTF price |
-| Distribute fees action | Folio `distributeFees()` |
+| Distribute fees contract call | Folio `distributeFees()` |
+
+Remaining settings parity gap:
+
+| Missing Surface | Source / Logic |
+| --- | --- |
+| Effective revenue distribution | fee recipients adjusted by platform fee |
 
 Settings conclusion:
 
 - We are close on static/settings metadata because `getDtf` is strong.
-- We are not done for Register settings migration until live reward tokens, platform fee, pending fees, and distribute-fees action exist.
+- We are not done for Register settings migration until effective revenue distribution is modeled.
 - The settings proposal builders should be cleaned before adding more settings actions.
 
 ### Vote-Lock Staking
 
 Register has a vote-lock flow separate from the aggregate `/dtf/daos` view.
 
-Read requirements:
+Implemented read requirements:
 
-| Missing Surface | Source / Logic |
+| Surface | Source / Logic |
 | --- | --- |
 | Underlying token price | Reserve API token price helper |
 | Underlying wallet balance | ERC20 `balanceOf(account)` |
@@ -298,8 +301,8 @@ Recommended SDK shape:
 - `sdk.index.getVoteLockState({ address, chainId, account })` for the Register drawer state.
 - `sdk.index.getVoteLockDao({ address, chainId })` for per-DTF APR and rewards stats.
 - `sdk.index.getVoteLockDaos()` for the aggregate earn/list view.
-- `sdk.index.buildVoteLock(...)`, `sdk.index.buildUnlock(...)`, and `sdk.index.buildDelegateVoteLock(...)` as simple calldata/args builders if write helpers are not added yet.
-- `sdk.index.buildClaimVoteLockRewards({ stToken, rewardTokens })` and `sdk.index.buildClaimVoteLockWithdrawal({ unstakingManager, lockId })` for portfolio actions. `unstakingManager` should come from `getVoteLockState` or an explicit caller-provided read; do not hide that network read in a pure builder.
+- `sdk.index.prepareVoteLockDeposit(...)`, `sdk.index.prepareVoteLockUnlock(...)`, and `sdk.index.prepareVoteLockDelegate(...)` as simple contract-call builders.
+- `sdk.index.prepareVoteLockClaimRewards({ stToken, chainId, rewardTokens })` and `sdk.index.prepareVoteLockClaimWithdrawal({ unstakingManager, chainId, lockId })` for portfolio actions. `unstakingManager` should come from `getVoteLockState` or an explicit caller-provided read; do not hide that network read in a pure builder.
 - Keep `/dtf/daos` as a separate aggregate getter; it is not a replacement for per-account vote-lock actions.
 - Add `/dtf/daos/{address}?chainId=` as the per-DTF DAO/APR getter used by Register overview staking.
 
@@ -336,12 +339,12 @@ Recommended SDK shape:
 
 ### Protocol And Global Fetchers
 
-Current protocol support is too small:
+Current protocol support:
 
 - `listIndexDtfs()` reads the static `@dtf-interface/dtf-catalog` package.
-- Root `getDiscoverDtfs()` already calls Reserve API `/discover/dtfs`, but it is not wired into `sdk.index` or `sdk.index.ref`.
+- `sdk.index.discover()` and root `getDiscoverDtfs()` call Reserve API `/discover/dtfs`.
 - Register discovery/status uses Reserve API `/discover/dtfs`, with product options like performance/brand in list views.
-- Register staking/vote-lock aggregate views use `/dtf/daos`.
+- `sdk.index.getVoteLockDaos()` and `sdk.index.getVoteLockDao({ address, chainId })` cover `/dtf/daos` views.
 - `client.api.getDtfPrices()` already wraps `/current/dtfs`, but there is no product-shaped `sdk.index` batch method.
 
 Missing global surfaces:
@@ -351,8 +354,6 @@ Missing global surfaces:
 | Product-shaped all-DTF discovery | Reserve API `/discover/dtfs`; root `getDiscoverDtfs` exists but is thin |
 | Product-shaped single-chain index DTF discovery | Reserve API `/discover/dtf` with `chainId`, `sort`, `limit`, and `offset`; useful for scripts/SDK consumers, not current Register list/status parity |
 | Product-shaped batch current DTFs | Reserve API `/current/dtfs`; client API helper exists |
-| Vote-lock DAO list | Reserve API `/dtf/daos` |
-| Per-DTF vote-lock DAO | Reserve API `/dtf/daos/{address}?chainId=` |
 
 Recommended SDK shape:
 
@@ -387,7 +388,7 @@ Keep these rules as missing surfaces are added:
 
 - Namespace/direct APIs should use object params for multi-value calls: `sdk.index.getRebalance({ address, chainId, nonce })`.
 - Ref APIs should stay flat: `dtf.getRebalances()`, `dtf.getRevenue()`, `dtf.getIssuanceState({ account })`.
-- Builders should return calldata/args and context. Writes should take `walletClient` at call time.
+- Prepare helpers should return `ContractCall` and any needed context. Consumers own `walletClient` sending.
 - Do not hide network calls in model objects or class constructors.
 - Do not add generic source/provider abstractions unless a concrete consumer needs them.
 - Do not add broad compatibility modes. Current SDK support should stay v5-only; v6 belongs to a future effort track.
@@ -396,15 +397,12 @@ Keep these rules as missing surfaces are added:
 
 ## Suggested Order
 
-1. Clean proposal builders without changing public API.
-2. Add Register parity getters that are simple one-source reads: status, exposure, transactions, pending fees, approved reward tokens, platform fee.
-3. Implement rebalance read models: list, detail, auctions, bids, current RPC state, completed API metrics.
-4. Add auction arg builder around `dtf-rebalance-lib/getOpenAuction`.
-5. Add auction write helpers after the builder is tested against Register behavior.
-6. Add manual issuance/redemption reads and calldata builders.
-7. Add vote-lock staking state and builders.
-8. Add API-backed protocol/global discovery and portfolio methods without removing catalog listing.
-9. Keep zapper as a separate effort track, and leave trusted filler/CowBot integration to consumers.
+1. Continue simplifying proposal builders without changing public API names unnecessarily.
+2. Add completed rebalance metrics from Reserve API when the product needs them.
+3. Model effective revenue distribution if Register settings migration needs it.
+4. Add deploy defaults only after proposal builder cleanup.
+5. Add API-backed protocol/global discovery without removing catalog listing.
+6. Keep zapper as a separate effort track, and leave trusted filler/CowBot integration to consumers.
 
 ## Test Targets
 
@@ -412,7 +410,7 @@ Use behavior tests that catch real migration bugs:
 
 - Mapper fixtures for subgraph rebalances, auctions, bids, transactions, and DTF metadata.
 - RPC transform tests for the v5 `getRebalance()` return shape.
-- `buildOpenAuction` tests using fixed Register-style fixtures and `dtf-rebalance-lib` outputs.
+- `prepareOpenAuctionArgs` tests using fixed Register-style fixtures and `dtf-rebalance-lib` outputs.
 - Issuance tests for asset distribution, max mint, max redeem, allowances, v5 mint args, and redeem min amounts.
 - Revenue tests for pending fee shares, platform fee math, and fee recipient splits.
 - Vote-lock tests for APR getters, account state, rewards claiming, unlock claiming, delegation, and deposit/withdraw args.
@@ -426,9 +424,12 @@ SDK files:
 
 - `packages/sdk/src/index-dtf/index.ts`
 - `packages/sdk/src/index-dtf/dtf/index.ts`
-- `packages/sdk/src/index-dtf/dtf/basket-utils.ts`
+- `packages/sdk/src/index-dtf/dtf/basket/index.ts`
+- `packages/sdk/src/index-dtf/dtf/basket/rebalance-args.ts`
 - `packages/sdk/src/index-dtf/governance/index.ts`
-- `packages/sdk/src/index-dtf/governance/propose/settings.ts`
+- `packages/sdk/src/index-dtf/governance/propose/settings-dtf.ts`
+- `packages/sdk/src/index-dtf/governance/propose/settings-dao.ts`
+- `packages/sdk/src/index-dtf/governance/propose/settings-basket.ts`
 - `packages/sdk/src/index-dtf/governance/propose/basket.ts`
 - `packages/sdk/src/index-dtf/rebalance/index.ts`
 - `packages/sdk/src/index-dtf/protocol/index.ts`

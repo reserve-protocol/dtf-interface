@@ -1,5 +1,6 @@
 import {
   createPublicClient,
+  createWalletClient as createViemWalletClient,
   fallback,
   http as viemHttp,
   type Abi,
@@ -13,9 +14,10 @@ import {
   type Transport,
   type WalletClient,
 } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import {
+  DEFAULT_RPC_URLS,
   SUPPORTED_CHAINS,
-  supportedChainIds,
   type SupportedChainId,
 } from "../defaults.js";
 import { SdkError } from "../errors.js";
@@ -30,14 +32,19 @@ export type DtfClientViemConfig = {
   readonly chains: Partial<Record<SupportedChainId, DtfClientViemChainConfig>>;
 };
 
-type WalletClientWriteContractParameters = Parameters<
-  WalletClient["writeContract"]
->[0];
+export type CreateWalletClientParams = {
+  readonly chainId: SupportedChainId;
+  readonly privateKey: Hex;
+  readonly rpcUrls?: readonly string[];
+};
 
-export type DtfClientWriteContractParameters = Omit<
-  WalletClientWriteContractParameters,
-  "chain"
->;
+type CreateConfiguredWalletClientParams = Omit<
+  CreateWalletClientParams,
+  "rpcUrls"
+> & {
+  readonly rpcUrls?: readonly string[] | undefined;
+  readonly chain?: Chain | undefined;
+};
 
 export type DtfClientReadContractParameters<
   abi extends Abi | readonly unknown[] = Abi,
@@ -52,6 +59,9 @@ export type DtfClientReadContractParameters<
 export type DtfClientViem = {
   readonly getPublicClient: (chainId: SupportedChainId) => PublicClient;
   readonly getRpcUrls: (chainId: SupportedChainId) => readonly string[];
+  readonly createWalletClient: (
+    params: CreateWalletClientParams,
+  ) => WalletClient;
   readonly readContract: <
     const abi extends Abi | readonly unknown[],
     functionName extends ContractFunctionName<abi, "pure" | "view">,
@@ -80,6 +90,15 @@ export function createDtfClientViem({
     },
     getRpcUrls(chainId) {
       return getChainConfig(chains, chainId).rpcUrls ?? [];
+    },
+    createWalletClient(params) {
+      const chainConfig = getChainConfig(chains, params.chainId);
+
+      return createConfiguredWalletClient({
+        ...params,
+        chain: chainConfig.chain,
+        rpcUrls: params.rpcUrls ?? chainConfig.rpcUrls,
+      });
     },
     readContract<
       const abi extends Abi | readonly unknown[],
@@ -113,27 +132,25 @@ export async function getLatestBlockTimepoint(
   return block.timestamp > 0n ? block.timestamp - 1n : 0n;
 }
 
-export function writeContract(
-  walletClient: WalletClient,
-  chainId: SupportedChainId,
-  params: DtfClientWriteContractParameters,
-): Promise<Hex> {
-  return walletClient.writeContract({
+/** Creates a viem WalletClient from a private key using the SDK's viem dependency. */
+export function createWalletClient(
+  params: CreateWalletClientParams,
+): WalletClient {
+  return createConfiguredWalletClient({
     ...params,
-    chain: getWriteChain(chainId),
-  } as WalletClientWriteContractParameters) as Promise<Hex>;
+    chain: getWriteChain(params.chainId),
+    rpcUrls: params.rpcUrls ?? DEFAULT_RPC_URLS[params.chainId],
+  });
 }
 
-export function getWriteChain(chainId: SupportedChainId) {
-  if (supportedChainIds.includes(chainId as SupportedChainId)) {
-    return SUPPORTED_CHAINS[chainId];
+function getWriteChain(chainId: SupportedChainId) {
+  const chain = SUPPORTED_CHAINS[chainId];
+
+  if (!chain) {
+    throwUnsupportedChain(chainId);
   }
 
-  throw new SdkError({
-    code: "UNSUPPORTED_CHAIN",
-    message: `Unsupported chain id: ${chainId}`,
-    meta: { chainId },
-  });
+  return chain;
 }
 
 function createDefaultPublicClient(
@@ -151,6 +168,25 @@ function createDefaultPublicClient(
       : viemHttp();
 
   return createPublicClient({ chain, transport });
+}
+
+function createConfiguredWalletClient({
+  chainId,
+  privateKey,
+  chain,
+  rpcUrls,
+}: CreateConfiguredWalletClientParams): WalletClient {
+  const writeChain = chain ?? getWriteChain(chainId);
+  const transport: Transport =
+    rpcUrls && rpcUrls.length > 0
+      ? fallback(rpcUrls.map((url) => viemHttp(url)))
+      : viemHttp();
+
+  return createViemWalletClient({
+    account: privateKeyToAccount(privateKey),
+    chain: writeChain,
+    transport,
+  });
 }
 
 function getChainConfig(

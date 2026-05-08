@@ -1,4 +1,5 @@
-import { encodeFunctionData, getAddress, zeroAddress, type Address, type Hex } from "viem";
+import { getAddress, zeroAddress, type Address, type Hex } from "viem";
+import { prepareContractCall } from "../../../contract-call.js";
 import type { DtfClient } from "../../../client.js";
 import { SdkError } from "../../../errors.js";
 import type { DtfParams } from "../../../types/common.js";
@@ -46,6 +47,7 @@ export type BuildIndexDtfBasketProposalParams =
   };
 
 export type BuiltIndexDtfBasketProposalContext = BuiltIndexDtfStartRebalance & {
+  readonly chainId: DtfParams["chainId"];
   readonly auctionLauncherWindow: bigint;
   readonly ttl: bigint;
 };
@@ -71,26 +73,33 @@ export async function buildIndexDtfBasketProposal(
   });
   const context: BuiltIndexDtfBasketProposalContext = {
     ...rebalance,
+    chainId: params.chainId,
     ...windows,
   };
   const authority = getProposalAuthority(params, dtf);
+  const call = prepareIndexDtfBasketRebalance(context);
 
   return {
     governance: authority.governance,
-    targets: [context.address],
-    calldatas: [buildIndexDtfBasketRebalanceCall(context).calldata],
+    targets: [call.to],
+    calldatas: [call.data],
     description: params.description ?? "",
     context,
   };
 }
 
-function buildIndexDtfBasketRebalanceCall(
+function prepareIndexDtfBasketRebalance(
   context: BuiltIndexDtfBasketProposalContext,
 ): IndexDtfCall {
-  return {
-    target: context.address,
-    calldata: encodeStartRebalanceCalldata(context),
-  };
+  const args = getStartRebalanceArgs(context);
+
+  return prepareContractCall({
+    chainId: context.chainId,
+    address: context.address,
+    abi: dtfIndexAbi,
+    functionName: "startRebalance",
+    args,
+  });
 }
 
 async function getDtfForProposal(
@@ -108,24 +117,18 @@ async function getDtfForProposal(
   return getDtf(client, params);
 }
 
-function encodeStartRebalanceCalldata(
-  context: BuiltIndexDtfBasketProposalContext,
-): Hex {
-  const args = context.startRebalanceArgs as StartRebalanceArgsV5;
+function getStartRebalanceArgs(context: BuiltIndexDtfBasketProposalContext) {
+  const startRebalanceArgs = context.startRebalanceArgs as StartRebalanceArgsV5;
 
-  return encodeFunctionData({
-    abi: dtfIndexAbi,
-    functionName: "startRebalance",
-    args: [
-      args.tokens.map((token) => ({
-        ...token,
-        token: getAddress(token.token as Address),
-      })),
-      args.limits,
-      context.auctionLauncherWindow,
-      context.ttl,
-    ],
-  });
+  return [
+    startRebalanceArgs.tokens.map((token) => ({
+      ...token,
+      token: getAddress(token.token as Address),
+    })),
+    startRebalanceArgs.limits,
+    context.auctionLauncherWindow,
+    context.ttl,
+  ] as const;
 }
 
 function getProposalAuthority(

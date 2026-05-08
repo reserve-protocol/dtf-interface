@@ -1,15 +1,24 @@
 import { FolioVersion, getOpenAuction, getTargetBasket } from "@reserve-protocol/dtf-rebalance-lib";
-import { encodeFunctionData, getAddress, type Address, type Hex } from "viem";
+import { getAddress, type Address } from "viem";
+import type { SupportedChainId } from "../../defaults.js";
 import { SdkError } from "../../errors.js";
+import { prepareContractCall } from "../../contract-call.js";
 import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
-import type { BuiltIndexDtfCall } from "../calls.js";
 import type { BuiltIndexDtfOpenAuction, IndexDtfOpenAuctionInput, OpenAuctionArgs } from "./types.js";
+
+type OpenAuctionContractArgs = readonly [
+  bigint,
+  readonly Address[],
+  readonly OpenAuctionArgs["newWeights"][number][],
+  readonly OpenAuctionArgs["newPrices"][number][],
+  OpenAuctionArgs["newLimits"],
+];
 
 /**
  * Builds the v5 launcher `openAuction` args with `dtf-rebalance-lib`.
  * Historical and current inputs stay explicit so bots cannot mix time sources by accident.
  */
-export function buildIndexDtfOpenAuctionArgs(
+export function prepareIndexDtfOpenAuctionArgs(
   params: IndexDtfOpenAuctionInput,
 ): BuiltIndexDtfOpenAuction {
   const tokenMap = new Map(params.tokens.map((token) => [token.address.toLowerCase(), token]));
@@ -69,11 +78,12 @@ export function buildIndexDtfOpenAuctionArgs(
   return { args, metrics, targetBasket };
 }
 
-/** Builds calldata for the v5 launcher `openAuction(...)` call. */
-export function buildIndexDtfOpenAuctionCall(params: {
+/** Prepares a v5 launcher `openAuction(...)` contract call. */
+export function prepareIndexDtfOpenAuction(params: {
   readonly address: Address;
+  readonly chainId: SupportedChainId;
   readonly args: OpenAuctionArgs;
-}): BuiltIndexDtfCall<readonly [bigint, readonly Address[], OpenAuctionArgs["newWeights"], OpenAuctionArgs["newPrices"], OpenAuctionArgs["newLimits"]]> {
+}) {
   const args = [
     params.args.rebalanceNonce,
     params.args.tokens.map((token) => getAddress(token as Address)),
@@ -82,29 +92,26 @@ export function buildIndexDtfOpenAuctionCall(params: {
     params.args.newLimits,
   ] as const;
 
-  return {
-    target: getAddress(params.address),
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.address,
+    abi: dtfIndexAbi,
     functionName: "openAuction",
     args,
-    calldata: encodeFunctionData({ abi: dtfIndexAbi, functionName: "openAuction", args }) as Hex,
-  };
+  });
 }
 
-/** Builds calldata for community `openAuctionUnrestricted(rebalanceNonce)`. */
-export function buildIndexDtfOpenAuctionUnrestrictedCall(params: {
+/** Prepares a community `openAuctionUnrestricted(rebalanceNonce)` contract call. */
+export function prepareIndexDtfOpenAuctionUnrestricted(params: {
   readonly address: Address;
+  readonly chainId: SupportedChainId;
   readonly rebalanceNonce: bigint;
-}): BuiltIndexDtfCall<readonly [bigint]> {
-  const args = [params.rebalanceNonce] as const;
-
-  return {
-    target: getAddress(params.address),
+}) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.address,
+    abi: dtfIndexAbi,
     functionName: "openAuctionUnrestricted",
-    args,
-    calldata: encodeFunctionData({
-      abi: dtfIndexAbi,
-      functionName: "openAuctionUnrestricted",
-      args,
-    }) as Hex,
-  };
+    args: [params.rebalanceNonce] as const,
+  });
 }

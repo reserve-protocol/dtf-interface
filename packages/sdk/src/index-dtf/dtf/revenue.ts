@@ -1,14 +1,14 @@
 import { Decimal } from "decimal.js-light";
-import { encodeFunctionData, getAddress, type Address, type Hex } from "viem";
+import { getAddress, type Address } from "viem";
 import type { DtfClient } from "../../client.js";
 import { mapAmount } from "../../lib/utils.js";
 import { getTokensData } from "../../tokens/index.js";
 import type { Amount, Token } from "../../types/common.js";
 import type { Financials, IndexDtf, PriceControl } from "../../types/index-dtf.js";
+import { prepareContractCall } from "../../contract-call.js";
 import { daoFeeRegistryAbi } from "../abis/dao-fee-registry.js";
 import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
 import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
-import type { BuiltIndexDtfCall } from "../calls.js";
 import { getDtf, getPrice } from "./index.js";
 
 export type IndexDtfPlatformFee = {
@@ -147,17 +147,16 @@ export async function getIndexDtfRevenue(
   };
 }
 
-/** Builds calldata for `distributeFees()` without binding a wallet client. */
-export function buildIndexDtfDistributeFeesCall(params: {
+/** Prepares a `distributeFees()` contract call without binding a wallet client. */
+export function prepareIndexDtfDistributeFees(params: {
   readonly address: Address;
-}): BuiltIndexDtfCall<readonly []> {
-  return {
-    target: getAddress(params.address),
+  readonly chainId: IndexDtf["chainId"];
+}) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.address,
+    abi: dtfIndexAbi,
     functionName: "distributeFees",
     args: [] as const,
-    calldata: encodeFunctionData({
-      abi: dtfIndexAbi,
-      functionName: "distributeFees",
-    }) as Hex,
-  };
+  });
 }

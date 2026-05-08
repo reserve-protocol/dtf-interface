@@ -10,9 +10,7 @@ import {
   zeroHash,
   type Address,
   type Hex,
-  type WalletClient,
 } from "viem";
-import { writeContract } from "../../client/viem.js";
 import { SdkError } from "../../errors.js";
 import type {
   CancelIndexDtfProposalParams,
@@ -22,6 +20,7 @@ import type {
   QueueIndexDtfProposalParams,
   VoteIndexDtfProposalParams,
 } from "../../types/governance.js";
+import { prepareContractCall } from "../../contract-call.js";
 import { dtfIndexGovernanceAbi } from "../abis/dtf-index-governance.js";
 import { timelockAbi } from "../abis/timelock.js";
 import { getZeroValues } from "./utils.js";
@@ -30,57 +29,53 @@ const TIMELOCK_OPERATION_PARAMS = parseAbiParameters(
   "address[], uint256[], bytes[], bytes32, bytes32",
 );
 
-export async function vote(
-  walletClient: WalletClient,
+export function prepareIndexDtfVote(
   params: VoteIndexDtfProposalParams,
-): Promise<Hex> {
-  return writeContract(walletClient, params.chainId, {
-    account: getAddress(params.account),
-    address: getAddress(params.governance),
+) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.governance,
     abi: dtfIndexGovernanceAbi,
     functionName: "castVote",
-    args: [BigInt(params.proposalId), params.support],
+    args: [BigInt(params.proposalId), params.support] as const,
   });
 }
 
-export async function queue(
-  walletClient: WalletClient,
+export function prepareIndexDtfQueueProposal(
   params: QueueIndexDtfProposalParams,
-): Promise<Hex> {
+) {
   const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(
     params.proposal,
   );
 
-  return writeContract(walletClient, params.chainId, {
-    account: getAddress(params.account),
-    address: getAddress(params.proposal.governance),
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.proposal.governance,
     abi: dtfIndexGovernanceAbi,
     functionName: "queue",
-    args: [targets, values, calldatas, descriptionHash],
+    args: [targets, values, calldatas, descriptionHash] as const,
   });
 }
 
-export async function execute(
-  walletClient: WalletClient,
+export function prepareIndexDtfExecuteProposal(
   params: ExecuteIndexDtfProposalParams,
-): Promise<Hex> {
+) {
   const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(
     params.proposal,
   );
 
-  return writeContract(walletClient, params.chainId, {
-    account: getAddress(params.account),
-    address: getAddress(params.proposal.governance),
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.proposal.governance,
     abi: dtfIndexGovernanceAbi,
     functionName: "execute",
-    args: [targets, values, calldatas, descriptionHash],
+    args: [targets, values, calldatas, descriptionHash] as const,
   });
 }
 
-export async function cancel(
-  walletClient: WalletClient,
+export function prepareIndexDtfCancelProposal(
   params: CancelIndexDtfProposalParams,
-): Promise<Hex> {
+) {
   if (!params.proposal.timelock) {
     throw new SdkError({
       code: "INVALID_INPUT",
@@ -88,29 +83,28 @@ export async function cancel(
     });
   }
 
-  return writeContract(walletClient, params.chainId, {
-    account: getAddress(params.account),
-    address: getAddress(params.proposal.timelock),
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.proposal.timelock,
     abi: timelockAbi,
     functionName: "cancel",
-    args: [getTimelockOperationId(params.proposal)],
+    args: [getTimelockOperationId(params.proposal)] as const,
   });
 }
 
-export async function propose(
-  walletClient: WalletClient,
+export function prepareIndexDtfSubmitProposal(
   params: ProposeIndexDtfProposalParams,
-): Promise<Hex> {
+) {
   const targets = params.proposal.targets.map(getAddress);
   const calldatas = [...params.proposal.calldatas];
   const values = getZeroValues(targets.length);
 
-  return writeContract(walletClient, params.chainId, {
-    account: getAddress(params.account),
-    address: getAddress(params.proposal.governance),
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.proposal.governance,
     abi: dtfIndexGovernanceAbi,
     functionName: "propose",
-    args: [targets, values, calldatas, params.proposal.description],
+    args: [targets, values, calldatas, params.proposal.description] as const,
   });
 }
 

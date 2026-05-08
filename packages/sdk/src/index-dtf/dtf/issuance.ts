@@ -8,10 +8,17 @@ import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
 import { getTotalAssets, getTotalSupply } from "./index.js";
 
 export {
-  buildIndexDtfBasketApprovalCall,
-  buildIndexDtfMintCall,
-  buildIndexDtfRedeemCall,
   getIndexDtfRedeemMinAmounts,
+  prepareIndexDtfBasketApproval,
+  prepareIndexDtfMint,
+  prepareIndexDtfMintPlan,
+  prepareIndexDtfRedeem,
+} from "./issuance-calls.js";
+export type {
+  PrepareIndexDtfBasketApprovalParams,
+  PrepareIndexDtfMintParams,
+  PrepareIndexDtfMintPlanParams,
+  PrepareIndexDtfRedeemParams,
 } from "./issuance-calls.js";
 
 const D18 = 10n ** 18n;

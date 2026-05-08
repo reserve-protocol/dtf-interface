@@ -3,11 +3,11 @@ import {
   getAddress,
   parseEther,
   type Address,
-  type Hex,
 } from "viem";
 import { SdkError } from "../../../errors.js";
+import type { IndexDtfCall } from "../../../types/governance.js";
 import type { IndexDtf } from "../../../types/index-dtf.js";
-import { buildIndexDtfSetFeeRecipientsCall, type IndexDtfWriteVersion } from "./calls.js";
+import { prepareIndexDtfSetFeeRecipients, type IndexDtfWriteVersion } from "./calls.js";
 
 const MAX_FEE_RECIPIENTS = 64;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -27,13 +27,11 @@ export type IndexDtfRevenueDistributionInput = {
   readonly additionalRecipients: readonly IndexDtfRevenueRecipientInput[];
 };
 
-export type RevenueDistributionCall = {
-  readonly target: Address;
-  readonly calldata: Hex;
-};
+export type RevenueDistributionCall = IndexDtfCall;
 
-export function buildRevenueDistributionCall(
+export function prepareRevenueDistribution(
   dtfAddress: Address,
+  chainId: IndexDtf["chainId"],
   dtf: IndexDtf | undefined,
   distribution: IndexDtfRevenueDistributionInput | undefined,
   version: IndexDtfWriteVersion,
@@ -54,7 +52,7 @@ export function buildRevenueDistributionCall(
   });
 
   return recipients.length > 0
-    ? buildIndexDtfSetFeeRecipientsCall({ address: dtfAddress, recipients, version })
+    ? prepareIndexDtfSetFeeRecipients({ address: dtfAddress, chainId, recipients, version })
     : undefined;
 }
 

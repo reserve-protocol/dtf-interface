@@ -1,11 +1,14 @@
-import { getAddress, type Address } from "viem";
 import type { PriceControl } from "@reserve-protocol/dtf-rebalance-lib";
+
+import { getAddress, type Address } from "viem";
+
 import type { DtfClient } from "../../client.js";
 import type { DtfParams } from "../../types/common.js";
 import type { IndexDtfTotalAssets } from "../../types/index-dtf.js";
+import type { IndexDtfCurrentRebalance, PriceRange, RebalanceLimits, WeightRange } from "./types.js";
+
 import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
 import { getTotalAssets, getTotalSupply } from "../dtf/index.js";
-import type { IndexDtfCurrentRebalance, PriceRange, RebalanceLimits, WeightRange } from "./types.js";
 
 export type IndexDtfCurrentRebalanceState = {
   readonly rebalance: IndexDtfCurrentRebalance;

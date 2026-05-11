@@ -1,12 +1,8 @@
+import { decodeFunctionData, parseEther, parseUnits, type Address, type PublicClient } from "viem";
 import { describe, expect, it, vi } from "vitest";
-import {
-  decodeFunctionData,
-  parseEther,
-  parseUnits,
-  type Address,
-  type PublicClient,
-} from "viem";
+
 import { createDtfClient } from "../../../client.js";
+import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import {
   buildInitialBasket,
   getBasketSharesFromUnits,
@@ -14,7 +10,6 @@ import {
   getDtfPriceFromBalances,
   type IndexDtfBasketToken,
 } from "../../dtf/basket/index.js";
-import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import { buildIndexDtfBasketProposal } from "./basket.js";
 
 const DTF = "0x0000000000000000000000000000000000000001";
@@ -30,10 +25,7 @@ describe("basket conversion helpers", () => {
       units: [parseUnits("1", 6), parseUnits("1", 18)],
     });
 
-    expect(shares).toEqual([
-      500000000000000000n,
-      500000000000000000n,
-    ]);
+    expect(shares).toEqual([500000000000000000n, 500000000000000000n]);
   });
 
   it("converts D18 basket shares to raw units for a target value", () => {
@@ -70,7 +62,6 @@ describe("basket conversion helpers", () => {
         units: [1n],
       }),
     ).toThrow("positive number");
-
   });
 
   it("rejects zero address basket tokens", () => {
@@ -200,10 +191,7 @@ describe("buildIndexDtfBasketProposal", () => {
       readonly price: { readonly low: bigint; readonly high: bigint };
     }[];
 
-    expect(decodedTokens.map((tokenParams) => tokenParams.token.toLowerCase())).toEqual([
-      USDC,
-      DAI,
-    ]);
+    expect(decodedTokens.map((tokenParams) => tokenParams.token.toLowerCase())).toEqual([USDC, DAI]);
     expect(decodedTokens.every((tokenParams) => tokenParams.inRebalance)).toBe(true);
     expect(decodedTokens.every((tokenParams) => tokenParams.maxAuctionSize > 0n)).toBe(true);
     expect(
@@ -244,9 +232,7 @@ describe("buildIndexDtfBasketProposal", () => {
       },
     });
 
-    const weights = proposal.context.startRebalanceArgs.tokens.map(
-      (tokenParams) => tokenParams.weight,
-    );
+    const weights = proposal.context.startRebalanceArgs.tokens.map((tokenParams) => tokenParams.weight);
 
     expect(proposal.context.weightControl).toBe(false);
     expect(proposal.context.assets.map((asset) => asset.targetShare)).toEqual([
@@ -288,11 +274,7 @@ describe("buildIndexDtfBasketProposal", () => {
 
     expect(proposal.context.weightControl).toBe(true);
     expect(proposal.context.deferWeights).toBe(true);
-    expect(
-      proposal.context.startRebalanceArgs.tokens.every(
-        (tokenParams) => tokenParams.weight.low === 0n,
-      ),
-    ).toBe(true);
+    expect(proposal.context.startRebalanceArgs.tokens.every((tokenParams) => tokenParams.weight.low === 0n)).toBe(true);
   });
 
   it("keeps current token order before new basket additions", async () => {
@@ -322,9 +304,7 @@ describe("buildIndexDtfBasketProposal", () => {
       },
     });
 
-    expect(
-      proposal.context.assets.map((asset) => asset.token.address.toLowerCase()),
-    ).toEqual([USDC, DAI]);
+    expect(proposal.context.assets.map((asset) => asset.token.address.toLowerCase())).toEqual([USDC, DAI]);
     expect(proposal.context.assets.map((asset) => asset.targetShare)).toEqual([
       500000000000000000n,
       500000000000000000n,

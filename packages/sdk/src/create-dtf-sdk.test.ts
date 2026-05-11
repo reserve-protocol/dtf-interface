@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { createDtfSdk } from "./create-dtf-sdk.js";
 
 describe("createDtfSdk", () => {
@@ -96,11 +97,7 @@ describe("createDtfSdk", () => {
       },
     });
 
-    expect(sdk.client.subgraph.getIndexUrl(1)).toBe(
-      "https://example.com/index",
-    );
-    expect(sdk.client.subgraph.getYieldUrl(1)).toBe(
-      "https://example.com/yield",
-    );
+    expect(sdk.client.subgraph.getIndexUrl(1)).toBe("https://example.com/index");
+    expect(sdk.client.subgraph.getYieldUrl(1)).toBe("https://example.com/yield");
   });
 });

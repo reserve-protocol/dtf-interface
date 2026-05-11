@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { normalizeQueryKeyValue } from "./normalize-query-key.js";
 
 describe("normalizeQueryKeyValue", () => {

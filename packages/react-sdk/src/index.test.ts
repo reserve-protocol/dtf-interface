@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import * as reactSdk from "./index.js";
 
 describe("React SDK public surface", () => {

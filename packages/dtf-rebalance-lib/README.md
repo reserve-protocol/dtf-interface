@@ -40,39 +40,39 @@ Each call to `getOpenAuction()` produces one of three round types:
 
 ### `getStartRebalance()`
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `version` | `FolioVersion` | Protocol version (`V4` or `V5`) |
-| `_supply` | `bigint` | Current total share supply |
-| `tokens` | `string[]` | Token addresses in the basket |
-| `_assets` | `bigint[]` | Current token balances |
-| `decimals` | `bigint[]` | Decimals for each token |
-| `_targetBasket` | `bigint[]` | D18 ideal basket proportions |
-| `_prices` | `number[]` | USD price per whole token |
-| `_priceError` | `number[]` | Price error fraction per token |
-| `_maxAuctionSizes` | `number[]` | Max USD auction size per token |
-| `weightControl` | `boolean` | `false` = tracking, `true` = native |
-| `deferWeights` | `boolean` | Use full weight range (native only) |
-| `debug` | `boolean?` | Log debug output |
+| Parameter          | Type           | Description                         |
+| ------------------ | -------------- | ----------------------------------- |
+| `version`          | `FolioVersion` | Protocol version (`V4` or `V5`)     |
+| `_supply`          | `bigint`       | Current total share supply          |
+| `tokens`           | `string[]`     | Token addresses in the basket       |
+| `_assets`          | `bigint[]`     | Current token balances              |
+| `decimals`         | `bigint[]`     | Decimals for each token             |
+| `_targetBasket`    | `bigint[]`     | D18 ideal basket proportions        |
+| `_prices`          | `number[]`     | USD price per whole token           |
+| `_priceError`      | `number[]`     | Price error fraction per token      |
+| `_maxAuctionSizes` | `number[]`     | Max USD auction size per token      |
+| `weightControl`    | `boolean`      | `false` = tracking, `true` = native |
+| `deferWeights`     | `boolean`      | Use full weight range (native only) |
+| `debug`            | `boolean?`     | Log debug output                    |
 
 **Returns** `StartRebalanceArgsPartial` -- contains `tokens` (with weight ranges, price ranges, and max auction sizes per token) and `limits` (low/spot/high).
 
 ### `getOpenAuction()`
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `version` | `FolioVersion` | Protocol version |
-| `_rebalance` | `Rebalance` | On-chain rebalance state |
-| `_supply` | `bigint` | Current total share supply |
-| `_initialSupply` | `bigint` | Supply at rebalance start |
-| `_initialAssets` | `bigint[]` | Token balances at rebalance start |
-| `_targetBasket` | `bigint[]` | D18 ideal basket proportions |
-| `_assets` | `bigint[]` | Current token balances |
-| `_decimals` | `bigint[]` | Token decimals |
-| `_prices` | `number[]` | Current USD prices per whole token |
-| `_priceError` | `number[]` | Price error fraction per token |
-| `_finalStageAt` | `number` | Progression threshold to enter FINAL (e.g. 0.9) |
-| `debug` | `boolean?` | Log debug output |
+| Parameter        | Type           | Description                                     |
+| ---------------- | -------------- | ----------------------------------------------- |
+| `version`        | `FolioVersion` | Protocol version                                |
+| `_rebalance`     | `Rebalance`    | On-chain rebalance state                        |
+| `_supply`        | `bigint`       | Current total share supply                      |
+| `_initialSupply` | `bigint`       | Supply at rebalance start                       |
+| `_initialAssets` | `bigint[]`     | Token balances at rebalance start               |
+| `_targetBasket`  | `bigint[]`     | D18 ideal basket proportions                    |
+| `_assets`        | `bigint[]`     | Current token balances                          |
+| `_decimals`      | `bigint[]`     | Token decimals                                  |
+| `_prices`        | `number[]`     | Current USD prices per whole token              |
+| `_priceError`    | `number[]`     | Price error fraction per token                  |
+| `_finalStageAt`  | `number`       | Progression threshold to enter FINAL (e.g. 0.9) |
+| `debug`          | `boolean?`     | Log debug output                                |
 
 **Returns** `[OpenAuctionArgs, AuctionMetrics]` -- the on-chain call arguments and a metrics object describing the round type, progression, and per-token surplus/deficit sizes.
 

@@ -8,15 +8,17 @@ import {
   type ContractFunctionName,
   type Hex,
 } from "viem";
+
 import type { SupportedChainId } from "./defaults.js";
 
 type WriteStateMutability = "nonpayable" | "payable";
 type WriteFunctionArgs<
   TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, WriteStateMutability>,
-> = ContractFunctionArgs<TAbi, WriteStateMutability, TFunctionName> extends readonly unknown[]
-  ? ContractFunctionArgs<TAbi, WriteStateMutability, TFunctionName>
-  : readonly [];
+> =
+  ContractFunctionArgs<TAbi, WriteStateMutability, TFunctionName> extends readonly unknown[]
+    ? ContractFunctionArgs<TAbi, WriteStateMutability, TFunctionName>
+    : readonly [];
 
 export type ContractCall<
   TArgs extends readonly unknown[] = readonly unknown[],

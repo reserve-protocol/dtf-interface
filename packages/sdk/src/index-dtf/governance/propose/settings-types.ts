@@ -1,10 +1,12 @@
 import { isAddress, type Address, type Hex } from "viem";
 import { z } from "zod";
+
 import type { DtfParams } from "../../../types/common.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import type { IndexDtf, PriceControl } from "../../../types/index-dtf.js";
-import { INDEX_DTF_VERSION_5_0_0 } from "../../versions.js";
 import type { IndexDtfRevenueDistributionInput } from "./revenue.js";
+
+import { INDEX_DTF_VERSION_5_0_0 } from "../../versions.js";
 
 const addressSchema = z.string().refine(isAddress, "Invalid address");
 
@@ -43,15 +45,19 @@ export const indexDtfSettingsProposalSchema = z.object({
   auctionLaunchers: z.array(addressSchema).optional(),
   governanceChanges: indexDtfGovernanceChangesSchema.optional(),
   version: z.literal(INDEX_DTF_VERSION_5_0_0).optional(),
-  revenueDistribution: z.object({
-    platformFee: z.coerce.number().min(0).lt(100),
-    governanceShare: z.coerce.number().min(0).max(100),
-    deployerShare: z.coerce.number().min(0).max(100),
-    additionalRecipients: z.array(z.object({
-      address: addressSchema,
-      share: z.coerce.number().min(0).max(100),
-    })),
-  }).optional(),
+  revenueDistribution: z
+    .object({
+      platformFee: z.coerce.number().min(0).lt(100),
+      governanceShare: z.coerce.number().min(0).max(100),
+      deployerShare: z.coerce.number().min(0).max(100),
+      additionalRecipients: z.array(
+        z.object({
+          address: addressSchema,
+          share: z.coerce.number().min(0).max(100),
+        }),
+      ),
+    })
+    .optional(),
 });
 
 export type IndexDtfGovernanceChanges = {
@@ -127,7 +133,4 @@ export type BuildIndexDtfSettingsProposalParams = DtfParams & {
   readonly version?: typeof INDEX_DTF_VERSION_5_0_0 | undefined;
 };
 
-export type {
-  IndexDtfRevenueDistributionInput,
-  IndexDtfRevenueRecipientInput,
-} from "./revenue.js";
+export type { IndexDtfRevenueDistributionInput, IndexDtfRevenueRecipientInput } from "./revenue.js";

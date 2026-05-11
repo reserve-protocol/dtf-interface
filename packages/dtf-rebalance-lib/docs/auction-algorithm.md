@@ -13,17 +13,14 @@ Initially `getStartRebalance()` is called to prepare the initial rebalance param
 ### Core Components
 
 1. **Weights** (`WeightRange`): Represent the amount of tokens per basket unit (BU). Expressed as D27 values with low/spot/high ranges.
-
    - Formula: `D27{tok/BU}`
    - Used to define the target composition of the basket
 
 2. **Limits** (`RebalanceLimits`): Define the relationship between basket units and shares. Expressed as D18 values with low/spot/high ranges.
-
    - Formula: `D18{BU/share}`
    - Used to scale the basket composition to actual share holdings
 
 3. **Prices** (`PriceRange`): Token prices in nanoUSD (D27 format) with low/high bounds for auction pricing.
-
    - Formula: `D27{nanoUSD/tok}`
    - Used to calculate values and determine trading ranges
 
@@ -49,7 +46,6 @@ Where:
 The high and low bounds define the trading boundaries for the auction:
 
 - **Low Bounds**: Define **deficits** - what we **buy up to**
-
   - `buyUpTo = weight.low × limit.low`
   - If current balance < buyUpTo, the token has a deficit
   - The auction will purchase tokens to reach this threshold
@@ -161,31 +157,26 @@ Before any auction can begin, `getStartRebalance()` prepares the initial rebalan
 ### Processing Steps
 
 1. **Calculate Current State**
-
    - Convert all values to common decimal format
    - Calculate share value and basket unit value
    - Determine ideal spot limit: `shareValue / buValue`
 
 2. **Calculate Progression**
-
    - **Absolute Progression**: Percentage of balances in correct position (0-100%)
    - **Relative Progression**: Progress from initial to target
    - Formula: `(current - initial) / (1 - initial)`
 
 3. **Determine Auction Round**
-
    - Check for ejections first
    - Then check progression thresholds
    - Default to FINAL if near completion
 
 4. **Calculate New Limits**
-
    - Base calculation: `spotLimit × (1 ± delta)`
    - Constrained by initial rebalance limits
    - Delta derived from target progression
 
 5. **Calculate New Weights**
-
    - Ideal weight: `shareValue × targetBasket / actualLimits.spot / price`
    - Adjusted for delta while avoiding double-counting uncertainty
    - Formula: `idealWeight × (1 ± delta) / (limitRatio)`
@@ -193,7 +184,6 @@ Before any auction can begin, `getStartRebalance()` prepares the initial rebalan
    - Constrained by initial weight ranges
 
 6. **Calculate New Prices**
-
    - Based on current prices ± price error
    - Constrained by initial price ranges
    - Only adjusted if `priceControl != NONE`
@@ -208,7 +198,6 @@ Before any auction can begin, `getStartRebalance()` prepares the initial rebalan
 The algorithm returns:
 
 1. **OpenAuctionArgs**: Parameters for calling `folio.openAuction()`
-
    - rebalanceNonce
    - tokens (filtered list)
    - newWeights
@@ -329,7 +318,6 @@ relativeProgression = (absolute - initial) / (1 - initial)
 The delta represents the uncertainty or spread in the rebalancing process. It's crucial to avoid double-counting this uncertainty:
 
 - **For Limits**: `limit × (1 ± delta)`
-
   - Uncertainty is directly applied to limits
 
 - **For Weights**: `weight × (1 ± delta) / (limitRatio)`

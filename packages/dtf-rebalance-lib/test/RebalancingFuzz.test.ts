@@ -1,16 +1,14 @@
-import hre from "hardhat";
-import { Contract } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { Contract } from "ethers";
+import hre from "hardhat";
 
 import { FolioVersion } from "../src/types";
-
-import { getAssetPrices, logPercentages, normalizePrices } from "./utils";
+import { FOLIO_CONFIGS, CHAIN_BLOCK_NUMBERS } from "./4.0.0/config";
+import { doAuctions } from "./do-auctions";
 import { initializeChainState, setupContractsAndSigners } from "./setup";
 import { startRebalance } from "./start-rebalance";
-import { doAuctions } from "./do-auctions";
-
-import { FOLIO_CONFIGS, CHAIN_BLOCK_NUMBERS } from "./4.0.0/config";
+import { getAssetPrices, logPercentages, normalizePrices } from "./utils";
 // TODO test V5
 
 // Only test BGCI for now

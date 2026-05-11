@@ -7,8 +7,10 @@ import {
   type WeightRange,
 } from "@reserve-protocol/dtf-rebalance-lib";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { prepareIndexDtfOpenAuctionArgs } from "./open-auction.js";
+
 import type { IndexDtfOpenAuctionInput } from "./types.js";
+
+import { prepareIndexDtfOpenAuctionArgs } from "./open-auction.js";
 
 vi.mock("@reserve-protocol/dtf-rebalance-lib", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@reserve-protocol/dtf-rebalance-lib")>();
@@ -69,10 +71,12 @@ describe("prepareIndexDtfOpenAuctionArgs", () => {
   });
 
   it("lets explicit snapshot mode override the legacy tracking fallback", () => {
-    prepareIndexDtfOpenAuctionArgs(createInput({
-      isTrackingDtf: true,
-      targetBasketPriceMode: "snapshot",
-    }));
+    prepareIndexDtfOpenAuctionArgs(
+      createInput({
+        isTrackingDtf: true,
+        targetBasketPriceMode: "snapshot",
+      }),
+    );
 
     expect(getTargetBasket).toHaveBeenCalledWith([WEIGHT], [1], [6n], false);
   });
@@ -100,18 +104,16 @@ describe("prepareIndexDtfOpenAuctionArgs", () => {
   });
 
   it("rejects invalid rebalance percentages before calling the rebalance library", () => {
-    expect(() =>
-      prepareIndexDtfOpenAuctionArgs(createInput({ rebalancePercent: 101 })),
-    ).toThrow("rebalancePercent must be between 0 and 100");
+    expect(() => prepareIndexDtfOpenAuctionArgs(createInput({ rebalancePercent: 101 }))).toThrow(
+      "rebalancePercent must be between 0 and 100",
+    );
 
     expect(getTargetBasket).not.toHaveBeenCalled();
     expect(getOpenAuction).not.toHaveBeenCalled();
   });
 });
 
-function createInput(
-  overrides: Partial<IndexDtfOpenAuctionInput> = {},
-): IndexDtfOpenAuctionInput {
+function createInput(overrides: Partial<IndexDtfOpenAuctionInput> = {}): IndexDtfOpenAuctionInput {
   return {
     rebalance: {
       nonce: 7n,

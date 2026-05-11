@@ -1,4 +1,5 @@
 import type { Address } from "viem";
+
 import type { SupportedChainId } from "../defaults.js";
 
 export type BlockNumber = bigint;

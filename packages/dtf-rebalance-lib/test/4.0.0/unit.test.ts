@@ -1,18 +1,13 @@
-import { describe, it, beforeEach } from "node:test";
 import { strict as assert } from "node:assert";
-
-import { bn } from "../../src/numbers";
-
-import { PriceControl, PriceRange, RebalanceLimits, WeightRange } from "../../src/types";
-import { Rebalance } from "../../src/4.0.0/types";
-
-import { getBasketDistribution } from "../../src/utils";
+import { describe, it, beforeEach } from "node:test";
 
 import { getOpenAuction } from "../../src/4.0.0/open-auction";
 import { getStartRebalance } from "../../src/4.0.0/start-rebalance";
-
+import { Rebalance } from "../../src/4.0.0/types";
+import { bn } from "../../src/numbers";
+import { PriceControl, PriceRange, RebalanceLimits, WeightRange } from "../../src/types";
+import { getBasketDistribution } from "../../src/utils";
 import {
-  assertApproxEq,
   assertPricesEqual,
   assertRangesEqual,
   assertRebalanceLimitsEqual,

@@ -1,5 +1,13 @@
-import type { AuctionMetrics, OpenAuctionArgs, PriceRange, Rebalance, RebalanceLimits, WeightRange } from "@reserve-protocol/dtf-rebalance-lib";
+import type {
+  AuctionMetrics,
+  OpenAuctionArgs,
+  PriceRange,
+  Rebalance,
+  RebalanceLimits,
+  WeightRange,
+} from "@reserve-protocol/dtf-rebalance-lib";
 import type { Address } from "viem";
+
 import type { DtfParams, Token } from "../../types/common.js";
 import type { IndexDtfInput } from "../../types/index-dtf.js";
 
@@ -8,10 +16,7 @@ export type GetIndexDtfRebalancesParams = IndexDtfInput & {
   readonly offset?: number;
 };
 
-export type GetIndexDtfRebalancesOptions = Pick<
-  GetIndexDtfRebalancesParams,
-  "limit" | "offset"
->;
+export type GetIndexDtfRebalancesOptions = Pick<GetIndexDtfRebalancesParams, "limit" | "offset">;
 
 export type GetIndexDtfRebalanceParams = {
   readonly id?: string;

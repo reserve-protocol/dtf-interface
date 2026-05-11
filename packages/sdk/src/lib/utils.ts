@@ -1,9 +1,8 @@
 import { formatUnits, getAddress, type Address } from "viem";
+
 import type { Amount } from "../types/common.js";
 
-export function dedupeAddresses(
-  addresses: readonly Address[],
-): readonly Address[] {
+export function dedupeAddresses(addresses: readonly Address[]): readonly Address[] {
   return [...new Set(addresses)];
 }
 

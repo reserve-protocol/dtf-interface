@@ -1,17 +1,16 @@
 import "@nomicfoundation/hardhat-ethers";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-
-import { bn } from "../src/numbers";
-import { whileImpersonating, toPlainObject, createPriceLookup, logPercentages } from "./utils";
-import { AuctionMetrics, AuctionRound, FolioVersion, OpenAuctionArgs, WeightRange } from "../src/types";
-import { getOpenAuction, getTargetBasket } from "../src/open-auction";
-import { RebalanceContracts, RebalanceSigners } from "./types";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { Rebalance as Rebalance_4_0_0 } from "../src/4.0.0/types";
+import { bn } from "../src/numbers";
+import { getOpenAuction, getTargetBasket } from "../src/open-auction";
+import { AuctionMetrics, AuctionRound, FolioVersion, OpenAuctionArgs, WeightRange } from "../src/types";
 import { Rebalance as Rebalance_5_0_0 } from "../src/types";
+import { RebalanceContracts, RebalanceSigners } from "./types";
+import { whileImpersonating, toPlainObject, createPriceLookup, logPercentages } from "./utils";
 
 export async function doAuctions(
   version: FolioVersion,

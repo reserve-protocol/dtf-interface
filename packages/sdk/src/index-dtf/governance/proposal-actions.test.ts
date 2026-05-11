@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import {
   bytesToHex,
   encodeAbiParameters,
@@ -9,15 +8,15 @@ import {
   toBytes,
   zeroHash,
 } from "viem";
+import { describe, expect, it } from "vitest";
+
 import {
   prepareIndexDtfCancelProposal,
   prepareIndexDtfQueueProposal,
   prepareIndexDtfSubmitProposal,
 } from "./proposal-actions.js";
 
-const timelockOperationParams = parseAbiParameters(
-  "address[], uint256[], bytes[], bytes32, bytes32",
-);
+const timelockOperationParams = parseAbiParameters("address[], uint256[], bytes[], bytes32, bytes32");
 
 describe("Index DTF proposal actions", () => {
   it("prepares propose calls from a proposal payload", () => {
@@ -47,8 +46,7 @@ describe("Index DTF proposal actions", () => {
     const proposal = {
       governance: "0x0000000000000000000000000000000000000001",
       timelock: "0x0000000000000000000000000000000000000006",
-      timelockId:
-        "0x0000000000000000000000000000000000000000000000000000000000000042",
+      timelockId: "0x0000000000000000000000000000000000000000000000000000000000000042",
       targets: ["0x0000000000000000000000000000000000000003"],
       calldatas: ["0x1234"],
       description: "Proposal description",
@@ -61,9 +59,7 @@ describe("Index DTF proposal actions", () => {
     });
 
     expect(queueCall.chainId).toBe(1);
-    expect(queueCall.contract.address).toBe(
-      "0x0000000000000000000000000000000000000001",
-    );
+    expect(queueCall.contract.address).toBe("0x0000000000000000000000000000000000000001");
     expect(queueCall.contract.functionName).toBe("queue");
     expect(queueCall.contract.args).toEqual([
       ["0x0000000000000000000000000000000000000003"],
@@ -73,13 +69,9 @@ describe("Index DTF proposal actions", () => {
     ]);
 
     expect(cancelCall.chainId).toBe(1);
-    expect(cancelCall.contract.address).toBe(
-      "0x0000000000000000000000000000000000000006",
-    );
+    expect(cancelCall.contract.address).toBe("0x0000000000000000000000000000000000000006");
     expect(cancelCall.contract.functionName).toBe("cancel");
-    expect(cancelCall.contract.args).toEqual([
-      "0x0000000000000000000000000000000000000000000000000000000000000042",
-    ]);
+    expect(cancelCall.contract.args).toEqual(["0x0000000000000000000000000000000000000000000000000000000000000042"]);
   });
 
   it("rejects cancel calls without a timelock", () => {
@@ -100,10 +92,7 @@ describe("Index DTF proposal actions", () => {
     const proposal = {
       governance: "0x0000000000000000000000000000000000000001",
       timelock: "0x0000000000000000000000000000000000000006",
-      targets: [
-        "0x0000000000000000000000000000000000000003",
-        "0x0000000000000000000000000000000000000004",
-      ],
+      targets: ["0x0000000000000000000000000000000000000003", "0x0000000000000000000000000000000000000004"],
       calldatas: ["0x1234", "0x5678"],
       description: "Legacy proposal",
     } as const;

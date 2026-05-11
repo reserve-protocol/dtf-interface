@@ -1,11 +1,10 @@
 import { getAddress } from "viem";
+
 import type { DtfClient } from "../../client.js";
+import type { GetIndexDtfDelegatesParams, IndexDtfDelegate } from "../../types/governance.js";
+
 import { SdkError } from "../../errors.js";
 import { mapAmount } from "../../lib/utils.js";
-import type {
-  GetIndexDtfDelegatesParams,
-  IndexDtfDelegate,
-} from "../../types/governance.js";
 import { GetIndexDtfDelegatesDocument } from "../subgraph/dtf.generated.js";
 import { DEFAULT_DELEGATE_LIMIT } from "./constants.js";
 

@@ -36,22 +36,22 @@ The SDK should support Index DTF v5 only for now.
 
 Implemented and useful today:
 
-| Area | Current Surface | Status |
-| --- | --- | --- |
-| SDK creation | `createDtfSdk`, `createDtfClient` | Good |
-| Index namespace | `sdk.index.*`, `sdk.index.ref()` | Good shape |
-| DTF metadata | `getDtf`, `getIndexDtf`, `getFullIndexDtf` | Good base |
-| Basket reads | `getBasket`, `getTotalAssets`, `getBasketWithPrice` | Good base |
-| Price reads | `getPrice`, `getPriceHistory`, `getBasketSnapshot` | Good base |
-| Brand reads | `getBrand` via `/folio-manager/read` | Good base |
-| Version/supply/assets RPC | `getVersion`, `getTotalSupply`, `getTotalAssets` | Good |
-| Governance reads | proposals, proposal detail, votes, voter/proposer state, delegates, guardians | Good base |
-| Governance contract calls | propose, queue, execute, cancel, vote builders | Good base |
-| Proposal builders | basket, admin settings, basket settings, DAO settings | Works, but messy |
-| Basket helpers | deploy basket, start rebalance args, units/shares conversion | Good, but file is dense |
-| Protocol list | `listIndexDtfs` from catalog | Too limited |
-| Rebalances | `getRebalances`, `getRebalance`, `getCurrentRebalance`, `getRebalanceAuctions`, open-auction builders | Core v5 surfaces implemented; completed metrics deferred |
-| Yield namespace | exported placeholders | Not part of this audit |
+| Area                      | Current Surface                                                                                       | Status                                                   |
+| ------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| SDK creation              | `createDtfSdk`, `createDtfClient`                                                                     | Good                                                     |
+| Index namespace           | `sdk.index.*`, `sdk.index.ref()`                                                                      | Good shape                                               |
+| DTF metadata              | `getDtf`, `getIndexDtf`, `getFullIndexDtf`                                                            | Good base                                                |
+| Basket reads              | `getBasket`, `getTotalAssets`, `getBasketWithPrice`                                                   | Good base                                                |
+| Price reads               | `getPrice`, `getPriceHistory`, `getBasketSnapshot`                                                    | Good base                                                |
+| Brand reads               | `getBrand` via `/folio-manager/read`                                                                  | Good base                                                |
+| Version/supply/assets RPC | `getVersion`, `getTotalSupply`, `getTotalAssets`                                                      | Good                                                     |
+| Governance reads          | proposals, proposal detail, votes, voter/proposer state, delegates, guardians                         | Good base                                                |
+| Governance contract calls | propose, queue, execute, cancel, vote builders                                                        | Good base                                                |
+| Proposal builders         | basket, admin settings, basket settings, DAO settings                                                 | Works, but messy                                         |
+| Basket helpers            | deploy basket, start rebalance args, units/shares conversion                                          | Good, but file is dense                                  |
+| Protocol list             | `listIndexDtfs` from catalog                                                                          | Too limited                                              |
+| Rebalances                | `getRebalances`, `getRebalance`, `getCurrentRebalance`, `getRebalanceAuctions`, open-auction builders | Core v5 surfaces implemented; completed metrics deferred |
+| Yield namespace           | exported placeholders                                                                                 | Not part of this audit                                   |
 
 ## Current Builder State
 
@@ -79,19 +79,19 @@ Cleanup should be boring, not architectural:
 
 Register-backed getters that drove this pass:
 
-| Getter | Source | Status |
-| --- | --- | --- |
-| `getStatus` / `getStatuses` | Reserve API `/discover/dtfs` | Implemented under `sdk.index` |
-| `getExposure` | Reserve API `/dtf/exposure` | Implemented |
-| `getTransactions` | Index subgraph `transferEvents` | Implemented |
-| `getRebalanceControl` | RPC `rebalanceControl()` | Implemented |
-| `getBidsEnabled` | RPC `bidsEnabled()` for v5 | Implemented |
-| `getPendingFeeShares` | RPC `getPendingFeeShares()` | Implemented |
-| `getApprovedRevenueTokens` | staking vault `getAllRewardTokens()` plus ERC20 metadata | Implemented |
-| `getPlatformFee` | Folio `daoFeeRegistry()` plus registry `getFeeDetails(dtf)` | Implemented |
-| `getDeployPlatformFee` | deployer `daoFeeRegistry()` plus registry `getFeeDetails(zeroAddress)` | Deferred deploy surface |
-| `getVoteLockDaos` | Reserve API `/dtf/daos` | Implemented |
-| `getVoteLockDao` | Reserve API `/dtf/daos/{address}?chainId=` | Implemented |
+| Getter                      | Source                                                                 | Status                        |
+| --------------------------- | ---------------------------------------------------------------------- | ----------------------------- |
+| `getStatus` / `getStatuses` | Reserve API `/discover/dtfs`                                           | Implemented under `sdk.index` |
+| `getExposure`               | Reserve API `/dtf/exposure`                                            | Implemented                   |
+| `getTransactions`           | Index subgraph `transferEvents`                                        | Implemented                   |
+| `getRebalanceControl`       | RPC `rebalanceControl()`                                               | Implemented                   |
+| `getBidsEnabled`            | RPC `bidsEnabled()` for v5                                             | Implemented                   |
+| `getPendingFeeShares`       | RPC `getPendingFeeShares()`                                            | Implemented                   |
+| `getApprovedRevenueTokens`  | staking vault `getAllRewardTokens()` plus ERC20 metadata               | Implemented                   |
+| `getPlatformFee`            | Folio `daoFeeRegistry()` plus registry `getFeeDetails(dtf)`            | Implemented                   |
+| `getDeployPlatformFee`      | deployer `daoFeeRegistry()` plus registry `getFeeDetails(zeroAddress)` | Deferred deploy surface       |
+| `getVoteLockDaos`           | Reserve API `/dtf/daos`                                                | Implemented                   |
+| `getVoteLockDao`            | Reserve API `/dtf/daos/{address}?chainId=`                             | Implemented                   |
 
 Existing getters that are already aligned with Register:
 
@@ -112,18 +112,18 @@ SDK scope for this track is manual v5 issuance/redemption only. Zapper support i
 
 Manual SDK requirements:
 
-| Requirement | Source / Logic |
-| --- | --- |
-| Asset distribution preview | Register reads RPC `toAssets(1e18, Floor)` today |
-| Wallet DTF balance | ERC20 `balanceOf(account)` |
-| Wallet basket balances | ERC20 `balanceOf(account)` for every basket token |
-| Basket allowances | ERC20 `allowance(account, dtf)` |
-| Required mint amounts | v5 `mint` transfers `_toAssets(shares, Ceil)`; do not use a floor preview as the approval source |
-| Max mint amount | minimum wallet balance after the same v5 mint rounding used for required amounts |
-| Max redeem amount | wallet DTF balance |
-| Mint tx v5 | `mint(shares, receiver, minSharesOut)` |
-| Redeem tx | `redeem(shares, receiver, assets, minAmountsOut)` |
-| Approval tx | ERC20 `approve(dtf, amount)` per basket token |
+| Requirement                | Source / Logic                                                                                   |
+| -------------------------- | ------------------------------------------------------------------------------------------------ |
+| Asset distribution preview | Register reads RPC `toAssets(1e18, Floor)` today                                                 |
+| Wallet DTF balance         | ERC20 `balanceOf(account)`                                                                       |
+| Wallet basket balances     | ERC20 `balanceOf(account)` for every basket token                                                |
+| Basket allowances          | ERC20 `allowance(account, dtf)`                                                                  |
+| Required mint amounts      | v5 `mint` transfers `_toAssets(shares, Ceil)`; do not use a floor preview as the approval source |
+| Max mint amount            | minimum wallet balance after the same v5 mint rounding used for required amounts                 |
+| Max redeem amount          | wallet DTF balance                                                                               |
+| Mint tx v5                 | `mint(shares, receiver, minSharesOut)`                                                           |
+| Redeem tx                  | `redeem(shares, receiver, assets, minAmountsOut)`                                                |
+| Approval tx                | ERC20 `approve(dtf, amount)` per basket token                                                    |
 
 Product decisions that remain after the manual v5 builder pass:
 
@@ -144,21 +144,21 @@ This was the largest missing Index DTF area. Core v5 read/build surfaces are imp
 
 Register currently uses:
 
-| Surface | Source / Logic |
-| --- | --- |
-| Rebalance list | Index subgraph `rebalances(where: { dtf })` |
-| Proposal mapping | Match rebalance `blockNumber` to proposal `executionBlock` |
-| Active rebalance state | RPC `getRebalance()` |
-| Current supply/assets | RPC `totalSupply()`, `totalAssets()` |
-| Initial supply/assets | historical RPC reads at proposal creation block |
-| Initial rebalance params | historical RPC `getRebalance()` at rebalance block |
-| Auction list | Index subgraph `auctions(where: { rebalance })` |
-| Bids | Subgraph auction `bids` |
-| Completed metrics | Reserve API `/dtf/rebalance?chainId=&address=&nonce=` |
-| Open auction args | `dtf-rebalance-lib/getOpenAuction` |
-| Community open | contract `openAuctionUnrestricted(nonce)` |
-| Launcher open | v5 ABI `openAuction(rebalanceNonce, tokens, newWeights, newPrices, newLimits)` |
-| Trusted fill / CowBot | Register consumer detail through `@reserve-protocol/trusted-fillers-sdk`; do not wrap in core SDK for now |
+| Surface                  | Source / Logic                                                                                            |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Rebalance list           | Index subgraph `rebalances(where: { dtf })`                                                               |
+| Proposal mapping         | Match rebalance `blockNumber` to proposal `executionBlock`                                                |
+| Active rebalance state   | RPC `getRebalance()`                                                                                      |
+| Current supply/assets    | RPC `totalSupply()`, `totalAssets()`                                                                      |
+| Initial supply/assets    | historical RPC reads at proposal creation block                                                           |
+| Initial rebalance params | historical RPC `getRebalance()` at rebalance block                                                        |
+| Auction list             | Index subgraph `auctions(where: { rebalance })`                                                           |
+| Bids                     | Subgraph auction `bids`                                                                                   |
+| Completed metrics        | Reserve API `/dtf/rebalance?chainId=&address=&nonce=`                                                     |
+| Open auction args        | `dtf-rebalance-lib/getOpenAuction`                                                                        |
+| Community open           | contract `openAuctionUnrestricted(nonce)`                                                                 |
+| Launcher open            | v5 ABI `openAuction(rebalanceNonce, tokens, newWeights, newPrices, newLimits)`                            |
+| Trusted fill / CowBot    | Register consumer detail through `@reserve-protocol/trusted-fillers-sdk`; do not wrap in core SDK for now |
 
 SDK requirements:
 
@@ -174,21 +174,21 @@ SDK requirements:
 
 The open-auction builder should not hide the historical/current split. It needs these inputs either directly or from a prior SDK context read. In this table, `rebalance` means the v5-transformed RPC `getRebalance()` struct, `initialPrices` and `initialWeights` mean values derived from the historical rebalance price/weight ranges, and `prices` means the current/snapshot token price map used by `dtf-rebalance-lib`.
 
-| Open Auction Input | Meaning |
-| --- | --- |
-| `folioVersion` | v5 for current SDK support; keep this seam obvious for future v6 work |
-| `rebalance` | current rebalance struct from RPC `getRebalance()` |
-| `tokens` | rebalance token metadata in stable order |
-| `supply` | current `totalSupply()` |
-| `initialSupply` | `totalSupply()` at proposal creation block |
-| `currentAssets` | current `totalAssets()` balances |
-| `initialAssets` | `totalAssets()` at proposal creation block |
-| `initialPrices` | token prices derived from the historical rebalance price ranges; native DTF target-basket snapshot input |
-| `initialWeights` | token weights derived from the historical rebalance weight ranges, or saved hybrid weights after the first auction |
-| `prices` | current and snapshot token prices |
-| `tokenPriceVolatility` | per-token volatility used for auction price error |
-| `rebalancePercent` | requested progression percentage |
-| `isTrackingDtf` / `isHybridDtf` | target basket price-mode switch |
+| Open Auction Input              | Meaning                                                                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `folioVersion`                  | v5 for current SDK support; keep this seam obvious for future v6 work                                              |
+| `rebalance`                     | current rebalance struct from RPC `getRebalance()`                                                                 |
+| `tokens`                        | rebalance token metadata in stable order                                                                           |
+| `supply`                        | current `totalSupply()`                                                                                            |
+| `initialSupply`                 | `totalSupply()` at proposal creation block                                                                         |
+| `currentAssets`                 | current `totalAssets()` balances                                                                                   |
+| `initialAssets`                 | `totalAssets()` at proposal creation block                                                                         |
+| `initialPrices`                 | token prices derived from the historical rebalance price ranges; native DTF target-basket snapshot input           |
+| `initialWeights`                | token weights derived from the historical rebalance weight ranges, or saved hybrid weights after the first auction |
+| `prices`                        | current and snapshot token prices                                                                                  |
+| `tokenPriceVolatility`          | per-token volatility used for auction price error                                                                  |
+| `rebalancePercent`              | requested progression percentage                                                                                   |
+| `isTrackingDtf` / `isHybridDtf` | target basket price-mode switch                                                                                    |
 
 Important constraints:
 
@@ -207,14 +207,14 @@ Currently covered:
 
 Implemented or deferred reads/actions:
 
-| Surface | Source / Logic |
-| --- | --- |
-| Pending fee shares | RPC `getPendingFeeShares()` implemented |
-| Pending fees USD | pending shares times current DTF price implemented in `getRevenue()` |
+| Surface                       | Source / Logic                                                                                 |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- |
+| Pending fee shares            | RPC `getPendingFeeShares()` implemented                                                        |
+| Pending fees USD              | pending shares times current DTF price implemented in `getRevenue()`                           |
 | Distribute fees contract call | `prepareDistributeFees({ address, chainId })` implemented; consumers own wallet-client sending |
-| Approved reward tokens | staking vault `getAllRewardTokens()` plus token metadata implemented |
-| Reward token settings | already partly in DAO settings proposal builder |
-| Revenue stats over time | Reserve API/subgraph decision needed |
+| Approved reward tokens        | staking vault `getAllRewardTokens()` plus token metadata implemented                           |
+| Reward token settings         | already partly in DAO settings proposal builder                                                |
+| Revenue stats over time       | Reserve API/subgraph decision needed                                                           |
 | Fee recipient effective split | subgraph fee recipients plus DAO fee registry details; adjusted/effective split still deferred |
 
 Recommended SDK shape:
@@ -229,34 +229,34 @@ Register's settings view is mostly covered by `getDtf`, but a few live/direct re
 
 Already covered by `getDtf` or existing governance helpers:
 
-| Settings Section | SDK Coverage |
-| --- | --- |
+| Settings Section                                 | SDK Coverage                                                                              |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | Basics: name, ticker, address, mandate, deployer | `IndexDtf.token`, `IndexDtf.id`, `IndexDtf.mandate`, `IndexDtf.roles.deployment.deployer` |
-| Version | `getVersion()` |
-| Weight control / price control | `IndexDtf.rebalance` from subgraph |
-| Governance token and underlying | `IndexDtf.voteLockVault` |
-| Owner, basket, and DAO governance settings | `IndexDtf.governance`, `IndexDtf.voteLockVault.governance` |
-| Guardians | `getGuardians()` and governance timelock metadata |
-| Auction launchers and brand managers | `IndexDtf.roles` |
-| Annualized TVL fee and minting fee | `IndexDtf.fees` |
-| Fee recipients | `IndexDtf.fees.recipients` |
-| Settings proposal builders | basket/admin/DAO settings proposal builders exist, but need cleanup |
+| Version                                          | `getVersion()`                                                                            |
+| Weight control / price control                   | `IndexDtf.rebalance` from subgraph                                                        |
+| Governance token and underlying                  | `IndexDtf.voteLockVault`                                                                  |
+| Owner, basket, and DAO governance settings       | `IndexDtf.governance`, `IndexDtf.voteLockVault.governance`                                |
+| Guardians                                        | `getGuardians()` and governance timelock metadata                                         |
+| Auction launchers and brand managers             | `IndexDtf.roles`                                                                          |
+| Annualized TVL fee and minting fee               | `IndexDtf.fees`                                                                           |
+| Fee recipients                                   | `IndexDtf.fees.recipients`                                                                |
+| Settings proposal builders                       | basket/admin/DAO settings proposal builders exist, but need cleanup                       |
 
 Implemented settings parity reads/actions:
 
-| Surface | Source / Logic |
-| --- | --- |
+| Surface                       | Source / Logic                                                        |
+| ----------------------------- | --------------------------------------------------------------------- |
 | Live permissionless bids flag | v5 RPC `bidsEnabled()`; subgraph value exists but Register reads live |
-| Live approved revenue tokens | staking vault `getAllRewardTokens()` plus token metadata |
-| Platform fee | DAO fee registry `getFeeDetails(dtf)` or deployer registry defaults |
-| Pending fee shares | Folio `getPendingFeeShares()` |
-| Pending fee shares USD | pending shares times current DTF price |
-| Distribute fees contract call | Folio `distributeFees()` |
+| Live approved revenue tokens  | staking vault `getAllRewardTokens()` plus token metadata              |
+| Platform fee                  | DAO fee registry `getFeeDetails(dtf)` or deployer registry defaults   |
+| Pending fee shares            | Folio `getPendingFeeShares()`                                         |
+| Pending fee shares USD        | pending shares times current DTF price                                |
+| Distribute fees contract call | Folio `distributeFees()`                                              |
 
 Remaining settings parity gap:
 
-| Missing Surface | Source / Logic |
-| --- | --- |
+| Missing Surface                | Source / Logic                          |
+| ------------------------------ | --------------------------------------- |
 | Effective revenue distribution | fee recipients adjusted by platform fee |
 
 Settings conclusion:
@@ -271,30 +271,30 @@ Register has a vote-lock flow separate from the aggregate `/dtf/daos` view.
 
 Implemented read requirements:
 
-| Surface | Source / Logic |
-| --- | --- |
-| Underlying token price | Reserve API token price helper |
-| Underlying wallet balance | ERC20 `balanceOf(account)` |
-| Underlying allowance | ERC20 `allowance(account, stToken)` |
-| Current delegate | staking vault `delegates(account)` |
-| Max unlock amount | staking vault `maxWithdraw(account)` |
-| Unlock delay | staking vault `unstakingDelay()` |
-| Unstaking manager | staking vault `unstakingManager()` |
-| Vote-lock metadata | already partly on `IndexDtf.voteLockVault` from subgraph |
-| Per-DTF vote-lock APR | Reserve API `/dtf/daos/{address}?chainId=` |
-| Global vote-lock APR/positions | Reserve API `/dtf/daos` |
+| Surface                        | Source / Logic                                           |
+| ------------------------------ | -------------------------------------------------------- |
+| Underlying token price         | Reserve API token price helper                           |
+| Underlying wallet balance      | ERC20 `balanceOf(account)`                               |
+| Underlying allowance           | ERC20 `allowance(account, stToken)`                      |
+| Current delegate               | staking vault `delegates(account)`                       |
+| Max unlock amount              | staking vault `maxWithdraw(account)`                     |
+| Unlock delay                   | staking vault `unstakingDelay()`                         |
+| Unstaking manager              | staking vault `unstakingManager()`                       |
+| Vote-lock metadata             | already partly on `IndexDtf.voteLockVault` from subgraph |
+| Per-DTF vote-lock APR          | Reserve API `/dtf/daos/{address}?chainId=`               |
+| Global vote-lock APR/positions | Reserve API `/dtf/daos`                                  |
 
 Write/build requirements:
 
-| Action | Contract Call |
-| --- | --- |
-| Approve underlying | ERC20 `approve(stToken, amount)` |
-| Vote-lock to self | staking vault `depositAndDelegate(amount)` |
-| Vote-lock without self-delegate | staking vault `deposit(amount, account)` |
-| Delegate voting power | staking vault `delegate(delegatee)` |
-| Start unlock | staking vault `withdraw(amount, account, account)` |
-| Claim unlocked vote-lock withdrawal | unstaking manager `claimLock(lockId)` |
-| Claim vote-lock rewards | staking vault `claimRewards([rewardToken])` |
+| Action                              | Contract Call                                      |
+| ----------------------------------- | -------------------------------------------------- |
+| Approve underlying                  | ERC20 `approve(stToken, amount)`                   |
+| Vote-lock to self                   | staking vault `depositAndDelegate(amount)`         |
+| Vote-lock without self-delegate     | staking vault `deposit(amount, account)`           |
+| Delegate voting power               | staking vault `delegate(delegatee)`                |
+| Start unlock                        | staking vault `withdraw(amount, account, account)` |
+| Claim unlocked vote-lock withdrawal | unstaking manager `claimLock(lockId)`              |
+| Claim vote-lock rewards             | staking vault `claimRewards([rewardToken])`        |
 
 Recommended SDK shape:
 
@@ -312,24 +312,24 @@ Register's portfolio page uses account-scoped API endpoints and exposes user act
 
 Portfolio read requirements:
 
-| Surface | Source / Logic |
-| --- | --- |
-| Current portfolio | Reserve API `/v1/portfolio/{account}` |
-| Historical portfolio chart | Reserve API `/v1/historical/portfolio/{account}?period=` |
-| Portfolio transactions | Reserve API `/v1/portfolio/{account}/transactions` |
-| Index DTF positions | `PortfolioResponse.indexDTFs` |
-| Vote-lock positions | `PortfolioResponse.voteLocks` |
-| Vote-lock rewards | `PortfolioVoteLock.rewards` from portfolio response |
-| Pending vote-lock withdrawals | `PortfolioVoteLock.locks` from portfolio response |
-| Active governance proposals | `PortfolioVoteLock.activeProposals` plus voting-state derivation |
+| Surface                       | Source / Logic                                                   |
+| ----------------------------- | ---------------------------------------------------------------- |
+| Current portfolio             | Reserve API `/v1/portfolio/{account}`                            |
+| Historical portfolio chart    | Reserve API `/v1/historical/portfolio/{account}?period=`         |
+| Portfolio transactions        | Reserve API `/v1/portfolio/{account}/transactions`               |
+| Index DTF positions           | `PortfolioResponse.indexDTFs`                                    |
+| Vote-lock positions           | `PortfolioResponse.voteLocks`                                    |
+| Vote-lock rewards             | `PortfolioVoteLock.rewards` from portfolio response              |
+| Pending vote-lock withdrawals | `PortfolioVoteLock.locks` from portfolio response                |
+| Active governance proposals   | `PortfolioVoteLock.activeProposals` plus voting-state derivation |
 
 Portfolio write/build requirements for Index DTF vote-lock positions:
 
-| Action | Contract Call |
-| --- | --- |
-| Claim available reward | staking vault `claimRewards([rewardToken])` |
+| Action                           | Contract Call                                                                 |
+| -------------------------------- | ----------------------------------------------------------------------------- |
+| Claim available reward           | staking vault `claimRewards([rewardToken])`                                   |
 | Claim ready vote-lock withdrawal | staking vault `unstakingManager()` then unstaking manager `claimLock(lockId)` |
-| Modify vote-lock position | same vote-lock drawer actions: approve, deposit/delegate, withdraw |
+| Modify vote-lock position        | same vote-lock drawer actions: approve, deposit/delegate, withdraw            |
 
 Recommended SDK shape:
 
@@ -349,11 +349,11 @@ Current protocol support:
 
 Missing global surfaces:
 
-| Missing Surface | Source |
-| --- | --- |
-| Product-shaped all-DTF discovery | Reserve API `/discover/dtfs`; root `getDiscoverDtfs` exists but is thin |
+| Missing Surface                                 | Source                                                                                                                                               |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product-shaped all-DTF discovery                | Reserve API `/discover/dtfs`; root `getDiscoverDtfs` exists but is thin                                                                              |
 | Product-shaped single-chain index DTF discovery | Reserve API `/discover/dtf` with `chainId`, `sort`, `limit`, and `offset`; useful for scripts/SDK consumers, not current Register list/status parity |
-| Product-shaped batch current DTFs | Reserve API `/current/dtfs`; client API helper exists |
+| Product-shaped batch current DTFs               | Reserve API `/current/dtfs`; client API helper exists                                                                                                |
 
 Recommended SDK shape:
 

@@ -3,13 +3,11 @@ import hre from "hardhat";
 
 import { bn } from "../src/numbers";
 import { FolioVersion } from "../src/types";
-
+import { FOLIO_CONFIGS, CHAIN_BLOCK_NUMBERS } from "./4.0.0/config";
+import { doAuctions } from "./do-auctions";
 import { initializeChainState, setupContractsAndSigners } from "./setup";
 import { startRebalance } from "./start-rebalance";
-import { doAuctions } from "./do-auctions";
 import { getAssetPrices, getTokenNameAndSymbol, normalizePrices } from "./utils";
-
-import { FOLIO_CONFIGS, CHAIN_BLOCK_NUMBERS } from "./4.0.0/config";
 // TODO test V5
 
 // Only test BGCI for now

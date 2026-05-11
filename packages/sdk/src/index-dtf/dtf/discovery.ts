@@ -1,4 +1,5 @@
 import { getAddress, type Address } from "viem";
+
 import type { DtfClient } from "../../client.js";
 import type { SupportedChainId } from "../../defaults.js";
 import type { DtfBrand, DtfBasketSummaryAsset, DtfPerformancePoint, DtfStatus } from "../../types/common.js";
@@ -55,9 +56,7 @@ export async function discoverIndexDtfs(
     },
   });
 
-  return response
-    .filter((item) => item.type === undefined || item.type === "index")
-    .map(mapDiscoveryItem);
+  return response.filter((item) => item.type === undefined || item.type === "index").map(mapDiscoveryItem);
 }
 
 /**
@@ -102,8 +101,6 @@ function mapDiscoveryItem(item: RawDiscoveryItem): IndexDtfDiscoveryItem {
     ...(item.marketCap === undefined ? {} : { marketCap: item.marketCap }),
     ...(item.performance ? { performance: item.performance } : {}),
     ...(item.brand ? { brand: item.brand } : {}),
-    ...(item.basket
-      ? { basket: item.basket.map((asset) => ({ ...asset, address: getAddress(asset.address) })) }
-      : {}),
+    ...(item.basket ? { basket: item.basket.map((asset) => ({ ...asset, address: getAddress(asset.address) })) } : {}),
   };
 }

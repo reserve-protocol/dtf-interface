@@ -1,5 +1,5 @@
-import { Contract } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import { Contract } from "ethers";
 
 import { FolioVersion } from "../src/types";
 

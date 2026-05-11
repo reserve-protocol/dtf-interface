@@ -1,5 +1,6 @@
 import { decodeFunctionData, parseEther, type PublicClient } from "viem";
 import { describe, expect, it, vi } from "vitest";
+
 import { createDtfClient } from "../../../client.js";
 import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import { dtfIndexGovernanceAbi } from "../../abis/dtf-index-governance.js";
@@ -20,12 +21,9 @@ const GUARDIAN_B = "0x0000000000000000000000000000000000000005";
 const ST_TOKEN = "0x0000000000000000000000000000000000000006";
 const REWARD = "0x0000000000000000000000000000000000000007";
 const DEPLOYER = "0x0000000000000000000000000000000000000008";
-const CANCELLER_ROLE =
-  "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783";
-const BRAND_MANAGER_ROLE =
-  "0x2d8e650da9bd8c373ab2450d770f2ed39549bfc28d3630025cecc51511bcd374";
-const AUCTION_LAUNCHER_ROLE =
-  "0x13ff1b2625181b311f257c723b5e6d366eb318b212d9dd694c48fcf227659df5";
+const CANCELLER_ROLE = "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783";
+const BRAND_MANAGER_ROLE = "0x2d8e650da9bd8c373ab2450d770f2ed39549bfc28d3630025cecc51511bcd374";
+const AUCTION_LAUNCHER_ROLE = "0x13ff1b2625181b311f257c723b5e6d366eb318b212d9dd694c48fcf227659df5";
 
 describe("settings proposal builders", () => {
   it("builds basket governance and guardian calls", async () => {
@@ -43,37 +41,16 @@ describe("settings proposal builders", () => {
       },
     });
 
-    expect(proposal.targets).toEqual([
-      GOVERNANCE,
-      GOVERNANCE,
-      TIMELOCK,
-      TIMELOCK,
-    ]);
+    expect(proposal.targets).toEqual([GOVERNANCE, GOVERNANCE, TIMELOCK, TIMELOCK]);
 
-    expect(
-      decodeFunctionData({ abi: dtfIndexGovernanceAbi, data: proposal.calldatas[0]! })
-        .functionName,
-    ).toBe("setVotingDelay");
-    expect(
-      decodeFunctionData({ abi: dtfIndexGovernanceAbi, data: proposal.calldatas[1]! })
-        .args[0],
-    ).toBe(25n);
-    expect(
-      decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[2]! })
-        .functionName,
-    ).toBe("revokeRole");
-    expect(
-      decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[2]! })
-        .args[0],
-    ).toBe(CANCELLER_ROLE);
-    expect(
-      decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[3]! })
-        .functionName,
-    ).toBe("grantRole");
-    expect(
-      decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[3]! })
-        .args[0],
-    ).toBe(CANCELLER_ROLE);
+    expect(decodeFunctionData({ abi: dtfIndexGovernanceAbi, data: proposal.calldatas[0]! }).functionName).toBe(
+      "setVotingDelay",
+    );
+    expect(decodeFunctionData({ abi: dtfIndexGovernanceAbi, data: proposal.calldatas[1]! }).args[0]).toBe(25n);
+    expect(decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[2]! }).functionName).toBe("revokeRole");
+    expect(decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[2]! }).args[0]).toBe(CANCELLER_ROLE);
+    expect(decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[3]! }).functionName).toBe("grantRole");
+    expect(decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[3]! }).args[0]).toBe(CANCELLER_ROLE);
   });
 
   it("builds DTF settings calls", async () => {
@@ -93,20 +70,14 @@ describe("settings proposal builders", () => {
 
     expect(proposal.targets).toEqual([DTF, DTF, DTF, DTF, DTF]);
     expect(proposal.timelock).toBe(TIMELOCK);
-    expect(
-      decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[0]! })
-        .functionName,
-    ).toBe("setName");
-    expect(
-      decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[2]! }).args[0],
-    ).toBe(10_000_000_000_000_000n);
-    expect(
-      decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[3]! }).args[0],
-    ).toBe(1800n);
-    expect(
-      decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[3]! })
-        .functionName,
-    ).toBe("setAuctionLength");
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[0]! }).functionName).toBe("setName");
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[2]! }).args[0]).toBe(
+      10_000_000_000_000_000n,
+    );
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[3]! }).args[0]).toBe(1800n);
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[3]! }).functionName).toBe(
+      "setAuctionLength",
+    );
   });
 
   it("fetches the DTF version for version-sensitive settings calls", async () => {
@@ -272,22 +243,10 @@ describe("settings proposal builders", () => {
       auctionLaunchers: [GUARDIAN_B],
     });
 
-    expect(
-      decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[0]! })
-        .args[0],
-    ).toBe(CANCELLER_ROLE);
-    expect(
-      decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[1]! })
-        .args[0],
-    ).toBe(CANCELLER_ROLE);
-    expect(
-      decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[2]! })
-        .args[0],
-    ).toBe(BRAND_MANAGER_ROLE);
-    expect(
-      decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[3]! })
-        .args[0],
-    ).toBe(AUCTION_LAUNCHER_ROLE);
+    expect(decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[0]! }).args[0]).toBe(CANCELLER_ROLE);
+    expect(decodeFunctionData({ abi: timelockAbi, data: proposal.calldatas[1]! }).args[0]).toBe(CANCELLER_ROLE);
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[2]! }).args[0]).toBe(BRAND_MANAGER_ROLE);
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: proposal.calldatas[3]! }).args[0]).toBe(AUCTION_LAUNCHER_ROLE);
   });
 
   it("rejects invalid revenue distribution shares", async () => {
@@ -606,10 +565,7 @@ describe("settings proposal builders", () => {
       data: proposal.calldatas[0]!,
     });
     const recipients = decoded.args[0] as readonly { readonly portion: bigint }[];
-    const total = recipients.reduce(
-      (sum, recipient) => sum + recipient.portion,
-      0n,
-    );
+    const total = recipients.reduce((sum, recipient) => sum + recipient.portion, 0n);
 
     expect(decoded.functionName).toBe("setFeeRecipients");
     expect(total).toBe(parseEther("1"));
@@ -638,10 +594,7 @@ describe("settings proposal builders", () => {
       data: proposal.calldatas[0]!,
     });
     const recipients = decoded.args[0] as readonly { readonly portion: bigint }[];
-    const total = recipients.reduce(
-      (sum, recipient) => sum + recipient.portion,
-      0n,
-    );
+    const total = recipients.reduce((sum, recipient) => sum + recipient.portion, 0n);
 
     expect(decoded.functionName).toBe("setFeeRecipients");
     expect(recipients).toHaveLength(3);
@@ -694,10 +647,7 @@ describe("settings proposal builders", () => {
       data: proposal.calldatas[0]!,
     });
     const recipients = decoded.args[0] as readonly { readonly portion: bigint }[];
-    const total = recipients.reduce(
-      (sum, recipient) => sum + recipient.portion,
-      0n,
-    );
+    const total = recipients.reduce((sum, recipient) => sum + recipient.portion, 0n);
 
     expect(decoded.functionName).toBe("setFeeRecipients");
     expect(recipients).toHaveLength(3);
@@ -743,11 +693,11 @@ function createDtfContext(
   };
 
   return options.voteLock
-    ? {
+    ? ({
         ...context,
         voteLockVault: {
           token: { address: ST_TOKEN },
         },
-      } as never
-    : context as never;
+      } as never)
+    : (context as never);
 }

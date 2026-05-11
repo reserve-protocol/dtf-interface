@@ -1,5 +1,6 @@
 import { decodeFunctionData } from "viem";
 import { describe, expect, it } from "vitest";
+
 import {
   indexDtfV5WriteAbi,
   prepareIndexDtfDeprecate,
@@ -21,9 +22,10 @@ describe("Index DTF call builders", () => {
     });
 
     expect(mandateCall.to).toBe(DTF);
-    expect(
-      decodeFunctionData({ abi: indexDtfV5WriteAbi, data: mandateCall.data }),
-    ).toMatchObject({ functionName: "setMandate", args: ["New mandate"] });
+    expect(decodeFunctionData({ abi: indexDtfV5WriteAbi, data: mandateCall.data })).toMatchObject({
+      functionName: "setMandate",
+      args: ["New mandate"],
+    });
   });
 
   it("encodes v5 version-sensitive call names", () => {
@@ -34,10 +36,7 @@ describe("Index DTF call builders", () => {
       version: "5.0.0",
     });
 
-    expect(
-      decodeFunctionData({ abi: indexDtfV5WriteAbi, data: oldCall.data })
-        .functionName,
-    ).toBe("setAuctionLength");
+    expect(decodeFunctionData({ abi: indexDtfV5WriteAbi, data: oldCall.data }).functionName).toBe("setAuctionLength");
   });
 
   it("encodes unchanged v5 call interfaces", () => {
@@ -48,10 +47,7 @@ describe("Index DTF call builders", () => {
       recipients: [{ recipient: ACCOUNT, portion: 1n }],
     });
 
-    expect(
-      decodeFunctionData({ abi: indexDtfV5WriteAbi, data: oldCall.data })
-        .functionName,
-    ).toBe("setFeeRecipients");
+    expect(decodeFunctionData({ abi: indexDtfV5WriteAbi, data: oldCall.data }).functionName).toBe("setFeeRecipients");
   });
 
   it("rejects non-v5 call builder versions", () => {
@@ -72,9 +68,6 @@ describe("Index DTF call builders", () => {
       version: "5.0.0",
     });
 
-    expect(
-      decodeFunctionData({ abi: indexDtfV5WriteAbi, data: call.data })
-        .functionName,
-    ).toBe("deprecateFolio");
+    expect(decodeFunctionData({ abi: indexDtfV5WriteAbi, data: call.data }).functionName).toBe("deprecateFolio");
   });
 });

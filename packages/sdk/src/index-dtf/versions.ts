@@ -1,4 +1,5 @@
 import type { Abi } from "viem";
+
 import { SdkError } from "../errors.js";
 import { dtfIndexAbi as indexDtfV5Abi } from "./abis/dtf-index-abi.js";
 import { folioArtifactAbi as indexDtfV6Abi } from "./abis/folio-artifact.js";
@@ -7,12 +8,9 @@ export const INDEX_DTF_VERSION_5_0_0 = "5.0.0";
 export const INDEX_DTF_VERSION_6_0_0 = "6.0.0";
 export const LATEST_INDEX_DTF_VERSION = INDEX_DTF_VERSION_6_0_0;
 
-const INDEX_DTF_VERSIONS = [
-  INDEX_DTF_VERSION_5_0_0,
-  INDEX_DTF_VERSION_6_0_0,
-] as const;
+const INDEX_DTF_VERSIONS = [INDEX_DTF_VERSION_5_0_0, INDEX_DTF_VERSION_6_0_0] as const;
 
-export type IndexDtfVersion = typeof INDEX_DTF_VERSIONS[number];
+export type IndexDtfVersion = (typeof INDEX_DTF_VERSIONS)[number];
 
 export type IndexDtfOperation =
   | "addToBasket"
@@ -116,18 +114,14 @@ export function getIndexDtfOperation(
   };
 }
 
-export function isIndexDtfOperationVersionSensitive(
-  operationName: IndexDtfOperation,
-): boolean {
+export function isIndexDtfOperationVersionSensitive(operationName: IndexDtfOperation): boolean {
   return VERSION_SENSITIVE_INDEX_DTF_OPERATIONS.has(operationName);
 }
 
-function getOperationFunctionName(
-  operationName: IndexDtfOperation,
-  version: IndexDtfVersion,
-): string {
-  return INDEX_DTF_OPERATION_FUNCTION_OVERRIDES[version]?.[operationName] ??
-    INDEX_DTF_OPERATION_FUNCTIONS[operationName];
+function getOperationFunctionName(operationName: IndexDtfOperation, version: IndexDtfVersion): string {
+  return (
+    INDEX_DTF_OPERATION_FUNCTION_OVERRIDES[version]?.[operationName] ?? INDEX_DTF_OPERATION_FUNCTIONS[operationName]
+  );
 }
 
 function getOperationFunctionNames(operationName: IndexDtfOperation): Set<string> {
@@ -146,9 +140,7 @@ function getOperationFunctionNames(operationName: IndexDtfOperation): Set<string
 
 function getVersionSensitiveOperations(): ReadonlySet<IndexDtfOperation> {
   const operations = new Set<IndexDtfOperation>();
-  const operationNames = Object.keys(
-    INDEX_DTF_OPERATION_FUNCTIONS,
-  ) as IndexDtfOperation[];
+  const operationNames = Object.keys(INDEX_DTF_OPERATION_FUNCTIONS) as IndexDtfOperation[];
 
   for (const operationName of operationNames) {
     const functionNames = getOperationFunctionNames(operationName);
@@ -159,10 +151,7 @@ function getVersionSensitiveOperations(): ReadonlySet<IndexDtfOperation> {
       }
 
       for (const functionName of functionNames) {
-        if (
-          difference.addedOrChangedFunctions.has(functionName) ||
-          difference.removedFunctions.has(functionName)
-        ) {
+        if (difference.addedOrChangedFunctions.has(functionName) || difference.removedFunctions.has(functionName)) {
           operations.add(operationName);
         }
       }
@@ -198,9 +187,7 @@ function getAbiDifference(previousAbi: Abi, nextAbi: Abi): AbiDifference {
   };
 }
 
-function getAbiFunctionSignatures(
-  abi: Abi,
-): ReadonlyMap<string, ReadonlySet<string>> {
+function getAbiFunctionSignatures(abi: Abi): ReadonlyMap<string, ReadonlySet<string>> {
   const signatures = new Map<string, Set<string>>();
 
   for (const item of abi) {
@@ -226,9 +213,7 @@ function getAbiInputSignature(input: AbiFunctionInput): string {
   }
 
   const arraySuffix = input.type.slice("tuple".length);
-  const tupleSignature = (input.components ?? [])
-    .map(getAbiInputSignature)
-    .join(",");
+  const tupleSignature = (input.components ?? []).map(getAbiInputSignature).join(",");
 
   return `(${tupleSignature})${arraySuffix}`;
 }

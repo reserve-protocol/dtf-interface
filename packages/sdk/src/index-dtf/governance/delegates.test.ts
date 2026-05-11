@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
+
 import type { DtfClient } from "../../client.js";
+
 import { getDelegates } from "./index.js";
 
 describe("Index DTF governance delegates", () => {

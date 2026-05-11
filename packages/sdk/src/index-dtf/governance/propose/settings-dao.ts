@@ -1,22 +1,20 @@
 import { getAddress } from "viem";
-import { prepareContractCall } from "../../../contract-call.js";
+
 import type { DtfClient } from "../../../client.js";
-import { SdkError } from "../../../errors.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
-import { dtfIndexStakingVaultAbi } from "../../abis/dtf-index-staking-vault.js";
-import { timelockAbi } from "../../abis/timelock.js";
-import { buildGovernanceCalls } from "./settings-governance.js";
-import { CANCELLER_ROLE, buildRoleDiffCalls } from "./settings-roles.js";
-import {
-  buildCallPayload,
-  buildSettingsProposal,
-  getDtfIfNeeded,
-} from "./settings-shared.js";
 import type {
   BuildIndexDtfDaoSettingsProposalParams,
   BuiltIndexDtfCalls,
   BuiltIndexDtfProposal,
 } from "./settings-types.js";
+
+import { prepareContractCall } from "../../../contract-call.js";
+import { SdkError } from "../../../errors.js";
+import { dtfIndexStakingVaultAbi } from "../../abis/dtf-index-staking-vault.js";
+import { timelockAbi } from "../../abis/timelock.js";
+import { buildGovernanceCalls } from "./settings-governance.js";
+import { CANCELLER_ROLE, buildRoleDiffCalls } from "./settings-roles.js";
+import { buildCallPayload, buildSettingsProposal, getDtfIfNeeded } from "./settings-shared.js";
 
 /** Builds a proposal that changes vote-lock DAO settings and rewards. */
 export async function buildIndexDtfDaoSettingsProposal(
@@ -24,7 +22,7 @@ export async function buildIndexDtfDaoSettingsProposal(
   params: BuildIndexDtfDaoSettingsProposalParams,
 ): Promise<BuiltIndexDtfProposal> {
   return buildSettingsProposal({
-    ...await buildIndexDtfDaoSettingsCalls(client, params),
+    ...(await buildIndexDtfDaoSettingsCalls(client, params)),
     description: params.description,
   });
 }
@@ -33,15 +31,14 @@ async function buildIndexDtfDaoSettingsCalls(
   client: DtfClient,
   params: BuildIndexDtfDaoSettingsProposalParams,
 ): Promise<BuiltIndexDtfCalls> {
-  const hasRewardChanges = (params.addRewardTokens?.length ?? 0) > 0 ||
-    (params.removeRewardTokens?.length ?? 0) > 0;
-  const needsDtf = params.dtf === undefined && (
-    params.governance === undefined ||
-    (hasRewardChanges && params.stToken === undefined) ||
-    (params.governanceChanges?.executionDelay !== undefined && params.timelock === undefined) ||
-    (params.governanceChanges?.quorumPercent !== undefined && params.quorumDenominator === undefined) ||
-    (params.guardians !== undefined && (params.timelock === undefined || params.currentGuardians === undefined))
-  );
+  const hasRewardChanges = (params.addRewardTokens?.length ?? 0) > 0 || (params.removeRewardTokens?.length ?? 0) > 0;
+  const needsDtf =
+    params.dtf === undefined &&
+    (params.governance === undefined ||
+      (hasRewardChanges && params.stToken === undefined) ||
+      (params.governanceChanges?.executionDelay !== undefined && params.timelock === undefined) ||
+      (params.governanceChanges?.quorumPercent !== undefined && params.quorumDenominator === undefined) ||
+      (params.guardians !== undefined && (params.timelock === undefined || params.currentGuardians === undefined)));
   const dtf = await getDtfIfNeeded(client, params, needsDtf);
   const vault = dtf?.voteLockVault;
   const governance = params.governance ?? vault?.governance?.address;

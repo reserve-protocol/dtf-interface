@@ -1,9 +1,8 @@
-import { Decimal } from "../utils";
 import type { Decimal as DecimalType } from "decimal.js-light";
 
 import { bn, D9d, D18d, D27d, D18n, D256_MAXn, D27n, ONE, ZERO } from "../numbers";
-
 import { PriceRange, RebalanceLimits, StartRebalanceArgsPartial, WeightRange } from "../types";
+import { Decimal } from "../utils";
 
 /**
  * Get the arguments needed to call startRebalance

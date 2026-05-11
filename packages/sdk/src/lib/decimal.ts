@@ -1,11 +1,9 @@
+import type { Decimal as DecimalInstance, Numeric } from "decimal.js-light";
+
 import DecimalModule from "decimal.js-light";
-import type {
-  Decimal as DecimalInstance,
-  Numeric,
-} from "decimal.js-light";
 
 type DecimalConstructor = {
-  new(value: Numeric): DecimalInstance;
+  new (value: Numeric): DecimalInstance;
   readonly ROUND_DOWN: number;
 };
 

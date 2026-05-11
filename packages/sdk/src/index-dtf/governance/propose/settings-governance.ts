@@ -1,12 +1,14 @@
 import { parseEther, type Address } from "viem";
-import { prepareContractCall } from "../../../contract-call.js";
+
 import type { SupportedChainId } from "../../../defaults.js";
+import type { IndexDtfCall } from "../../../types/governance.js";
+import type { IndexDtfGovernanceChanges } from "./settings-types.js";
+
+import { prepareContractCall } from "../../../contract-call.js";
 import { SdkError } from "../../../errors.js";
 import { Decimal } from "../../../lib/decimal.js";
-import type { IndexDtfCall } from "../../../types/governance.js";
 import { dtfIndexGovernanceAbi } from "../../abis/dtf-index-governance.js";
 import { timelockAbi } from "../../abis/timelock.js";
-import type { IndexDtfGovernanceChanges } from "./settings-types.js";
 
 export function buildGovernanceCalls({
   changes,
@@ -124,22 +126,14 @@ function validateGovernanceChanges(changes: IndexDtfGovernanceChanges) {
   }
 }
 
-export function assertNumberRange(
-  value: number,
-  field: string,
-  min: number,
-  max?: number,
-) {
-  if (
-    !Number.isFinite(value) ||
-    value < min ||
-    (max !== undefined && value > max)
-  ) {
+export function assertNumberRange(value: number, field: string, min: number, max?: number) {
+  if (!Number.isFinite(value) || value < min || (max !== undefined && value > max)) {
     throw new SdkError({
       code: "INVALID_INPUT",
-      message: max === undefined
-        ? `${field} must be greater than or equal to ${min}`
-        : `${field} must be between ${min} and ${max}`,
+      message:
+        max === undefined
+          ? `${field} must be greater than or equal to ${min}`
+          : `${field} must be between ${min} and ${max}`,
       meta: { [field]: value },
     });
   }

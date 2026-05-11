@@ -1,10 +1,8 @@
-import { FolioVersion } from "./types";
-
-import { StartRebalanceArgsPartial as StartRebalanceArgsPartial_4_0_0 } from "./4.0.0/types";
-import { StartRebalanceArgsPartial as StartRebalanceArgsPartial_5_0_0 } from "./types";
-
 import { getStartRebalance as getStartRebalance_4_0_0 } from "./4.0.0/start-rebalance";
+import { StartRebalanceArgsPartial as StartRebalanceArgsPartial_4_0_0 } from "./4.0.0/types";
 import { getStartRebalance as getStartRebalance_5_0_0 } from "./5.0.0/start-rebalance";
+import { FolioVersion } from "./types";
+import { StartRebalanceArgsPartial as StartRebalanceArgsPartial_5_0_0 } from "./types";
 
 /**
  * Get the arguments needed to call startRebalance

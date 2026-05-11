@@ -1,4 +1,5 @@
 import { getAddress, type Address } from "viem";
+
 import type { DtfClient } from "../client.js";
 
 export type PortfolioPeriod = "24h" | "7d" | "1m" | "3m" | "1y" | "all";
@@ -26,7 +27,13 @@ export type PortfolioVoteLock = {
   readonly votingPower: string;
   readonly delegation?: Address;
   readonly rewards: readonly PortfolioReward[];
-  readonly locks: readonly { readonly lockId: string; readonly amount: string; readonly unlockTime: number; readonly delay: number; readonly value: number }[];
+  readonly locks: readonly {
+    readonly lockId: string;
+    readonly amount: string;
+    readonly unlockTime: number;
+    readonly delay: number;
+    readonly value: number;
+  }[];
   readonly votingWeight: number;
   readonly activeProposals: readonly unknown[];
 };
@@ -55,7 +62,11 @@ export type PortfolioTransaction = {
   readonly type: string;
   readonly title: string;
   readonly description: string;
-  readonly token: { readonly address: Address; readonly symbol: string; readonly underlying?: { readonly address: Address; readonly symbol: string } } | null;
+  readonly token: {
+    readonly address: Address;
+    readonly symbol: string;
+    readonly underlying?: { readonly address: Address; readonly symbol: string };
+  } | null;
   readonly proposalId?: string;
 };
 
@@ -97,7 +108,8 @@ export async function getAccountPortfolioTransactions(
 export function createPortfolioNamespace(client: DtfClient) {
   return {
     get: (params: { readonly account: Address }) => getAccountPortfolio(client, params),
-    getHistory: (params: { readonly account: Address; readonly period: PortfolioPeriod }) => getAccountPortfolioHistory(client, params),
+    getHistory: (params: { readonly account: Address; readonly period: PortfolioPeriod }) =>
+      getAccountPortfolioHistory(client, params),
     getTransactions: (params: { readonly account: Address }) => getAccountPortfolioTransactions(client, params),
   };
 }
@@ -125,7 +137,12 @@ function mapPortfolioTransaction(transaction: PortfolioTransaction): PortfolioTr
           ...transaction.token,
           address: getAddress(transaction.token.address),
           ...(transaction.token.underlying
-            ? { underlying: { ...transaction.token.underlying, address: getAddress(transaction.token.underlying.address) } }
+            ? {
+                underlying: {
+                  ...transaction.token.underlying,
+                  address: getAddress(transaction.token.underlying.address),
+                },
+              }
             : {}),
         }
       : null,

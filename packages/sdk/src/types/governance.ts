@@ -1,4 +1,5 @@
 import type { Address, Hex } from "viem";
+
 import type { ContractCall } from "../contract-call.js";
 import type { SupportedChainId } from "../defaults.js";
 import type { DtfParams } from "./common.js";
@@ -31,11 +32,7 @@ type GetIndexDtfProposalsByGovernanceParams = {
 };
 
 export type GetIndexDtfProposalsParams = GetIndexDtfProposalsOptions &
-  (
-    | GetIndexDtfProposalsByAddressParams
-    | GetIndexDtfProposalsByDtfParams
-    | GetIndexDtfProposalsByGovernanceParams
-  );
+  (GetIndexDtfProposalsByAddressParams | GetIndexDtfProposalsByDtfParams | GetIndexDtfProposalsByGovernanceParams);
 
 export type GetAllIndexDtfProposalsParams = {
   readonly chainId: SupportedChainId;
@@ -79,10 +76,7 @@ export type GetIndexDtfProposalVoterStateParams = {
   readonly chainId: SupportedChainId;
   readonly governance: Address;
   readonly account: Address;
-  readonly proposal: Pick<
-    IndexDtfProposalDetail,
-    "id" | "voteStart" | "votes"
-  >;
+  readonly proposal: Pick<IndexDtfProposalDetail, "id" | "voteStart" | "votes">;
 };
 
 export type ProposalState =

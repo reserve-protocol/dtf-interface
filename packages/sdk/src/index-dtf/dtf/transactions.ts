@@ -1,8 +1,10 @@
 import { getAddress, type Address } from "viem";
+
 import type { DtfClient } from "../../client.js";
-import { mapAmount } from "../../lib/utils.js";
 import type { Amount } from "../../types/common.js";
 import type { IndexDtfInput } from "../../types/index-dtf.js";
+
+import { mapAmount } from "../../lib/utils.js";
 import { GetIndexDtfTransactionsDocument } from "../subgraph/dtf.generated.js";
 import { getIndexDtfIdentity } from "../utils.js";
 
@@ -52,9 +54,7 @@ export async function getIndexDtfTransactions(
       id: event.id,
       hash: event.hash,
       amount,
-      ...(params.dtfPriceUsd === undefined
-        ? {}
-        : { amountUsd: Number(amount.formatted) * params.dtfPriceUsd }),
+      ...(params.dtfPriceUsd === undefined ? {} : { amountUsd: Number(amount.formatted) * params.dtfPriceUsd }),
       timestamp: Number(event.timestamp),
       chainId,
       ...(event.to?.id ? { to: getAddress(event.to.id) } : {}),

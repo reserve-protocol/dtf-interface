@@ -1,21 +1,12 @@
-import {
-  FolioVersion,
-  getStartRebalance,
-} from "@reserve-protocol/dtf-rebalance-lib";
-import { SdkError } from "../../../errors.js";
-import type {
-  BuildIndexDtfStartRebalanceArgsParams,
-  StartRebalanceArgsV5,
-} from "./types.js";
-import { getBasketShares } from "./math.js";
-import {
-  assertPositiveNumber,
-  validateBasketTokens,
-} from "./validation.js";
+import { FolioVersion, getStartRebalance } from "@reserve-protocol/dtf-rebalance-lib";
 
-export function buildStartRebalanceArgs(
-  params: BuildIndexDtfStartRebalanceArgsParams,
-): StartRebalanceArgsV5 {
+import type { BuildIndexDtfStartRebalanceArgsParams, StartRebalanceArgsV5 } from "./types.js";
+
+import { SdkError } from "../../../errors.js";
+import { getBasketShares } from "./math.js";
+import { assertPositiveNumber, validateBasketTokens } from "./validation.js";
+
+export function buildStartRebalanceArgs(params: BuildIndexDtfStartRebalanceArgsParams): StartRebalanceArgsV5 {
   if (params.supply <= 0n) {
     throw new SdkError({
       code: "INVALID_INPUT",

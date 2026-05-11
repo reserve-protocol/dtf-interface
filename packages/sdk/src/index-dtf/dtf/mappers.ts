@@ -1,20 +1,12 @@
 import { getAddress } from "viem";
-import type { SupportedChainId } from "../../defaults.js";
-import { SdkError } from "../../errors.js";
-import { mapAmount } from "../../lib/utils.js";
+
 import type {
   ReserveApiIndexDtfBasketSnapshot,
   ReserveApiIndexDtfPrice,
   ReserveApiIndexDtfPriceHistory,
 } from "../../client/api.js";
-import type {
-  Authority,
-  DtfParams,
-  Governance,
-  Token,
-  TokenSnapshot,
-  TokenWithSnapshot,
-} from "../../types/common.js";
+import type { SupportedChainId } from "../../defaults.js";
+import type { Authority, DtfParams, Governance, Token, TokenSnapshot, TokenWithSnapshot } from "../../types/common.js";
 import type {
   FeeRecipients,
   IndexDtfBrand,
@@ -27,6 +19,9 @@ import type {
   IndexDtfPricePoint,
 } from "../../types/index-dtf.js";
 import type { GetIndexDtfQuery } from "../subgraph/dtf.generated.js";
+
+import { SdkError } from "../../errors.js";
+import { mapAmount } from "../../lib/utils.js";
 
 type SubgraphIndexDtf = NonNullable<GetIndexDtfQuery["dtf"]>;
 type NullableSubgraphGovernance = SubgraphIndexDtf["ownerGovernance"];
@@ -66,10 +61,7 @@ type IndexDtfBrandResponseProfile = {
   readonly link: string;
 };
 
-export function mapIndexDtf(
-  dtf: SubgraphIndexDtf,
-  chainId: SupportedChainId,
-): IndexDtf {
+export function mapIndexDtf(dtf: SubgraphIndexDtf, chainId: SupportedChainId): IndexDtf {
   const adminAuthority = mapAuthority(dtf.ownerAddress, dtf.ownerGovernance);
   const rebalanceAuthorities = dtf.tradingGovernance
     ? [mapAuthority(dtf.tradingGovernance.id, dtf.tradingGovernance)]
@@ -115,9 +107,7 @@ export function mapIndexDtf(
       },
       rebalance: {
         all: rebalanceAuthorities,
-        ...(rebalanceAuthorities[0]
-          ? { primary: rebalanceAuthorities[0] }
-          : {}),
+        ...(rebalanceAuthorities[0] ? { primary: rebalanceAuthorities[0] } : {}),
       },
       ...(voteLockAuthority ? { voteLock: voteLockAuthority } : {}),
       all: allAuthorities,
@@ -126,30 +116,19 @@ export function mapIndexDtf(
       ? {
           voteLockVault: {
             token: mapVoteLockToken(dtf.stToken.token, dtf.stToken.id),
-            underlying: dtf.stToken.underlying
-              ? mapToken(dtf.stToken.underlying)
-              : mapToken(dtf.token),
-            ...(dtf.stToken.governance
-              ? { governance: mapGovernance(dtf.stToken.governance) }
-              : {}),
+            underlying: dtf.stToken.underlying ? mapToken(dtf.stToken.underlying) : mapToken(dtf.token),
+            ...(dtf.stToken.governance ? { governance: mapGovernance(dtf.stToken.governance) } : {}),
             legacyGovernance: dtf.stToken.legacyGovernance.map(getAddress),
-            rewardTokens: dtf.stToken.rewards.map(({ rewardToken }) =>
-              mapToken(rewardToken),
-            ),
+            rewardTokens: dtf.stToken.rewards.map(({ rewardToken }) => mapToken(rewardToken)),
           },
         }
       : {}),
     rebalance: {
       auctionDelay: Number(dtf.auctionDelay),
       auctionLength: Number(dtf.auctionLength),
-      ...(dtf.bidsEnabled === null || dtf.bidsEnabled === undefined
-        ? {}
-        : { bidsEnabled: dtf.bidsEnabled }),
-      ...(dtf.trustedFillerRegistry
-        ? { trustedFillerRegistry: getAddress(dtf.trustedFillerRegistry) }
-        : {}),
-      ...(dtf.trustedFillerEnabled === null ||
-      dtf.trustedFillerEnabled === undefined
+      ...(dtf.bidsEnabled === null || dtf.bidsEnabled === undefined ? {} : { bidsEnabled: dtf.bidsEnabled }),
+      ...(dtf.trustedFillerRegistry ? { trustedFillerRegistry: getAddress(dtf.trustedFillerRegistry) } : {}),
+      ...(dtf.trustedFillerEnabled === null || dtf.trustedFillerEnabled === undefined
         ? {}
         : { trustedFillerEnabled: dtf.trustedFillerEnabled }),
       weightControl: dtf.weightControl,
@@ -170,9 +149,7 @@ export function mapIndexDtf(
   };
 }
 
-export function mapIndexDtfBrand(
-  response: IndexDtfBrandResponse,
-): IndexDtfBrand | undefined {
+export function mapIndexDtfBrand(response: IndexDtfBrandResponse): IndexDtfBrand | undefined {
   if (!response.parsedData) {
     return undefined;
   }
@@ -189,9 +166,7 @@ export function mapIndexDtfBrand(
     ...(nonEmpty(dtf.cover) ? { cover: dtf.cover } : {}),
     ...(nonEmpty(dtf.mobileCover) ? { mobileCover: dtf.mobileCover } : {}),
     ...(nonEmpty(dtf.description) ? { description: dtf.description } : {}),
-    ...(nonEmpty(dtf.notesFromCreator)
-      ? { notesFromCreator: dtf.notesFromCreator }
-      : {}),
+    ...(nonEmpty(dtf.notesFromCreator) ? { notesFromCreator: dtf.notesFromCreator } : {}),
     ...(nonEmpty(dtf.prospectus) ? { prospectus: dtf.prospectus } : {}),
     ...(nonEmpty(dtf.basketType) ? { basketType: dtf.basketType } : {}),
     ...(mappedCreator ? { creator: mappedCreator } : {}),
@@ -199,10 +174,7 @@ export function mapIndexDtfBrand(
   };
 }
 
-export function mapIndexDtfPrice(
-  response: ReserveApiIndexDtfPrice,
-  params: DtfParams,
-): IndexDtfPrice {
+export function mapIndexDtfPrice(response: ReserveApiIndexDtfPrice, params: DtfParams): IndexDtfPrice {
   return {
     address: getAddress(params.address),
     chainId: params.chainId,
@@ -225,9 +197,7 @@ export function mapIndexDtfPrice(
   };
 }
 
-export function mapIndexDtfPriceHistory(
-  response: ReserveApiIndexDtfPriceHistory,
-): readonly IndexDtfPricePoint[] {
+export function mapIndexDtfPriceHistory(response: ReserveApiIndexDtfPriceHistory): readonly IndexDtfPricePoint[] {
   return response.timeseries.map((point) => ({
     timestamp: point.timestamp,
     price: point.price,
@@ -241,9 +211,7 @@ export function mapIndexDtfPriceHistory(
   }));
 }
 
-export function mapIndexDtfBasketSnapshot(
-  response: ReserveApiIndexDtfBasketSnapshot,
-): IndexDtfBasketSnapshot {
+export function mapIndexDtfBasketSnapshot(response: ReserveApiIndexDtfBasketSnapshot): IndexDtfBasketSnapshot {
   return {
     price: response.price,
     basket: response.basket.map((asset) => ({
@@ -256,10 +224,7 @@ export function mapIndexDtfBasketSnapshot(
   };
 }
 
-function mapAuthority(
-  address: string,
-  governance?: NullableSubgraphGovernance,
-): Authority {
+function mapAuthority(address: string, governance?: NullableSubgraphGovernance): Authority {
   return governance
     ? {
         address: getAddress(governance.id),
@@ -280,10 +245,7 @@ function mapGovernance(governance: SubgraphGovernance): Governance {
     proposalThreshold: mapD18Percentage(governance.proposalThreshold),
     quorumNumerator: Number(governance.quorumNumerator ?? 0),
     quorumDenominator: Number(governance.quorumDenominator ?? 0),
-    quorum: calculateQuorum(
-      governance.quorumNumerator,
-      governance.quorumDenominator,
-    ),
+    quorum: calculateQuorum(governance.quorumNumerator, governance.quorumDenominator),
     timelock: {
       address: getAddress(governance.timelock.id),
       guardians: governance.timelock.guardians.map(getAddress),
@@ -314,10 +276,7 @@ function mapTokenWithSnapshot(token: SubgraphToken): TokenWithSnapshot {
   };
 }
 
-function mapVoteLockToken(
-  token: SubgraphVoteLockToken,
-  vaultAddress: string,
-): TokenWithSnapshot {
+function mapVoteLockToken(token: SubgraphVoteLockToken, vaultAddress: string): TokenWithSnapshot {
   return {
     ...mapToken({ ...token, id: vaultAddress }),
     snapshot: mapTokenSnapshot(token),
@@ -347,9 +306,7 @@ function mapTokenSnapshot(token: {
   };
 }
 
-function mapBrandProfile(
-  profile: IndexDtfBrandResponseProfile,
-): IndexDtfBrandProfile | undefined {
+function mapBrandProfile(profile: IndexDtfBrandResponseProfile): IndexDtfBrandProfile | undefined {
   const name = nonEmpty(profile.name);
   const icon = nonEmpty(profile.icon);
   const link = nonEmpty(profile.link);
@@ -403,9 +360,7 @@ function mapFeeRecipients(raw: string): FeeRecipients {
   });
 }
 
-function dedupeAuthorities(
-  authorities: readonly Authority[],
-): readonly Authority[] {
+function dedupeAuthorities(authorities: readonly Authority[]): readonly Authority[] {
   const seen = new Set<string>();
 
   return authorities.filter((authority) => {
@@ -419,15 +374,10 @@ function dedupeAuthorities(
   });
 }
 
-function calculateQuorum(
-  numerator: unknown | null | undefined,
-  denominator: unknown | null | undefined,
-): number {
+function calculateQuorum(numerator: unknown | null | undefined, denominator: unknown | null | undefined): number {
   const quorumDenominator = Number(denominator ?? 0);
 
-  return quorumDenominator === 0
-    ? 0
-    : (Number(numerator ?? 0) / quorumDenominator) * 100;
+  return quorumDenominator === 0 ? 0 : (Number(numerator ?? 0) / quorumDenominator) * 100;
 }
 
 function mapD18Percentage(value: unknown): number {

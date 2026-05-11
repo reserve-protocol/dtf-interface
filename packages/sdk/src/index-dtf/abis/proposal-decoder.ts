@@ -1,4 +1,5 @@
 import type { Abi } from "viem";
+
 import { dtfAdminProposalAbi } from "./dtf-admin-proposal.js";
 import { dtfIndexGovernanceProposalAbi } from "./dtf-index-governance-proposal.js";
 import { dtfIndexProposalAbi } from "./dtf-index-proposal.js";

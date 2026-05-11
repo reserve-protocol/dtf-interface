@@ -1,7 +1,8 @@
 import "@nomicfoundation/hardhat-ethers";
-import { Contract } from "ethers";
-import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import type { HardhatRuntimeEnvironment } from "hardhat/types";
+
+import { Contract } from "ethers";
 
 import { bn } from "../src/numbers";
 
@@ -197,7 +198,7 @@ export async function getTokenNameAndSymbol(hre: HardhatRuntimeEnvironment, toke
     const tokenContract = await hre.ethers.getContractAt("IERC20Metadata", token);
     const [name, symbol] = await Promise.all([tokenContract.name(), tokenContract.symbol()]);
     return `${name} (${symbol})`;
-  } catch (e) {
+  } catch  {
     return token;
   }
 }

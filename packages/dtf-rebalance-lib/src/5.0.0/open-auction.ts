@@ -1,4 +1,3 @@
-import { Decimal } from "../utils";
 import type { Decimal as DecimalType } from "decimal.js-light";
 
 import { bn, D9d, D18d, D27d, ONE, ZERO, D18n, D27n, EPSILON } from "../numbers";
@@ -12,6 +11,7 @@ import {
   TokenRebalanceParams,
   WeightRange,
 } from "../types";
+import { Decimal } from "../utils";
 
 /**
  * Get the values needed to call `folio.openAuction()` as the AUCTION_LAUNCHER

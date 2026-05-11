@@ -1,9 +1,6 @@
 export { createDtfClient } from "./client.js";
 export { createWalletClient } from "./client/viem.js";
-export {
-  prepareContractCall,
-  prepareErc20Approval,
-} from "./contract-call.js";
+export { prepareContractCall, prepareErc20Approval } from "./contract-call.js";
 export { createDtfSdk } from "./create-dtf-sdk.js";
 export { SdkError, isSdkError } from "./errors.js";
 export {
@@ -170,19 +167,11 @@ export {
   getAccountPortfolioHistory,
   getAccountPortfolioTransactions,
 } from "./portfolio/index.js";
-export {
-  getTokenData,
-  getTokenPrices,
-  getTokenVolatilities,
-  getTokensData,
-} from "./tokens/index.js";
+export { getTokenData, getTokenPrices, getTokenVolatilities, getTokensData } from "./tokens/index.js";
 export type { IndexDtfRef } from "./index-dtf/index.js";
 export type * from "./index-dtf/dtf/basket/index.js";
 export type * from "./index-dtf/governance/propose/index.js";
 export type * from "./index-dtf/index.js";
 export type * from "./portfolio/index.js";
 export type * from "./types/index.js";
-export type {
-  DiscoverDtf,
-  GetDiscoverDtfsOptions,
-} from "./actions/get-discover-dtfs.js";
+export type { DiscoverDtf, GetDiscoverDtfsOptions } from "./actions/get-discover-dtfs.js";

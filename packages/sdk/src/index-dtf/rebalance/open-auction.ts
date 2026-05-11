@@ -1,9 +1,7 @@
 import { FolioVersion, getOpenAuction, getTargetBasket } from "@reserve-protocol/dtf-rebalance-lib";
 import { getAddress, type Address } from "viem";
+
 import type { SupportedChainId } from "../../defaults.js";
-import { SdkError } from "../../errors.js";
-import { prepareContractCall } from "../../contract-call.js";
-import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
 import type {
   BuiltIndexDtfOpenAuction,
   IndexDtfOpenAuctionInput,
@@ -11,13 +9,15 @@ import type {
   OpenAuctionArgs,
 } from "./types.js";
 
+import { prepareContractCall } from "../../contract-call.js";
+import { SdkError } from "../../errors.js";
+import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
+
 /**
  * Builds the v5 launcher `openAuction` args with `dtf-rebalance-lib`.
  * Historical and current inputs stay explicit so bots cannot mix time sources by accident.
  */
-export function prepareIndexDtfOpenAuctionArgs(
-  params: IndexDtfOpenAuctionInput,
-): BuiltIndexDtfOpenAuction {
+export function prepareIndexDtfOpenAuctionArgs(params: IndexDtfOpenAuctionInput): BuiltIndexDtfOpenAuction {
   validateOpenAuctionInput(params);
 
   const tokenMap = new Map(params.tokens.map((token) => [token.address.toLowerCase(), token]));
@@ -85,12 +85,8 @@ function validateOpenAuctionInput(params: IndexDtfOpenAuctionInput) {
   }
 }
 
-function getTargetBasketPriceMode(
-  params: IndexDtfOpenAuctionInput,
-): IndexDtfTargetBasketPriceMode {
-  const mode = params.targetBasketPriceMode ?? (
-    params.isTrackingDtf || params.isHybridDtf ? "current" : "snapshot"
-  );
+function getTargetBasketPriceMode(params: IndexDtfOpenAuctionInput): IndexDtfTargetBasketPriceMode {
+  const mode = params.targetBasketPriceMode ?? (params.isTrackingDtf || params.isHybridDtf ? "current" : "snapshot");
 
   if (mode !== "current" && mode !== "snapshot") {
     throw new SdkError({

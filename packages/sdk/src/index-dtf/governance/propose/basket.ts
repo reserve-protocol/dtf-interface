@@ -1,10 +1,13 @@
 import { getAddress, zeroAddress, type Address, type Hex } from "viem";
-import { prepareContractCall } from "../../../contract-call.js";
+
 import type { DtfClient } from "../../../client.js";
-import { SdkError } from "../../../errors.js";
 import type { DtfParams } from "../../../types/common.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import type { IndexDtf } from "../../../types/index-dtf.js";
+
+import { prepareContractCall } from "../../../contract-call.js";
+import { SdkError } from "../../../errors.js";
+import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import {
   DEFAULT_AUCTION_LAUNCHER_WINDOW,
   buildIndexDtfStartRebalance,
@@ -20,7 +23,6 @@ import {
   type IndexDtfBasketUnitsInput,
   type StartRebalanceArgsV5,
 } from "../../dtf/basket/index.js";
-import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
 import { getDtf } from "../../dtf/index.js";
 
 const MAX_REBALANCE_TTL = 604_800n * 4n;
@@ -37,14 +39,13 @@ export type IndexDtfBasketProposalSharesInput = IndexDtfBasketSharesInput;
 export type IndexDtfBasketProposalUnitsInput = IndexDtfBasketUnitsInput;
 export type IndexDtfBasketProposalInput = IndexDtfBasketInput;
 
-export type BuildIndexDtfBasketProposalParams =
-  BuildIndexDtfStartRebalanceParams & {
-    readonly description?: string;
-    readonly governance?: Address;
-    readonly auctionLauncherWindow?: number | bigint;
-    readonly permissionlessWindow?: number | bigint;
-    readonly ttl?: number | bigint;
-  };
+export type BuildIndexDtfBasketProposalParams = BuildIndexDtfStartRebalanceParams & {
+  readonly description?: string;
+  readonly governance?: Address;
+  readonly auctionLauncherWindow?: number | bigint;
+  readonly permissionlessWindow?: number | bigint;
+  readonly ttl?: number | bigint;
+};
 
 export type BuiltIndexDtfBasketProposalContext = BuiltIndexDtfStartRebalance & {
   readonly chainId: DtfParams["chainId"];
@@ -88,9 +89,7 @@ export async function buildIndexDtfBasketProposal(
   };
 }
 
-function prepareIndexDtfBasketRebalance(
-  context: BuiltIndexDtfBasketProposalContext,
-): IndexDtfCall {
+function prepareIndexDtfBasketRebalance(context: BuiltIndexDtfBasketProposalContext): IndexDtfCall {
   const args = getStartRebalanceArgs(context);
 
   return prepareContractCall({
@@ -136,9 +135,7 @@ function getProposalAuthority(
   dtf: IndexDtf | undefined,
 ): { governance: Address } {
   const authority = dtf?.governance.rebalance.primary;
-  const resolvedGovernance =
-    params.governance ??
-    (authority?.type === "governance" ? authority.address : undefined);
+  const resolvedGovernance = params.governance ?? (authority?.type === "governance" ? authority.address : undefined);
 
   if (!resolvedGovernance) {
     throw new SdkError({
@@ -185,8 +182,7 @@ function getRebalanceWindows(params: {
   );
   const ttl =
     params.ttl === undefined
-      ? auctionLauncherWindow +
-        toSeconds(params.permissionlessWindow ?? 0, "permissionlessWindow")
+      ? auctionLauncherWindow + toSeconds(params.permissionlessWindow ?? 0, "permissionlessWindow")
       : toSeconds(params.ttl, "ttl", { allowZero: false });
 
   if (ttl === 0n) {
@@ -214,11 +210,7 @@ function getRebalanceWindows(params: {
   return { auctionLauncherWindow, ttl };
 }
 
-function toSeconds(
-  value: number | bigint,
-  field: string,
-  options: { readonly allowZero?: boolean } = {},
-): bigint {
+function toSeconds(value: number | bigint, field: string, options: { readonly allowZero?: boolean } = {}): bigint {
   const allowZero = options.allowZero ?? true;
   if (typeof value === "bigint") {
     if (value < 0n || (!allowZero && value === 0n)) {
@@ -231,12 +223,7 @@ function toSeconds(
 
     return value;
   }
-  if (
-    !Number.isFinite(value) ||
-    !Number.isInteger(value) ||
-    value < 0 ||
-    (!allowZero && value === 0)
-  ) {
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0 || (!allowZero && value === 0)) {
     throw new SdkError({
       code: "INVALID_INPUT",
       message: `${field} must be a ${allowZero ? "non-negative" : "positive"} number of seconds`,

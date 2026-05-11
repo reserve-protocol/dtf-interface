@@ -1,8 +1,8 @@
-import { Decimal } from "../utils";
 import type { Decimal as DecimalType } from "decimal.js-light";
 
 import { bn, D9d, D18d, D27d, ONE, ZERO, D18n, D27n, EPSILON } from "../numbers";
 import { AuctionMetrics, AuctionRound, OpenAuctionArgs, PriceControl, PriceRange, WeightRange } from "../types";
+import { Decimal } from "../utils";
 import { Rebalance } from "./types";
 
 /**

@@ -1,9 +1,11 @@
 import { getAddress, type Address } from "viem";
+
 import type { DtfClient } from "../../../client.js";
+import type { TokenVolatility } from "../../../types/common.js";
+
 import { SdkError } from "../../../errors.js";
 import { getTokensData } from "../../../tokens/index.js";
 import { getTokenPrices, getTokenVolatilities } from "../../../tokens/prices.js";
-import type { TokenVolatility } from "../../../types/common.js";
 import {
   DEFAULT_MAX_AUCTION_SIZE_USD,
   PRICE_ERROR_BY_VOLATILITY,
@@ -100,7 +102,8 @@ export async function getBasketPriceErrors(
   }
   for (const token of inputTokens) {
     if (token.priceError !== undefined) explicitErrors.set(token.address.toLowerCase(), token.priceError);
-    if (token.priceVolatility !== undefined) explicitVolatilities.set(token.address.toLowerCase(), token.priceVolatility);
+    if (token.priceVolatility !== undefined)
+      explicitVolatilities.set(token.address.toLowerCase(), token.priceVolatility);
   }
 
   const missingVolatility = tokenOrder.filter((address) => {
@@ -108,9 +111,10 @@ export async function getBasketPriceErrors(
 
     return !explicitErrors.has(key) && !explicitVolatilities.has(key);
   });
-  const fetchedVolatilities = missingVolatility.length > 0
-    ? await getTokenVolatilities(client, { chainId: params.chainId, addresses: missingVolatility })
-    : {};
+  const fetchedVolatilities =
+    missingVolatility.length > 0
+      ? await getTokenVolatilities(client, { chainId: params.chainId, addresses: missingVolatility })
+      : {};
   const fetchedVolatilityByAddress = new Map(
     Object.entries(fetchedVolatilities).map(([address, volatility]) => [address.toLowerCase(), volatility]),
   );

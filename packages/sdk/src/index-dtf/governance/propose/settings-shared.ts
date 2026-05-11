@@ -1,15 +1,17 @@
 import type { Address } from "viem";
-import { SdkError } from "../../../errors.js";
+
 import type { Authority, DtfParams, Governance } from "../../../types/common.js";
 import type { IndexDtf, PriceControl } from "../../../types/index-dtf.js";
-import { getDtf, getVersion } from "../../dtf/index.js";
-import { INDEX_DTF_VERSION_5_0_0, type IndexDtfVersion } from "../../versions.js";
-import { assertNumberRange } from "./settings-governance.js";
 import type {
   BuildIndexDtfSettingsProposalParams,
   BuiltIndexDtfCalls,
   BuiltIndexDtfProposal,
 } from "./settings-types.js";
+
+import { SdkError } from "../../../errors.js";
+import { getDtf, getVersion } from "../../dtf/index.js";
+import { INDEX_DTF_VERSION_5_0_0, type IndexDtfVersion } from "../../versions.js";
+import { assertNumberRange } from "./settings-governance.js";
 
 const MAX_TOKEN_NAME_LENGTH = 32;
 const MAX_MINT_FEE = 5;
@@ -71,7 +73,7 @@ export async function getIndexDtfSettingsVersion(
   client: Parameters<typeof getVersion>[0],
   params: BuildIndexDtfSettingsProposalParams,
 ): Promise<typeof INDEX_DTF_VERSION_5_0_0> {
-  const version = params.version ?? await getVersion(client, params) as IndexDtfVersion;
+  const version = params.version ?? ((await getVersion(client, params)) as IndexDtfVersion);
 
   if (version !== INDEX_DTF_VERSION_5_0_0) {
     throw new SdkError({
@@ -85,7 +87,8 @@ export async function getIndexDtfSettingsVersion(
 }
 
 export function hasIndexDtfSettingsCall(params: BuildIndexDtfSettingsProposalParams): boolean {
-  return (params.removeBasketTokens?.length ?? 0) > 0 ||
+  return (
+    (params.removeBasketTokens?.length ?? 0) > 0 ||
     params.tokenName !== undefined ||
     params.mandate !== undefined ||
     params.mintFee !== undefined ||
@@ -94,7 +97,8 @@ export function hasIndexDtfSettingsCall(params: BuildIndexDtfSettingsProposalPar
     params.weightControl !== undefined ||
     params.priceControl !== undefined ||
     params.bidsEnabled !== undefined ||
-    params.revenueDistribution !== undefined;
+    params.revenueDistribution !== undefined
+  );
 }
 
 export function getAuthorityGovernance(authority: Authority | undefined): Governance | undefined {
@@ -105,7 +109,8 @@ export function validateDtfSettingsParams(params: BuildIndexDtfSettingsProposalP
   if (params.tokenName !== undefined) assertStringLength(params.tokenName, "tokenName", 1, MAX_TOKEN_NAME_LENGTH);
   if (params.mintFee !== undefined) assertNumberRange(params.mintFee, "mintFee", 0, MAX_MINT_FEE);
   if (params.tvlFee !== undefined) assertNumberRange(params.tvlFee, "tvlFee", 0, MAX_TVL_FEE);
-  if (params.auctionLength !== undefined) assertNumberRange(params.auctionLength, "auctionLength", MIN_AUCTION_LENGTH_MINUTES, MAX_AUCTION_LENGTH_MINUTES);
+  if (params.auctionLength !== undefined)
+    assertNumberRange(params.auctionLength, "auctionLength", MIN_AUCTION_LENGTH_MINUTES, MAX_AUCTION_LENGTH_MINUTES);
   if (params.priceControl !== undefined && !isPriceControl(params.priceControl)) {
     throw new SdkError({
       code: "INVALID_INPUT",

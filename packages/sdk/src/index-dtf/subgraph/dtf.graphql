@@ -120,11 +120,7 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
 query GetIndexDtfProposals($governanceIds: [ID!]!, $limit: Int = 100) {
   governances(where: { id_in: $governanceIds }) {
     id
-    proposals(
-      first: $limit
-      orderBy: creationTime
-      orderDirection: desc
-    ) {
+    proposals(first: $limit, orderBy: creationTime, orderDirection: desc) {
       id
       description
       creationTime
@@ -271,13 +267,7 @@ query GetIndexDtfDelegates($stToken: ID!, $limit: Int = 10) {
 }
 
 query GetIndexDtfRebalances($dtf: String!, $limit: Int = 100, $offset: Int = 0) {
-  rebalances(
-    where: { dtf: $dtf }
-    orderBy: timestamp
-    orderDirection: desc
-    first: $limit
-    skip: $offset
-  ) {
+  rebalances(where: { dtf: $dtf }, orderBy: timestamp, orderDirection: desc, first: $limit, skip: $offset) {
     id
     nonce
     tokens {

@@ -1,6 +1,8 @@
-import type { QueryKey } from "@tanstack/react-query";
 import type { DtfSdk } from "@dtf-interface/sdk";
+import type { QueryKey } from "@tanstack/react-query";
+
 import type { DtfQueryOptions, DtfQueryOptionsResult } from "./query-options.js";
+
 import { normalizeQueryKeyValue } from "./normalize-query-key.js";
 
 type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
@@ -43,7 +45,12 @@ export function indexDtfStatusQueryOptions<TData = MethodResult<IndexMethod<"get
   params: MethodParams<IndexMethod<"getStatus">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getStatus">>, TData>,
 ) {
-  return queryOptions(key("status", params), () => sdk.index.getStatus(requireParams(params, "indexDtfStatusQueryOptions")), params !== undefined, options);
+  return queryOptions(
+    key("status", params),
+    () => sdk.index.getStatus(requireParams(params, "indexDtfStatusQueryOptions")),
+    params !== undefined,
+    options,
+  );
 }
 
 export function indexDtfExposureQueryOptions<TData = MethodResult<IndexMethod<"getExposure">>>(
@@ -51,7 +58,12 @@ export function indexDtfExposureQueryOptions<TData = MethodResult<IndexMethod<"g
   params: MethodParams<IndexMethod<"getExposure">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getExposure">>, TData>,
 ) {
-  return queryOptions(key("exposure", params), () => sdk.index.getExposure(requireParams(params, "indexDtfExposureQueryOptions")), params !== undefined, options);
+  return queryOptions(
+    key("exposure", params),
+    () => sdk.index.getExposure(requireParams(params, "indexDtfExposureQueryOptions")),
+    params !== undefined,
+    options,
+  );
 }
 
 export function indexDtfTransactionsQueryOptions<TData = MethodResult<IndexMethod<"getTransactions">>>(
@@ -59,7 +71,12 @@ export function indexDtfTransactionsQueryOptions<TData = MethodResult<IndexMetho
   params: MethodParams<IndexMethod<"getTransactions">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getTransactions">>, TData>,
 ) {
-  return queryOptions(key("transactions", params), () => sdk.index.getTransactions(requireParams(params, "indexDtfTransactionsQueryOptions")), params !== undefined, options);
+  return queryOptions(
+    key("transactions", params),
+    () => sdk.index.getTransactions(requireParams(params, "indexDtfTransactionsQueryOptions")),
+    params !== undefined,
+    options,
+  );
 }
 
 export function indexDtfRevenueQueryOptions<TData = MethodResult<IndexMethod<"getRevenue">>>(
@@ -67,7 +84,12 @@ export function indexDtfRevenueQueryOptions<TData = MethodResult<IndexMethod<"ge
   params: MethodParams<IndexMethod<"getRevenue">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getRevenue">>, TData>,
 ) {
-  return queryOptions(key("revenue", params), () => sdk.index.getRevenue(requireParams(params, "indexDtfRevenueQueryOptions")), params !== undefined, options);
+  return queryOptions(
+    key("revenue", params),
+    () => sdk.index.getRevenue(requireParams(params, "indexDtfRevenueQueryOptions")),
+    params !== undefined,
+    options,
+  );
 }
 
 export function indexDtfIssuanceStateQueryOptions<TData = MethodResult<IndexMethod<"getIssuanceState">>>(
@@ -75,7 +97,12 @@ export function indexDtfIssuanceStateQueryOptions<TData = MethodResult<IndexMeth
   params: MethodParams<IndexMethod<"getIssuanceState">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getIssuanceState">>, TData>,
 ) {
-  return queryOptions(key("issuance-state", params), () => sdk.index.getIssuanceState(requireParams(params, "indexDtfIssuanceStateQueryOptions")), params !== undefined, options);
+  return queryOptions(
+    key("issuance-state", params),
+    () => sdk.index.getIssuanceState(requireParams(params, "indexDtfIssuanceStateQueryOptions")),
+    params !== undefined,
+    options,
+  );
 }
 
 export function indexDtfRebalancesQueryOptions<TData = MethodResult<IndexMethod<"getRebalances">>>(
@@ -83,7 +110,12 @@ export function indexDtfRebalancesQueryOptions<TData = MethodResult<IndexMethod<
   params: MethodParams<IndexMethod<"getRebalances">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getRebalances">>, TData>,
 ) {
-  return queryOptions(key("rebalances", params), () => sdk.index.getRebalances(requireParams(params, "indexDtfRebalancesQueryOptions")), params !== undefined, options);
+  return queryOptions(
+    key("rebalances", params),
+    () => sdk.index.getRebalances(requireParams(params, "indexDtfRebalancesQueryOptions")),
+    params !== undefined,
+    options,
+  );
 }
 
 export function indexDtfCurrentRebalanceQueryOptions<TData = MethodResult<IndexMethod<"getCurrentRebalance">>>(
@@ -91,7 +123,12 @@ export function indexDtfCurrentRebalanceQueryOptions<TData = MethodResult<IndexM
   params: MethodParams<IndexMethod<"getCurrentRebalance">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getCurrentRebalance">>, TData>,
 ) {
-  return queryOptions(key("current-rebalance", params), () => sdk.index.getCurrentRebalance(requireParams(params, "indexDtfCurrentRebalanceQueryOptions")), params !== undefined, options);
+  return queryOptions(
+    key("current-rebalance", params),
+    () => sdk.index.getCurrentRebalance(requireParams(params, "indexDtfCurrentRebalanceQueryOptions")),
+    params !== undefined,
+    options,
+  );
 }
 
 export function indexDtfVoteLockStateQueryOptions<TData = MethodResult<IndexMethod<"getVoteLockState">>>(
@@ -99,7 +136,12 @@ export function indexDtfVoteLockStateQueryOptions<TData = MethodResult<IndexMeth
   params: MethodParams<IndexMethod<"getVoteLockState">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getVoteLockState">>, TData>,
 ) {
-  return queryOptions(key("vote-lock-state", params), () => sdk.index.getVoteLockState(requireParams(params, "indexDtfVoteLockStateQueryOptions")), params !== undefined, options);
+  return queryOptions(
+    key("vote-lock-state", params),
+    () => sdk.index.getVoteLockState(requireParams(params, "indexDtfVoteLockStateQueryOptions")),
+    params !== undefined,
+    options,
+  );
 }
 
 export function accountPortfolioQueryOptions<TData = MethodResult<PortfolioMethod<"get">>>(
@@ -107,5 +149,10 @@ export function accountPortfolioQueryOptions<TData = MethodResult<PortfolioMetho
   params: MethodParams<PortfolioMethod<"get">> | undefined,
   options?: DtfQueryOptions<MethodResult<PortfolioMethod<"get">>, TData>,
 ) {
-  return queryOptions(["dtf", "portfolio", normalizeQueryKeyValue(params)], () => sdk.portfolio.get(requireParams(params, "accountPortfolioQueryOptions")), params !== undefined, options);
+  return queryOptions(
+    ["dtf", "portfolio", normalizeQueryKeyValue(params)],
+    () => sdk.portfolio.get(requireParams(params, "accountPortfolioQueryOptions")),
+    params !== undefined,
+    options,
+  );
 }

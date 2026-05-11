@@ -1,12 +1,6 @@
-export {
-  buildIndexDtfBasketSettingsProposal,
-} from "./settings-basket.js";
-export {
-  buildIndexDtfDaoSettingsProposal,
-} from "./settings-dao.js";
-export {
-  buildIndexDtfSettingsProposal,
-} from "./settings-dtf.js";
+export { buildIndexDtfBasketSettingsProposal } from "./settings-basket.js";
+export { buildIndexDtfDaoSettingsProposal } from "./settings-dao.js";
+export { buildIndexDtfSettingsProposal } from "./settings-dtf.js";
 export {
   indexDtfBasketSettingsProposalSchema,
   indexDtfDaoSettingsProposalSchema,

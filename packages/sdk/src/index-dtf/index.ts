@@ -29,11 +29,7 @@ export {
   getTotalSupply as getIndexDtfTotalSupply,
   getVersion as getIndexDtfVersion,
 } from "./dtf/index.js";
-export {
-  discoverIndexDtfs,
-  getIndexDtfStatus,
-  getIndexDtfStatuses,
-} from "./dtf/discovery.js";
+export { discoverIndexDtfs, getIndexDtfStatus, getIndexDtfStatuses } from "./dtf/discovery.js";
 export { getIndexDtfExposure } from "./dtf/exposure.js";
 export {
   getIndexDtfIssuanceState,

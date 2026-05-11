@@ -1,4 +1,5 @@
 import { getAddress, isAddress, type Address } from "viem";
+
 import type { DtfClient } from "../client.js";
 import type { GetTokenPricesParams, TokenPrice, TokenVolatility } from "../types/common.js";
 
@@ -10,10 +11,7 @@ type RawZapperToken = {
 
 const TOKEN_VOLATILITIES = new Set<TokenVolatility>(["low", "medium", "high", "degen"]);
 
-export function getTokenPrices(
-  client: DtfClient,
-  params: GetTokenPricesParams,
-): Promise<readonly TokenPrice[]> {
+export function getTokenPrices(client: DtfClient, params: GetTokenPricesParams): Promise<readonly TokenPrice[]> {
   return client.api.getTokenPrices(params);
 }
 

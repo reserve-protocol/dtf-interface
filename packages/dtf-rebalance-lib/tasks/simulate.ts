@@ -1,12 +1,13 @@
+import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
-import { FolioVersion } from "../src/types";
+import FolioGovernorArtifact from "../out/FolioGovernor.sol/FolioGovernor.json";
 import { getTargetBasket } from "../src/open-auction";
-
-import { initializeChainState, setupContractsAndSigners } from "../test/setup";
+import { FolioVersion } from "../src/types";
+import { FOLIO_CONFIGS } from "../test/4.0.0/config";
 import { doAuctions } from "../test/do-auctions";
+import { initializeChainState, setupContractsAndSigners } from "../test/setup";
 import {
   calculateRebalanceMetrics,
   logPercentages,
@@ -15,10 +16,6 @@ import {
   createPriceLookup,
   whileImpersonating,
 } from "../test/utils";
-
-import { FOLIO_CONFIGS } from "../test/4.0.0/config";
-
-import FolioGovernorArtifact from "../out/FolioGovernor.sol/FolioGovernor.json";
 
 // TODO this probably doesn't work for V5 Folios yet
 
@@ -586,7 +583,7 @@ task("simulate", "Run a live rebalance simulation for a governance proposal")
             });
 
             console.log(`✅ Proposal queued successfully`);
-          } catch (error: any) {
+          } catch  {
             // If queue fails, it might already be queued or there's another issue
             // Try to proceed anyway
             console.log(`⚠️ Could not queue proposal (may already be queued). Attempting to proceed...`);

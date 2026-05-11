@@ -17,12 +17,7 @@ export type GetDiscoverDtfsOptions = {
 
 export async function getDiscoverDtfs(
   client: DtfClient,
-  {
-    chainId,
-    limit,
-    offset,
-    sort,
-  }: GetDiscoverDtfsOptions = {},
+  { chainId, limit, offset, sort }: GetDiscoverDtfsOptions = {},
 ): Promise<readonly DiscoverDtf[]> {
   const dtfs = await client.api.get<readonly DiscoverDtf[]>({
     path: "/discover/dtfs",

@@ -1,7 +1,6 @@
 import { getAddress } from "viem";
+
 import type { DtfClient } from "../../client.js";
-import { SdkError } from "../../errors.js";
-import { getCurrentTime } from "../../lib/utils.js";
 import type { DtfParams } from "../../types/common.js";
 import type {
   GetAllIndexDtfProposalsParams,
@@ -10,6 +9,9 @@ import type {
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
 } from "../../types/governance.js";
+
+import { SdkError } from "../../errors.js";
+import { getCurrentTime } from "../../lib/utils.js";
 import {
   GetIndexDtfProposalDocument,
   GetIndexDtfProposalGovernanceAddressesDocument,
@@ -41,17 +43,9 @@ export async function getProposals(
 
   if (params.governanceAddresses) {
     const governanceIds = normalizeGovernanceIds(params.governanceAddresses);
-    const dtf = params.address
-      ? { address: getAddress(params.address), chainId: params.chainId }
-      : undefined;
+    const dtf = params.address ? { address: getAddress(params.address), chainId: params.chainId } : undefined;
 
-    return getProposalsByGovernanceIds(
-      client,
-      params.chainId,
-      governanceIds,
-      limit,
-      dtf,
-    );
+    return getProposalsByGovernanceIds(client, params.chainId, governanceIds, limit, dtf);
   }
 
   if (params.dtf) {
@@ -59,29 +53,15 @@ export async function getProposals(
       address: getAddress(params.dtf.id),
       chainId: params.dtf.chainId,
     };
-    const governanceIds = normalizeGovernanceIds(
-      getProposalGovernanceAddresses(params.dtf),
-    );
+    const governanceIds = normalizeGovernanceIds(getProposalGovernanceAddresses(params.dtf));
 
-    return getProposalsByGovernanceIds(
-      client,
-      dtf.chainId,
-      governanceIds,
-      limit,
-      dtf,
-    );
+    return getProposalsByGovernanceIds(client, dtf.chainId, governanceIds, limit, dtf);
   }
 
   const dtf = { address: getAddress(params.address), chainId: params.chainId };
   const governanceIds = await fetchDtfProposalGovernanceIds(client, dtf);
 
-  return getProposalsByGovernanceIds(
-    client,
-    dtf.chainId,
-    governanceIds,
-    limit,
-    dtf,
-  );
+  return getProposalsByGovernanceIds(client, dtf.chainId, governanceIds, limit, dtf);
 }
 
 export async function getAllProposals(
@@ -130,9 +110,7 @@ export async function getProposal(
   const contractMap = buildProposalContractMap({
     chainId,
     dtf: mapDtfProposalContractContext(governedDtf),
-    proposalGovernance: mapProposalGovernanceContractContext(
-      proposal.governance,
-    ),
+    proposalGovernance: mapProposalGovernanceContractContext(proposal.governance),
   });
   const decodedData = decodeIndexDtfProposalCalldatas({
     targets: parsedProposal.targets,
@@ -169,21 +147,13 @@ async function getProposalsByGovernanceIds(
   const timestamp = getCurrentTime();
   const proposals = governances
     .flatMap((governance) => governance.proposals)
-    .map((proposal) =>
-      withVoteState(
-        mapIndexDtfProposalSummary(proposal, chainId, dtf),
-        timestamp,
-      ),
-    )
+    .map((proposal) => withVoteState(mapIndexDtfProposalSummary(proposal, chainId, dtf), timestamp))
     .sort((a, b) => b.creationTime - a.creationTime);
 
   return proposals.slice(0, limit);
 }
 
-async function fetchDtfProposalGovernanceIds(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<readonly string[]> {
+async function fetchDtfProposalGovernanceIds(client: DtfClient, params: DtfParams): Promise<readonly string[]> {
   const address = getAddress(params.address);
   const { dtf } = await client.subgraph.queryIndex({
     chainId: params.chainId,

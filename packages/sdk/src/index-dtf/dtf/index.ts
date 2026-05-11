@@ -1,9 +1,8 @@
 import type { Address } from "viem";
+
 import { getAddress } from "viem";
+
 import type { DtfClient } from "../../client.js";
-import { SdkError } from "../../errors.js";
-import { mapAmount } from "../../lib/utils.js";
-import { getTokensData } from "../../tokens/index.js";
 import type { DtfParams } from "../../types/common.js";
 import type {
   GetFullIndexDtfParams,
@@ -22,6 +21,10 @@ import type {
   IndexDtfPricePoint,
   IndexDtfTotalAssets,
 } from "../../types/index-dtf.js";
+
+import { SdkError } from "../../errors.js";
+import { mapAmount } from "../../lib/utils.js";
+import { getTokensData } from "../../tokens/index.js";
 import dtfAbi from "../abis/dtf-index-abi-v6.js";
 import { GetIndexDtfDocument } from "../subgraph/dtf.generated.js";
 import {
@@ -33,18 +36,13 @@ import {
   type IndexDtfBrandResponse,
 } from "./mappers.js";
 
-export async function getDtf(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<IndexDtf> {
+export async function getDtf(client: DtfClient, params: DtfParams): Promise<IndexDtf> {
   const { dtf } = await client.subgraph.queryIndex({
     chainId: params.chainId,
     query: GetIndexDtfDocument,
     variables: {
       id: getAddress(params.address).toLowerCase(),
-      ...(params.blockNumber === undefined
-        ? {}
-        : { block: { number: Number(params.blockNumber) } }),
+      ...(params.blockNumber === undefined ? {} : { block: { number: Number(params.blockNumber) } }),
     },
   });
 
@@ -63,10 +61,7 @@ export async function getDtf(
   return mapIndexDtf(dtf, params.chainId);
 }
 
-export async function getFull(
-  client: DtfClient,
-  params: GetFullIndexDtfParams,
-): Promise<IndexDtfFull> {
+export async function getFull(client: DtfClient, params: GetFullIndexDtfParams): Promise<IndexDtfFull> {
   const [dtf, market, brand] = await Promise.all([
     getDtf(client, params),
     getBasketWithPrice(client, params),
@@ -86,14 +81,8 @@ export async function getFull(
   };
 }
 
-export async function getBasketWithPrice(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<IndexDtfBasketWithPrice> {
-  const [basket, price] = await Promise.all([
-    getBasket(client, params),
-    getPrice(client, params),
-  ]);
+export async function getBasketWithPrice(client: DtfClient, params: DtfParams): Promise<IndexDtfBasketWithPrice> {
+  const [basket, price] = await Promise.all([getBasket(client, params), getPrice(client, params)]);
 
   const basketWithPrice: Record<Address, IndexDtfBasketAssetWithPrice> = {};
 
@@ -127,15 +116,9 @@ export async function getBasketWithPrice(
   };
 }
 
-export async function getBasket(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<IndexDtfBasket> {
+export async function getBasket(client: DtfClient, params: DtfParams): Promise<IndexDtfBasket> {
   const publicClient = client.viem.getPublicClient(params.chainId);
-  const { tokens: assetAddresses, balances } = await getTotalAssets(
-    client,
-    params,
-  );
+  const { tokens: assetAddresses, balances } = await getTotalAssets(client, params);
   const tokens = await getTokensData(publicClient, [...assetAddresses]);
   const basket: IndexDtfBasket = {};
 
@@ -169,19 +152,13 @@ export async function getBasket(
   return basket;
 }
 
-export async function getBasketSnapshot(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<IndexDtfBasketSnapshot> {
+export async function getBasketSnapshot(client: DtfClient, params: DtfParams): Promise<IndexDtfBasketSnapshot> {
   const response = await client.api.getIndexDtfBasketSnapshot(params);
 
   return mapIndexDtfBasketSnapshot(response);
 }
 
-export async function getVersion(
-  client: DtfClient,
-  params: GetIndexDtfVersionParams,
-): Promise<string> {
+export async function getVersion(client: DtfClient, params: GetIndexDtfVersionParams): Promise<string> {
   const publicClient = client.viem.getPublicClient(params.chainId);
 
   return publicClient.readContract({
@@ -192,10 +169,7 @@ export async function getVersion(
   });
 }
 
-export async function getTotalSupply(
-  client: DtfClient,
-  params: GetIndexDtfTotalSupplyParams,
-): Promise<bigint> {
+export async function getTotalSupply(client: DtfClient, params: GetIndexDtfTotalSupplyParams): Promise<bigint> {
   const publicClient = client.viem.getPublicClient(params.chainId);
 
   return publicClient.readContract({
@@ -231,20 +205,14 @@ export async function getTotalAssets(
   };
 }
 
-export async function getPrice(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<IndexDtfPrice> {
+export async function getPrice(client: DtfClient, params: DtfParams): Promise<IndexDtfPrice> {
   const address = getAddress(params.address);
   const response = await client.api.getIndexDtfPrice(params);
 
   return mapIndexDtfPrice(response, { address, chainId: params.chainId });
 }
 
-export async function getBrand(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<IndexDtfBrand | undefined> {
+export async function getBrand(client: DtfClient, params: DtfParams): Promise<IndexDtfBrand | undefined> {
   const address = getAddress(params.address);
   const response = await client.api.get<IndexDtfBrandResponse>({
     path: "/folio-manager/read",
@@ -266,10 +234,7 @@ export async function getPriceHistory(
   return mapIndexDtfPriceHistory(response);
 }
 
-export async function getMandate(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<string> {
+export async function getMandate(client: DtfClient, params: DtfParams): Promise<string> {
   const { address, chainId, blockNumber } = params;
   const publicClient = client.viem.getPublicClient(chainId);
 

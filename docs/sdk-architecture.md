@@ -75,9 +75,9 @@ The SDK should not require `getIndexDtf()` before fetching proposals. Consumers 
 Block-aware reads should stay granular. Source-specific methods that can read historical state may accept `blockNumber`; composed methods should not unless every source in the composition is pinned to the same point in time.
 
 ```ts
-await sdk.index.getDtf({ address, chainId, blockNumber: 123n });    // subgraph time travel
+await sdk.index.getDtf({ address, chainId, blockNumber: 123n }); // subgraph time travel
 await sdk.index.getBasket({ address, chainId, blockNumber: 123n }); // onchain read at block
-await sdk.index.get({ address, chainId });                          // current-state composition only
+await sdk.index.get({ address, chainId }); // current-state composition only
 ```
 
 ## Layers
@@ -91,12 +91,12 @@ namespace methods -> client -> small transports -> mappers
 Namespace methods are the public SDK:
 
 ```ts
-sdk.index.get()
-sdk.index.getFull()
-sdk.index.getBrand()
-sdk.index.getPrice()
-sdk.index.getProposals()
-sdk.index.ref()
+sdk.index.get();
+sdk.index.getFull();
+sdk.index.getBrand();
+sdk.index.getPrice();
+sdk.index.getProposals();
+sdk.index.ref();
 ```
 
 The client holds runtime configuration. `createDtfSdk(config)` returns an isolated plain object; it must not mutate global SDK state.
@@ -184,11 +184,11 @@ Yield DTF:
 This boundary matters even if a high-level method later composes everything:
 
 ```ts
-await sdk.index.get({ address, chainId });      // subgraph/onchain domain model
+await sdk.index.get({ address, chainId }); // subgraph/onchain domain model
 await sdk.index.getBasket({ address, chainId }); // onchain current holdings
 await sdk.index.getPrice({ address, chainId }); // API-backed fresh price
 await sdk.index.getBrand({ address, chainId }); // API-backed branding
-await sdk.index.getFull({ address, chainId });  // composed convenience method
+await sdk.index.getFull({ address, chainId }); // composed convenience method
 ```
 
 Price is live data and should be treated differently from slow-changing governance or token metadata. Consumers should be able to refresh price often without refetching the full DTF model.

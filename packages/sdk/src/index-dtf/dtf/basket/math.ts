@@ -1,22 +1,17 @@
-import {
-  D18d,
-  Decimal,
-  getBasketDistribution,
-} from "@reserve-protocol/dtf-rebalance-lib";
 import type { Decimal as DecimalType } from "decimal.js-light";
+
+import { D18d, Decimal, getBasketDistribution } from "@reserve-protocol/dtf-rebalance-lib";
 import { parseUnits } from "viem";
-import { SdkError } from "../../../errors.js";
+
 import type {
   BuildIndexDtfInitialBasketParams,
   IndexDtfBasketDefinition,
   IndexDtfBasketToken,
   IndexDtfInitialBasket,
 } from "./types.js";
-import {
-  assertPositiveNumber,
-  validateBasketTokens,
-  validateShares,
-} from "./validation.js";
+
+import { SdkError } from "../../../errors.js";
+import { assertPositiveNumber, validateBasketTokens, validateShares } from "./validation.js";
 
 export function getBasketSharesFromUnits(params: {
   readonly tokens: readonly IndexDtfBasketToken[];
@@ -95,9 +90,10 @@ export function buildInitialBasket(params: BuildIndexDtfInitialBasketParams): In
 
   validateBasketTokens(params.tokens);
   const shares = getBasketShares(params.tokens, params.basket);
-  const amounts = params.basket.type === "units"
-    ? getScaledUnits(params.tokens, params.basket.units, getInitialValueUsd(params))
-    : getUnitsFromShares(params.tokens, shares, getInitialValueUsd(params));
+  const amounts =
+    params.basket.type === "units"
+      ? getScaledUnits(params.tokens, params.basket.units, getInitialValueUsd(params))
+      : getUnitsFromShares(params.tokens, shares, getInitialValueUsd(params));
 
   for (const amount of amounts) {
     if (amount <= 0n) {
@@ -113,10 +109,7 @@ export function buildInitialBasket(params: BuildIndexDtfInitialBasketParams): In
   };
 }
 
-export function getBasketShares(
-  tokens: readonly IndexDtfBasketToken[],
-  basket: IndexDtfBasketDefinition,
-): bigint[] {
+export function getBasketShares(tokens: readonly IndexDtfBasketToken[], basket: IndexDtfBasketDefinition): bigint[] {
   if (basket.type === "shares") {
     validateShares(basket.shares);
 

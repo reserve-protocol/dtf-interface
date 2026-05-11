@@ -1,5 +1,6 @@
-import DecimalLight from "decimal.js-light";
 import type { Decimal as DecimalType } from "decimal.js-light";
+
+import DecimalLight from "decimal.js-light";
 
 // Create a local Decimal constructor with custom precision
 const Decimal = DecimalLight.clone({ precision: 100 });

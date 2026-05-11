@@ -1,11 +1,13 @@
 import { getAddress, type Address } from "viem";
+
 import type { DtfClient } from "../../client.js";
+import type { Amount, Token } from "../../types/common.js";
+import type { Financials, IndexDtf, PriceControl } from "../../types/index-dtf.js";
+
+import { prepareContractCall } from "../../contract-call.js";
 import { Decimal } from "../../lib/decimal.js";
 import { mapAmount } from "../../lib/utils.js";
 import { getTokensData } from "../../tokens/index.js";
-import type { Amount, Token } from "../../types/common.js";
-import type { Financials, IndexDtf, PriceControl } from "../../types/index-dtf.js";
-import { prepareContractCall } from "../../contract-call.js";
 import { daoFeeRegistryAbi } from "../abis/dao-fee-registry.js";
 import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
 import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";

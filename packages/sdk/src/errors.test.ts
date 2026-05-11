@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { SdkError, isSdkError } from "./errors.js";
 
 describe("SdkError", () => {

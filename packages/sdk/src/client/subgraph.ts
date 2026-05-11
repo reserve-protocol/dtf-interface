@@ -1,10 +1,8 @@
 import type { Variables } from "graphql-request";
+
 import { supportedChainIds, type SupportedChainId } from "../defaults.js";
 import { SdkError } from "../errors.js";
-import {
-  querySubgraph,
-  type SubgraphDocument,
-} from "../transports/subgraph.js";
+import { querySubgraph, type SubgraphDocument } from "../transports/subgraph.js";
 
 export type DtfClientSubgraphChainConfig = {
   readonly indexSubgraphUrl?: string;
@@ -12,15 +10,10 @@ export type DtfClientSubgraphChainConfig = {
 };
 
 export type DtfClientSubgraphConfig = {
-  readonly chains: Partial<
-    Record<SupportedChainId, DtfClientSubgraphChainConfig>
-  >;
+  readonly chains: Partial<Record<SupportedChainId, DtfClientSubgraphChainConfig>>;
 };
 
-export type QueryIndexSubgraphOptions<
-  TResult,
-  TVariables extends Variables = Record<string, never>,
-> = {
+export type QueryIndexSubgraphOptions<TResult, TVariables extends Variables = Record<string, never>> = {
   readonly chainId: SupportedChainId;
   readonly query: SubgraphDocument<TResult, TVariables>;
   readonly requestHeaders?: HeadersInit;
@@ -32,10 +25,7 @@ export type QueryYieldSubgraphOptions<
   TVariables extends Variables = Record<string, never>,
 > = QueryIndexSubgraphOptions<TResult, TVariables>;
 
-export type QueryIndexAllSubgraphsOptions<
-  TResult,
-  TVariables extends Variables = Record<string, never>,
-> = {
+export type QueryIndexAllSubgraphsOptions<TResult, TVariables extends Variables = Record<string, never>> = {
   readonly chainIds?: readonly SupportedChainId[];
   readonly query: SubgraphDocument<TResult, TVariables>;
   readonly requestHeaders?: HeadersInit;
@@ -45,29 +35,18 @@ export type QueryIndexAllSubgraphsOptions<
 export type DtfClientSubgraph = {
   readonly getIndexUrl: (chainId: SupportedChainId) => string;
   readonly getYieldUrl: (chainId: SupportedChainId) => string;
-  readonly queryIndex: <
-    TResult,
-    TVariables extends Variables = Record<string, never>,
-  >(
+  readonly queryIndex: <TResult, TVariables extends Variables = Record<string, never>>(
     options: QueryIndexSubgraphOptions<TResult, TVariables>,
   ) => Promise<TResult>;
-  readonly queryIndexAll: <
-    TResult,
-    TVariables extends Variables = Record<string, never>,
-  >(
+  readonly queryIndexAll: <TResult, TVariables extends Variables = Record<string, never>>(
     options: QueryIndexAllSubgraphsOptions<TResult, TVariables>,
   ) => Promise<Partial<Record<SupportedChainId, TResult>>>;
-  readonly queryYield: <
-    TResult,
-    TVariables extends Variables = Record<string, never>,
-  >(
+  readonly queryYield: <TResult, TVariables extends Variables = Record<string, never>>(
     options: QueryYieldSubgraphOptions<TResult, TVariables>,
   ) => Promise<TResult>;
 };
 
-export function createDtfClientSubgraph({
-  chains,
-}: DtfClientSubgraphConfig): DtfClientSubgraph {
+export function createDtfClientSubgraph({ chains }: DtfClientSubgraphConfig): DtfClientSubgraph {
   const subgraph: DtfClientSubgraph = {
     getIndexUrl(chainId) {
       const url = chains[chainId]?.indexSubgraphUrl;
@@ -102,32 +81,22 @@ export function createDtfClientSubgraph({
         url: subgraph.getIndexUrl(options.chainId),
       });
     },
-    async queryIndexAll({
-      chainIds = supportedChainIds,
-      query,
-      requestHeaders,
-      variables,
-    }) {
+    async queryIndexAll({ chainIds = supportedChainIds, query, requestHeaders, variables }) {
       const results = await Promise.all(
         chainIds.map(async (chainId) => {
-          const chainVariables =
-            typeof variables === "function" ? variables(chainId) : variables;
+          const chainVariables = typeof variables === "function" ? variables(chainId) : variables;
           const data = await subgraph.queryIndex({
             chainId,
             query,
             ...(requestHeaders === undefined ? {} : { requestHeaders }),
-            ...(chainVariables === undefined
-              ? {}
-              : { variables: chainVariables }),
+            ...(chainVariables === undefined ? {} : { variables: chainVariables }),
           });
 
           return [chainId, data] as const;
         }),
       );
 
-      return Object.fromEntries(results) as Partial<
-        Record<SupportedChainId, Awaited<typeof results[number][1]>>
-      >;
+      return Object.fromEntries(results) as Partial<Record<SupportedChainId, Awaited<(typeof results)[number][1]>>>;
     },
     queryYield(options) {
       return querySubgraph({

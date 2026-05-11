@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { decodeFunctionData, erc20Abi, parseEther } from "viem";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { createDtfClient, type DtfClient } from "../../client.js";
 import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
 import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
@@ -50,7 +51,10 @@ describe("Index DTF Register parity SDK surfaces", () => {
   });
 
   it("treats missing API discovery status as unsupported", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => Response.json([])));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json([])),
+    );
     const client = createDtfClient({ apiBaseUrl: "https://api.example" });
 
     await expect(getIndexDtfStatus(client, { address: DTF, chainId: 8453 })).resolves.toBe("unsupported");
@@ -80,7 +84,15 @@ describe("Index DTF Register parity SDK surfaces", () => {
   it("maps mint/redeem transactions from the subgraph", async () => {
     const queryIndex = vi.fn(async () => ({
       transferEvents: [
-        { id: "1", hash: "0xabc", amount: parseEther("2").toString(), timestamp: "100", type: "MINT", to: { id: ACCOUNT }, from: null },
+        {
+          id: "1",
+          hash: "0xabc",
+          amount: parseEther("2").toString(),
+          timestamp: "100",
+          type: "MINT",
+          to: { id: ACCOUNT },
+          from: null,
+        },
       ],
     }));
     const client = { subgraph: { queryIndex } } as unknown as DtfClient;
@@ -135,10 +147,20 @@ describe("Index DTF Register parity SDK surfaces", () => {
     const withdrawal = prepareVoteLockClaimWithdrawal({ unstakingManager: DTF, chainId: 1, lockId: 1n });
 
     expect(decodeFunctionData({ abi: dtfIndexAbi, data: distribute.data }).functionName).toBe("distributeFees");
-    expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: deposit.data }).functionName).toBe("depositAndDelegate");
+    expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: deposit.data }).functionName).toBe(
+      "depositAndDelegate",
+    );
     expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: rewards.data }).functionName).toBe("claimRewards");
     expect(decodeFunctionData({ abi: unstakingManagerAbi, data: withdrawal.data }).functionName).toBe("claimLock");
-    expect(() => prepareVoteLockDeposit({ stToken: DTF, chainId: 1, amount: 1n, delegateToSelf: true, receiver: ACCOUNT } as never)).toThrow("receiver");
+    expect(() =>
+      prepareVoteLockDeposit({
+        stToken: DTF,
+        chainId: 1,
+        amount: 1n,
+        delegateToSelf: true,
+        receiver: ACCOUNT,
+      } as never),
+    ).toThrow("receiver");
   });
 
   it("prepares vote-lock deposit plans", () => {
@@ -244,8 +266,10 @@ describe("Index DTF Register parity SDK surfaces", () => {
     const byNonce = await getRebalance(client, { address: DTF, chainId: 1, nonce: 1n });
 
     expect(byNonce.nonce).toBe("1");
-    expect(queryIndex).toHaveBeenCalledWith(expect.objectContaining({
-      variables: { dtf: DTF.toLowerCase(), nonce: "1" },
-    }));
+    expect(queryIndex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variables: { dtf: DTF.toLowerCase(), nonce: "1" },
+      }),
+    );
   });
 });

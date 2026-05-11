@@ -1,12 +1,10 @@
 import type { Abi } from "viem";
-import {
-  INDEX_DTF_VERSION_5_0_0,
-  INDEX_DTF_VERSION_6_0_0,
-} from "../versions.js";
-import { dtfIndexAbi } from "./dtf-index-abi.js";
+
+import { INDEX_DTF_VERSION_5_0_0, INDEX_DTF_VERSION_6_0_0 } from "../versions.js";
 import { dtfIndexAbiV1 } from "./dtf-index-abi-v1.js";
 import { dtfIndexAbiV2 } from "./dtf-index-abi-v2.js";
 import { dtfIndexAbiV4 } from "./dtf-index-abi-v4.js";
+import { dtfIndexAbi } from "./dtf-index-abi.js";
 import { folioArtifactAbi as indexDtfArtifactAbi } from "./folio-artifact.js";
 
 export const dtfIndexProposalAbiV1 = dtfIndexAbiV1;
@@ -27,6 +25,4 @@ export const dtfIndexProposalAbiCatalog: readonly DtfIndexProposalAbiCatalogEntr
   { version: "1.0.0", abi: dtfIndexProposalAbiV1 },
 ] as const;
 
-export const dtfIndexProposalAbi = dtfIndexProposalAbiCatalog.flatMap(
-  ({ abi }) => abi,
-) as Abi;
+export const dtfIndexProposalAbi = dtfIndexProposalAbiCatalog.flatMap(({ abi }) => abi) as Abi;

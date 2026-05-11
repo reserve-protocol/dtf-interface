@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { dtfQueryKeys } from "./query-keys.js";
 
 describe("dtfQueryKeys", () => {
@@ -34,26 +35,17 @@ describe("dtfQueryKeys", () => {
   it("keys proposal lists by sorted governance address sets", () => {
     const firstKey = dtfQueryKeys.index.governance.proposals({
       chainId: 1,
-      governanceAddresses: [
-        "0x000000000000000000000000000000000000000B",
-        "0x000000000000000000000000000000000000000A",
-      ],
+      governanceAddresses: ["0x000000000000000000000000000000000000000B", "0x000000000000000000000000000000000000000A"],
     });
     const secondKey = dtfQueryKeys.index.governance.proposals({
       chainId: 1,
-      governanceAddresses: [
-        "0x000000000000000000000000000000000000000A",
-        "0x000000000000000000000000000000000000000B",
-      ],
+      governanceAddresses: ["0x000000000000000000000000000000000000000A", "0x000000000000000000000000000000000000000B"],
     });
 
     expect(firstKey).toEqual(secondKey);
     expect(firstKey[4]).toEqual({
       chainId: 1,
-      governanceAddresses: [
-        "0x000000000000000000000000000000000000000a",
-        "0x000000000000000000000000000000000000000b",
-      ],
+      governanceAddresses: ["0x000000000000000000000000000000000000000a", "0x000000000000000000000000000000000000000b"],
     });
   });
 
@@ -160,9 +152,7 @@ function createDtfKeyFixture() {
         legacy: ["0x0000000000000000000000000000000000000004"],
       },
       rebalance: {
-        legacyAuctionApprovers: [
-          "0x0000000000000000000000000000000000000005",
-        ],
+        legacyAuctionApprovers: ["0x0000000000000000000000000000000000000005"],
       },
     },
     voteLockVault: {
@@ -172,11 +162,7 @@ function createDtfKeyFixture() {
   } as never;
 }
 
-function governanceAuthority(
-  address: string,
-  timelock: string,
-  guardians: readonly string[],
-) {
+function governanceAuthority(address: string, timelock: string, guardians: readonly string[]) {
   return {
     type: "governance",
     address,

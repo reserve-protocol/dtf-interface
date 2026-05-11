@@ -25,10 +25,7 @@ export {
   indexDtfQueryOptions,
   indexDtfVoterStateQueryOptions,
 } from "./query-options.js";
-export type {
-  DtfQueryOptions,
-  DtfQueryOptionsResult,
-} from "./query-options.js";
+export type { DtfQueryOptions, DtfQueryOptionsResult } from "./query-options.js";
 export {
   useBuildIndexDtfBasketProposal,
   useBuildIndexDtfBasketSettingsProposal,

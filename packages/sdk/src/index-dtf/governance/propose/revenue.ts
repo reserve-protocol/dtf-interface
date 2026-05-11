@@ -1,12 +1,10 @@
-import {
-  getAddress,
-  parseEther,
-  type Address,
-} from "viem";
-import { SdkError } from "../../../errors.js";
-import { Decimal } from "../../../lib/decimal.js";
+import { getAddress, parseEther, type Address } from "viem";
+
 import type { IndexDtfCall } from "../../../types/governance.js";
 import type { IndexDtf } from "../../../types/index-dtf.js";
+
+import { SdkError } from "../../../errors.js";
+import { Decimal } from "../../../lib/decimal.js";
 import { prepareIndexDtfSetFeeRecipients, type IndexDtfWriteVersion } from "./calls.js";
 
 const MAX_FEE_RECIPIENTS = 64;
@@ -83,9 +81,7 @@ export function validateRevenueDistributionInput(
   });
 }
 
-function validateRevenueDistribution(
-  distribution: IndexDtfRevenueDistributionInput,
-) {
+function validateRevenueDistribution(distribution: IndexDtfRevenueDistributionInput) {
   if (!Array.isArray(distribution.additionalRecipients)) {
     throw new SdkError({
       code: "INVALID_INPUT",
@@ -116,13 +112,8 @@ function validateRecipientShares({
   readonly additionalRecipients: readonly IndexDtfRevenueRecipientInput[];
   readonly hasVoteLock: boolean;
 }) {
-  const shares = [governanceShare, deployerShare].concat(
-    additionalRecipients.map((recipient) => recipient.share),
-  );
-  const totalRecipientShare = shares.reduce(
-    (sum, share) => sum.plus(share),
-    new Decimal(0),
-  );
+  const shares = [governanceShare, deployerShare].concat(additionalRecipients.map((recipient) => recipient.share));
+  const totalRecipientShare = shares.reduce((sum, share) => sum.plus(share), new Decimal(0));
   const nonPlatformShare = new Decimal(100).minus(platformFee);
 
   if (shares.some((share) => !Number.isFinite(share) || share < 0)) {
@@ -166,9 +157,7 @@ function getFeeRecipients({
     const actualFraction = new Decimal(share).div(100);
     const nonPlatformFraction = nonPlatformShare.div(100);
 
-    return parseEther(
-      actualFraction.div(nonPlatformFraction).toFixed(18, Decimal.ROUND_DOWN),
-    );
+    return parseEther(actualFraction.div(nonPlatformFraction).toFixed(18, Decimal.ROUND_DOWN));
   };
   const recipients: { recipient: Address; portion: bigint }[] = [];
 
@@ -190,20 +179,14 @@ function getFeeRecipients({
   validateFeeRecipients(recipients);
 
   if (recipients.length > 1) {
-    const currentSum = recipients
-      .slice(0, -1)
-      .reduce((sum, recipient) => sum + recipient.portion, 0n);
+    const currentSum = recipients.slice(0, -1).reduce((sum, recipient) => sum + recipient.portion, 0n);
     recipients[recipients.length - 1]!.portion = parseEther("1") - currentSum;
   }
 
-  return recipients.sort((a, b) =>
-    a.recipient.toLowerCase().localeCompare(b.recipient.toLowerCase()),
-  );
+  return recipients.sort((a, b) => a.recipient.toLowerCase().localeCompare(b.recipient.toLowerCase()));
 }
 
-function validateFeeRecipients(
-  recipients: readonly { readonly recipient: Address; readonly portion: bigint }[],
-) {
+function validateFeeRecipients(recipients: readonly { readonly recipient: Address; readonly portion: bigint }[]) {
   if (recipients.length > MAX_FEE_RECIPIENTS) {
     throw new SdkError({
       code: "INVALID_INPUT",
@@ -248,9 +231,7 @@ function validateRawAdditionalRecipients(
     });
   }
 
-  const seen = new Set(
-    reservedRecipients.map((recipient) => getAddress(recipient).toLowerCase()),
-  );
+  const seen = new Set(reservedRecipients.map((recipient) => getAddress(recipient).toLowerCase()));
 
   for (const recipient of recipients) {
     const address = getAddress(recipient.address);

@@ -1,14 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
 import type { PublicClient } from "viem";
+
+import { describe, expect, it, vi } from "vitest";
+
 import { createDtfClient } from "../client.js";
 import { createIndexDtfNamespace, createIndexDtfRef } from "./index.js";
 
 describe("Index DTF namespace", () => {
   it("passes blockNumber to ref basket shorthand", async () => {
-    const readContract = vi.fn(async () => [
-      ["0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"],
-      [1_000_000n],
-    ]);
+    const readContract = vi.fn(async () => [["0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"], [1_000_000n]]);
     const multicall = vi.fn(async () => ["USD Coin", "USDC", 6]);
     const client = createDtfClient({
       chains: {
@@ -40,10 +39,7 @@ describe("Index DTF namespace", () => {
       .fn()
       .mockResolvedValueOnce("5.0.0")
       .mockResolvedValueOnce(10n ** 18n)
-      .mockResolvedValueOnce([
-        ["0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"],
-        [1_000_000n],
-      ]);
+      .mockResolvedValueOnce([["0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"], [1_000_000n]]);
     const client = createDtfClient({
       chains: {
         1: {
@@ -80,9 +76,7 @@ describe("Index DTF namespace", () => {
     });
 
     expect(call.chainId).toBe(8453);
-    expect(call.contract.address).toBe(
-      "0x0000000000000000000000000000000000000002",
-    );
+    expect(call.contract.address).toBe("0x0000000000000000000000000000000000000002");
     expect(call.contract.functionName).toBe("castVote");
     expect(call.contract.args).toEqual([1n, 1]);
   });
@@ -104,9 +98,7 @@ describe("Index DTF namespace", () => {
     });
 
     expect(call.chainId).toBe(8453);
-    expect(call.contract.address).toBe(
-      "0x0000000000000000000000000000000000000002",
-    );
+    expect(call.contract.address).toBe("0x0000000000000000000000000000000000000002");
     expect(call.contract.functionName).toBe("queue");
   });
 

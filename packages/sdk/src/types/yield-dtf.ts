@@ -1,4 +1,5 @@
 import type { Address } from "viem";
+
 import type { SupportedChainId } from "../defaults.js";
 import type {
   DtfBasketAsset,
@@ -18,10 +19,7 @@ export type YieldDtf = DtfMarketData & {
   readonly basket: readonly DtfBasketAsset[];
 };
 
-export type YieldDtfListItem = Pick<
-  YieldDtf,
-  "address" | "chainId" | "name" | "symbol" | "price" | "marketCap"
-> & {
+export type YieldDtfListItem = Pick<YieldDtf, "address" | "chainId" | "name" | "symbol" | "price" | "marketCap"> & {
   readonly type: "yield";
   readonly status: Exclude<DtfStatus, "unsupported">;
   readonly basket: readonly DtfBasketSummaryAsset[];

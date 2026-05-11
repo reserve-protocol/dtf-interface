@@ -11,7 +11,7 @@ import {
   type Address,
   type Hex,
 } from "viem";
-import { SdkError } from "../../errors.js";
+
 import type {
   CancelIndexDtfProposalParams,
   ExecuteIndexDtfProposalParams,
@@ -20,18 +20,16 @@ import type {
   QueueIndexDtfProposalParams,
   VoteIndexDtfProposalParams,
 } from "../../types/governance.js";
+
 import { prepareContractCall } from "../../contract-call.js";
+import { SdkError } from "../../errors.js";
 import { dtfIndexGovernanceAbi } from "../abis/dtf-index-governance.js";
 import { timelockAbi } from "../abis/timelock.js";
 import { getZeroValues } from "./utils.js";
 
-const TIMELOCK_OPERATION_PARAMS = parseAbiParameters(
-  "address[], uint256[], bytes[], bytes32, bytes32",
-);
+const TIMELOCK_OPERATION_PARAMS = parseAbiParameters("address[], uint256[], bytes[], bytes32, bytes32");
 
-export function prepareIndexDtfVote(
-  params: VoteIndexDtfProposalParams,
-) {
+export function prepareIndexDtfVote(params: VoteIndexDtfProposalParams) {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.governance,
@@ -41,12 +39,8 @@ export function prepareIndexDtfVote(
   });
 }
 
-export function prepareIndexDtfQueueProposal(
-  params: QueueIndexDtfProposalParams,
-) {
-  const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(
-    params.proposal,
-  );
+export function prepareIndexDtfQueueProposal(params: QueueIndexDtfProposalParams) {
+  const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(params.proposal);
 
   return prepareContractCall({
     chainId: params.chainId,
@@ -57,12 +51,8 @@ export function prepareIndexDtfQueueProposal(
   });
 }
 
-export function prepareIndexDtfExecuteProposal(
-  params: ExecuteIndexDtfProposalParams,
-) {
-  const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(
-    params.proposal,
-  );
+export function prepareIndexDtfExecuteProposal(params: ExecuteIndexDtfProposalParams) {
+  const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(params.proposal);
 
   return prepareContractCall({
     chainId: params.chainId,
@@ -73,9 +63,7 @@ export function prepareIndexDtfExecuteProposal(
   });
 }
 
-export function prepareIndexDtfCancelProposal(
-  params: CancelIndexDtfProposalParams,
-) {
+export function prepareIndexDtfCancelProposal(params: CancelIndexDtfProposalParams) {
   if (!params.proposal.timelock) {
     throw new SdkError({
       code: "INVALID_INPUT",
@@ -92,9 +80,7 @@ export function prepareIndexDtfCancelProposal(
   });
 }
 
-export function prepareIndexDtfSubmitProposal(
-  params: ProposeIndexDtfProposalParams,
-) {
+export function prepareIndexDtfSubmitProposal(params: ProposeIndexDtfProposalParams) {
   const targets = params.proposal.targets.map(getAddress);
   const calldatas = [...params.proposal.calldatas];
   const values = getZeroValues(targets.length);
@@ -113,12 +99,7 @@ function getProposalTxArgs(
 ): [readonly Address[], readonly bigint[], readonly Hex[], Hex] {
   const targets = proposal.targets.map(getAddress);
 
-  return [
-    targets,
-    getZeroValues(targets.length),
-    [...proposal.calldatas],
-    keccak256(toBytes(proposal.description)),
-  ];
+  return [targets, getZeroValues(targets.length), [...proposal.calldatas], keccak256(toBytes(proposal.description))];
 }
 
 function getTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
@@ -129,9 +110,7 @@ function getTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
   return calculateLegacyTimelockOperationId(proposal);
 }
 
-function calculateLegacyTimelockOperationId(
-  proposal: IndexDtfProposalPayload,
-): Hex {
+function calculateLegacyTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
   const targets = proposal.targets.map(getAddress);
 
   return keccak256(

@@ -1,9 +1,8 @@
-import type {
-  RebalanceLimits,
-  TokenRebalanceParams,
-} from "@reserve-protocol/dtf-rebalance-lib";
+import type { RebalanceLimits, TokenRebalanceParams } from "@reserve-protocol/dtf-rebalance-lib";
+
 import { isAddress, type Address } from "viem";
 import { z } from "zod";
+
 import type { DtfParams, TokenVolatility } from "../../../types/common.js";
 import type { IndexDtf, IndexDtfTotalAssets } from "../../../types/index-dtf.js";
 
@@ -47,10 +46,7 @@ export const indexDtfBasketUnitsSchema = z.object({
   ),
 });
 
-export const indexDtfBasketSchema = z.union([
-  indexDtfBasketSharesSchema,
-  indexDtfBasketUnitsSchema,
-]);
+export const indexDtfBasketSchema = z.union([indexDtfBasketSharesSchema, indexDtfBasketUnitsSchema]);
 
 export type IndexDtfBasketToken = {
   readonly address: Address;
@@ -97,9 +93,7 @@ export type IndexDtfBasketUnitsInput = {
   })[];
 };
 
-export type IndexDtfBasketInput =
-  | IndexDtfBasketSharesInput
-  | IndexDtfBasketUnitsInput;
+export type IndexDtfBasketInput = IndexDtfBasketSharesInput | IndexDtfBasketUnitsInput;
 
 export type IndexDtfBasketCurrentBalancesInput =
   | IndexDtfTotalAssets

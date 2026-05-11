@@ -1,11 +1,11 @@
 import { getAddress, parseEther, type Address } from "viem";
 
-import type { IndexDtfCall } from "../../../types/governance.js";
-import type { IndexDtf } from "../../../types/index-dtf.js";
+import type { IndexDtfCall } from "@/types/governance";
+import type { IndexDtf } from "@/types/index-dtf";
 
-import { SdkError } from "../../../errors.js";
-import { Decimal } from "../../../lib/decimal.js";
-import { prepareIndexDtfSetFeeRecipients, type IndexDtfWriteVersion } from "./calls.js";
+import { SdkError } from "@/errors";
+import { prepareIndexDtfSetFeeRecipients, type IndexDtfWriteVersion } from "@/index-dtf/governance/propose/calls";
+import { Decimal } from "@/lib/decimal";
 
 const MAX_FEE_RECIPIENTS = 64;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";

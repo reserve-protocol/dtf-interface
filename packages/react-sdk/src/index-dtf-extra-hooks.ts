@@ -2,7 +2,7 @@ import type { DtfSdk } from "@dtf-interface/sdk";
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { DtfQueryOptions } from "./query-options.js";
+import type { DtfQueryOptions } from "@/query-options";
 
 import {
   accountPortfolioQueryOptions,
@@ -14,8 +14,8 @@ import {
   indexDtfStatusQueryOptions,
   indexDtfTransactionsQueryOptions,
   indexDtfVoteLockStateQueryOptions,
-} from "./index-dtf-query-options.js";
-import { useDtfSdk } from "./provider.js";
+} from "@/index-dtf-query-options";
+import { useDtfSdk } from "@/provider";
 
 type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
   ? DtfSdk["index"][TKey]

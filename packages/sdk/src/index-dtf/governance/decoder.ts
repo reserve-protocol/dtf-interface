@@ -1,12 +1,8 @@
 import { decodeFunctionData, getAbiItem, getAddress, type Abi, type Address } from "viem";
 
-import type {
-  IndexDtfDecodedCalldata,
-  IndexDtfProposalDecoded,
-  IndexDtfUnknownCalldata,
-} from "../../types/governance.js";
+import type { IndexDtfDecodedCalldata, IndexDtfProposalDecoded, IndexDtfUnknownCalldata } from "@/types/governance";
 
-import { getContractAliases, type ProposalContractDecoder } from "./contract-map.js";
+import { getContractAliases, type ProposalContractDecoder } from "@/index-dtf/governance/contract-map";
 
 const UNKNOWN_CONTRACT = "Unknown";
 

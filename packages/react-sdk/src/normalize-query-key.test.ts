@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeQueryKeyValue } from "./normalize-query-key.js";
+import { normalizeQueryKeyValue } from "@/normalize-query-key";
 
 describe("normalizeQueryKeyValue", () => {
   it("normalizes addresses and bigints for React Query keys", () => {

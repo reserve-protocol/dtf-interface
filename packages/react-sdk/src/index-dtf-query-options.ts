@@ -1,9 +1,9 @@
 import type { DtfSdk } from "@dtf-interface/sdk";
 import type { QueryKey } from "@tanstack/react-query";
 
-import type { DtfQueryOptions, DtfQueryOptionsResult } from "./query-options.js";
+import type { DtfQueryOptions, DtfQueryOptionsResult } from "@/query-options";
 
-import { normalizeQueryKeyValue } from "./normalize-query-key.js";
+import { normalizeQueryKeyValue } from "@/normalize-query-key";
 
 type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
   ? DtfSdk["index"][TKey]

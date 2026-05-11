@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 
-import type { DtfClient } from "../../client.js";
+import type { DtfClient } from "@/client";
 import type {
   GetIndexDtfProposalVoterStateParams,
   GetIndexDtfProposalVotesParams,
@@ -10,12 +10,12 @@ import type {
   IndexDtfProposalVotes,
   IndexDtfProposerState,
   IndexDtfVoterState,
-} from "../../types/governance.js";
+} from "@/types/governance";
 
-import { getLatestBlockTimepoint } from "../../client/viem.js";
-import { mapAmount } from "../../lib/utils.js";
-import { dtfIndexGovernanceAbi } from "../abis/dtf-index-governance.js";
-import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
+import { getLatestBlockTimepoint } from "@/client/viem";
+import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
+import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { mapAmount } from "@/lib/utils";
 
 export async function getVoterState(
   client: DtfClient,

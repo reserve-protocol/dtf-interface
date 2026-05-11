@@ -3,14 +3,14 @@ import type { Decimal as DecimalType } from "decimal.js-light";
 import { Decimal } from "@reserve-protocol/dtf-rebalance-lib";
 import { getAddress, parseUnits, type Address } from "viem";
 
-import { SdkError } from "../../../errors.js";
+import { SdkError } from "@/errors";
 import {
   SHARE_DECIMALS,
   type IndexDtfBasketDefinition,
   type IndexDtfBasketInput,
   type IndexDtfBasketToken,
-} from "./types.js";
-import { validateShares } from "./validation.js";
+} from "@/index-dtf/dtf/basket/types";
+import { validateShares } from "@/index-dtf/dtf/basket/validation";
 
 export function getBasketFromInput(
   input: IndexDtfBasketInput,

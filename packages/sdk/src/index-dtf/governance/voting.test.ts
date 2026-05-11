@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { DtfClient } from "../../client.js";
+import type { DtfClient } from "@/client";
 
-import { getProposalVoterState, getProposerState, getVoterState } from "./index.js";
+import { getProposalVoterState, getProposerState, getVoterState } from "@/index-dtf/governance/index";
 
 describe("Index DTF governance voting", () => {
   it("reads current vote-lock voter state", async () => {

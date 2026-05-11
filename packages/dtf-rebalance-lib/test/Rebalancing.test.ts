@@ -1,8 +1,9 @@
 import { loadFixture, time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import hre from "hardhat";
 
-import { bn } from "../src/numbers";
-import { FolioVersion } from "../src/types";
+import { bn } from "@/numbers";
+import { FolioVersion } from "@/types";
+
 import { FOLIO_CONFIGS, CHAIN_BLOCK_NUMBERS } from "./4.0.0/config";
 import { doAuctions } from "./do-auctions";
 import { initializeChainState, setupContractsAndSigners } from "./setup";

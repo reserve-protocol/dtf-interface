@@ -1,20 +1,24 @@
 import { getAddress } from "viem";
 
-import type { DtfClient } from "../../../client.js";
-import type { IndexDtfCall } from "../../../types/governance.js";
+import type { DtfClient } from "@/client";
 import type {
   BuildIndexDtfDaoSettingsProposalParams,
   BuiltIndexDtfCalls,
   BuiltIndexDtfProposal,
-} from "./settings-types.js";
+} from "@/index-dtf/governance/propose/settings-types";
+import type { IndexDtfCall } from "@/types/governance";
 
-import { prepareContractCall } from "../../../contract-call.js";
-import { SdkError } from "../../../errors.js";
-import { dtfIndexStakingVaultAbi } from "../../abis/dtf-index-staking-vault.js";
-import { timelockAbi } from "../../abis/timelock.js";
-import { buildGovernanceCalls } from "./settings-governance.js";
-import { CANCELLER_ROLE, buildRoleDiffCalls } from "./settings-roles.js";
-import { buildCallPayload, buildSettingsProposal, getDtfIfNeeded } from "./settings-shared.js";
+import { prepareContractCall } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { timelockAbi } from "@/index-dtf/abis/timelock";
+import { buildGovernanceCalls } from "@/index-dtf/governance/propose/settings-governance";
+import { CANCELLER_ROLE, buildRoleDiffCalls } from "@/index-dtf/governance/propose/settings-roles";
+import {
+  buildCallPayload,
+  buildSettingsProposal,
+  getDtfIfNeeded,
+} from "@/index-dtf/governance/propose/settings-shared";
 
 /** Builds a proposal that changes vote-lock DAO settings and rewards. */
 export async function buildIndexDtfDaoSettingsProposal(

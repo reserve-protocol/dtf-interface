@@ -1,7 +1,13 @@
 import { getAddress, type Address } from "viem";
 
-import type { DtfClient } from "../client.js";
-import type { BlockNumber, DtfParams } from "../types/common.js";
+import type { DtfClient } from "@/client";
+import type {
+  BuildIndexDtfBasketProposalParams,
+  BuildIndexDtfBasketSettingsProposalParams,
+  BuildIndexDtfDaoSettingsProposalParams,
+  BuildIndexDtfSettingsProposalParams,
+} from "@/index-dtf/governance/propose/index";
+import type { BlockNumber, DtfParams } from "@/types/common";
 import type {
   GetIndexDtfDelegatesParams,
   GetIndexDtfProposalVoterStateParams,
@@ -9,23 +15,17 @@ import type {
   GetIndexDtfProposalsOptions,
   GetIndexDtfProposerStateParams,
   GetIndexDtfVoterStateParams,
-} from "../types/governance.js";
+} from "@/types/governance";
 import type {
   GetFullIndexDtfOptions,
   GetIndexDtfBasketOptions,
   GetIndexDtfBasketSnapshotOptions,
   GetIndexDtfOptions,
   GetIndexDtfPriceHistoryOptions,
-} from "../types/index-dtf.js";
-import type {
-  BuildIndexDtfBasketProposalParams,
-  BuildIndexDtfBasketSettingsProposalParams,
-  BuildIndexDtfDaoSettingsProposalParams,
-  BuildIndexDtfSettingsProposalParams,
-} from "./governance/propose/index.js";
+} from "@/types/index-dtf";
 
-import { getIndexDtfStatus } from "./dtf/discovery.js";
-import { getIndexDtfExposure } from "./dtf/exposure.js";
+import { getIndexDtfStatus } from "@/index-dtf/dtf/discovery";
+import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 import {
   getBasket,
   getBasketSnapshot,
@@ -38,14 +38,14 @@ import {
   getTotalAssets,
   getTotalSupply,
   getVersion,
-} from "./dtf/index.js";
+} from "@/index-dtf/dtf/index";
 import {
   getIndexDtfIssuanceState,
   prepareIndexDtfBasketApproval,
   prepareIndexDtfMint,
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
-} from "./dtf/issuance.js";
+} from "@/index-dtf/dtf/issuance";
 import {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
@@ -54,8 +54,8 @@ import {
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
   prepareIndexDtfDistributeFees,
-} from "./dtf/revenue.js";
-import { getIndexDtfTransactions } from "./dtf/transactions.js";
+} from "@/index-dtf/dtf/revenue";
+import { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 import {
   getDelegates,
   getGuardians,
@@ -70,13 +70,13 @@ import {
   prepareIndexDtfQueueProposal,
   prepareIndexDtfSubmitProposal,
   prepareIndexDtfVote,
-} from "./governance/index.js";
+} from "@/index-dtf/governance/index";
 import {
   buildIndexDtfBasketProposal,
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
-} from "./governance/propose/index.js";
+} from "@/index-dtf/governance/propose/index";
 import {
   getIndexDtfCurrentRebalance,
   getRebalance,
@@ -86,7 +86,7 @@ import {
   prepareIndexDtfOpenAuction,
   prepareIndexDtfOpenAuctionUnrestricted,
   type GetIndexDtfRebalanceParams,
-} from "./rebalance/index.js";
+} from "@/index-dtf/rebalance/index";
 import {
   getVoteLockDao,
   getVoteLockState,
@@ -97,7 +97,7 @@ import {
   prepareVoteLockDeposit,
   prepareVoteLockDepositPlan,
   prepareVoteLockUnlock,
-} from "./vote-lock/index.js";
+} from "@/index-dtf/vote-lock/index";
 
 type BlockNumberOption = Pick<DtfParams, "blockNumber">;
 type WithoutChainId<T> = T extends unknown ? Omit<T, "chainId"> : never;

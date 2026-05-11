@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createDtfClient } from "../client.js";
+import { createDtfClient } from "@/client";
 
 describe("Reserve API helpers", () => {
   afterEach(() => {

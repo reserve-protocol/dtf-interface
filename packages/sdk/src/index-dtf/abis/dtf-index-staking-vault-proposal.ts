@@ -1,1 +1,1 @@
-export { dtfIndexStakingVaultAbi as dtfIndexStakingVaultProposalAbi } from "./dtf-index-staking-vault.js";
+export { dtfIndexStakingVaultAbi as dtfIndexStakingVaultProposalAbi } from "@/index-dtf/abis/dtf-index-staking-vault";

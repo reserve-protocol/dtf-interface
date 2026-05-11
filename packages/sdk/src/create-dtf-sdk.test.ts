@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createDtfSdk } from "./create-dtf-sdk.js";
+import { createDtfSdk } from "@/create-dtf-sdk";
 
 describe("createDtfSdk", () => {
   it("exposes the intended index namespace names", () => {

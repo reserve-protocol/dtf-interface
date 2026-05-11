@@ -1,7 +1,7 @@
 import { getAddress, isAddress, type Address } from "viem";
 
-import type { DtfClient } from "../client.js";
-import type { GetTokenPricesParams, TokenPrice, TokenVolatility } from "../types/common.js";
+import type { DtfClient } from "@/client";
+import type { GetTokenPricesParams, TokenPrice, TokenVolatility } from "@/types/common";
 
 type RawZapperToken = {
   readonly address?: string;

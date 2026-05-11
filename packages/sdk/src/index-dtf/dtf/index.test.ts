@@ -1,9 +1,9 @@
 import { getAddress, type PublicClient } from "viem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createDtfClient, type DtfClient } from "../../client.js";
-import { getDtf, getBasket, getBasketSnapshot, getBrand, getPrice, getPriceHistory } from "./index.js";
-import { mapIndexDtf } from "./mappers.js";
+import { createDtfClient, type DtfClient } from "@/client";
+import { getDtf, getBasket, getBasketSnapshot, getBrand, getPrice, getPriceHistory } from "@/index-dtf/dtf/index";
+import { mapIndexDtf } from "@/index-dtf/dtf/mappers";
 
 describe("Index DTF getters", () => {
   afterEach(() => {

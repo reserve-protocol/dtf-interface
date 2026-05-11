@@ -1,10 +1,10 @@
 import { encodeFunctionData } from "viem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { DtfClient } from "../../client.js";
+import type { DtfClient } from "@/client";
 
-import { dtfIndexProposalAbi } from "../abis/proposal-decoder.js";
-import { getProposal, getProposals } from "./index.js";
+import { dtfIndexProposalAbi } from "@/index-dtf/abis/proposal-decoder";
+import { getProposal, getProposals } from "@/index-dtf/governance/index";
 
 describe("Index DTF governance proposals", () => {
   afterEach(() => {

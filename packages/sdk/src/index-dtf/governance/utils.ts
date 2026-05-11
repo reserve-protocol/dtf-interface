@@ -1,15 +1,15 @@
 import { getAddress, type Address } from "viem";
 
-import type { Authority } from "../../types/common.js";
+import type { Authority } from "@/types/common";
 import type {
   IndexDtfGuardianGroup,
   IndexDtfProposalSummary,
   ProposalState,
   ProposalVotingState,
-} from "../../types/governance.js";
-import type { IndexDtf } from "../../types/index-dtf.js";
+} from "@/types/governance";
+import type { IndexDtf } from "@/types/index-dtf";
 
-import { dedupeAddresses, getCurrentTime } from "../../lib/utils.js";
+import { dedupeAddresses, getCurrentTime } from "@/lib/utils";
 
 export type DtfGovernanceAddressContext = {
   readonly ownerGovernance?: { readonly id: string } | null;

@@ -1,17 +1,17 @@
 import type { Address } from "viem";
 
-import type { Authority, DtfParams, Governance } from "../../../types/common.js";
-import type { IndexDtf, PriceControl } from "../../../types/index-dtf.js";
 import type {
   BuildIndexDtfSettingsProposalParams,
   BuiltIndexDtfCalls,
   BuiltIndexDtfProposal,
-} from "./settings-types.js";
+} from "@/index-dtf/governance/propose/settings-types";
+import type { Authority, DtfParams, Governance } from "@/types/common";
+import type { IndexDtf, PriceControl } from "@/types/index-dtf";
 
-import { SdkError } from "../../../errors.js";
-import { getDtf, getVersion } from "../../dtf/index.js";
-import { INDEX_DTF_VERSION_5_0_0, type IndexDtfVersion } from "../../versions.js";
-import { assertNumberRange } from "./settings-governance.js";
+import { SdkError } from "@/errors";
+import { getDtf, getVersion } from "@/index-dtf/dtf/index";
+import { assertNumberRange } from "@/index-dtf/governance/propose/settings-governance";
+import { INDEX_DTF_VERSION_5_0_0, type IndexDtfVersion } from "@/index-dtf/versions";
 
 const MAX_TOKEN_NAME_LENGTH = 32;
 const MAX_MINT_FEE = 5;

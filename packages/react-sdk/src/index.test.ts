@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import * as reactSdk from "./index.js";
+import * as reactSdk from "@/index";
 
 describe("React SDK public surface", () => {
   it("re-exports core prepare helpers without wallet-bound mutation hooks", () => {

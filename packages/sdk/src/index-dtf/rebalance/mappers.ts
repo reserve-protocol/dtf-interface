@@ -1,12 +1,12 @@
 import { getAddress, type Address } from "viem";
 
-import type { Token } from "../../types/common.js";
+import type { IndexDtfAuction, IndexDtfBid, IndexDtfRebalance } from "@/index-dtf/rebalance/types";
 import type {
   GetIndexDtfRebalanceQuery,
   GetIndexDtfRebalanceAuctionsQuery,
   GetIndexDtfRebalancesQuery,
-} from "../subgraph/dtf.generated.js";
-import type { IndexDtfAuction, IndexDtfBid, IndexDtfRebalance } from "./types.js";
+} from "@/index-dtf/subgraph/dtf.generated";
+import type { Token } from "@/types/common";
 
 type SubgraphRebalance =
   | GetIndexDtfRebalancesQuery["rebalances"][number]

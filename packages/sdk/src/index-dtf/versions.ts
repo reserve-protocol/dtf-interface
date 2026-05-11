@@ -1,8 +1,8 @@
 import type { Abi } from "viem";
 
-import { SdkError } from "../errors.js";
-import { dtfIndexAbi as indexDtfV5Abi } from "./abis/dtf-index-abi.js";
-import { folioArtifactAbi as indexDtfV6Abi } from "./abis/folio-artifact.js";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
+import { folioArtifactAbi as indexDtfV6Abi } from "@/index-dtf/abis/folio-artifact";
 
 export const INDEX_DTF_VERSION_5_0_0 = "5.0.0";
 export const INDEX_DTF_VERSION_6_0_0 = "6.0.0";

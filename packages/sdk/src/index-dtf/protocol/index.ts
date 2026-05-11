@@ -1,7 +1,7 @@
 import { indexDtfs as indexDtfCatalog, type CatalogIndexDTF as CatalogIndexDtf } from "@dtf-interface/dtf-catalog";
 
-import type { DtfClient } from "../../client.js";
-import type { ListIndexDtfsParams } from "../../types/protocol.js";
+import type { DtfClient } from "@/client";
+import type { ListIndexDtfsParams } from "@/types/protocol";
 
 export async function listIndexDtfs(
   _client: DtfClient,

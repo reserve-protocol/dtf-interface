@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { SdkError, isSdkError } from "./errors.js";
+import { SdkError, isSdkError } from "@/errors";
 
 describe("SdkError", () => {
   it("exposes a deterministic code, message, and metadata", () => {

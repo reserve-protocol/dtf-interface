@@ -19,13 +19,13 @@ import type {
   ProposeIndexDtfProposalParams,
   QueueIndexDtfProposalParams,
   VoteIndexDtfProposalParams,
-} from "../../types/governance.js";
+} from "@/types/governance";
 
-import { prepareContractCall } from "../../contract-call.js";
-import { SdkError } from "../../errors.js";
-import { dtfIndexGovernanceAbi } from "../abis/dtf-index-governance.js";
-import { timelockAbi } from "../abis/timelock.js";
-import { getZeroValues } from "./utils.js";
+import { prepareContractCall } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
+import { timelockAbi } from "@/index-dtf/abis/timelock";
+import { getZeroValues } from "@/index-dtf/governance/utils";
 
 const TIMELOCK_OPERATION_PARAMS = parseAbiParameters("address[], uint256[], bytes[], bytes32, bytes32");
 

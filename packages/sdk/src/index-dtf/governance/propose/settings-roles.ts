@@ -1,12 +1,12 @@
 import { keccak256, toBytes, type Address, type Hex } from "viem";
 
-import type { SupportedChainId } from "../../../defaults.js";
-import type { IndexDtfCall } from "../../../types/governance.js";
+import type { SupportedChainId } from "@/defaults";
+import type { IndexDtfCall } from "@/types/governance";
 
-import { prepareContractCall } from "../../../contract-call.js";
-import { SdkError } from "../../../errors.js";
-import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
-import { timelockAbi } from "../../abis/timelock.js";
+import { prepareContractCall } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { timelockAbi } from "@/index-dtf/abis/timelock";
 
 // Register labels owner timelock guardians as GUARDIAN_ROLE, but the contract
 // role bytes are the Timelock CANCELLER_ROLE hash.

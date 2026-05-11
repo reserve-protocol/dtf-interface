@@ -1,14 +1,14 @@
 import { getAddress, parseEther, type Address } from "viem";
 
-import type { SupportedChainId } from "../../../defaults.js";
-import type { IndexDtfCall } from "../../../types/governance.js";
-import type { PriceControl } from "../../../types/index-dtf.js";
+import type { SupportedChainId } from "@/defaults";
+import type { IndexDtfCall } from "@/types/governance";
+import type { PriceControl } from "@/types/index-dtf";
 
-import { prepareContractCall } from "../../../contract-call.js";
-import { SdkError } from "../../../errors.js";
-import { Decimal } from "../../../lib/decimal.js";
-import { dtfIndexAbi as indexDtfV5Abi } from "../../abis/dtf-index-abi.js";
-import { INDEX_DTF_VERSION_5_0_0, getIndexDtfOperation, type IndexDtfOperation } from "../../versions.js";
+import { prepareContractCall } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
+import { INDEX_DTF_VERSION_5_0_0, getIndexDtfOperation, type IndexDtfOperation } from "@/index-dtf/versions";
+import { Decimal } from "@/lib/decimal";
 
 export const indexDtfV5WriteAbi = indexDtfV5Abi;
 

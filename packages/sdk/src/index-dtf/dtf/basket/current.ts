@@ -1,14 +1,14 @@
 import { getAddress, type Address } from "viem";
 
-import type { DtfClient } from "../../../client.js";
-import type { IndexDtf, IndexDtfTotalAssets } from "../../../types/index-dtf.js";
+import type { DtfClient } from "@/client";
 import type {
   BuildIndexDtfStartRebalanceParams,
   IndexDtfBasketCurrentBalancesInput,
   IndexDtfBasketTokenInput,
-} from "./types.js";
+} from "@/index-dtf/dtf/basket/types";
+import type { IndexDtf, IndexDtfTotalAssets } from "@/types/index-dtf";
 
-import { getDtf, getTotalAssets } from "../index.js";
+import { getDtf, getTotalAssets } from "@/index-dtf/dtf/index";
 
 export async function getCurrentBalances(
   client: DtfClient,

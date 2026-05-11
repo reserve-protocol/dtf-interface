@@ -1,13 +1,13 @@
 import { erc20Abi, getAddress, type Address, type PublicClient } from "viem";
 
-import type { DtfClient } from "../../client.js";
-import type { SupportedChainId } from "../../defaults.js";
-import type { Amount, Token } from "../../types/common.js";
+import type { DtfClient } from "@/client";
+import type { SupportedChainId } from "@/defaults";
+import type { Amount, Token } from "@/types/common";
 
-import { mapAmount } from "../../lib/utils.js";
-import { getTokensData } from "../../tokens/index.js";
-import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
-import { getTotalAssets, getTotalSupply } from "./index.js";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { getTotalAssets, getTotalSupply } from "@/index-dtf/dtf/index";
+import { mapAmount } from "@/lib/utils";
+import { getTokensData } from "@/tokens/index";
 
 export {
   getIndexDtfRedeemMinAmounts,
@@ -15,13 +15,13 @@ export {
   prepareIndexDtfMint,
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
-} from "./issuance-calls.js";
+} from "@/index-dtf/dtf/issuance-calls";
 export type {
   PrepareIndexDtfBasketApprovalParams,
   PrepareIndexDtfMintParams,
   PrepareIndexDtfMintPlanParams,
   PrepareIndexDtfRedeemParams,
-} from "./issuance-calls.js";
+} from "@/index-dtf/dtf/issuance-calls";
 
 const D18 = 10n ** 18n;
 const ROUNDING_FLOOR = 0;

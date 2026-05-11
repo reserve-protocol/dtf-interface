@@ -1,27 +1,27 @@
 import { decodeFunctionData, erc20Abi, parseEther } from "viem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createDtfClient, type DtfClient } from "../../client.js";
-import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
-import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
-import { unstakingManagerAbi } from "../abis/unstaking-manager.js";
-import { getRebalance, getRebalances } from "../rebalance/index.js";
-import {
-  prepareVoteLockClaimRewards,
-  prepareVoteLockClaimWithdrawal,
-  prepareVoteLockDeposit,
-  prepareVoteLockDepositPlan,
-} from "../vote-lock/index.js";
-import { discoverIndexDtfs, getIndexDtfStatus } from "./discovery.js";
-import { getIndexDtfExposure } from "./exposure.js";
+import { createDtfClient, type DtfClient } from "@/client";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
+import { discoverIndexDtfs, getIndexDtfStatus } from "@/index-dtf/dtf/discovery";
+import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 import {
   getIndexDtfRedeemMinAmounts,
   prepareIndexDtfMint,
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
-} from "./issuance.js";
-import { prepareIndexDtfDistributeFees } from "./revenue.js";
-import { getIndexDtfTransactions } from "./transactions.js";
+} from "@/index-dtf/dtf/issuance";
+import { prepareIndexDtfDistributeFees } from "@/index-dtf/dtf/revenue";
+import { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
+import { getRebalance, getRebalances } from "@/index-dtf/rebalance/index";
+import {
+  prepareVoteLockClaimRewards,
+  prepareVoteLockClaimWithdrawal,
+  prepareVoteLockDeposit,
+  prepareVoteLockDepositPlan,
+} from "@/index-dtf/vote-lock/index";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const TOKEN = "0x0000000000000000000000000000000000000002";

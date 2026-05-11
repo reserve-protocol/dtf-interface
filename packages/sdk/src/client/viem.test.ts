@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { createDtfClient } from "../client.js";
-import { createWalletClient } from "./viem.js";
+import { createDtfClient } from "@/client";
+import { createWalletClient } from "@/client/viem";
 
 const privateKey = "0x0000000000000000000000000000000000000000000000000000000000000001";
 

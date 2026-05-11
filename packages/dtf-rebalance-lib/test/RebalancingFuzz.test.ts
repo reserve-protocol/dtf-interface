@@ -3,7 +3,8 @@ import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { Contract } from "ethers";
 import hre from "hardhat";
 
-import { FolioVersion } from "../src/types";
+import { FolioVersion } from "@/types";
+
 import { FOLIO_CONFIGS, CHAIN_BLOCK_NUMBERS } from "./4.0.0/config";
 import { doAuctions } from "./do-auctions";
 import { initializeChainState, setupContractsAndSigners } from "./setup";

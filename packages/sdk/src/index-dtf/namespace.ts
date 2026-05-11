@@ -1,5 +1,11 @@
-import type { DtfClient } from "../client.js";
-import type { DtfParams } from "../types/common.js";
+import type { DtfClient } from "@/client";
+import type {
+  BuildIndexDtfBasketProposalParams,
+  BuildIndexDtfBasketSettingsProposalParams,
+  BuildIndexDtfDaoSettingsProposalParams,
+  BuildIndexDtfSettingsProposalParams,
+} from "@/index-dtf/governance/propose/index";
+import type { DtfParams } from "@/types/common";
 import type {
   GetAllIndexDtfProposalsParams,
   GetIndexDtfDelegatesParams,
@@ -10,7 +16,7 @@ import type {
   GetIndexDtfProposalsParams,
   GetIndexDtfProposerStateParams,
   GetIndexDtfVoterStateParams,
-} from "../types/governance.js";
+} from "@/types/governance";
 import type {
   GetFullIndexDtfParams,
   GetIndexDtfBasketParams,
@@ -21,17 +27,11 @@ import type {
   GetIndexDtfTotalAssetsParams,
   GetIndexDtfTotalSupplyParams,
   GetIndexDtfVersionParams,
-} from "../types/index-dtf.js";
-import type { ListIndexDtfsParams } from "../types/protocol.js";
-import type {
-  BuildIndexDtfBasketProposalParams,
-  BuildIndexDtfBasketSettingsProposalParams,
-  BuildIndexDtfDaoSettingsProposalParams,
-  BuildIndexDtfSettingsProposalParams,
-} from "./governance/propose/index.js";
+} from "@/types/index-dtf";
+import type { ListIndexDtfsParams } from "@/types/protocol";
 
-import { discoverIndexDtfs, getIndexDtfStatus, getIndexDtfStatuses } from "./dtf/discovery.js";
-import { getIndexDtfExposure } from "./dtf/exposure.js";
+import { discoverIndexDtfs, getIndexDtfStatus, getIndexDtfStatuses } from "@/index-dtf/dtf/discovery";
+import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 import {
   getBasket,
   getBasketSnapshot,
@@ -44,7 +44,7 @@ import {
   getTotalAssets,
   getTotalSupply,
   getVersion,
-} from "./dtf/index.js";
+} from "@/index-dtf/dtf/index";
 import {
   getIndexDtfIssuanceState,
   getIndexDtfRedeemMinAmounts,
@@ -52,7 +52,7 @@ import {
   prepareIndexDtfMint,
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
-} from "./dtf/issuance.js";
+} from "@/index-dtf/dtf/issuance";
 import {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
@@ -61,8 +61,8 @@ import {
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
   prepareIndexDtfDistributeFees,
-} from "./dtf/revenue.js";
-import { getIndexDtfTransactions } from "./dtf/transactions.js";
+} from "@/index-dtf/dtf/revenue";
+import { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 import {
   getAllProposals,
   getDelegates,
@@ -78,14 +78,14 @@ import {
   prepareIndexDtfQueueProposal,
   prepareIndexDtfSubmitProposal,
   prepareIndexDtfVote,
-} from "./governance/index.js";
+} from "@/index-dtf/governance/index";
 import {
   buildIndexDtfBasketProposal,
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
-} from "./governance/propose/index.js";
-import { listIndexDtfs } from "./protocol/index.js";
+} from "@/index-dtf/governance/propose/index";
+import { listIndexDtfs } from "@/index-dtf/protocol/index";
 import {
   getIndexDtfCurrentRebalance,
   getRebalance,
@@ -96,8 +96,8 @@ import {
   prepareIndexDtfOpenAuctionUnrestricted,
   type GetIndexDtfRebalanceParams,
   type GetIndexDtfRebalancesParams,
-} from "./rebalance/index.js";
-import { createIndexDtfRef } from "./ref.js";
+} from "@/index-dtf/rebalance/index";
+import { createIndexDtfRef } from "@/index-dtf/ref";
 import {
   getVoteLockDao,
   getVoteLockDaos,
@@ -109,7 +109,7 @@ import {
   prepareVoteLockDeposit,
   prepareVoteLockDepositPlan,
   prepareVoteLockUnlock,
-} from "./vote-lock/index.js";
+} from "@/index-dtf/vote-lock/index";
 
 /** Creates the direct Index DTF namespace for scripts, bots, CLI, and apps. */
 export function createIndexDtfNamespace(client: DtfClient) {

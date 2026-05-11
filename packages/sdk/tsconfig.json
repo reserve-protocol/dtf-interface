@@ -5,6 +5,9 @@
     "composite": true,
     "rootDir": "src",
     "outDir": "dist",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "types": ["vitest/globals"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],

@@ -1,11 +1,11 @@
 import type { Abi } from "viem";
 
-import { dtfAdminProposalAbi } from "./dtf-admin-proposal.js";
-import { dtfIndexGovernanceProposalAbi } from "./dtf-index-governance-proposal.js";
-import { dtfIndexProposalAbi } from "./dtf-index-proposal.js";
-import { dtfIndexStakingVaultProposalAbi } from "./dtf-index-staking-vault-proposal.js";
-import { timelockProposalAbi } from "./timelock-proposal.js";
-import { upgradeSpellProposalAbi } from "./upgrade-spell-proposal.js";
+import { dtfAdminProposalAbi } from "@/index-dtf/abis/dtf-admin-proposal";
+import { dtfIndexGovernanceProposalAbi } from "@/index-dtf/abis/dtf-index-governance-proposal";
+import { dtfIndexProposalAbi } from "@/index-dtf/abis/dtf-index-proposal";
+import { dtfIndexStakingVaultProposalAbi } from "@/index-dtf/abis/dtf-index-staking-vault-proposal";
+import { timelockProposalAbi } from "@/index-dtf/abis/timelock-proposal";
+import { upgradeSpellProposalAbi } from "@/index-dtf/abis/upgrade-spell-proposal";
 
 export const indexDtfProposalDecoderAbi: Abi = [
   ...dtfIndexProposalAbi,

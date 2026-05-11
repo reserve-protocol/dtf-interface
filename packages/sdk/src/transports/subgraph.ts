@@ -2,9 +2,9 @@ import type { TypedDocumentNode } from "@graphql-typed-document-node/core";
 
 import { ClientError, request, type RequestDocument, type TypedDocumentString, type Variables } from "graphql-request";
 
-import type { SupportedChainId } from "../defaults.js";
+import type { SupportedChainId } from "@/defaults";
 
-import { SdkError, type SdkErrorMeta } from "../errors.js";
+import { SdkError, type SdkErrorMeta } from "@/errors";
 
 type SubgraphProduct = "index" | "yield";
 

@@ -7,7 +7,7 @@ import {
   prepareIndexDtfSetAuctionLength,
   prepareIndexDtfSetFeeRecipients,
   prepareIndexDtfSetMandate,
-} from "./calls.js";
+} from "@/index-dtf/governance/propose/calls";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const ACCOUNT = "0x0000000000000000000000000000000000000002";

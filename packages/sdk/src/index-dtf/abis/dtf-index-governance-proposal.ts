@@ -1,1 +1,1 @@
-export { dtfIndexGovernanceAbi as dtfIndexGovernanceProposalAbi } from "./dtf-index-governance.js";
+export { dtfIndexGovernanceAbi as dtfIndexGovernanceProposalAbi } from "@/index-dtf/abis/dtf-index-governance";

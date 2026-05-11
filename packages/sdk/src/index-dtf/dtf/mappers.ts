@@ -4,9 +4,10 @@ import type {
   ReserveApiIndexDtfBasketSnapshot,
   ReserveApiIndexDtfPrice,
   ReserveApiIndexDtfPriceHistory,
-} from "../../client/api.js";
-import type { SupportedChainId } from "../../defaults.js";
-import type { Authority, DtfParams, Governance, Token, TokenSnapshot, TokenWithSnapshot } from "../../types/common.js";
+} from "@/client/api";
+import type { SupportedChainId } from "@/defaults";
+import type { GetIndexDtfQuery } from "@/index-dtf/subgraph/dtf.generated";
+import type { Authority, DtfParams, Governance, Token, TokenSnapshot, TokenWithSnapshot } from "@/types/common";
 import type {
   FeeRecipients,
   IndexDtfBrand,
@@ -17,11 +18,10 @@ import type {
   IndexDtfPrice,
   IndexDtfBasketSnapshot,
   IndexDtfPricePoint,
-} from "../../types/index-dtf.js";
-import type { GetIndexDtfQuery } from "../subgraph/dtf.generated.js";
+} from "@/types/index-dtf";
 
-import { SdkError } from "../../errors.js";
-import { mapAmount } from "../../lib/utils.js";
+import { SdkError } from "@/errors";
+import { mapAmount } from "@/lib/utils";
 
 type SubgraphIndexDtf = NonNullable<GetIndexDtfQuery["dtf"]>;
 type NullableSubgraphGovernance = SubgraphIndexDtf["ownerGovernance"];

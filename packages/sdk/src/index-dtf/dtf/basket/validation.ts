@@ -1,8 +1,8 @@
 import { D18n } from "@reserve-protocol/dtf-rebalance-lib";
 import { getAddress, zeroAddress, type Address } from "viem";
 
-import { SdkError } from "../../../errors.js";
-import { TARGET_BASKET_TOLERANCE, type IndexDtfBasketToken } from "./types.js";
+import { SdkError } from "@/errors";
+import { TARGET_BASKET_TOLERANCE, type IndexDtfBasketToken } from "@/index-dtf/dtf/basket/types";
 
 export function validateBasketTokens(tokens: readonly IndexDtfBasketToken[]) {
   if (tokens.length === 0) {

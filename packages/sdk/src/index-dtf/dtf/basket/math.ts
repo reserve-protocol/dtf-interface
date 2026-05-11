@@ -8,10 +8,10 @@ import type {
   IndexDtfBasketDefinition,
   IndexDtfBasketToken,
   IndexDtfInitialBasket,
-} from "./types.js";
+} from "@/index-dtf/dtf/basket/types";
 
-import { SdkError } from "../../../errors.js";
-import { assertPositiveNumber, validateBasketTokens, validateShares } from "./validation.js";
+import { SdkError } from "@/errors";
+import { assertPositiveNumber, validateBasketTokens, validateShares } from "@/index-dtf/dtf/basket/validation";
 
 export function getBasketSharesFromUnits(params: {
   readonly tokens: readonly IndexDtfBasketToken[];

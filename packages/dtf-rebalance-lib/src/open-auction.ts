@@ -1,10 +1,10 @@
-import { getOpenAuction as getOpenAuction_4_0_0 } from "./4.0.0/open-auction";
-import { Rebalance as Rebalance_4_0_0 } from "./4.0.0/types";
-import { getOpenAuction as getOpenAuction_5_0_0 } from "./5.0.0/open-auction";
-import { bn, D9d, D18d } from "./numbers";
-import { AuctionMetrics, FolioVersion, OpenAuctionArgs, WeightRange } from "./types";
-import { Rebalance as Rebalance_5_0_0 } from "./types";
-import { Decimal } from "./utils";
+import { getOpenAuction as getOpenAuction_4_0_0 } from "@/4.0.0/open-auction";
+import { Rebalance as Rebalance_4_0_0 } from "@/4.0.0/types";
+import { getOpenAuction as getOpenAuction_5_0_0 } from "@/5.0.0/open-auction";
+import { bn, D9d, D18d } from "@/numbers";
+import { AuctionMetrics, FolioVersion, OpenAuctionArgs, WeightRange } from "@/types";
+import { Rebalance as Rebalance_5_0_0 } from "@/types";
+import { Decimal } from "@/utils";
 
 /**
  * Generator for the `_targetBasket` parameter

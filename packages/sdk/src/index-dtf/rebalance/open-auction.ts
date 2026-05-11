@@ -1,17 +1,17 @@
 import { FolioVersion, getOpenAuction, getTargetBasket } from "@reserve-protocol/dtf-rebalance-lib";
 import { getAddress, type Address } from "viem";
 
-import type { SupportedChainId } from "../../defaults.js";
+import type { SupportedChainId } from "@/defaults";
 import type {
   BuiltIndexDtfOpenAuction,
   IndexDtfOpenAuctionInput,
   IndexDtfTargetBasketPriceMode,
   OpenAuctionArgs,
-} from "./types.js";
+} from "@/index-dtf/rebalance/types";
 
-import { prepareContractCall } from "../../contract-call.js";
-import { SdkError } from "../../errors.js";
-import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
+import { prepareContractCall } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
 /**
  * Builds the v5 launcher `openAuction` args with `dtf-rebalance-lib`.

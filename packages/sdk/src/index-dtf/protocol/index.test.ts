@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { createDtfClient } from "../../client.js";
-import { listIndexDtfs } from "./index.js";
+import { createDtfClient } from "@/client";
+import { listIndexDtfs } from "@/index-dtf/protocol/index";
 
 describe("Index DTF catalog list", () => {
   const client = createDtfClient();

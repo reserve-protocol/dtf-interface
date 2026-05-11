@@ -39,7 +39,7 @@ import type {
 
 import { useQuery } from "@tanstack/react-query";
 
-import { useDtfSdk } from "./provider.js";
+import { useDtfSdk } from "@/provider";
 import {
   buildIndexDtfBasketProposalQueryOptions,
   buildIndexDtfBasketSettingsProposalQueryOptions,
@@ -63,7 +63,7 @@ import {
   indexDtfVoterStateQueryOptions,
   type DtfQueryOptions,
   type IndexDtfList,
-} from "./query-options.js";
+} from "@/query-options";
 
 export function useDiscoverDtfs<TData = readonly DiscoverDtf[]>(
   params?: GetDiscoverDtfsOptions,

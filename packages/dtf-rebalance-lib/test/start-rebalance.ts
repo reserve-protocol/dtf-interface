@@ -2,10 +2,11 @@ import "@nomicfoundation/hardhat-ethers";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { StartRebalanceArgsPartial as StartRebalanceArgsPartial_4_0_0 } from "../src/4.0.0/types";
-import { getStartRebalance } from "../src/start-rebalance";
-import { FolioVersion } from "../src/types";
-import { StartRebalanceArgsPartial as StartRebalanceArgsPartial_5_0_0 } from "../src/types";
+import { StartRebalanceArgsPartial as StartRebalanceArgsPartial_4_0_0 } from "@/4.0.0/types";
+import { getStartRebalance } from "@/start-rebalance";
+import { FolioVersion } from "@/types";
+import { StartRebalanceArgsPartial as StartRebalanceArgsPartial_5_0_0 } from "@/types";
+
 import { RebalanceContracts, RebalanceSigners } from "./types";
 import { whileImpersonating } from "./utils";
 

@@ -1,9 +1,9 @@
-import type { DtfClient } from "../../client.js";
-import type { GetIndexDtfGuardiansParams, IndexDtfGuardians } from "../../types/governance.js";
+import type { DtfClient } from "@/client";
+import type { GetIndexDtfGuardiansParams, IndexDtfGuardians } from "@/types/governance";
 
-import { dedupeAddresses } from "../../lib/utils.js";
-import { getDtf } from "../dtf/index.js";
-import { mapGuardianGroup } from "./utils.js";
+import { getDtf } from "@/index-dtf/dtf/index";
+import { mapGuardianGroup } from "@/index-dtf/governance/utils";
+import { dedupeAddresses } from "@/lib/utils";
 
 export async function getGuardians(client: DtfClient, params: GetIndexDtfGuardiansParams): Promise<IndexDtfGuardians> {
   const dtf = "dtf" in params ? params.dtf : await getDtf(client, params);

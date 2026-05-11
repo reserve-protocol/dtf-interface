@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import type { SupportedChainId } from "../defaults.js";
+import type { SupportedChainId } from "@/defaults";
 import type {
   Amount,
   Authority,
@@ -10,7 +10,7 @@ import type {
   Governance,
   Token,
   TokenWithSnapshot,
-} from "./common.js";
+} from "@/types/common";
 
 export type FeeRecipients = readonly {
   readonly address: Address;

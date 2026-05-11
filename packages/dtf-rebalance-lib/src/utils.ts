@@ -1,7 +1,7 @@
 import DecimalLight from "decimal.js-light";
 
-import { bn, D18d, D27d } from "./numbers";
-import { WeightRange } from "./types";
+import { bn, D18d, D27d } from "@/numbers";
+import { WeightRange } from "@/types";
 
 // Create a local Decimal constructor with custom precision
 export const Decimal = DecimalLight.clone({ precision: 100 });

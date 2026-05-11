@@ -1,16 +1,16 @@
 import { getAddress } from "viem";
 
-import type { DtfClient } from "../../../client.js";
-import type { IndexDtfCall } from "../../../types/governance.js";
+import type { DtfClient } from "@/client";
 import type {
   BuildIndexDtfSettingsProposalParams,
   BuiltIndexDtfCalls,
   BuiltIndexDtfProposal,
-} from "./settings-types.js";
+} from "@/index-dtf/governance/propose/settings-types";
+import type { IndexDtfCall } from "@/types/governance";
 
-import { SdkError } from "../../../errors.js";
-import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
-import { timelockAbi } from "../../abis/timelock.js";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { timelockAbi } from "@/index-dtf/abis/timelock";
 import {
   prepareIndexDtfRemoveFromBasket,
   prepareIndexDtfSetAuctionLength,
@@ -20,10 +20,15 @@ import {
   prepareIndexDtfSetName,
   prepareIndexDtfSetRebalanceControl,
   prepareIndexDtfSetTvlFee,
-} from "./calls.js";
-import { prepareRevenueDistribution, validateRevenueDistributionInput } from "./revenue.js";
-import { buildGovernanceCalls } from "./settings-governance.js";
-import { AUCTION_LAUNCHER_ROLE, BRAND_MANAGER_ROLE, GUARDIAN_ROLE, buildRoleDiffCalls } from "./settings-roles.js";
+} from "@/index-dtf/governance/propose/calls";
+import { prepareRevenueDistribution, validateRevenueDistributionInput } from "@/index-dtf/governance/propose/revenue";
+import { buildGovernanceCalls } from "@/index-dtf/governance/propose/settings-governance";
+import {
+  AUCTION_LAUNCHER_ROLE,
+  BRAND_MANAGER_ROLE,
+  GUARDIAN_ROLE,
+  buildRoleDiffCalls,
+} from "@/index-dtf/governance/propose/settings-roles";
 import {
   buildCallPayload,
   buildSettingsProposal,
@@ -32,7 +37,7 @@ import {
   getIndexDtfSettingsVersion,
   hasIndexDtfSettingsCall,
   validateDtfSettingsParams,
-} from "./settings-shared.js";
+} from "@/index-dtf/governance/propose/settings-shared";
 
 /** Builds a proposal that changes core Index DTF settings. */
 export async function buildIndexDtfSettingsProposal(

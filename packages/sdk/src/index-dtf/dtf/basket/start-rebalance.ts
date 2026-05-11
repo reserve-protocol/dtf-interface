@@ -1,16 +1,25 @@
 import { getAddress } from "viem";
 
-import type { DtfClient } from "../../../client.js";
-import type { BuildIndexDtfStartRebalanceParams, BuiltIndexDtfStartRebalance } from "./types.js";
+import type { DtfClient } from "@/client";
+import type { BuildIndexDtfStartRebalanceParams, BuiltIndexDtfStartRebalance } from "@/index-dtf/dtf/basket/types";
 
-import { SdkError } from "../../../errors.js";
-import { getTotalSupply } from "../index.js";
-import { getCurrentBalances, getDtfForWeightControl, getBasketTokenOrder } from "./current.js";
-import { getBasketFromInput } from "./input.js";
-import { getBasketShares } from "./math.js";
-import { buildStartRebalanceArgs } from "./rebalance-args.js";
-import { getBasketPriceErrors, getBasketPrices, getBasketTokens, getMaxAuctionSizes } from "./token-data.js";
-import { assertNoDtfBasketToken, assertUniqueAddresses, assertValidBasketAddresses } from "./validation.js";
+import { SdkError } from "@/errors";
+import { getCurrentBalances, getDtfForWeightControl, getBasketTokenOrder } from "@/index-dtf/dtf/basket/current";
+import { getBasketFromInput } from "@/index-dtf/dtf/basket/input";
+import { getBasketShares } from "@/index-dtf/dtf/basket/math";
+import { buildStartRebalanceArgs } from "@/index-dtf/dtf/basket/rebalance-args";
+import {
+  getBasketPriceErrors,
+  getBasketPrices,
+  getBasketTokens,
+  getMaxAuctionSizes,
+} from "@/index-dtf/dtf/basket/token-data";
+import {
+  assertNoDtfBasketToken,
+  assertUniqueAddresses,
+  assertValidBasketAddresses,
+} from "@/index-dtf/dtf/basket/validation";
+import { getTotalSupply } from "@/index-dtf/dtf/index";
 
 export async function buildIndexDtfStartRebalance(
   client: DtfClient,

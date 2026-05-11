@@ -8,8 +8,8 @@ import type {
 } from "@reserve-protocol/dtf-rebalance-lib";
 import type { Address } from "viem";
 
-import type { DtfParams, Token } from "../../types/common.js";
-import type { IndexDtfInput } from "../../types/index-dtf.js";
+import type { DtfParams, Token } from "@/types/common";
+import type { IndexDtfInput } from "@/types/index-dtf";
 
 export type GetIndexDtfRebalancesParams = IndexDtfInput & {
   readonly limit?: number;

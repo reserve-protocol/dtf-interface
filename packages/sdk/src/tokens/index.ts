@@ -2,11 +2,11 @@ import type { Address, PublicClient } from "viem";
 
 import { erc20Abi } from "viem";
 
-import type { Token } from "../types/common.js";
+import type { Token } from "@/types/common";
 
-import { SdkError } from "../errors.js";
+import { SdkError } from "@/errors";
 
-export { getTokenPrices, getTokenVolatilities } from "./prices.js";
+export { getTokenPrices, getTokenVolatilities } from "@/tokens/prices";
 
 export async function getTokenData(publicClient: PublicClient, address: Address): Promise<Token> {
   const [token] = await getTokensData(publicClient, [address]);

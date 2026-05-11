@@ -1,10 +1,6 @@
-import { createDtfClientApi, type DtfClientApi } from "./client/api.js";
-import {
-  createDtfClientSubgraph,
-  type DtfClientSubgraph,
-  type DtfClientSubgraphChainConfig,
-} from "./client/subgraph.js";
-import { createDtfClientViem, type DtfClientViem, type DtfClientViemChainConfig } from "./client/viem.js";
+import { createDtfClientApi, type DtfClientApi } from "@/client/api";
+import { createDtfClientSubgraph, type DtfClientSubgraph, type DtfClientSubgraphChainConfig } from "@/client/subgraph";
+import { createDtfClientViem, type DtfClientViem, type DtfClientViemChainConfig } from "@/client/viem";
 import {
   DEFAULT_API_BASE_URL,
   DEFAULT_RPC_URLS,
@@ -13,7 +9,7 @@ import {
   YIELD_DTF_SUBGRAPH_URL,
   supportedChainIds,
   type SupportedChainId,
-} from "./defaults.js";
+} from "@/defaults";
 
 export type DtfChainConfig = DtfClientSubgraphChainConfig & DtfClientViemChainConfig;
 

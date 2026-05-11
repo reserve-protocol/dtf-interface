@@ -1,8 +1,8 @@
 import type { Variables } from "graphql-request";
 
-import { supportedChainIds, type SupportedChainId } from "../defaults.js";
-import { SdkError } from "../errors.js";
-import { querySubgraph, type SubgraphDocument } from "../transports/subgraph.js";
+import { supportedChainIds, type SupportedChainId } from "@/defaults";
+import { SdkError } from "@/errors";
+import { querySubgraph, type SubgraphDocument } from "@/transports/subgraph";
 
 export type DtfClientSubgraphChainConfig = {
   readonly indexSubgraphUrl?: string;

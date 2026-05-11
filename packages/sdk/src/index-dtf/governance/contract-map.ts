@@ -1,6 +1,6 @@
 import { getAddress, type Abi, type Address } from "viem";
 
-import type { SupportedChainId } from "../../defaults.js";
+import type { SupportedChainId } from "@/defaults";
 
 import {
   dtfAdminProposalAbi,
@@ -9,7 +9,7 @@ import {
   dtfIndexStakingVaultProposalAbi,
   timelockProposalAbi,
   upgradeSpellProposalAbi,
-} from "../abis/proposal-decoder.js";
+} from "@/index-dtf/abis/proposal-decoder";
 
 export type ProposalContractDecoder = {
   readonly target: Address;

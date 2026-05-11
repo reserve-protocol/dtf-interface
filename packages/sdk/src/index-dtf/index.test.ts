@@ -2,8 +2,8 @@ import type { PublicClient } from "viem";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { createDtfClient } from "../client.js";
-import { createIndexDtfNamespace, createIndexDtfRef } from "./index.js";
+import { createDtfClient } from "@/client";
+import { createIndexDtfNamespace, createIndexDtfRef } from "@/index-dtf/index";
 
 describe("Index DTF namespace", () => {
   it("passes blockNumber to ref basket shorthand", async () => {

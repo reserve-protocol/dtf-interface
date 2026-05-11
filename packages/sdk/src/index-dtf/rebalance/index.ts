@@ -1,27 +1,27 @@
 import { getAddress } from "viem";
 
-import type { DtfClient } from "../../client.js";
+import type { DtfClient } from "@/client";
 import type {
   GetIndexDtfRebalanceParams,
   GetIndexDtfRebalancesParams,
   IndexDtfAuction,
   IndexDtfRebalance,
-} from "./types.js";
+} from "@/index-dtf/rebalance/types";
 
-import { SdkError } from "../../errors.js";
+import { SdkError } from "@/errors";
+import { getIndexDtfCurrentRebalance } from "@/index-dtf/rebalance/current";
+import { mapSubgraphAuction, mapSubgraphRebalance } from "@/index-dtf/rebalance/mappers";
 import {
   GetIndexDtfRebalanceDocument,
   GetIndexDtfRebalanceByNonceDocument,
   GetIndexDtfRebalanceAuctionsDocument,
   GetIndexDtfRebalancesDocument,
-} from "../subgraph/dtf.generated.js";
-import { getIndexDtfIdentity } from "../utils.js";
-import { getIndexDtfCurrentRebalance } from "./current.js";
-import { mapSubgraphAuction, mapSubgraphRebalance } from "./mappers.js";
+} from "@/index-dtf/subgraph/dtf.generated";
+import { getIndexDtfIdentity } from "@/index-dtf/utils";
 
-export * from "./current.js";
-export * from "./open-auction.js";
-export * from "./types.js";
+export * from "@/index-dtf/rebalance/current";
+export * from "@/index-dtf/rebalance/open-auction";
+export * from "@/index-dtf/rebalance/types";
 
 /** Reads Index DTF rebalances from the subgraph in newest-first order. */
 export async function getRebalances(

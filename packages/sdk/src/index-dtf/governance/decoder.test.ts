@@ -1,11 +1,11 @@
 import { encodeFunctionData } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { dtfIndexProposalAbiCatalog } from "../abis/dtf-index-proposal.js";
-import { folioArtifactAbi } from "../abis/folio-artifact.js";
-import { dtfIndexProposalAbi } from "../abis/proposal-decoder.js";
-import { decodeIndexDtfProposalCalldatas } from "./decoder.js";
-import { indexDtfV5WriteAbi } from "./propose/calls.js";
+import { dtfIndexProposalAbiCatalog } from "@/index-dtf/abis/dtf-index-proposal";
+import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
+import { dtfIndexProposalAbi } from "@/index-dtf/abis/proposal-decoder";
+import { decodeIndexDtfProposalCalldatas } from "@/index-dtf/governance/decoder";
+import { indexDtfV5WriteAbi } from "@/index-dtf/governance/propose/calls";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 

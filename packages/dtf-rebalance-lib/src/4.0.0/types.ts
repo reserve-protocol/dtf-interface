@@ -1,4 +1,4 @@
-import { WeightRange, PriceRange, RebalanceLimits, PriceControl } from "../types";
+import { WeightRange, PriceRange, RebalanceLimits, PriceControl } from "@/types";
 
 // === START REBALANCE ===
 

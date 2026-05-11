@@ -24,7 +24,7 @@ import type {
 
 import { getIndexDtfProposalGovernanceAddresses } from "@dtf-interface/sdk";
 
-import { normalizeQueryKeyValue } from "./normalize-query-key.js";
+import { normalizeQueryKeyValue } from "@/normalize-query-key";
 
 const defaultKey = "default";
 

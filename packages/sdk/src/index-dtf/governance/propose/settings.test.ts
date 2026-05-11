@@ -1,17 +1,17 @@
 import { decodeFunctionData, parseEther, type PublicClient } from "viem";
 import { describe, expect, it, vi } from "vitest";
 
-import { createDtfClient } from "../../../client.js";
-import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
-import { dtfIndexGovernanceAbi } from "../../abis/dtf-index-governance.js";
-import { dtfIndexStakingVaultAbi } from "../../abis/dtf-index-staking-vault.js";
-import { timelockAbi } from "../../abis/timelock.js";
+import { createDtfClient } from "@/client";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
+import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { timelockAbi } from "@/index-dtf/abis/timelock";
 import {
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
   indexDtfSettingsProposalSchema,
-} from "./settings.js";
+} from "@/index-dtf/governance/propose/settings";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const GOVERNANCE = "0x0000000000000000000000000000000000000002";

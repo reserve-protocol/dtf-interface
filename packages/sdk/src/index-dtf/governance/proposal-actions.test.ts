@@ -14,7 +14,7 @@ import {
   prepareIndexDtfCancelProposal,
   prepareIndexDtfQueueProposal,
   prepareIndexDtfSubmitProposal,
-} from "./proposal-actions.js";
+} from "@/index-dtf/governance/proposal-actions";
 
 const timelockOperationParams = parseAbiParameters("address[], uint256[], bytes[], bytes32, bytes32");
 

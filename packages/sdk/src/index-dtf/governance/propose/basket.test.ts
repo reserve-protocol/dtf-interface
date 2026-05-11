@@ -1,16 +1,16 @@
 import { decodeFunctionData, parseEther, parseUnits, type Address, type PublicClient } from "viem";
 import { describe, expect, it, vi } from "vitest";
 
-import { createDtfClient } from "../../../client.js";
-import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
+import { createDtfClient } from "@/client";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import {
   buildInitialBasket,
   getBasketSharesFromUnits,
   getBasketUnitsFromShares,
   getDtfPriceFromBalances,
   type IndexDtfBasketToken,
-} from "../../dtf/basket/index.js";
-import { buildIndexDtfBasketProposal } from "./basket.js";
+} from "@/index-dtf/dtf/basket/index";
+import { buildIndexDtfBasketProposal } from "@/index-dtf/governance/propose/basket";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const GOVERNANCE = "0x0000000000000000000000000000000000000002";

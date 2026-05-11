@@ -1,11 +1,11 @@
 import type { Address } from "viem";
 
-import type { SupportedChainId } from "./defaults.js";
+import type { SupportedChainId } from "@/defaults";
 
-import { createDtfClient, type DtfClient, type DtfClientConfig } from "./client.js";
-import { SdkError } from "./errors.js";
-import { createIndexDtfNamespace } from "./index-dtf/index.js";
-import { createPortfolioNamespace } from "./portfolio/index.js";
+import { createDtfClient, type DtfClient, type DtfClientConfig } from "@/client";
+import { SdkError } from "@/errors";
+import { createIndexDtfNamespace } from "@/index-dtf/index";
+import { createPortfolioNamespace } from "@/portfolio/index";
 
 export type DtfSdkConfig = DtfClientConfig & {
   readonly client?: DtfClient;

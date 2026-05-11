@@ -1,9 +1,9 @@
 import { getAddress, type Address } from "viem";
 
-import type { SupportedChainId } from "../defaults.js";
-import type { GetTokenPricesParams, TokenPrice } from "../types/common.js";
+import type { SupportedChainId } from "@/defaults";
+import type { GetTokenPricesParams, TokenPrice } from "@/types/common";
 
-import { get, post, type GetOptions, type PostOptions } from "../transports/api.js";
+import { get, post, type GetOptions, type PostOptions } from "@/transports/api";
 
 export type ReserveApiDtfBasketToken = {
   readonly address: string;

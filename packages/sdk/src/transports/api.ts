@@ -1,4 +1,4 @@
-import { SdkError } from "../errors.js";
+import { SdkError } from "@/errors";
 
 type Query = Record<string, boolean | number | string | null | undefined>;
 

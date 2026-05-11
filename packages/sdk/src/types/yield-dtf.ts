@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import type { SupportedChainId } from "../defaults.js";
+import type { SupportedChainId } from "@/defaults";
 import type {
   DtfBasketAsset,
   DtfBasketSummaryAsset,
@@ -8,7 +8,7 @@ import type {
   DtfMarketData,
   DtfPerformancePoint,
   DtfStatus,
-} from "./common.js";
+} from "@/types/common";
 
 export type YieldDtf = DtfMarketData & {
   readonly address: Address;

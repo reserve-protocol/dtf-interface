@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { SdkError } from "../errors.js";
+import type { SdkError } from "@/errors";
 
-import { createDtfClient } from "../client.js";
+import { createDtfClient } from "@/client";
 
 describe("subgraph client", () => {
   afterEach(() => {

@@ -4,11 +4,12 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { Rebalance as Rebalance_4_0_0 } from "../src/4.0.0/types";
-import { bn } from "../src/numbers";
-import { getOpenAuction, getTargetBasket } from "../src/open-auction";
-import { AuctionMetrics, AuctionRound, FolioVersion, OpenAuctionArgs, WeightRange } from "../src/types";
-import { Rebalance as Rebalance_5_0_0 } from "../src/types";
+import { Rebalance as Rebalance_4_0_0 } from "@/4.0.0/types";
+import { bn } from "@/numbers";
+import { getOpenAuction, getTargetBasket } from "@/open-auction";
+import { AuctionMetrics, AuctionRound, FolioVersion, OpenAuctionArgs, WeightRange } from "@/types";
+import { Rebalance as Rebalance_5_0_0 } from "@/types";
+
 import { RebalanceContracts, RebalanceSigners } from "./types";
 import { whileImpersonating, toPlainObject, createPriceLookup, logPercentages } from "./utils";
 

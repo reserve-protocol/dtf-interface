@@ -1,12 +1,12 @@
-export { buildIndexDtfBasketSettingsProposal } from "./settings-basket.js";
-export { buildIndexDtfDaoSettingsProposal } from "./settings-dao.js";
-export { buildIndexDtfSettingsProposal } from "./settings-dtf.js";
+export { buildIndexDtfBasketSettingsProposal } from "@/index-dtf/governance/propose/settings-basket";
+export { buildIndexDtfDaoSettingsProposal } from "@/index-dtf/governance/propose/settings-dao";
+export { buildIndexDtfSettingsProposal } from "@/index-dtf/governance/propose/settings-dtf";
 export {
   indexDtfBasketSettingsProposalSchema,
   indexDtfDaoSettingsProposalSchema,
   indexDtfGovernanceChangesSchema,
   indexDtfSettingsProposalSchema,
-} from "./settings-types.js";
+} from "@/index-dtf/governance/propose/settings-types";
 export type {
   BuildIndexDtfBasketSettingsProposalParams,
   BuildIndexDtfDaoSettingsProposalParams,
@@ -15,4 +15,4 @@ export type {
   IndexDtfGovernanceChanges,
   IndexDtfRevenueDistributionInput,
   IndexDtfRevenueRecipientInput,
-} from "./settings-types.js";
+} from "@/index-dtf/governance/propose/settings-types";

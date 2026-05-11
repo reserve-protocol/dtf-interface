@@ -1,5 +1,5 @@
-import type { SupportedChainId } from "../defaults.js";
-import type { DtfStatus } from "./common.js";
+import type { SupportedChainId } from "@/defaults";
+import type { DtfStatus } from "@/types/common";
 
 export type ListIndexDtfsParams = {
   readonly chainId?: SupportedChainId;

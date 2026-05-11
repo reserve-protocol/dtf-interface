@@ -1,4 +1,4 @@
-import type { CatalogIndexDTF, CatalogYieldDTF } from "./types.js";
+import type { CatalogIndexDTF, CatalogYieldDTF } from "@/types";
 
 import indexBase from "../index-dtf/base.json" with { type: "json" };
 import indexBnb from "../index-dtf/bnb.json" with { type: "json" };
@@ -6,7 +6,7 @@ import indexMainnet from "../index-dtf/mainnet.json" with { type: "json" };
 import yieldBase from "../yield-dtf/base.json" with { type: "json" };
 import yieldMainnet from "../yield-dtf/mainnet.json" with { type: "json" };
 
-export type { CatalogIndexDTF, CatalogYieldDTF } from "./types.js";
+export type { CatalogIndexDTF, CatalogYieldDTF } from "@/types";
 
 export const indexDtfs: Record<1 | 56 | 8453, Record<string, CatalogIndexDTF>> = {
   1: indexMainnet as Record<string, CatalogIndexDTF>,

@@ -9,7 +9,7 @@ import {
   type Hex,
 } from "viem";
 
-import type { SupportedChainId } from "./defaults.js";
+import type { SupportedChainId } from "@/defaults";
 
 type WriteStateMutability = "nonpayable" | "payable";
 type WriteFunctionArgs<

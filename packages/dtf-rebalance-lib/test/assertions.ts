@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
 
-import { bn } from "../src/numbers";
-import { OpenAuctionArgs, PriceRange, RebalanceLimits, WeightRange } from "../src/types";
+import { bn } from "@/numbers";
+import { OpenAuctionArgs, PriceRange, RebalanceLimits, WeightRange } from "@/types";
 
 export const PRECISION = bn("1e3"); // 1-part-in-1000
 

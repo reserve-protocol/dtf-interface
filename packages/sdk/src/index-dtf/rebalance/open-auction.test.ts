@@ -8,9 +8,9 @@ import {
 } from "@reserve-protocol/dtf-rebalance-lib";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { IndexDtfOpenAuctionInput } from "./types.js";
+import type { IndexDtfOpenAuctionInput } from "@/index-dtf/rebalance/types";
 
-import { prepareIndexDtfOpenAuctionArgs } from "./open-auction.js";
+import { prepareIndexDtfOpenAuctionArgs } from "@/index-dtf/rebalance/open-auction";
 
 vi.mock("@reserve-protocol/dtf-rebalance-lib", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@reserve-protocol/dtf-rebalance-lib")>();

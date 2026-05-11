@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { dtfQueryKeys } from "./query-keys.js";
+import { dtfQueryKeys } from "@/query-keys";
 
 describe("dtfQueryKeys", () => {
   it("keys proposal lists by DTF identity instead of the full DTF object", () => {

@@ -1,19 +1,19 @@
 import { getAddress, type Address } from "viem";
 
-import type { DtfClient } from "../../../client.js";
-import type { TokenVolatility } from "../../../types/common.js";
+import type { DtfClient } from "@/client";
+import type { TokenVolatility } from "@/types/common";
 
-import { SdkError } from "../../../errors.js";
-import { getTokensData } from "../../../tokens/index.js";
-import { getTokenPrices, getTokenVolatilities } from "../../../tokens/prices.js";
+import { SdkError } from "@/errors";
 import {
   DEFAULT_MAX_AUCTION_SIZE_USD,
   PRICE_ERROR_BY_VOLATILITY,
   type BuildIndexDtfStartRebalanceParams,
   type IndexDtfBasketToken,
   type IndexDtfBasketTokenInput,
-} from "./types.js";
-import { assertPositiveNumber } from "./validation.js";
+} from "@/index-dtf/dtf/basket/types";
+import { assertPositiveNumber } from "@/index-dtf/dtf/basket/validation";
+import { getTokensData } from "@/tokens/index";
+import { getTokenPrices, getTokenVolatilities } from "@/tokens/prices";
 
 export async function getBasketTokens(
   client: DtfClient,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { createDtfClient } from "./client.js";
-import { DEFAULT_RPC_URLS, INDEX_DTF_SUBGRAPH_URL, supportedChainIds } from "./defaults.js";
+import { createDtfClient } from "@/client";
+import { DEFAULT_RPC_URLS, INDEX_DTF_SUBGRAPH_URL, supportedChainIds } from "@/defaults";
 
 describe("chain defaults", () => {
   it("keeps supported chains explicit", () => {

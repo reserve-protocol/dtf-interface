@@ -1,13 +1,13 @@
 import { getAddress, zeroAddress, type Address, type Hex } from "viem";
 
-import type { DtfClient } from "../../../client.js";
-import type { DtfParams } from "../../../types/common.js";
-import type { IndexDtfCall } from "../../../types/governance.js";
-import type { IndexDtf } from "../../../types/index-dtf.js";
+import type { DtfClient } from "@/client";
+import type { DtfParams } from "@/types/common";
+import type { IndexDtfCall } from "@/types/governance";
+import type { IndexDtf } from "@/types/index-dtf";
 
-import { prepareContractCall } from "../../../contract-call.js";
-import { SdkError } from "../../../errors.js";
-import { dtfIndexAbi } from "../../abis/dtf-index-abi.js";
+import { prepareContractCall } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import {
   DEFAULT_AUCTION_LAUNCHER_WINDOW,
   buildIndexDtfStartRebalance,
@@ -22,8 +22,8 @@ import {
   type IndexDtfBasketTokenInput,
   type IndexDtfBasketUnitsInput,
   type StartRebalanceArgsV5,
-} from "../../dtf/basket/index.js";
-import { getDtf } from "../../dtf/index.js";
+} from "@/index-dtf/dtf/basket/index";
+import { getDtf } from "@/index-dtf/dtf/index";
 
 const MAX_REBALANCE_TTL = 604_800n * 4n;
 

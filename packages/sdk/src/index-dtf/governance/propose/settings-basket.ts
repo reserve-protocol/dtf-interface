@@ -1,14 +1,19 @@
-import type { DtfClient } from "../../../client.js";
+import type { DtfClient } from "@/client";
 import type {
   BuildIndexDtfBasketSettingsProposalParams,
   BuiltIndexDtfCalls,
   BuiltIndexDtfProposal,
-} from "./settings-types.js";
+} from "@/index-dtf/governance/propose/settings-types";
 
-import { timelockAbi } from "../../abis/timelock.js";
-import { buildGovernanceCalls } from "./settings-governance.js";
-import { CANCELLER_ROLE, buildRoleDiffCalls } from "./settings-roles.js";
-import { buildCallPayload, buildSettingsProposal, getAuthorityGovernance, getDtfIfNeeded } from "./settings-shared.js";
+import { timelockAbi } from "@/index-dtf/abis/timelock";
+import { buildGovernanceCalls } from "@/index-dtf/governance/propose/settings-governance";
+import { CANCELLER_ROLE, buildRoleDiffCalls } from "@/index-dtf/governance/propose/settings-roles";
+import {
+  buildCallPayload,
+  buildSettingsProposal,
+  getAuthorityGovernance,
+  getDtfIfNeeded,
+} from "@/index-dtf/governance/propose/settings-shared";
 
 /** Builds a proposal that changes basket governance settings. */
 export async function buildIndexDtfBasketSettingsProposal(

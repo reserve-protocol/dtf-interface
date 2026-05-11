@@ -1,12 +1,12 @@
 import { isAddress, type Address, type Hex } from "viem";
 import { z } from "zod";
 
-import type { DtfParams } from "../../../types/common.js";
-import type { IndexDtfCall } from "../../../types/governance.js";
-import type { IndexDtf, PriceControl } from "../../../types/index-dtf.js";
-import type { IndexDtfRevenueDistributionInput } from "./revenue.js";
+import type { IndexDtfRevenueDistributionInput } from "@/index-dtf/governance/propose/revenue";
+import type { DtfParams } from "@/types/common";
+import type { IndexDtfCall } from "@/types/governance";
+import type { IndexDtf, PriceControl } from "@/types/index-dtf";
 
-import { INDEX_DTF_VERSION_5_0_0 } from "../../versions.js";
+import { INDEX_DTF_VERSION_5_0_0 } from "@/index-dtf/versions";
 
 const addressSchema = z.string().refine(isAddress, "Invalid address");
 
@@ -133,4 +133,7 @@ export type BuildIndexDtfSettingsProposalParams = DtfParams & {
   readonly version?: typeof INDEX_DTF_VERSION_5_0_0 | undefined;
 };
 
-export type { IndexDtfRevenueDistributionInput, IndexDtfRevenueRecipientInput } from "./revenue.js";
+export type {
+  IndexDtfRevenueDistributionInput,
+  IndexDtfRevenueRecipientInput,
+} from "@/index-dtf/governance/propose/revenue";

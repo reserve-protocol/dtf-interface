@@ -1,17 +1,17 @@
 import { erc20Abi, getAddress, type Address } from "viem";
 
-import type { DtfClient } from "../../client.js";
-import type { ContractCallPlan } from "../../contract-call.js";
-import type { SupportedChainId } from "../../defaults.js";
-import type { Amount, Token } from "../../types/common.js";
-import type { IndexDtf } from "../../types/index-dtf.js";
+import type { DtfClient } from "@/client";
+import type { ContractCallPlan } from "@/contract-call";
+import type { SupportedChainId } from "@/defaults";
+import type { Amount, Token } from "@/types/common";
+import type { IndexDtf } from "@/types/index-dtf";
 
-import { prepareContractCall, prepareErc20Approval } from "../../contract-call.js";
-import { SdkError } from "../../errors.js";
-import { mapAmount } from "../../lib/utils.js";
-import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
-import { unstakingManagerAbi } from "../abis/unstaking-manager.js";
-import { getDtf } from "../dtf/index.js";
+import { prepareContractCall, prepareErc20Approval } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
+import { getDtf } from "@/index-dtf/dtf/index";
+import { mapAmount } from "@/lib/utils";
 
 export type VoteLockDao = {
   readonly chainId: number;

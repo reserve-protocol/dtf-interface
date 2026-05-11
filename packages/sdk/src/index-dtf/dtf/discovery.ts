@@ -1,8 +1,8 @@
 import { getAddress, type Address } from "viem";
 
-import type { DtfClient } from "../../client.js";
-import type { SupportedChainId } from "../../defaults.js";
-import type { DtfBrand, DtfBasketSummaryAsset, DtfPerformancePoint, DtfStatus } from "../../types/common.js";
+import type { DtfClient } from "@/client";
+import type { SupportedChainId } from "@/defaults";
+import type { DtfBrand, DtfBasketSummaryAsset, DtfPerformancePoint, DtfStatus } from "@/types/common";
 
 export type DiscoverIndexDtfsParams = {
   readonly chainId?: SupportedChainId;

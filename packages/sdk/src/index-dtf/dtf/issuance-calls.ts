@@ -1,11 +1,11 @@
 import { getAddress, type Address } from "viem";
 
-import type { ContractCallPlan } from "../../contract-call.js";
-import type { SupportedChainId } from "../../defaults.js";
+import type { ContractCallPlan } from "@/contract-call";
+import type { SupportedChainId } from "@/defaults";
 
-import { prepareContractCall, prepareErc20Approval } from "../../contract-call.js";
-import { SdkError } from "../../errors.js";
-import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
+import { prepareContractCall, prepareErc20Approval } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
 type MintArgs = readonly [bigint, Address, bigint];
 type RedeemArgs = readonly [bigint, Address, readonly Address[], readonly bigint[]];

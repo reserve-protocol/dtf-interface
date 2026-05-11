@@ -1,12 +1,12 @@
 import { getAddress } from "viem";
 
-import type { DtfClient } from "../../client.js";
-import type { GetIndexDtfDelegatesParams, IndexDtfDelegate } from "../../types/governance.js";
+import type { DtfClient } from "@/client";
+import type { GetIndexDtfDelegatesParams, IndexDtfDelegate } from "@/types/governance";
 
-import { SdkError } from "../../errors.js";
-import { mapAmount } from "../../lib/utils.js";
-import { GetIndexDtfDelegatesDocument } from "../subgraph/dtf.generated.js";
-import { DEFAULT_DELEGATE_LIMIT } from "./constants.js";
+import { SdkError } from "@/errors";
+import { DEFAULT_DELEGATE_LIMIT } from "@/index-dtf/governance/constants";
+import { GetIndexDtfDelegatesDocument } from "@/index-dtf/subgraph/dtf.generated";
+import { mapAmount } from "@/lib/utils";
 
 export async function getDelegates(
   client: DtfClient,

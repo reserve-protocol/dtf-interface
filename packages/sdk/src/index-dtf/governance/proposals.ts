@@ -1,39 +1,39 @@
 import { getAddress } from "viem";
 
-import type { DtfClient } from "../../client.js";
-import type { DtfParams } from "../../types/common.js";
+import type { DtfClient } from "@/client";
+import type { DtfParams } from "@/types/common";
 import type {
   GetAllIndexDtfProposalsParams,
   GetIndexDtfProposalParams,
   GetIndexDtfProposalsParams,
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
-} from "../../types/governance.js";
+} from "@/types/governance";
 
-import { SdkError } from "../../errors.js";
-import { getCurrentTime } from "../../lib/utils.js";
-import {
-  GetIndexDtfProposalDocument,
-  GetIndexDtfProposalGovernanceAddressesDocument,
-  GetIndexDtfProposalsDocument,
-} from "../subgraph/dtf.generated.js";
-import { DEFAULT_PROPOSAL_LIMIT } from "./constants.js";
-import { buildProposalContractMap } from "./contract-map.js";
-import { decodeIndexDtfProposalCalldatas } from "./decoder.js";
+import { SdkError } from "@/errors";
+import { DEFAULT_PROPOSAL_LIMIT } from "@/index-dtf/governance/constants";
+import { buildProposalContractMap } from "@/index-dtf/governance/contract-map";
+import { decodeIndexDtfProposalCalldatas } from "@/index-dtf/governance/decoder";
 import {
   mapDtfProposalContractContext,
   mapIndexDtfProposal,
   mapIndexDtfProposalSummary,
   mapProposalGovernanceContractContext,
   type SubgraphGovernedIndexDtfProposalDtf,
-} from "./mapper.js";
+} from "@/index-dtf/governance/mapper";
 import {
   getDtfProposalGovernanceIds,
   getProposalGovernanceAddresses,
   normalizeGovernanceIds,
   withVoteState,
   type DtfGovernanceAddressContext,
-} from "./utils.js";
+} from "@/index-dtf/governance/utils";
+import {
+  GetIndexDtfProposalDocument,
+  GetIndexDtfProposalGovernanceAddressesDocument,
+  GetIndexDtfProposalsDocument,
+} from "@/index-dtf/subgraph/dtf.generated";
+import { getCurrentTime } from "@/lib/utils";
 
 export async function getProposals(
   client: DtfClient,

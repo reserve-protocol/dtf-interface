@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { DtfClient } from "../../client.js";
+import type { DtfClient } from "@/client";
 
-import { getDelegates } from "./index.js";
+import { getDelegates } from "@/index-dtf/governance/index";
 
 describe("Index DTF governance delegates", () => {
   it("lists delegates ordered by delegated votes from the subgraph", async () => {

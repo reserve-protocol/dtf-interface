@@ -41,7 +41,7 @@ import {
   type ListIndexDtfsParams,
 } from "@dtf-interface/sdk";
 
-import { dtfQueryKeys } from "./query-keys.js";
+import { dtfQueryKeys } from "@/query-keys";
 
 export type IndexDtfList = Awaited<ReturnType<DtfSdk["index"]["list"]>>;
 

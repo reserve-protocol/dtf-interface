@@ -2,8 +2,8 @@ import type { DtfSdk } from "@dtf-interface/sdk";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { dtfQueryKeys } from "./query-keys.js";
-import { indexDtfProposalQueryOptions, indexDtfQueryOptions } from "./query-options.js";
+import { dtfQueryKeys } from "@/query-keys";
+import { indexDtfProposalQueryOptions, indexDtfQueryOptions } from "@/query-options";
 
 describe("react SDK query options", () => {
   it("builds disabled options until required params exist", () => {

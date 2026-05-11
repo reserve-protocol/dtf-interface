@@ -2,8 +2,8 @@ import type { Address } from "viem";
 
 import { getAddress } from "viem";
 
-import type { DtfClient } from "../../client.js";
-import type { DtfParams } from "../../types/common.js";
+import type { DtfClient } from "@/client";
+import type { DtfParams } from "@/types/common";
 import type {
   GetFullIndexDtfParams,
   GetIndexDtfPriceHistoryParams,
@@ -20,13 +20,10 @@ import type {
   IndexDtfPrice,
   IndexDtfPricePoint,
   IndexDtfTotalAssets,
-} from "../../types/index-dtf.js";
+} from "@/types/index-dtf";
 
-import { SdkError } from "../../errors.js";
-import { mapAmount } from "../../lib/utils.js";
-import { getTokensData } from "../../tokens/index.js";
-import dtfAbi from "../abis/dtf-index-abi-v6.js";
-import { GetIndexDtfDocument } from "../subgraph/dtf.generated.js";
+import { SdkError } from "@/errors";
+import dtfAbi from "@/index-dtf/abis/dtf-index-abi-v6";
 import {
   mapIndexDtf,
   mapIndexDtfBasketSnapshot,
@@ -34,7 +31,10 @@ import {
   mapIndexDtfPrice,
   mapIndexDtfPriceHistory,
   type IndexDtfBrandResponse,
-} from "./mappers.js";
+} from "@/index-dtf/dtf/mappers";
+import { GetIndexDtfDocument } from "@/index-dtf/subgraph/dtf.generated";
+import { mapAmount } from "@/lib/utils";
+import { getTokensData } from "@/tokens/index";
 
 export async function getDtf(client: DtfClient, params: DtfParams): Promise<IndexDtf> {
   const { dtf } = await client.subgraph.queryIndex({

@@ -1,6 +1,6 @@
-export { createIndexDtfNamespace } from "./namespace.js";
-export { createIndexDtfRef } from "./ref.js";
-export type { IndexDtfRef } from "./ref.js";
+export { createIndexDtfNamespace } from "@/index-dtf/namespace";
+export { createIndexDtfRef } from "@/index-dtf/ref";
+export type { IndexDtfRef } from "@/index-dtf/ref";
 
 export {
   buildIndexDtfStartRebalance,
@@ -13,7 +13,7 @@ export {
   indexDtfBasketSharesSchema,
   indexDtfBasketTokenSchema,
   indexDtfBasketUnitsSchema,
-} from "./dtf/basket/index.js";
+} from "@/index-dtf/dtf/basket/index";
 export {
   getDtf,
   getBasket as getIndexDtfBasket,
@@ -28,9 +28,9 @@ export {
   getTotalAssets as getIndexDtfTotalAssets,
   getTotalSupply as getIndexDtfTotalSupply,
   getVersion as getIndexDtfVersion,
-} from "./dtf/index.js";
-export { discoverIndexDtfs, getIndexDtfStatus, getIndexDtfStatuses } from "./dtf/discovery.js";
-export { getIndexDtfExposure } from "./dtf/exposure.js";
+} from "@/index-dtf/dtf/index";
+export { discoverIndexDtfs, getIndexDtfStatus, getIndexDtfStatuses } from "@/index-dtf/dtf/discovery";
+export { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 export {
   getIndexDtfIssuanceState,
   getIndexDtfRedeemMinAmounts,
@@ -38,7 +38,7 @@ export {
   prepareIndexDtfMint,
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
-} from "./dtf/issuance.js";
+} from "@/index-dtf/dtf/issuance";
 export {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
@@ -47,23 +47,23 @@ export {
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
   prepareIndexDtfDistributeFees,
-} from "./dtf/revenue.js";
-export { getIndexDtfTransactions } from "./dtf/transactions.js";
+} from "@/index-dtf/dtf/revenue";
+export { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 
-export { getDelegates as getIndexDtfDelegates } from "./governance/delegates.js";
-export { getGuardians as getIndexDtfGuardians } from "./governance/guardians.js";
+export { getDelegates as getIndexDtfDelegates } from "@/index-dtf/governance/delegates";
+export { getGuardians as getIndexDtfGuardians } from "@/index-dtf/governance/guardians";
 export {
   prepareIndexDtfCancelProposal,
   prepareIndexDtfExecuteProposal,
   prepareIndexDtfQueueProposal,
   prepareIndexDtfSubmitProposal,
   prepareIndexDtfVote,
-} from "./governance/proposal-actions.js";
+} from "@/index-dtf/governance/proposal-actions";
 export {
   getAllProposals as getAllIndexDtfProposals,
   getProposal as getIndexDtfProposal,
   getProposals as getIndexDtfProposals,
-} from "./governance/proposals.js";
+} from "@/index-dtf/governance/proposals";
 export {
   buildIndexDtfBasketProposal,
   buildIndexDtfBasketSettingsProposal,
@@ -77,7 +77,7 @@ export {
   indexDtfDaoSettingsProposalSchema,
   indexDtfGovernanceChangesSchema,
   indexDtfSettingsProposalSchema,
-} from "./governance/propose/index.js";
+} from "@/index-dtf/governance/propose/index";
 export {
   indexDtfV5WriteAbi,
   prepareIndexDtfAddToAllowlist,
@@ -96,15 +96,15 @@ export {
   prepareIndexDtfSetTradeAllowlistEnabled,
   prepareIndexDtfSetTrustedFillerRegistry,
   prepareIndexDtfSetTvlFee,
-} from "./governance/propose/calls.js";
-export { getProposalGovernanceAddresses as getIndexDtfProposalGovernanceAddresses } from "./governance/utils.js";
+} from "@/index-dtf/governance/propose/calls";
+export { getProposalGovernanceAddresses as getIndexDtfProposalGovernanceAddresses } from "@/index-dtf/governance/utils";
 export {
   getProposalVoterState as getIndexDtfProposalVoterState,
   getProposalVotes as getIndexDtfProposalVotes,
   getProposerState as getIndexDtfProposerState,
   getVoterState as getIndexDtfVoterState,
-} from "./governance/voting.js";
-export { listIndexDtfs } from "./protocol/index.js";
+} from "@/index-dtf/governance/voting";
+export { listIndexDtfs } from "@/index-dtf/protocol/index";
 export {
   getIndexDtfCurrentRebalance,
   getRebalance as getIndexDtfRebalance,
@@ -113,7 +113,7 @@ export {
   prepareIndexDtfOpenAuctionArgs,
   prepareIndexDtfOpenAuction,
   prepareIndexDtfOpenAuctionUnrestricted,
-} from "./rebalance/index.js";
+} from "@/index-dtf/rebalance/index";
 export {
   getVoteLockDao as getIndexDtfVoteLockDao,
   getVoteLockDaos as getIndexDtfVoteLockDaos,
@@ -125,13 +125,13 @@ export {
   prepareVoteLockDeposit,
   prepareVoteLockDepositPlan,
   prepareVoteLockUnlock,
-} from "./vote-lock/index.js";
+} from "@/index-dtf/vote-lock/index";
 
-export type * from "./dtf/discovery.js";
-export type * from "./dtf/exposure.js";
-export type * from "./dtf/issuance.js";
-export type * from "./dtf/revenue.js";
-export type * from "./dtf/transactions.js";
-export type * from "./governance/propose/calls.js";
-export type * from "./rebalance/index.js";
-export type * from "./vote-lock/index.js";
+export type * from "@/index-dtf/dtf/discovery";
+export type * from "@/index-dtf/dtf/exposure";
+export type * from "@/index-dtf/dtf/issuance";
+export type * from "@/index-dtf/dtf/revenue";
+export type * from "@/index-dtf/dtf/transactions";
+export type * from "@/index-dtf/governance/propose/calls";
+export type * from "@/index-dtf/rebalance/index";
+export type * from "@/index-dtf/vote-lock/index";

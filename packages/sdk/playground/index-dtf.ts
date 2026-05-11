@@ -1,6 +1,6 @@
-import type { SupportedChainId } from "../src/defaults.js";
+import type { SupportedChainId } from "@/defaults";
 
-import { createDtfSdk } from "../src/create-dtf-sdk.js";
+import { createDtfSdk } from "@/create-dtf-sdk";
 
 const address = process.argv[2] ?? "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8";
 const chainId = Number(process.argv[3] ?? 8453) as SupportedChainId;

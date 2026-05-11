@@ -1,9 +1,9 @@
 import { strict as assert } from "node:assert";
 import { describe, it, beforeEach } from "node:test";
 
-import { bn } from "../../src/numbers";
-import { getOpenAuction } from "../../src/open-auction";
-import { getStartRebalance } from "../../src/start-rebalance";
+import { bn } from "@/numbers";
+import { getOpenAuction } from "@/open-auction";
+import { getStartRebalance } from "@/start-rebalance";
 import {
   FolioVersion,
   PriceControl,
@@ -12,8 +12,9 @@ import {
   RebalanceLimits,
   StartRebalanceArgsPartial as StartRebalanceArgsPartial_5_0_0,
   WeightRange,
-} from "../../src/types";
-import { getBasketDistribution } from "../../src/utils";
+} from "@/types";
+import { getBasketDistribution } from "@/utils";
+
 import {
   assertPricesEqual,
   assertRangesEqual,

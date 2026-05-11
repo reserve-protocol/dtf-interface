@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getGuardians } from "./index.js";
+import { getGuardians } from "@/index-dtf/governance/index";
 
 describe("Index DTF governance guardians", () => {
   it("groups owner, basket, and dao guardians from DTF governance", async () => {

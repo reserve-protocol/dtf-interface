@@ -1,16 +1,16 @@
 import { getAddress, type Address } from "viem";
 
-import type { DtfParams } from "../../types/common.js";
+import type { IndexDtfProposalDtfContractContext } from "@/index-dtf/governance/contract-map";
+import type { GetIndexDtfProposalQuery } from "@/index-dtf/subgraph/dtf.generated";
+import type { DtfParams } from "@/types/common";
 import type {
   GetIndexDtfProposalParams,
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
   ProposalState,
-} from "../../types/governance.js";
-import type { GetIndexDtfProposalQuery } from "../subgraph/dtf.generated.js";
-import type { IndexDtfProposalDtfContractContext } from "./contract-map.js";
+} from "@/types/governance";
 
-import { mapAmount } from "../../lib/utils.js";
+import { mapAmount } from "@/lib/utils";
 
 type SubgraphIndexDtfProposal = NonNullable<GetIndexDtfProposalQuery["proposal"]>;
 type SubgraphIndexDtfProposalSummary = {

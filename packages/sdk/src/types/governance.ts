@@ -1,10 +1,10 @@
 import type { Address, Hex } from "viem";
 
-import type { ContractCall } from "../contract-call.js";
-import type { SupportedChainId } from "../defaults.js";
-import type { DtfParams } from "./common.js";
-import type { Amount } from "./common.js";
-import type { IndexDtf } from "./index-dtf.js";
+import type { ContractCall } from "@/contract-call";
+import type { SupportedChainId } from "@/defaults";
+import type { DtfParams } from "@/types/common";
+import type { Amount } from "@/types/common";
+import type { IndexDtf } from "@/types/index-dtf";
 
 export type IndexDtfGovernanceInput = Address | readonly Address[];
 

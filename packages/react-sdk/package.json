@@ -39,12 +39,14 @@
   },
   "devDependencies": {
     "@dtf-interface/tsconfig": "workspace:*",
-    "@tanstack/react-query": "^5.99.0",
-    "@types/react": "^18.3.28",
-    "react": "^18.3.1",
-    "tsdown": "^0.21.10",
-    "typescript": "^6.0.3",
-    "viem": "^2.48.0"
+    "@tanstack/react-query": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "viem": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.99.0",
@@ -52,6 +54,6 @@
     "viem": "^2.48.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=24"
   }
 }

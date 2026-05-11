@@ -31,9 +31,6 @@
     "build": "tsdown",
     "clean": "rm -rf dist *.tsbuildinfo",
     "dev": "tsdown --watch",
-    "prebuild": "pnpm --filter @dtf-interface/sdk build && pnpm run clean",
-    "pretest": "pnpm --filter @dtf-interface/sdk build",
-    "pretypecheck": "pnpm --filter @dtf-interface/sdk build",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

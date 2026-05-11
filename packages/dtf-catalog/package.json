@@ -39,7 +39,6 @@
     "build": "tsdown",
     "clean": "rm -rf dist *.tsbuildinfo",
     "dev": "tsdown --watch",
-    "prebuild": "pnpm run clean",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

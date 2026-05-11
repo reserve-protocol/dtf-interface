@@ -7,11 +7,12 @@
       "dependsOn": ["^build"]
     },
     "test": {
-      "outputs": ["coverage/**"],
-      "dependsOn": []
+      "outputs": [],
+      "dependsOn": ["^build"]
     },
     "typecheck": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["^build"]
     },
     "dev": {
       "cache": false,

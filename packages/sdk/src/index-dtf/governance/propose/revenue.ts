@@ -1,10 +1,10 @@
-import { Decimal } from "decimal.js-light";
 import {
   getAddress,
   parseEther,
   type Address,
 } from "viem";
 import { SdkError } from "../../../errors.js";
+import { Decimal } from "../../../lib/decimal.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import type { IndexDtf } from "../../../types/index-dtf.js";
 import { prepareIndexDtfSetFeeRecipients, type IndexDtfWriteVersion } from "./calls.js";

@@ -1,11 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "../../tsconfig.base.json",
+  "extends": "@dtf-interface/tsconfig/config.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "dist",
-    "noEmit": true
+    "outDir": "dist"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]

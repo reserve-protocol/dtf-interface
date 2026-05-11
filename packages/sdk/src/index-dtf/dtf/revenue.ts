@@ -1,6 +1,6 @@
-import { Decimal } from "decimal.js-light";
 import { getAddress, type Address } from "viem";
 import type { DtfClient } from "../../client.js";
+import { Decimal } from "../../lib/decimal.js";
 import { mapAmount } from "../../lib/utils.js";
 import { getTokensData } from "../../tokens/index.js";
 import type { Amount, Token } from "../../types/common.js";

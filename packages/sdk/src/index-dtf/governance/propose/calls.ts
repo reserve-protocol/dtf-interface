@@ -1,8 +1,8 @@
-import { Decimal } from "decimal.js-light";
 import { getAddress, parseEther, type Address } from "viem";
 import { prepareContractCall } from "../../../contract-call.js";
 import type { SupportedChainId } from "../../../defaults.js";
 import { SdkError } from "../../../errors.js";
+import { Decimal } from "../../../lib/decimal.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import type { PriceControl } from "../../../types/index-dtf.js";
 import { dtfIndexAbi as indexDtfV5Abi } from "../../abis/dtf-index-abi.js";

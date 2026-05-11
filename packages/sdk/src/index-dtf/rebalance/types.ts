@@ -71,6 +71,8 @@ export type IndexDtfCurrentRebalance = Rebalance & {
   readonly bidsEnabled: boolean;
 };
 
+export type IndexDtfTargetBasketPriceMode = "current" | "snapshot";
+
 export type IndexDtfOpenAuctionInput = {
   readonly rebalance: IndexDtfCurrentRebalance;
   readonly tokens: readonly Token[];
@@ -85,6 +87,13 @@ export type IndexDtfOpenAuctionInput = {
   readonly rebalancePercent: number;
   readonly isTrackingDtf: boolean;
   readonly isHybridDtf?: boolean;
+  /**
+   * Price source used to derive the target basket.
+   *
+   * Defaults to the legacy mode: current prices for tracking or hybrid DTFs,
+   * snapshot prices for native DTFs.
+   */
+  readonly targetBasketPriceMode?: IndexDtfTargetBasketPriceMode;
 };
 
 export type BuiltIndexDtfOpenAuction = {

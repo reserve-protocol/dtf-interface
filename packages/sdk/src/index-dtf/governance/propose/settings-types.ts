@@ -4,10 +4,7 @@ import type { DtfParams } from "../../../types/common.js";
 import type { IndexDtfCall } from "../../../types/governance.js";
 import type { IndexDtf, PriceControl } from "../../../types/index-dtf.js";
 import { INDEX_DTF_VERSION_5_0_0 } from "../../versions.js";
-import type {
-  IndexDtfRevenueDistributionInput,
-  IndexDtfRevenueRecipientInput,
-} from "./revenue.js";
+import type { IndexDtfRevenueDistributionInput } from "./revenue.js";
 
 const addressSchema = z.string().refine(isAddress, "Invalid address");
 

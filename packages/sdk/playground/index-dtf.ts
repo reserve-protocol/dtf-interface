@@ -1,8 +1,8 @@
-import { createDtfSdk } from "../src/create-dtf-sdk.js";
-import type { SupportedChainId } from "../src/defaults.js";
+import type { SupportedChainId } from "@/defaults";
 
-const address =
-  process.argv[2] ?? "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8";
+import { createDtfSdk } from "@/create-dtf-sdk";
+
+const address = process.argv[2] ?? "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8";
 const chainId = Number(process.argv[3] ?? 8453) as SupportedChainId;
 
 const sdk = createDtfSdk();
@@ -26,16 +26,9 @@ console.table(
     index,
     address: authority.address,
     type: authority.type,
-    votingDelay:
-      authority.type === "governance"
-        ? authority.governance.votingDelay
-        : undefined,
-    votingPeriod:
-      authority.type === "governance"
-        ? authority.governance.votingPeriod
-        : undefined,
-    quorum:
-      authority.type === "governance" ? authority.governance.quorum : undefined,
+    votingDelay: authority.type === "governance" ? authority.governance.votingDelay : undefined,
+    votingPeriod: authority.type === "governance" ? authority.governance.votingPeriod : undefined,
+    quorum: authority.type === "governance" ? authority.governance.quorum : undefined,
   })),
 );
 

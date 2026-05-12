@@ -1,18 +1,20 @@
 import { getAddress, type Address } from "viem";
-import type { DtfClient } from "../../../client.js";
-import type { IndexDtf, IndexDtfTotalAssets } from "../../../types/index-dtf.js";
+
+import type { DtfClient } from "@/client";
 import type {
   BuildIndexDtfStartRebalanceParams,
   IndexDtfBasketCurrentBalancesInput,
   IndexDtfBasketTokenInput,
-} from "./types.js";
-import { getDtf, getTotalAssets } from "../index.js";
+} from "@/index-dtf/dtf/basket/types";
+import type { IndexDtf, IndexDtfTotalAssets } from "@/types/index-dtf";
+
+import { getDtf, getTotalAssets } from "@/index-dtf/dtf/index";
 
 export async function getCurrentBalances(
   client: DtfClient,
   params: BuildIndexDtfStartRebalanceParams,
 ): Promise<Record<string, bigint>> {
-  const totalAssets = params.currentBalances ?? await getTotalAssets(client, params);
+  const totalAssets = params.currentBalances ?? (await getTotalAssets(client, params));
 
   return normalizeCurrentBalances(totalAssets);
 }
@@ -54,9 +56,7 @@ export function getBasketTokenOrder(
   return addresses;
 }
 
-function normalizeCurrentBalances(
-  input: IndexDtfBasketCurrentBalancesInput,
-): Record<string, bigint> {
+function normalizeCurrentBalances(input: IndexDtfBasketCurrentBalancesInput): Record<string, bigint> {
   if (Array.isArray(input)) {
     const result: Record<string, bigint> = {};
 
@@ -86,9 +86,7 @@ function normalizeCurrentBalances(
   return result;
 }
 
-function isTotalAssetsInput(
-  input: IndexDtfBasketCurrentBalancesInput,
-): input is IndexDtfTotalAssets {
+function isTotalAssetsInput(input: IndexDtfBasketCurrentBalancesInput): input is IndexDtfTotalAssets {
   if (Array.isArray(input)) {
     return false;
   }

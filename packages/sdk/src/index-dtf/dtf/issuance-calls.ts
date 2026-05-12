@@ -1,12 +1,11 @@
 import { getAddress, type Address } from "viem";
-import type { SupportedChainId } from "../../defaults.js";
-import { SdkError } from "../../errors.js";
-import type { ContractCallPlan } from "../../contract-call.js";
-import {
-  prepareContractCall,
-  prepareErc20Approval,
-} from "../../contract-call.js";
-import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
+
+import type { ContractCallPlan } from "@/contract-call";
+import type { SupportedChainId } from "@/defaults";
+
+import { prepareContractCall, prepareErc20Approval } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
 type MintArgs = readonly [bigint, Address, bigint];
 type RedeemArgs = readonly [bigint, Address, readonly Address[], readonly bigint[]];
@@ -43,9 +42,7 @@ export type PrepareIndexDtfMintPlanParams = PrepareIndexDtfMintParams & {
 };
 
 /** Prepares a v5 `mint(shares, receiver, minSharesOut)` contract call. */
-export function prepareIndexDtfMint(
-  params: PrepareIndexDtfMintParams,
-) {
+export function prepareIndexDtfMint(params: PrepareIndexDtfMintParams) {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
@@ -58,10 +55,7 @@ export function prepareIndexDtfMint(
 /** Prepares the approval calls plus mint call for manual issuance. */
 export function prepareIndexDtfMintPlan(
   params: PrepareIndexDtfMintPlanParams,
-): ContractCallPlan<
-  ReturnType<typeof prepareIndexDtfMint>,
-  ReturnType<typeof prepareIndexDtfBasketApproval>
-> {
+): ContractCallPlan<ReturnType<typeof prepareIndexDtfMint>, ReturnType<typeof prepareIndexDtfBasketApproval>> {
   const call = prepareIndexDtfMint(params);
   const approvals = (params.approvals ?? []).map((approval) =>
     prepareIndexDtfBasketApproval({
@@ -72,15 +66,11 @@ export function prepareIndexDtfMintPlan(
     }),
   );
 
-  return approvals.length
-    ? { type: "approval-required", approvals, call }
-    : { type: "call", call };
+  return approvals.length ? { type: "approval-required", approvals, call } : { type: "call", call };
 }
 
 /** Prepares a v5 `redeem(shares, receiver, assets, minAmountsOut)` contract call. */
-export function prepareIndexDtfRedeem(
-  params: PrepareIndexDtfRedeemParams,
-) {
+export function prepareIndexDtfRedeem(params: PrepareIndexDtfRedeemParams) {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
@@ -91,9 +81,7 @@ export function prepareIndexDtfRedeem(
 }
 
 /** Prepares one ERC20 approval call for a basket token and the DTF as spender. */
-export function prepareIndexDtfBasketApproval(
-  params: PrepareIndexDtfBasketApprovalParams,
-) {
+export function prepareIndexDtfBasketApproval(params: PrepareIndexDtfBasketApprovalParams) {
   return prepareErc20Approval({
     chainId: params.chainId,
     token: params.token,
@@ -103,10 +91,7 @@ export function prepareIndexDtfBasketApproval(
 }
 
 /** Applies basis-point slippage to redeem amounts while preserving token order. */
-export function getIndexDtfRedeemMinAmounts(
-  amounts: readonly bigint[],
-  slippageBps: number,
-): readonly bigint[] {
+export function getIndexDtfRedeemMinAmounts(amounts: readonly bigint[], slippageBps: number): readonly bigint[] {
   if (!Number.isInteger(slippageBps) || slippageBps < 0 || slippageBps > 10_000) {
     throw new SdkError({
       code: "INVALID_INPUT",
@@ -134,10 +119,5 @@ function getRedeemArgs(params: {
   readonly assets: readonly Address[];
   readonly minAmountsOut: readonly bigint[];
 }): RedeemArgs {
-  return [
-    params.shares,
-    getAddress(params.receiver),
-    params.assets.map(getAddress),
-    params.minAmountsOut,
-  ] as const;
+  return [params.shares, getAddress(params.receiver), params.assets.map(getAddress), params.minAmountsOut] as const;
 }

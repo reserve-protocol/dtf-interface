@@ -1,1 +1,1 @@
-export { timelockAbi as timelockProposalAbi } from "./timelock.js";
+export { timelockAbi as timelockProposalAbi } from "@/index-dtf/abis/timelock";

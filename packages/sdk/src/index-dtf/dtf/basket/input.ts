@@ -1,23 +1,23 @@
-import { Decimal } from "@reserve-protocol/dtf-rebalance-lib";
 import type { Decimal as DecimalType } from "decimal.js-light";
+
+import { Decimal } from "@reserve-protocol/dtf-rebalance-lib";
 import { getAddress, parseUnits, type Address } from "viem";
-import { SdkError } from "../../../errors.js";
+
+import { SdkError } from "@/errors";
 import {
   SHARE_DECIMALS,
   type IndexDtfBasketDefinition,
   type IndexDtfBasketInput,
   type IndexDtfBasketToken,
-} from "./types.js";
-import { validateShares } from "./validation.js";
+} from "@/index-dtf/dtf/basket/types";
+import { validateShares } from "@/index-dtf/dtf/basket/validation";
 
 export function getBasketFromInput(
   input: IndexDtfBasketInput,
   tokenOrder: readonly Address[],
   tokens: readonly IndexDtfBasketToken[],
 ): IndexDtfBasketDefinition {
-  const inputByAddress = new Map(
-    input.tokens.map((token) => [getAddress(token.address).toLowerCase(), token]),
-  );
+  const inputByAddress = new Map(input.tokens.map((token) => [getAddress(token.address).toLowerCase(), token]));
 
   if (input.type === "shares") {
     const shares = tokenOrder.map((address) => {
@@ -34,9 +34,7 @@ export function getBasketFromInput(
   const units = tokenOrder.map((address, index) => {
     const token = inputByAddress.get(address.toLowerCase());
 
-    return token && "units" in token
-      ? parseTokenUnits(token.units, tokens[index]!.decimals)
-      : 0n;
+    return token && "units" in token ? parseTokenUnits(token.units, tokens[index]!.decimals) : 0n;
   });
 
   return { type: "units", units };

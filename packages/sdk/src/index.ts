@@ -1,17 +1,14 @@
-export { createDtfClient } from "./client.js";
-export { createWalletClient } from "./client/viem.js";
-export {
-  prepareContractCall,
-  prepareErc20Approval,
-} from "./contract-call.js";
-export { createDtfSdk } from "./create-dtf-sdk.js";
-export { SdkError, isSdkError } from "./errors.js";
+export { createDtfClient } from "@/client";
+export { createWalletClient } from "@/client/viem";
+export { prepareContractCall, prepareErc20Approval } from "@/contract-call";
+export { createDtfSdk } from "@/create-dtf-sdk";
+export { SdkError, isSdkError } from "@/errors";
 export {
   default as dtfCatalog,
   indexDtfs as indexDtfCatalog,
   yieldDtfs as yieldDtfCatalog,
 } from "@dtf-interface/dtf-catalog";
-export type { DtfClient, DtfChainConfig, DtfClientConfig } from "./client.js";
+export type { DtfClient, DtfChainConfig, DtfClientConfig } from "@/client";
 export type {
   DtfClientApi,
   GetBasketTokenPricesWithSnapshotParams,
@@ -27,17 +24,17 @@ export type {
   ReserveApiIndexDtfPrice,
   ReserveApiIndexDtfPriceHistory,
   TokenPriceWithSnapshot,
-} from "./client/api.js";
+} from "@/client/api";
 export type {
   DtfClientReadContractParameters,
   DtfClientViem,
   DtfClientViemChainConfig,
   DtfClientViemConfig,
   CreateWalletClientParams,
-} from "./client/viem.js";
-export type { DtfSdk, DtfSdkConfig } from "./create-dtf-sdk.js";
-export type { ContractCall, ContractCallPlan } from "./contract-call.js";
-export type { SdkErrorCode, SdkErrorMeta, SdkErrorOptions } from "./errors.js";
+} from "@/client/viem";
+export type { DtfSdk, DtfSdkConfig } from "@/create-dtf-sdk";
+export type { ContractCall, ContractCallPlan } from "@/contract-call";
+export type { SdkErrorCode, SdkErrorMeta, SdkErrorOptions } from "@/errors";
 export {
   DEFAULT_API_BASE_URL,
   DEFAULT_RPC_URLS,
@@ -45,8 +42,8 @@ export {
   YIELD_DTF_SUBGRAPH_URL,
   SUPPORTED_CHAINS,
   supportedChainIds,
-} from "./defaults.js";
-export type { SupportedChainId } from "./defaults.js";
+} from "@/defaults";
+export type { SupportedChainId } from "@/defaults";
 export type {
   DtfClientSubgraph,
   DtfClientSubgraphChainConfig,
@@ -54,9 +51,9 @@ export type {
   QueryIndexAllSubgraphsOptions,
   QueryIndexSubgraphOptions,
   QueryYieldSubgraphOptions,
-} from "./client/subgraph.js";
-export type { SubgraphDocument } from "./transports/subgraph.js";
-export { getDiscoverDtfs } from "./actions/get-discover-dtfs.js";
+} from "@/client/subgraph";
+export type { SubgraphDocument } from "@/transports/subgraph";
+export { getDiscoverDtfs } from "@/actions/get-discover-dtfs";
 export {
   buildIndexDtfInitialBasket,
   buildIndexDtfBasketProposal,
@@ -163,26 +160,18 @@ export {
   prepareVoteLockDeposit,
   prepareVoteLockDepositPlan,
   prepareVoteLockUnlock,
-} from "./index-dtf/index.js";
+} from "@/index-dtf/index";
 export {
   createPortfolioNamespace,
   getAccountPortfolio,
   getAccountPortfolioHistory,
   getAccountPortfolioTransactions,
-} from "./portfolio/index.js";
-export {
-  getTokenData,
-  getTokenPrices,
-  getTokenVolatilities,
-  getTokensData,
-} from "./tokens/index.js";
-export type { IndexDtfRef } from "./index-dtf/index.js";
-export type * from "./index-dtf/dtf/basket/index.js";
-export type * from "./index-dtf/governance/propose/index.js";
-export type * from "./index-dtf/index.js";
-export type * from "./portfolio/index.js";
-export type * from "./types/index.js";
-export type {
-  DiscoverDtf,
-  GetDiscoverDtfsOptions,
-} from "./actions/get-discover-dtfs.js";
+} from "@/portfolio/index";
+export { getTokenData, getTokenPrices, getTokenVolatilities, getTokensData } from "@/tokens/index";
+export type { IndexDtfRef } from "@/index-dtf/index";
+export type * from "@/index-dtf/dtf/basket/index";
+export type * from "@/index-dtf/governance/propose/index";
+export type * from "@/index-dtf/index";
+export type * from "@/portfolio/index";
+export type * from "@/types/index";
+export type { DiscoverDtf, GetDiscoverDtfsOptions } from "@/actions/get-discover-dtfs";

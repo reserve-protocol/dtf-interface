@@ -1,13 +1,11 @@
 import type { Address } from "viem";
-import {
-  createDtfClient,
-  type DtfClient,
-  type DtfClientConfig,
-} from "./client.js";
-import type { SupportedChainId } from "./defaults.js";
-import { SdkError } from "./errors.js";
-import { createIndexDtfNamespace } from "./index-dtf/index.js";
-import { createPortfolioNamespace } from "./portfolio/index.js";
+
+import type { SupportedChainId } from "@/defaults";
+
+import { createDtfClient, type DtfClient, type DtfClientConfig } from "@/client";
+import { SdkError } from "@/errors";
+import { createIndexDtfNamespace } from "@/index-dtf/index";
+import { createPortfolioNamespace } from "@/portfolio/index";
 
 export type DtfSdkConfig = DtfClientConfig & {
   readonly client?: DtfClient;
@@ -22,9 +20,7 @@ export type DtfSdk = {
       readonly address: Address | string;
       readonly chainId: SupportedChainId;
     }) => Promise<never>;
-    readonly list: (params?: {
-      readonly chainId?: SupportedChainId;
-    }) => Promise<never>;
+    readonly list: (params?: { readonly chainId?: SupportedChainId }) => Promise<never>;
   };
 };
 

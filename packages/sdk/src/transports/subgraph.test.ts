@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createDtfClient } from "../client.js";
-import type { SdkError } from "../errors.js";
+
+import type { SdkError } from "@/errors";
+
+import { createDtfClient } from "@/client";
 
 describe("subgraph client", () => {
   afterEach(() => {
@@ -49,10 +51,7 @@ describe("subgraph client", () => {
     expect(data.dtf.id).toBe("0x0000000000000000000000000000000000000001");
     expect(fetch).toHaveBeenCalledOnce();
 
-    const [url, init] = fetch.mock.calls[0] as unknown as [
-      URL,
-      RequestInit,
-    ];
+    const [url, init] = fetch.mock.calls[0] as unknown as [URL, RequestInit];
     expect(String(url)).toBe("https://example.com/index");
     expect(JSON.parse(String(init.body))).toMatchObject({
       variables: { id: "0x0000000000000000000000000000000000000001" },

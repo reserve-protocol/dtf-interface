@@ -1,4 +1,4 @@
-import { SdkError } from "../errors.js";
+import { SdkError } from "@/errors";
 
 type Query = Record<string, boolean | number | string | null | undefined>;
 
@@ -12,11 +12,7 @@ export type PostOptions<TBody = unknown> = GetOptions & {
   readonly body?: TBody;
 };
 
-export async function get<TResult>({
-  baseUrl,
-  path,
-  query,
-}: GetOptions): Promise<TResult> {
+export async function get<TResult>({ baseUrl, path, query }: GetOptions): Promise<TResult> {
   const url = createUrl({
     baseUrl,
     path,
@@ -65,10 +61,7 @@ function createUrl({ baseUrl, path, query }: GetOptions): URL {
   return url;
 }
 
-async function readResponse<TResult>(
-  response: Response,
-  url: URL,
-): Promise<TResult> {
+async function readResponse<TResult>(response: Response, url: URL): Promise<TResult> {
   if (!response.ok) {
     throw new SdkError({
       code: "REQUEST_FAILED",

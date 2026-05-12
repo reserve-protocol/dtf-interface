@@ -1,8 +1,8 @@
 export * from "@dtf-interface/sdk";
-export { useDtfSdk, DtfSdkProvider } from "./provider.js";
-export type { DtfSdkProviderProps } from "./provider.js";
-export { normalizeQueryKeyValue } from "./normalize-query-key.js";
-export { dtfQueryKeys } from "./query-keys.js";
+export { useDtfSdk, DtfSdkProvider } from "@/provider";
+export type { DtfSdkProviderProps } from "@/provider";
+export { normalizeQueryKeyValue } from "@/normalize-query-key";
+export { dtfQueryKeys } from "@/query-keys";
 export {
   buildIndexDtfBasketProposalQueryOptions,
   buildIndexDtfBasketSettingsProposalQueryOptions,
@@ -24,11 +24,8 @@ export {
   indexDtfProposerStateQueryOptions,
   indexDtfQueryOptions,
   indexDtfVoterStateQueryOptions,
-} from "./query-options.js";
-export type {
-  DtfQueryOptions,
-  DtfQueryOptionsResult,
-} from "./query-options.js";
+} from "@/query-options";
+export type { DtfQueryOptions, DtfQueryOptionsResult } from "@/query-options";
 export {
   useBuildIndexDtfBasketProposal,
   useBuildIndexDtfBasketSettingsProposal,
@@ -50,7 +47,7 @@ export {
   useIndexDtfProposals,
   useIndexDtfProposerState,
   useIndexDtfVoterState,
-} from "./hooks.js";
+} from "@/hooks";
 export {
   accountPortfolioQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
@@ -61,7 +58,7 @@ export {
   indexDtfStatusQueryOptions,
   indexDtfTransactionsQueryOptions,
   indexDtfVoteLockStateQueryOptions,
-} from "./index-dtf-query-options.js";
+} from "@/index-dtf-query-options";
 export {
   useAccountPortfolio,
   useIndexDtfCurrentRebalance,
@@ -72,4 +69,4 @@ export {
   useIndexDtfStatus,
   useIndexDtfTransactions,
   useIndexDtfVoteLockState,
-} from "./index-dtf-extra-hooks.js";
+} from "@/index-dtf-extra-hooks";

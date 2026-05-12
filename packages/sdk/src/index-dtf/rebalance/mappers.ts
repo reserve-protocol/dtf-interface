@@ -1,11 +1,12 @@
 import { getAddress, type Address } from "viem";
-import type { Token } from "../../types/common.js";
+
+import type { IndexDtfAuction, IndexDtfBid, IndexDtfRebalance } from "@/index-dtf/rebalance/types";
 import type {
   GetIndexDtfRebalanceQuery,
   GetIndexDtfRebalanceAuctionsQuery,
   GetIndexDtfRebalancesQuery,
-} from "../subgraph/dtf.generated.js";
-import type { IndexDtfAuction, IndexDtfBid, IndexDtfRebalance } from "./types.js";
+} from "@/index-dtf/subgraph/dtf.generated";
+import type { Token } from "@/types/common";
 
 type SubgraphRebalance =
   | GetIndexDtfRebalancesQuery["rebalances"][number]
@@ -74,7 +75,12 @@ function mapSubgraphBid(bid: SubgraphBid): IndexDtfBid {
   };
 }
 
-function mapToken(token: { readonly address: string; readonly name: string; readonly symbol: string; readonly decimals: number }): Token {
+function mapToken(token: {
+  readonly address: string;
+  readonly name: string;
+  readonly symbol: string;
+  readonly decimals: number;
+}): Token {
   return {
     address: getAddress(token.address) as Address,
     name: token.name,

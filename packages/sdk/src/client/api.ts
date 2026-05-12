@@ -1,12 +1,9 @@
-import {
-  get,
-  post,
-  type GetOptions,
-  type PostOptions,
-} from "../transports/api.js";
 import { getAddress, type Address } from "viem";
-import type { SupportedChainId } from "../defaults.js";
-import type { GetTokenPricesParams, TokenPrice } from "../types/common.js";
+
+import type { SupportedChainId } from "@/defaults";
+import type { GetTokenPricesParams, TokenPrice } from "@/types/common";
+
+import { get, post, type GetOptions, type PostOptions } from "@/transports/api";
 
 export type ReserveApiDtfBasketToken = {
   readonly address: string;
@@ -65,10 +62,7 @@ export type ReserveApiHistoricalTokenPrices = {
   }[];
 };
 
-export type TokenPriceWithSnapshot = Record<
-  string,
-  { readonly currentPrice: number; readonly snapshotPrice: number }
->;
+export type TokenPriceWithSnapshot = Record<string, { readonly currentPrice: number; readonly snapshotPrice: number }>;
 
 export type GetDtfPricesParams = {
   readonly chainId: SupportedChainId;
@@ -113,40 +107,24 @@ type TokenPriceResponse = {
 
 export type DtfClientApi = {
   readonly baseUrl: string;
-  readonly get: <TResult>(
-    options: Omit<GetOptions, "baseUrl">,
-  ) => Promise<TResult>;
-  readonly post: <TResult, TBody = unknown>(
-    options: Omit<PostOptions<TBody>, "baseUrl">,
-  ) => Promise<TResult>;
-  readonly getTokenPrices: (
-    params: GetTokenPricesParams,
-  ) => Promise<readonly TokenPrice[]>;
-  readonly getDtfPrices: (
-    params: GetDtfPricesParams,
-  ) => Promise<readonly ReserveApiDtfPrice[]>;
+  readonly get: <TResult>(options: Omit<GetOptions, "baseUrl">) => Promise<TResult>;
+  readonly post: <TResult, TBody = unknown>(options: Omit<PostOptions<TBody>, "baseUrl">) => Promise<TResult>;
+  readonly getTokenPrices: (params: GetTokenPricesParams) => Promise<readonly TokenPrice[]>;
+  readonly getDtfPrices: (params: GetDtfPricesParams) => Promise<readonly ReserveApiDtfPrice[]>;
   readonly getHistoricalTokenPrices: (
     params: GetHistoricalTokenPricesParams,
   ) => Promise<ReserveApiHistoricalTokenPrices>;
   readonly getBasketTokenPricesWithSnapshot: (
     params: GetBasketTokenPricesWithSnapshotParams,
   ) => Promise<TokenPriceWithSnapshot>;
-  readonly getIndexDtfPrice: (
-    params: GetIndexDtfPriceParams,
-  ) => Promise<ReserveApiIndexDtfPrice>;
-  readonly getIndexDtfPriceHistory: (
-    params: GetIndexDtfPriceHistoryParams,
-  ) => Promise<ReserveApiIndexDtfPriceHistory>;
+  readonly getIndexDtfPrice: (params: GetIndexDtfPriceParams) => Promise<ReserveApiIndexDtfPrice>;
+  readonly getIndexDtfPriceHistory: (params: GetIndexDtfPriceHistoryParams) => Promise<ReserveApiIndexDtfPriceHistory>;
   readonly getIndexDtfBasketSnapshot: (
     params: GetIndexDtfBasketSnapshotParams,
   ) => Promise<ReserveApiIndexDtfBasketSnapshot>;
 };
 
-export function createDtfClientApi({
-  baseUrl,
-}: {
-  readonly baseUrl: string;
-}): DtfClientApi {
+export function createDtfClientApi({ baseUrl }: { readonly baseUrl: string }): DtfClientApi {
   const apiGet = <TResult>(options: Omit<GetOptions, "baseUrl">) =>
     get<TResult>({
       ...options,
@@ -219,9 +197,7 @@ export function createDtfClientApi({
       });
     },
     getIndexDtfBasketSnapshot(params) {
-      const blockNumber = params.blockNumber === undefined
-        ? undefined
-        : Number(params.blockNumber);
+      const blockNumber = params.blockNumber === undefined ? undefined : Number(params.blockNumber);
 
       return apiGet<ReserveApiIndexDtfBasketSnapshot>({
         path: blockNumber === undefined ? "/current/dtf" : "/snapshot/dtf",
@@ -342,13 +318,8 @@ function normalizeAddresses(addresses: readonly Address[]): Address[] {
   return result;
 }
 
-function normalizeTokenPrices(
-  addresses: readonly Address[],
-  prices: readonly TokenPrice[],
-): readonly TokenPrice[] {
-  const priceByAddress = new Map(
-    prices.map((token) => [token.address.toLowerCase(), token]),
-  );
+function normalizeTokenPrices(addresses: readonly Address[], prices: readonly TokenPrice[]): readonly TokenPrice[] {
+  const priceByAddress = new Map(prices.map((token) => [token.address.toLowerCase(), token]));
 
   return addresses.map((address) => {
     const price = priceByAddress.get(address.toLowerCase());

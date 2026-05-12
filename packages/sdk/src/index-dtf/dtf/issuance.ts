@@ -1,11 +1,13 @@
 import { erc20Abi, getAddress, type Address, type PublicClient } from "viem";
-import type { DtfClient } from "../../client.js";
-import type { SupportedChainId } from "../../defaults.js";
-import { mapAmount } from "../../lib/utils.js";
-import { getTokensData } from "../../tokens/index.js";
-import type { Amount, Token } from "../../types/common.js";
-import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
-import { getTotalAssets, getTotalSupply } from "./index.js";
+
+import type { DtfClient } from "@/client";
+import type { SupportedChainId } from "@/defaults";
+import type { Amount, Token } from "@/types/common";
+
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { getTotalAssets, getTotalSupply } from "@/index-dtf/dtf/index";
+import { mapAmount } from "@/lib/utils";
+import { getTokensData } from "@/tokens/index";
 
 export {
   getIndexDtfRedeemMinAmounts,
@@ -13,13 +15,13 @@ export {
   prepareIndexDtfMint,
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
-} from "./issuance-calls.js";
+} from "@/index-dtf/dtf/issuance-calls";
 export type {
   PrepareIndexDtfBasketApprovalParams,
   PrepareIndexDtfMintParams,
   PrepareIndexDtfMintPlanParams,
   PrepareIndexDtfRedeemParams,
-} from "./issuance-calls.js";
+} from "@/index-dtf/dtf/issuance-calls";
 
 const D18 = 10n ** 18n;
 const ROUNDING_FLOOR = 0;
@@ -125,11 +127,7 @@ async function readToAssets(
   return { assets: assets.map(getAddress), amounts };
 }
 
-async function readTokenBalances(
-  publicClient: PublicClient,
-  tokens: readonly Address[],
-  account: Address,
-) {
+async function readTokenBalances(publicClient: PublicClient, tokens: readonly Address[], account: Address) {
   return publicClient.multicall({
     allowFailure: false,
     contracts: tokens.map((address) => ({ address, abi: erc20Abi, functionName: "balanceOf", args: [account] })),
@@ -144,7 +142,12 @@ async function readTokenAllowances(
 ) {
   return publicClient.multicall({
     allowFailure: false,
-    contracts: tokens.map((address) => ({ address, abi: erc20Abi, functionName: "allowance", args: [account, spender] })),
+    contracts: tokens.map((address) => ({
+      address,
+      abi: erc20Abi,
+      functionName: "allowance",
+      args: [account, spender],
+    })),
   }) as Promise<readonly bigint[]>;
 }
 

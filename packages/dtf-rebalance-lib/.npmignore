@@ -1,9 +1,0 @@
-node_modules
-*.tgz
-test/
-dist/test
-*.test.*
-hardhat.config.ts
-.env
-.env.example
-src/test

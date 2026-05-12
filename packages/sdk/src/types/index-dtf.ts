@@ -1,5 +1,6 @@
 import type { Address } from "viem";
-import type { SupportedChainId } from "../defaults.js";
+
+import type { SupportedChainId } from "@/defaults";
 import type {
   Amount,
   Authority,
@@ -9,7 +10,7 @@ import type {
   Governance,
   Token,
   TokenWithSnapshot,
-} from "./common.js";
+} from "@/types/common";
 
 export type FeeRecipients = readonly {
   readonly address: Address;
@@ -121,8 +122,7 @@ export type IndexDtfBasketAsset = {
   readonly balance: Amount;
 };
 
-export type IndexDtfBasketAssetWithPrice = IndexDtfBasketAsset &
-  Omit<IndexDtfPriceBasketAsset, "token">;
+export type IndexDtfBasketAssetWithPrice = IndexDtfBasketAsset & Omit<IndexDtfPriceBasketAsset, "token">;
 
 export type IndexDtfBasket = Record<Address, IndexDtfBasketAsset>;
 
@@ -222,8 +222,7 @@ export type GetFullIndexDtfOptions = {
   readonly brand?: boolean;
 };
 
-export type GetFullIndexDtfParams = IndexDtfIdentityParams &
-  GetFullIndexDtfOptions;
+export type GetFullIndexDtfParams = IndexDtfIdentityParams & GetFullIndexDtfOptions;
 
 export type GetIndexDtfParams = GetFullIndexDtfParams;
 
@@ -235,10 +234,7 @@ export type GetIndexDtfBasketOptions = BlockNumber | Pick<DtfParams, "blockNumbe
 
 export type GetIndexDtfBasketSnapshotParams = DtfParams;
 
-export type GetIndexDtfBasketSnapshotOptions = BlockNumber | Pick<
-  DtfParams,
-  "blockNumber"
->;
+export type GetIndexDtfBasketSnapshotOptions = BlockNumber | Pick<DtfParams, "blockNumber">;
 
 export type GetIndexDtfVersionParams = DtfParams;
 
@@ -254,7 +250,4 @@ export type GetIndexDtfPriceHistoryParams = IndexDtfIdentityParams & {
   readonly interval: "1h" | "1d";
 };
 
-export type GetIndexDtfPriceHistoryOptions = Pick<
-  GetIndexDtfPriceHistoryParams,
-  "from" | "interval" | "to"
->;
+export type GetIndexDtfPriceHistoryOptions = Pick<GetIndexDtfPriceHistoryParams, "from" | "interval" | "to">;

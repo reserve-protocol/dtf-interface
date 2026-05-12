@@ -1,3 +1,6 @@
+import { createDtfClientApi, type DtfClientApi } from "@/client/api";
+import { createDtfClientSubgraph, type DtfClientSubgraph, type DtfClientSubgraphChainConfig } from "@/client/subgraph";
+import { createDtfClientViem, type DtfClientViem, type DtfClientViemChainConfig } from "@/client/viem";
 import {
   DEFAULT_API_BASE_URL,
   DEFAULT_RPC_URLS,
@@ -6,21 +9,9 @@ import {
   YIELD_DTF_SUBGRAPH_URL,
   supportedChainIds,
   type SupportedChainId,
-} from "./defaults.js";
-import { createDtfClientApi, type DtfClientApi } from "./client/api.js";
-import {
-  createDtfClientSubgraph,
-  type DtfClientSubgraph,
-  type DtfClientSubgraphChainConfig,
-} from "./client/subgraph.js";
-import {
-  createDtfClientViem,
-  type DtfClientViem,
-  type DtfClientViemChainConfig,
-} from "./client/viem.js";
+} from "@/defaults";
 
-export type DtfChainConfig = DtfClientSubgraphChainConfig &
-  DtfClientViemChainConfig;
+export type DtfChainConfig = DtfClientSubgraphChainConfig & DtfClientViemChainConfig;
 
 export type DtfClientConfig = {
   readonly apiBaseUrl?: string;
@@ -34,9 +25,7 @@ export type DtfClient = {
 };
 
 export function createDtfClient(config: DtfClientConfig = {}): DtfClient {
-  const apiBaseUrl = trimTrailingSlash(
-    config.apiBaseUrl ?? DEFAULT_API_BASE_URL,
-  );
+  const apiBaseUrl = trimTrailingSlash(config.apiBaseUrl ?? DEFAULT_API_BASE_URL);
   const chains = createChainConfig(config.chains);
 
   return {

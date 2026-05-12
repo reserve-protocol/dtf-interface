@@ -1,5 +1,5 @@
-export type * from "./common.js";
-export type * from "./governance.js";
-export type * from "./index-dtf.js";
-export type * from "./protocol.js";
-export type * from "./yield-dtf.js";
+export type * from "@/types/common";
+export type * from "@/types/governance";
+export type * from "@/types/index-dtf";
+export type * from "@/types/protocol";
+export type * from "@/types/yield-dtf";

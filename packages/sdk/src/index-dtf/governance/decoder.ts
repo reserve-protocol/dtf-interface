@@ -1,19 +1,8 @@
-import {
-  decodeFunctionData,
-  getAbiItem,
-  getAddress,
-  type Abi,
-  type Address,
-} from "viem";
-import type {
-  IndexDtfDecodedCalldata,
-  IndexDtfProposalDecoded,
-  IndexDtfUnknownCalldata,
-} from "../../types/governance.js";
-import {
-  getContractAliases,
-  type ProposalContractDecoder,
-} from "./contract-map.js";
+import { decodeFunctionData, getAbiItem, getAddress, type Abi, type Address } from "viem";
+
+import type { IndexDtfDecodedCalldata, IndexDtfProposalDecoded, IndexDtfUnknownCalldata } from "@/types/governance";
+
+import { getContractAliases, type ProposalContractDecoder } from "@/index-dtf/governance/contract-map";
 
 const UNKNOWN_CONTRACT = "Unknown";
 
@@ -73,12 +62,7 @@ export function decodeIndexDtfProposalCalldatas({
       continue;
     }
 
-    const decoded = decodeProposalCalldata(
-      contractDecoder,
-      i,
-      targetAddress,
-      callData,
-    );
+    const decoded = decodeProposalCalldata(contractDecoder, i, targetAddress, callData);
 
     if (decoded) {
       calls.push(decoded);
@@ -132,9 +116,7 @@ function decodeProposalCalldata(
 function tryDecodeCalldata(
   abi: Abi,
   callData: `0x${string}`,
-):
-  | Omit<IndexDtfDecodedCalldata, "callData" | "contract" | "index" | "target">
-  | undefined {
+): Omit<IndexDtfDecodedCalldata, "callData" | "contract" | "index" | "target"> | undefined {
   try {
     const { args, functionName } = decodeFunctionData({
       abi,
@@ -145,10 +127,7 @@ function tryDecodeCalldata(
       args,
       name: functionName,
     });
-    const parameters =
-      abiItem && "inputs" in abiItem
-        ? abiItem.inputs.map((input) => formatAbiInput(input))
-        : [];
+    const parameters = abiItem && "inputs" in abiItem ? abiItem.inputs.map((input) => formatAbiInput(input)) : [];
     const functionNameString = String(functionName);
 
     return {

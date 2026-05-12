@@ -1,15 +1,6 @@
-import {
-  createContext,
-  createElement,
-  useContext,
-  useMemo,
-  type PropsWithChildren,
-} from "react";
-import {
-  createDtfSdk,
-  type DtfSdk,
-  type DtfSdkConfig,
-} from "@dtf-interface/sdk";
+import { createContext, createElement, useContext, useMemo, type PropsWithChildren } from "react";
+
+import { createDtfSdk, type DtfSdk, type DtfSdkConfig } from "@dtf-interface/sdk";
 
 export type DtfSdkProviderProps = PropsWithChildren<
   DtfSdkConfig & {
@@ -19,13 +10,7 @@ export type DtfSdkProviderProps = PropsWithChildren<
 
 const DtfSdkContext = createContext<DtfSdk | undefined>(undefined);
 
-export function DtfSdkProvider({
-  apiBaseUrl,
-  chains,
-  children,
-  client,
-  sdk,
-}: DtfSdkProviderProps) {
+export function DtfSdkProvider({ apiBaseUrl, chains, children, client, sdk }: DtfSdkProviderProps) {
   const value = useMemo(() => {
     if (sdk) {
       return sdk;

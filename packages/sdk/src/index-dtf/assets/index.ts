@@ -1,7 +1,8 @@
 import type { Address } from "viem";
-import type { SupportedChainId } from "../../defaults.js";
-import type { TokenVolatility } from "../../types/common.js";
-import type { DtfClient } from "../../client.js";
+
+import type { DtfClient } from "@/client";
+import type { SupportedChainId } from "@/defaults";
+import type { TokenVolatility } from "@/types/common";
 
 export type GetAssetListParams = {
   chainId: SupportedChainId;
@@ -17,10 +18,7 @@ export type Asset = {
   symbol: string;
 };
 
-export async function getAssetList(
-  client: DtfClient,
-  params: GetAssetListParams,
-): Promise<Readonly<Asset[]>> {
+export async function getAssetList(client: DtfClient, params: GetAssetListParams): Promise<Readonly<Asset[]>> {
   const { chainId, unfiltered } = params;
 
   return client.api.get<readonly Asset[]>({

@@ -1,13 +1,15 @@
 import { getAddress, type Address } from "viem";
-import { dedupeAddresses, getCurrentTime } from "../../lib/utils.js";
-import type { Authority } from "../../types/common.js";
+
+import type { Authority } from "@/types/common";
 import type {
   IndexDtfGuardianGroup,
   IndexDtfProposalSummary,
   ProposalState,
   ProposalVotingState,
-} from "../../types/governance.js";
-import type { IndexDtf } from "../../types/index-dtf.js";
+} from "@/types/governance";
+import type { IndexDtf } from "@/types/index-dtf";
+
+import { dedupeAddresses, getCurrentTime } from "@/lib/utils";
 
 export type DtfGovernanceAddressContext = {
   readonly ownerGovernance?: { readonly id: string } | null;
@@ -43,25 +45,17 @@ type MutableProposalVotingState = {
   abstain: number;
 };
 
-export function getProposalGovernanceAddresses(
-  dtf: IndexDtf,
-): readonly Address[] {
+export function getProposalGovernanceAddresses(dtf: IndexDtf): readonly Address[] {
   return dedupeAddresses([
-    ...dtf.governance.all.flatMap((authority) =>
-      authority.type === "governance" ? [authority.address] : [],
-    ),
-    ...(dtf.governance.voteLock?.type === "governance"
-      ? [dtf.governance.voteLock.address]
-      : []),
+    ...dtf.governance.all.flatMap((authority) => (authority.type === "governance" ? [authority.address] : [])),
+    ...(dtf.governance.voteLock?.type === "governance" ? [dtf.governance.voteLock.address] : []),
     ...dtf.roles.admin.legacy,
     ...dtf.roles.rebalance.legacyAuctionApprovers,
     ...(dtf.voteLockVault?.legacyGovernance ?? []),
   ]);
 }
 
-export function getDtfProposalGovernanceIds(
-  dtf: DtfGovernanceAddressContext,
-): readonly string[] {
+export function getDtfProposalGovernanceIds(dtf: DtfGovernanceAddressContext): readonly string[] {
   return normalizeGovernanceIds([
     ...(dtf.ownerGovernance ? [dtf.ownerGovernance.id] : []),
     ...(dtf.tradingGovernance ? [dtf.tradingGovernance.id] : []),
@@ -72,21 +66,13 @@ export function getDtfProposalGovernanceIds(
   ]);
 }
 
-export function normalizeGovernanceIds(
-  governanceAddresses: string | readonly string[],
-): readonly string[] {
-  const addresses = Array.isArray(governanceAddresses)
-    ? governanceAddresses
-    : [governanceAddresses];
+export function normalizeGovernanceIds(governanceAddresses: string | readonly string[]): readonly string[] {
+  const addresses = Array.isArray(governanceAddresses) ? governanceAddresses : [governanceAddresses];
 
-  return [
-    ...new Set(addresses.map((address) => getAddress(address).toLowerCase())),
-  ];
+  return [...new Set(addresses.map((address) => getAddress(address).toLowerCase()))];
 }
 
-export function mapGuardianGroup(
-  authority: Authority | undefined,
-): IndexDtfGuardianGroup {
+export function mapGuardianGroup(authority: Authority | undefined): IndexDtfGuardianGroup {
   if (!authority || authority.type !== "governance") {
     return { governance: undefined, timelock: undefined, guardians: [] };
   }
@@ -102,10 +88,7 @@ export function getZeroValues(length: number): bigint[] {
   return Array.from({ length }, () => 0n);
 }
 
-export function getVoteState(
-  proposal: ProposalVoteStateInput,
-  timestamp = getCurrentTime(),
-): ProposalVotingState {
+export function getVoteState(proposal: ProposalVoteStateInput, timestamp = getCurrentTime()): ProposalVotingState {
   const state = createInitialVotingState(proposal.state);
 
   if (proposal.state === "QUEUED" && proposal.executionETA) {
@@ -121,15 +104,9 @@ export function getVoteState(
     }
   } else if (proposal.state === "ACTIVE") {
     if (timestamp >= proposal.voteEnd) {
-      if (
-        proposal.againstWeightedVotes.raw > proposal.forWeightedVotes.raw ||
-        proposal.forWeightedVotes.raw === 0n
-      ) {
+      if (proposal.againstWeightedVotes.raw > proposal.forWeightedVotes.raw || proposal.forWeightedVotes.raw === 0n) {
         state.state = "DEFEATED";
-      } else if (
-        proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw <
-        proposal.quorumVotes.raw
-      ) {
+      } else if (proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw < proposal.quorumVotes.raw) {
         state.state = "QUORUM_NOT_REACHED";
       } else {
         state.state = "SUCCEEDED";
@@ -140,27 +117,16 @@ export function getVoteState(
   }
 
   const totalVotes =
-    proposal.forWeightedVotes.raw +
-    proposal.againstWeightedVotes.raw +
-    proposal.abstainWeightedVotes.raw;
-  state.quorum =
-    proposal.forWeightedVotes.raw > 0n &&
-    proposal.forWeightedVotes.raw >= proposal.quorumVotes.raw;
+    proposal.forWeightedVotes.raw + proposal.againstWeightedVotes.raw + proposal.abstainWeightedVotes.raw;
+  state.quorum = proposal.forWeightedVotes.raw > 0n && proposal.forWeightedVotes.raw >= proposal.quorumVotes.raw;
   state.forVotesReachedQuorum = state.quorum;
   state.participationQuorumReached =
-    proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw >=
-    proposal.quorumVotes.raw;
+    proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw >= proposal.quorumVotes.raw;
 
   if (totalVotes > 0n) {
     state.for = getVotePercentage(proposal.forWeightedVotes.raw, totalVotes);
-    state.abstain = getVotePercentage(
-      proposal.abstainWeightedVotes.raw,
-      totalVotes,
-    );
-    state.against = getVotePercentage(
-      proposal.againstWeightedVotes.raw,
-      totalVotes,
-    );
+    state.abstain = getVotePercentage(proposal.abstainWeightedVotes.raw, totalVotes);
+    state.against = getVotePercentage(proposal.againstWeightedVotes.raw, totalVotes);
   }
 
   return state;
@@ -182,9 +148,7 @@ export function withVoteState<T extends ProposalVoteStateInput>(
   };
 }
 
-function createInitialVotingState(
-  state: ProposalState,
-): MutableProposalVotingState {
+function createInitialVotingState(state: ProposalState): MutableProposalVotingState {
   return {
     state,
     deadline: null,

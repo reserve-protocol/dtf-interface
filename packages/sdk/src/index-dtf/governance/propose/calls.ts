@@ -1,16 +1,14 @@
-import { Decimal } from "decimal.js-light";
 import { getAddress, parseEther, type Address } from "viem";
-import { prepareContractCall } from "../../../contract-call.js";
-import type { SupportedChainId } from "../../../defaults.js";
-import { SdkError } from "../../../errors.js";
-import type { IndexDtfCall } from "../../../types/governance.js";
-import type { PriceControl } from "../../../types/index-dtf.js";
-import { dtfIndexAbi as indexDtfV5Abi } from "../../abis/dtf-index-abi.js";
-import {
-  INDEX_DTF_VERSION_5_0_0,
-  getIndexDtfOperation,
-  type IndexDtfOperation,
-} from "../../versions.js";
+
+import type { SupportedChainId } from "@/defaults";
+import type { IndexDtfCall } from "@/types/governance";
+import type { PriceControl } from "@/types/index-dtf";
+
+import { prepareContractCall } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
+import { INDEX_DTF_VERSION_5_0_0, getIndexDtfOperation, type IndexDtfOperation } from "@/index-dtf/versions";
+import { Decimal } from "@/lib/decimal";
 
 export const indexDtfV5WriteAbi = indexDtfV5Abi;
 
@@ -44,9 +42,7 @@ export type PrepareIndexDtfSetRebalanceControlParams = PrepareIndexDtfCallParams
   readonly priceControl: PriceControl;
 };
 
-export function prepareIndexDtfAddToBasket(
-  params: PrepareIndexDtfTokenCallParams,
-): IndexDtfCall {
+export function prepareIndexDtfAddToBasket(params: PrepareIndexDtfTokenCallParams): IndexDtfCall {
   return prepareIndexDtfOperation(
     params.address,
     params.chainId,
@@ -56,9 +52,7 @@ export function prepareIndexDtfAddToBasket(
   );
 }
 
-export function prepareIndexDtfRemoveFromBasket(
-  params: PrepareIndexDtfTokenCallParams,
-): IndexDtfCall {
+export function prepareIndexDtfRemoveFromBasket(params: PrepareIndexDtfTokenCallParams): IndexDtfCall {
   return prepareIndexDtfOperation(
     params.address,
     params.chainId,
@@ -68,9 +62,7 @@ export function prepareIndexDtfRemoveFromBasket(
   );
 }
 
-export function prepareIndexDtfSetTvlFee(
-  params: PrepareIndexDtfPercentageCallParams,
-): IndexDtfCall {
+export function prepareIndexDtfSetTvlFee(params: PrepareIndexDtfPercentageCallParams): IndexDtfCall {
   return prepareIndexDtfOperation(
     params.address,
     params.chainId,
@@ -80,9 +72,7 @@ export function prepareIndexDtfSetTvlFee(
   );
 }
 
-export function prepareIndexDtfSetMintFee(
-  params: PrepareIndexDtfPercentageCallParams,
-): IndexDtfCall {
+export function prepareIndexDtfSetMintFee(params: PrepareIndexDtfPercentageCallParams): IndexDtfCall {
   return prepareIndexDtfOperation(
     params.address,
     params.chainId,
@@ -92,9 +82,7 @@ export function prepareIndexDtfSetMintFee(
   );
 }
 
-export function prepareIndexDtfSetSelfFee(
-  params: PrepareIndexDtfPercentageCallParams,
-): IndexDtfCall {
+export function prepareIndexDtfSetSelfFee(params: PrepareIndexDtfPercentageCallParams): IndexDtfCall {
   return prepareIndexDtfOperation(
     params.address,
     params.chainId,
@@ -123,9 +111,7 @@ export function prepareIndexDtfSetFeeRecipients(
   );
 }
 
-export function prepareIndexDtfSetAuctionLength(
-  params: PrepareIndexDtfAuctionLengthCallParams,
-): IndexDtfCall {
+export function prepareIndexDtfSetAuctionLength(params: PrepareIndexDtfAuctionLengthCallParams): IndexDtfCall {
   return prepareIndexDtfOperation(
     params.address,
     params.chainId,
@@ -138,18 +124,10 @@ export function prepareIndexDtfSetAuctionLength(
 export function prepareIndexDtfSetMandate(
   params: PrepareIndexDtfCallParams & { readonly mandate: string },
 ): IndexDtfCall {
-  return prepareIndexDtfOperation(
-    params.address,
-    params.chainId,
-    "setMandate",
-    [params.mandate],
-    params.version,
-  );
+  return prepareIndexDtfOperation(params.address, params.chainId, "setMandate", [params.mandate], params.version);
 }
 
-export function prepareIndexDtfSetName(
-  params: PrepareIndexDtfCallParams & { readonly name: string },
-): IndexDtfCall {
+export function prepareIndexDtfSetName(params: PrepareIndexDtfCallParams & { readonly name: string }): IndexDtfCall {
   return prepareIndexDtfOperation(params.address, params.chainId, "setName", [params.name], params.version);
 }
 
@@ -168,9 +146,7 @@ export function prepareIndexDtfSetTrustedFillerRegistry(
   );
 }
 
-export function prepareIndexDtfSetRebalanceControl(
-  params: PrepareIndexDtfSetRebalanceControlParams,
-): IndexDtfCall {
+export function prepareIndexDtfSetRebalanceControl(params: PrepareIndexDtfSetRebalanceControlParams): IndexDtfCall {
   return prepareIndexDtfOperation(
     params.address,
     params.chainId,
@@ -188,13 +164,7 @@ export function prepareIndexDtfSetRebalanceControl(
 export function prepareIndexDtfSetBidsEnabled(
   params: PrepareIndexDtfCallParams & { readonly enabled: boolean },
 ): IndexDtfCall {
-  return prepareIndexDtfOperation(
-    params.address,
-    params.chainId,
-    "setBidsEnabled",
-    [params.enabled],
-    params.version,
-  );
+  return prepareIndexDtfOperation(params.address, params.chainId, "setBidsEnabled", [params.enabled], params.version);
 }
 
 export function prepareIndexDtfSetTradeAllowlistEnabled(
@@ -233,9 +203,7 @@ export function prepareIndexDtfRemoveFromAllowlist(
   );
 }
 
-export function prepareIndexDtfDeprecate(
-  params: PrepareIndexDtfCallParams,
-): IndexDtfCall {
+export function prepareIndexDtfDeprecate(params: PrepareIndexDtfCallParams): IndexDtfCall {
   return prepareIndexDtfOperation(params.address, params.chainId, "deprecate", [], params.version);
 }
 

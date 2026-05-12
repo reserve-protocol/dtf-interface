@@ -1,26 +1,25 @@
 import { getAddress } from "viem";
-import type { DtfClient } from "../../../client.js";
-import { SdkError } from "../../../errors.js";
-import type {
-  BuildIndexDtfStartRebalanceParams,
-  BuiltIndexDtfStartRebalance,
-} from "./types.js";
-import { getCurrentBalances, getDtfForWeightControl, getBasketTokenOrder } from "./current.js";
-import { getBasketFromInput } from "./input.js";
-import { getBasketShares } from "./math.js";
-import { buildStartRebalanceArgs } from "./rebalance-args.js";
-import {
-  assertNoDtfBasketToken,
-  assertUniqueAddresses,
-  assertValidBasketAddresses,
-} from "./validation.js";
+
+import type { DtfClient } from "@/client";
+import type { BuildIndexDtfStartRebalanceParams, BuiltIndexDtfStartRebalance } from "@/index-dtf/dtf/basket/types";
+
+import { SdkError } from "@/errors";
+import { getCurrentBalances, getDtfForWeightControl, getBasketTokenOrder } from "@/index-dtf/dtf/basket/current";
+import { getBasketFromInput } from "@/index-dtf/dtf/basket/input";
+import { getBasketShares } from "@/index-dtf/dtf/basket/math";
+import { buildStartRebalanceArgs } from "@/index-dtf/dtf/basket/rebalance-args";
 import {
   getBasketPriceErrors,
   getBasketPrices,
   getBasketTokens,
   getMaxAuctionSizes,
-} from "./token-data.js";
-import { getTotalSupply } from "../index.js";
+} from "@/index-dtf/dtf/basket/token-data";
+import {
+  assertNoDtfBasketToken,
+  assertUniqueAddresses,
+  assertValidBasketAddresses,
+} from "@/index-dtf/dtf/basket/validation";
+import { getTotalSupply } from "@/index-dtf/dtf/index";
 
 export async function buildIndexDtfStartRebalance(
   client: DtfClient,
@@ -30,7 +29,10 @@ export async function buildIndexDtfStartRebalance(
   const inputTokens = params.basket.tokens.map((token) => ({ ...token, address: getAddress(token.address) }));
   assertUniqueAddresses(inputTokens.map((token) => token.address));
   assertValidBasketAddresses(inputTokens.map((token) => token.address));
-  assertNoDtfBasketToken(address, inputTokens.map((token) => token.address));
+  assertNoDtfBasketToken(
+    address,
+    inputTokens.map((token) => token.address),
+  );
 
   const [currentBalances, supply, dtf] = await Promise.all([
     getCurrentBalances(client, params),

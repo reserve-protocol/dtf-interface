@@ -15,12 +15,9 @@ import {
   type WalletClient,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import {
-  DEFAULT_RPC_URLS,
-  SUPPORTED_CHAINS,
-  type SupportedChainId,
-} from "../defaults.js";
-import { SdkError } from "../errors.js";
+
+import { DEFAULT_RPC_URLS, SUPPORTED_CHAINS, type SupportedChainId } from "@/defaults";
+import { SdkError } from "@/errors";
 
 export type DtfClientViemChainConfig = {
   readonly chain?: Chain;
@@ -38,20 +35,19 @@ export type CreateWalletClientParams = {
   readonly rpcUrls?: readonly string[];
 };
 
-type CreateConfiguredWalletClientParams = Omit<
-  CreateWalletClientParams,
-  "rpcUrls"
-> & {
+type CreateConfiguredWalletClientParams = Omit<CreateWalletClientParams, "rpcUrls"> & {
   readonly rpcUrls?: readonly string[] | undefined;
   readonly chain?: Chain | undefined;
 };
 
 export type DtfClientReadContractParameters<
   abi extends Abi | readonly unknown[] = Abi,
-  functionName extends ContractFunctionName<abi, "pure" | "view"> =
-    ContractFunctionName<abi, "pure" | "view">,
-  args extends ContractFunctionArgs<abi, "pure" | "view", functionName> =
-    ContractFunctionArgs<abi, "pure" | "view", functionName>,
+  functionName extends ContractFunctionName<abi, "pure" | "view"> = ContractFunctionName<abi, "pure" | "view">,
+  args extends ContractFunctionArgs<abi, "pure" | "view", functionName> = ContractFunctionArgs<
+    abi,
+    "pure" | "view",
+    functionName
+  >,
 > = ReadContractParameters<abi, functionName, args> & {
   readonly chainId: SupportedChainId;
 };
@@ -59,9 +55,7 @@ export type DtfClientReadContractParameters<
 export type DtfClientViem = {
   readonly getPublicClient: (chainId: SupportedChainId) => PublicClient;
   readonly getRpcUrls: (chainId: SupportedChainId) => readonly string[];
-  readonly createWalletClient: (
-    params: CreateWalletClientParams,
-  ) => WalletClient;
+  readonly createWalletClient: (params: CreateWalletClientParams) => WalletClient;
   readonly readContract: <
     const abi extends Abi | readonly unknown[],
     functionName extends ContractFunctionName<abi, "pure" | "view">,
@@ -71,20 +65,14 @@ export type DtfClientViem = {
   ) => Promise<ReadContractReturnType<abi, functionName, args>>;
 };
 
-export function createDtfClientViem({
-  chains,
-}: DtfClientViemConfig): DtfClientViem {
+export function createDtfClientViem({ chains }: DtfClientViemConfig): DtfClientViem {
   const publicClients = getConfiguredPublicClients(chains);
 
   const viem: DtfClientViem = {
     getPublicClient(chainId) {
       const chainConfig = getChainConfig(chains, chainId);
 
-      publicClients[chainId] ??= createDefaultPublicClient(
-        chainId,
-        chainConfig.chain,
-        chainConfig.rpcUrls,
-      );
+      publicClients[chainId] ??= createDefaultPublicClient(chainId, chainConfig.chain, chainConfig.rpcUrls);
 
       return publicClients[chainId];
     },
@@ -103,39 +91,27 @@ export function createDtfClientViem({
     readContract<
       const abi extends Abi | readonly unknown[],
       functionName extends ContractFunctionName<abi, "pure" | "view">,
-      const args extends ContractFunctionArgs<
-        abi,
-        "pure" | "view",
-        functionName
-      >,
-    >({
-      chainId,
-      ...params
-    }: DtfClientReadContractParameters<abi, functionName, args>) {
+      const args extends ContractFunctionArgs<abi, "pure" | "view", functionName>,
+    >({ chainId, ...params }: DtfClientReadContractParameters<abi, functionName, args>) {
       return viem
         .getPublicClient(chainId)
-        .readContract(
-          params as ReadContractParameters<abi, functionName, args>,
-        ) as Promise<ReadContractReturnType<abi, functionName, args>>;
+        .readContract(params as ReadContractParameters<abi, functionName, args>) as Promise<
+        ReadContractReturnType<abi, functionName, args>
+      >;
     },
   };
 
   return viem;
 }
 
-export async function getLatestBlockTimepoint(
-  viem: DtfClientViem,
-  chainId: SupportedChainId,
-): Promise<bigint> {
+export async function getLatestBlockTimepoint(viem: DtfClientViem, chainId: SupportedChainId): Promise<bigint> {
   const block = await viem.getPublicClient(chainId).getBlock();
 
   return block.timestamp > 0n ? block.timestamp - 1n : 0n;
 }
 
 /** Creates a viem WalletClient from a private key using the SDK's viem dependency. */
-export function createWalletClient(
-  params: CreateWalletClientParams,
-): WalletClient {
+export function createWalletClient(params: CreateWalletClientParams): WalletClient {
   return createConfiguredWalletClient({
     ...params,
     chain: getWriteChain(params.chainId),
@@ -163,9 +139,7 @@ function createDefaultPublicClient(
   }
 
   const transport: Transport =
-    rpcUrls && rpcUrls.length > 0
-      ? fallback(rpcUrls.map((url) => viemHttp(url)))
-      : viemHttp();
+    rpcUrls && rpcUrls.length > 0 ? fallback(rpcUrls.map((url) => viemHttp(url))) : viemHttp();
 
   return createPublicClient({ chain, transport });
 }
@@ -178,9 +152,7 @@ function createConfiguredWalletClient({
 }: CreateConfiguredWalletClientParams): WalletClient {
   const writeChain = chain ?? getWriteChain(chainId);
   const transport: Transport =
-    rpcUrls && rpcUrls.length > 0
-      ? fallback(rpcUrls.map((url) => viemHttp(url)))
-      : viemHttp();
+    rpcUrls && rpcUrls.length > 0 ? fallback(rpcUrls.map((url) => viemHttp(url))) : viemHttp();
 
   return createViemWalletClient({
     account: privateKeyToAccount(privateKey),
@@ -209,8 +181,7 @@ function getConfiguredPublicClients(
 
   for (const [chainId, chainConfig] of Object.entries(chains)) {
     if (chainConfig.publicClient) {
-      publicClients[Number(chainId) as SupportedChainId] =
-        chainConfig.publicClient;
+      publicClients[Number(chainId) as SupportedChainId] = chainConfig.publicClient;
     }
   }
 

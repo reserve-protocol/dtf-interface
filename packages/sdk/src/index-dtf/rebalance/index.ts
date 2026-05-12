@@ -1,25 +1,27 @@
 import { getAddress } from "viem";
-import type { DtfClient } from "../../client.js";
-import { SdkError } from "../../errors.js";
-import {
-  GetIndexDtfRebalanceDocument,
-  GetIndexDtfRebalanceByNonceDocument,
-  GetIndexDtfRebalanceAuctionsDocument,
-  GetIndexDtfRebalancesDocument,
-} from "../subgraph/dtf.generated.js";
-import { getIndexDtfIdentity } from "../utils.js";
-import { getIndexDtfCurrentRebalance } from "./current.js";
-import { mapSubgraphAuction, mapSubgraphRebalance } from "./mappers.js";
+
+import type { DtfClient } from "@/client";
 import type {
   GetIndexDtfRebalanceParams,
   GetIndexDtfRebalancesParams,
   IndexDtfAuction,
   IndexDtfRebalance,
-} from "./types.js";
+} from "@/index-dtf/rebalance/types";
 
-export * from "./current.js";
-export * from "./open-auction.js";
-export * from "./types.js";
+import { SdkError } from "@/errors";
+import { getIndexDtfCurrentRebalance } from "@/index-dtf/rebalance/current";
+import { mapSubgraphAuction, mapSubgraphRebalance } from "@/index-dtf/rebalance/mappers";
+import {
+  GetIndexDtfRebalanceDocument,
+  GetIndexDtfRebalanceByNonceDocument,
+  GetIndexDtfRebalanceAuctionsDocument,
+  GetIndexDtfRebalancesDocument,
+} from "@/index-dtf/subgraph/dtf.generated";
+import { getIndexDtfIdentity } from "@/index-dtf/utils";
+
+export * from "@/index-dtf/rebalance/current";
+export * from "@/index-dtf/rebalance/open-auction";
+export * from "@/index-dtf/rebalance/types";
 
 /** Reads Index DTF rebalances from the subgraph in newest-first order. */
 export async function getRebalances(
@@ -41,10 +43,7 @@ export async function getRebalances(
 }
 
 /** Reads one Index DTF rebalance by id or by DTF address + nonce. */
-export async function getRebalance(
-  client: DtfClient,
-  params: GetIndexDtfRebalanceParams,
-): Promise<IndexDtfRebalance> {
+export async function getRebalance(client: DtfClient, params: GetIndexDtfRebalanceParams): Promise<IndexDtfRebalance> {
   const rebalance = params.id
     ? await getRebalanceById(client, params.chainId, params.id)
     : await getRebalanceByNonce(client, params);
@@ -60,11 +59,7 @@ export async function getRebalance(
   return rebalance;
 }
 
-async function getRebalanceById(
-  client: DtfClient,
-  chainId: GetIndexDtfRebalanceParams["chainId"],
-  id: string,
-) {
+async function getRebalanceById(client: DtfClient, chainId: GetIndexDtfRebalanceParams["chainId"], id: string) {
   const response = await client.subgraph.queryIndex({
     chainId,
     query: GetIndexDtfRebalanceDocument,
@@ -74,10 +69,7 @@ async function getRebalanceById(
   return response.rebalance ? mapSubgraphRebalance(response.rebalance) : undefined;
 }
 
-async function getRebalanceByNonce(
-  client: DtfClient,
-  params: GetIndexDtfRebalanceParams,
-) {
+async function getRebalanceByNonce(client: DtfClient, params: GetIndexDtfRebalanceParams) {
   if (!params.address || params.nonce === undefined) {
     throw new SdkError({
       code: "INVALID_INPUT",

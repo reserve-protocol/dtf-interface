@@ -1,5 +1,7 @@
 import { getAddress, type Abi, type Address } from "viem";
-import type { SupportedChainId } from "../../defaults.js";
+
+import type { SupportedChainId } from "@/defaults";
+
 import {
   dtfAdminProposalAbi,
   dtfIndexProposalAbi,
@@ -7,7 +9,7 @@ import {
   dtfIndexStakingVaultProposalAbi,
   timelockProposalAbi,
   upgradeSpellProposalAbi,
-} from "../abis/proposal-decoder.js";
+} from "@/index-dtf/abis/proposal-decoder";
 
 export type ProposalContractDecoder = {
   readonly target: Address;
@@ -99,99 +101,38 @@ export function buildProposalContractMap({
   const hasSharedOwnerAndBasketGovernance =
     dtf.ownerGovernance &&
     dtf.tradingGovernance &&
-    dtf.ownerGovernance.address.toLowerCase() ===
-      dtf.tradingGovernance.address.toLowerCase();
+    dtf.ownerGovernance.address.toLowerCase() === dtf.tradingGovernance.address.toLowerCase();
 
   for (const governance of dtf.legacyAdminGovernance) {
-    addContract(
-      contracts,
-      governance,
-      "Legacy Owner Governance",
-      dtfIndexGovernanceProposalAbi,
-    );
+    addContract(contracts, governance, "Legacy Owner Governance", dtfIndexGovernanceProposalAbi);
   }
 
   for (const governance of dtf.legacyTradingGovernance) {
-    addContract(
-      contracts,
-      governance,
-      "Legacy Basket Governance",
-      dtfIndexGovernanceProposalAbi,
-    );
+    addContract(contracts, governance, "Legacy Basket Governance", dtfIndexGovernanceProposalAbi);
   }
 
   if (hasSharedOwnerAndBasketGovernance) {
-    addContract(
-      contracts,
-      dtf.ownerGovernance!.address,
-      "Owner/Basket Governance",
-      dtfIndexGovernanceProposalAbi,
-    );
-    addContract(
-      contracts,
-      dtf.ownerGovernance!.timelock,
-      "Owner/Basket Governance Timelock",
-      timelockProposalAbi,
-    );
+    addContract(contracts, dtf.ownerGovernance!.address, "Owner/Basket Governance", dtfIndexGovernanceProposalAbi);
+    addContract(contracts, dtf.ownerGovernance!.timelock, "Owner/Basket Governance Timelock", timelockProposalAbi);
   } else if (dtf.ownerGovernance) {
-    addContract(
-      contracts,
-      dtf.ownerGovernance.address,
-      "Owner Governance",
-      dtfIndexGovernanceProposalAbi,
-    );
-    addContract(
-      contracts,
-      dtf.ownerGovernance.timelock,
-      "Owner Governance Timelock",
-      timelockProposalAbi,
-    );
+    addContract(contracts, dtf.ownerGovernance.address, "Owner Governance", dtfIndexGovernanceProposalAbi);
+    addContract(contracts, dtf.ownerGovernance.timelock, "Owner Governance Timelock", timelockProposalAbi);
   }
 
   if (!hasSharedOwnerAndBasketGovernance && dtf.tradingGovernance) {
-    addContract(
-      contracts,
-      dtf.tradingGovernance.address,
-      "Basket Governance",
-      dtfIndexGovernanceProposalAbi,
-    );
-    addContract(
-      contracts,
-      dtf.tradingGovernance.timelock,
-      "Basket Governance Timelock",
-      timelockProposalAbi,
-    );
+    addContract(contracts, dtf.tradingGovernance.address, "Basket Governance", dtfIndexGovernanceProposalAbi);
+    addContract(contracts, dtf.tradingGovernance.timelock, "Basket Governance Timelock", timelockProposalAbi);
   }
 
-  addContract(
-    contracts,
-    dtf.stakingToken.address,
-    "Lock Vault",
-    dtfIndexStakingVaultProposalAbi,
-  );
+  addContract(contracts, dtf.stakingToken.address, "Lock Vault", dtfIndexStakingVaultProposalAbi);
 
   for (const governance of dtf.stakingToken.legacyGovernance) {
-    addContract(
-      contracts,
-      governance,
-      "Legacy Lock Governance",
-      dtfIndexGovernanceProposalAbi,
-    );
+    addContract(contracts, governance, "Legacy Lock Governance", dtfIndexGovernanceProposalAbi);
   }
 
   if (dtf.stakingToken.governance) {
-    addContract(
-      contracts,
-      dtf.stakingToken.governance.address,
-      "Lock Governance",
-      dtfIndexGovernanceProposalAbi,
-    );
-    addContract(
-      contracts,
-      dtf.stakingToken.governance.timelock,
-      "Lock Governance Timelock",
-      timelockProposalAbi,
-    );
+    addContract(contracts, dtf.stakingToken.governance.address, "Lock Governance", dtfIndexGovernanceProposalAbi);
+    addContract(contracts, dtf.stakingToken.governance.timelock, "Lock Governance Timelock", timelockProposalAbi);
   }
 
   if (proposalGovernance) {
@@ -210,20 +151,13 @@ export function buildProposalContractMap({
   }
 
   for (const extraContract of EXTRA_PROPOSAL_CONTRACTS) {
-    addContract(
-      contracts,
-      extraContract.addresses[chainId],
-      extraContract.contract,
-      extraContract.abi,
-    );
+    addContract(contracts, extraContract.addresses[chainId], extraContract.contract, extraContract.abi);
   }
 
   return contracts;
 }
 
-export function getContractAliases(
-  contractMap: Map<string, ProposalContractDecoder>,
-): Record<Address, string> {
+export function getContractAliases(contractMap: Map<string, ProposalContractDecoder>): Record<Address, string> {
   const aliases: Record<Address, string> = {};
 
   for (const contract of contractMap.values()) {

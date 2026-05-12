@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import type {
   BuildIndexDtfBasketProposalParams,
   BuildIndexDtfBasketSettingsProposalParams,
@@ -37,7 +36,10 @@ import type {
   IndexDtfVoterState,
   ListIndexDtfsParams,
 } from "@dtf-interface/sdk";
-import { useDtfSdk } from "./provider.js";
+
+import { useQuery } from "@tanstack/react-query";
+
+import { useDtfSdk } from "@/provider";
 import {
   buildIndexDtfBasketProposalQueryOptions,
   buildIndexDtfBasketSettingsProposalQueryOptions,
@@ -61,7 +63,7 @@ import {
   indexDtfVoterStateQueryOptions,
   type DtfQueryOptions,
   type IndexDtfList,
-} from "./query-options.js";
+} from "@/query-options";
 
 export function useDiscoverDtfs<TData = readonly DiscoverDtf[]>(
   params?: GetDiscoverDtfsOptions,
@@ -126,9 +128,7 @@ export function useIndexDtfPrice<TData = IndexDtfPrice>(
   return useQuery(indexDtfPriceQueryOptions(sdk, params, options));
 }
 
-export function useIndexDtfPriceHistory<
-  TData = readonly IndexDtfPricePoint[],
->(
+export function useIndexDtfPriceHistory<TData = readonly IndexDtfPricePoint[]>(
   params: GetIndexDtfPriceHistoryParams | undefined,
   options?: DtfQueryOptions<readonly IndexDtfPricePoint[], TData>,
 ) {
@@ -137,9 +137,7 @@ export function useIndexDtfPriceHistory<
   return useQuery(indexDtfPriceHistoryQueryOptions(sdk, params, options));
 }
 
-export function useIndexDtfProposals<
-  TData = readonly IndexDtfProposalSummary[],
->(
+export function useIndexDtfProposals<TData = readonly IndexDtfProposalSummary[]>(
   params: GetIndexDtfProposalsParams | undefined,
   options?: DtfQueryOptions<readonly IndexDtfProposalSummary[], TData>,
 ) {
@@ -157,9 +155,7 @@ export function useIndexDtfProposal<TData = IndexDtfProposalDetail>(
   return useQuery(indexDtfProposalQueryOptions(sdk, params, options));
 }
 
-export function useBuildIndexDtfBasketProposal<
-  TData = BuiltIndexDtfBasketProposal,
->(
+export function useBuildIndexDtfBasketProposal<TData = BuiltIndexDtfBasketProposal>(
   params: BuildIndexDtfBasketProposalParams | undefined,
   options?: DtfQueryOptions<BuiltIndexDtfBasketProposal, TData>,
 ) {
@@ -168,35 +164,25 @@ export function useBuildIndexDtfBasketProposal<
   return useQuery(buildIndexDtfBasketProposalQueryOptions(sdk, params, options));
 }
 
-export function useBuildIndexDtfBasketSettingsProposal<
-  TData = BuiltIndexDtfProposal,
->(
+export function useBuildIndexDtfBasketSettingsProposal<TData = BuiltIndexDtfProposal>(
   params: BuildIndexDtfBasketSettingsProposalParams | undefined,
   options?: DtfQueryOptions<BuiltIndexDtfProposal, TData>,
 ) {
   const sdk = useDtfSdk();
 
-  return useQuery(
-    buildIndexDtfBasketSettingsProposalQueryOptions(sdk, params, options),
-  );
+  return useQuery(buildIndexDtfBasketSettingsProposalQueryOptions(sdk, params, options));
 }
 
-export function useBuildIndexDtfDaoSettingsProposal<
-  TData = BuiltIndexDtfProposal,
->(
+export function useBuildIndexDtfDaoSettingsProposal<TData = BuiltIndexDtfProposal>(
   params: BuildIndexDtfDaoSettingsProposalParams | undefined,
   options?: DtfQueryOptions<BuiltIndexDtfProposal, TData>,
 ) {
   const sdk = useDtfSdk();
 
-  return useQuery(
-    buildIndexDtfDaoSettingsProposalQueryOptions(sdk, params, options),
-  );
+  return useQuery(buildIndexDtfDaoSettingsProposalQueryOptions(sdk, params, options));
 }
 
-export function useBuildIndexDtfSettingsProposal<
-  TData = BuiltIndexDtfProposal,
->(
+export function useBuildIndexDtfSettingsProposal<TData = BuiltIndexDtfProposal>(
   params: BuildIndexDtfSettingsProposalParams | undefined,
   options?: DtfQueryOptions<BuiltIndexDtfProposal, TData>,
 ) {
@@ -250,9 +236,7 @@ export function useIndexDtfProposalVotes<TData = IndexDtfProposalVotes>(
   return useQuery(indexDtfProposalVotesQueryOptions(sdk, params, options));
 }
 
-export function useIndexDtfProposalVoterState<
-  TData = IndexDtfProposalVoterState,
->(
+export function useIndexDtfProposalVoterState<TData = IndexDtfProposalVoterState>(
   params: GetIndexDtfProposalVoterStateParams | undefined,
   options?: DtfQueryOptions<IndexDtfProposalVoterState, TData>,
 ) {

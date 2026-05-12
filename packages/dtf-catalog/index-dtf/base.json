@@ -116,17 +116,7 @@
     "logo": "default.webp",
     "decimals": 18,
     "status": "deprecated",
-    "tags": [
-      "AI",
-      "DeFi",
-      "SocialFi",
-      "RWA",
-      "DeSci",
-      "LST",
-      "Oracles",
-      "Ecosystem",
-      "Memes"
-    ]
+    "tags": ["AI", "DeFi", "SocialFi", "RWA", "DeSci", "LST", "Oracles", "Ecosystem", "Memes"]
   },
   "0x160c18476f6f5099f374033fbc695c9234cda495": {
     "chainId": 8453,

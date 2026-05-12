@@ -1,18 +1,18 @@
 import { getAddress, type Address } from "viem";
-import { mapAmount } from "../../lib/utils.js";
-import type { DtfParams } from "../../types/common.js";
+
+import type { IndexDtfProposalDtfContractContext } from "@/index-dtf/governance/contract-map";
+import type { GetIndexDtfProposalQuery } from "@/index-dtf/subgraph/dtf.generated";
+import type { DtfParams } from "@/types/common";
 import type {
   GetIndexDtfProposalParams,
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
   ProposalState,
-} from "../../types/governance.js";
-import type { GetIndexDtfProposalQuery } from "../subgraph/dtf.generated.js";
-import type { IndexDtfProposalDtfContractContext } from "./contract-map.js";
+} from "@/types/governance";
 
-type SubgraphIndexDtfProposal = NonNullable<
-  GetIndexDtfProposalQuery["proposal"]
->;
+import { mapAmount } from "@/lib/utils";
+
+type SubgraphIndexDtfProposal = NonNullable<GetIndexDtfProposalQuery["proposal"]>;
 type SubgraphIndexDtfProposalSummary = {
   readonly id: string;
   readonly description: string;
@@ -37,21 +37,13 @@ type SubgraphIndexDtfProposalSummary = {
   };
 };
 type SubgraphIndexDtfProposalDtf = NonNullable<GetIndexDtfProposalQuery["dtf"]>;
-export type SubgraphGovernedIndexDtfProposalDtf =
-  SubgraphIndexDtfProposalDtf & {
-    readonly stToken: NonNullable<SubgraphIndexDtfProposalDtf["stToken"]>;
-  };
-type SubgraphIndexDtfProposalGovernance =
-  SubgraphIndexDtfProposal["governance"];
+export type SubgraphGovernedIndexDtfProposalDtf = SubgraphIndexDtfProposalDtf & {
+  readonly stToken: NonNullable<SubgraphIndexDtfProposalDtf["stToken"]>;
+};
+type SubgraphIndexDtfProposalGovernance = SubgraphIndexDtfProposal["governance"];
 
-export type ParsedIndexDtfProposalSummary = Omit<
-  IndexDtfProposalSummary,
-  "votingState"
->;
-export type ParsedIndexDtfProposal = Omit<
-  IndexDtfProposalDetail,
-  "decoded" | "votingState"
->;
+export type ParsedIndexDtfProposalSummary = Omit<IndexDtfProposalSummary, "votingState">;
+export type ParsedIndexDtfProposal = Omit<IndexDtfProposalDetail, "decoded" | "votingState">;
 
 export function mapIndexDtfProposalSummary(
   proposal: SubgraphIndexDtfProposalSummary,
@@ -78,9 +70,7 @@ export function mapIndexDtfProposalSummary(
     forWeightedVotes: mapAmount(proposal.forWeightedVotes),
     againstWeightedVotes: mapAmount(proposal.againstWeightedVotes),
     abstainWeightedVotes: mapAmount(proposal.abstainWeightedVotes),
-    ...(dtf
-      ? { dtf: { address: getAddress(dtf.address), chainId: dtf.chainId } }
-      : {}),
+    ...(dtf ? { dtf: { address: getAddress(dtf.address), chainId: dtf.chainId } } : {}),
     ...(executionETA === undefined ? {} : { executionETA }),
     ...(executionTime === undefined ? {} : { executionTime }),
     ...(executionBlock === undefined ? {} : { executionBlock }),
@@ -95,9 +85,7 @@ export function mapIndexDtfProposal(
   const queueBlock = toOptionalNumber(proposal.queueBlock);
   const queueTime = toOptionalNumber(proposal.queueTime);
   const cancellationTime = toOptionalNumber(proposal.cancellationTime);
-  const executionTxnHash = proposal.executionTxnHash
-    ? toHex(proposal.executionTxnHash)
-    : undefined;
+  const executionTxnHash = proposal.executionTxnHash ? toHex(proposal.executionTxnHash) : undefined;
   const targets = proposal.targets!.map((target) => getAddress(target));
   const calldatas = proposal.calldatas!.map(toHex);
 
@@ -127,32 +115,22 @@ export function mapIndexDtfProposal(
 export function mapDtfProposalContractContext(
   dtf: SubgraphGovernedIndexDtfProposalDtf,
 ): IndexDtfProposalDtfContractContext {
-  const ownerGovernance = dtf.ownerGovernance
-    ? mapGovernanceWithTimelock(dtf.ownerGovernance)
-    : undefined;
-  const tradingGovernance = dtf.tradingGovernance
-    ? mapGovernanceWithTimelock(dtf.tradingGovernance)
-    : undefined;
+  const ownerGovernance = dtf.ownerGovernance ? mapGovernanceWithTimelock(dtf.ownerGovernance) : undefined;
+  const tradingGovernance = dtf.tradingGovernance ? mapGovernanceWithTimelock(dtf.tradingGovernance) : undefined;
   const stakingToken = mapStakingTokenContractContext(dtf.stToken);
 
   return {
     address: getAddress(dtf.id),
     proxyAdmin: getAddress(dtf.proxyAdmin),
-    legacyAdminGovernance: dtf.legacyAdmins.map((address) =>
-      getAddress(address),
-    ),
-    legacyTradingGovernance: dtf.legacyAuctionApprovers.map((address) =>
-      getAddress(address),
-    ),
+    legacyAdminGovernance: dtf.legacyAdmins.map((address) => getAddress(address)),
+    legacyTradingGovernance: dtf.legacyAuctionApprovers.map((address) => getAddress(address)),
     ...(ownerGovernance ? { ownerGovernance } : {}),
     ...(tradingGovernance ? { tradingGovernance } : {}),
     stakingToken,
   };
 }
 
-export function mapProposalGovernanceContractContext(
-  governance: SubgraphIndexDtfProposalGovernance,
-) {
+export function mapProposalGovernanceContractContext(governance: SubgraphIndexDtfProposalGovernance) {
   return {
     address: getAddress(governance.id),
     timelock: {
@@ -169,9 +147,10 @@ type SubgraphGovernanceWithTimelock = {
 
 type SubgraphStakingToken = NonNullable<SubgraphIndexDtfProposalDtf["stToken"]>;
 
-function mapGovernanceWithTimelock(
-  governance: SubgraphGovernanceWithTimelock,
-): { readonly address: Address; readonly timelock: Address } {
+function mapGovernanceWithTimelock(governance: SubgraphGovernanceWithTimelock): {
+  readonly address: Address;
+  readonly timelock: Address;
+} {
   return {
     address: getAddress(governance.id),
     timelock: getAddress(governance.timelock!.id),
@@ -181,22 +160,16 @@ function mapGovernanceWithTimelock(
 function mapStakingTokenContractContext(
   stakingToken: SubgraphStakingToken,
 ): IndexDtfProposalDtfContractContext["stakingToken"] {
-  const governance = stakingToken.governance
-    ? mapGovernanceWithTimelock(stakingToken.governance)
-    : undefined;
+  const governance = stakingToken.governance ? mapGovernanceWithTimelock(stakingToken.governance) : undefined;
 
   return {
     address: getAddress(stakingToken.id),
-    legacyGovernance: stakingToken.legacyGovernance.map((address) =>
-      getAddress(address),
-    ),
+    legacyGovernance: stakingToken.legacyGovernance.map((address) => getAddress(address)),
     ...(governance ? { governance } : {}),
   };
 }
 
-function toOptionalNumber(
-  value: string | null | undefined,
-): number | undefined {
+function toOptionalNumber(value: string | null | undefined): number | undefined {
   return value === null || value === undefined ? undefined : Number(value);
 }
 

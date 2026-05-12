@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getGuardians } from "./index.js";
+
+import { getGuardians } from "@/index-dtf/governance/index";
 
 describe("Index DTF governance guardians", () => {
   it("groups owner, basket, and dao guardians from DTF governance", async () => {
@@ -17,10 +18,7 @@ describe("Index DTF governance guardians", () => {
             primary: governanceAuthority(
               "0x0000000000000000000000000000000000000004",
               "0x0000000000000000000000000000000000000005",
-              [
-                "0x0000000000000000000000000000000000000003",
-                "0x0000000000000000000000000000000000000006",
-              ],
+              ["0x0000000000000000000000000000000000000003", "0x0000000000000000000000000000000000000006"],
             ),
           },
           voteLock: governanceAuthority(
@@ -41,10 +39,7 @@ describe("Index DTF governance guardians", () => {
       basket: {
         governance: "0x0000000000000000000000000000000000000004",
         timelock: "0x0000000000000000000000000000000000000005",
-        guardians: [
-          "0x0000000000000000000000000000000000000003",
-          "0x0000000000000000000000000000000000000006",
-        ],
+        guardians: ["0x0000000000000000000000000000000000000003", "0x0000000000000000000000000000000000000006"],
       },
       dao: {
         governance: "0x0000000000000000000000000000000000000007",
@@ -60,11 +55,7 @@ describe("Index DTF governance guardians", () => {
   });
 });
 
-function governanceAuthority(
-  address: string,
-  timelock: string,
-  guardians: readonly string[],
-) {
+function governanceAuthority(address: string, timelock: string, guardians: readonly string[]) {
   return {
     address,
     type: "governance",

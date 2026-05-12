@@ -1,15 +1,17 @@
-import { Decimal } from "decimal.js-light";
 import { getAddress, type Address } from "viem";
-import type { DtfClient } from "../../client.js";
-import { mapAmount } from "../../lib/utils.js";
-import { getTokensData } from "../../tokens/index.js";
-import type { Amount, Token } from "../../types/common.js";
-import type { Financials, IndexDtf, PriceControl } from "../../types/index-dtf.js";
-import { prepareContractCall } from "../../contract-call.js";
-import { daoFeeRegistryAbi } from "../abis/dao-fee-registry.js";
-import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
-import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
-import { getDtf, getPrice } from "./index.js";
+
+import type { DtfClient } from "@/client";
+import type { Amount, Token } from "@/types/common";
+import type { Financials, IndexDtf, PriceControl } from "@/types/index-dtf";
+
+import { prepareContractCall } from "@/contract-call";
+import { daoFeeRegistryAbi } from "@/index-dtf/abis/dao-fee-registry";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { getDtf, getPrice } from "@/index-dtf/dtf/index";
+import { Decimal } from "@/lib/decimal";
+import { mapAmount } from "@/lib/utils";
+import { getTokensData } from "@/tokens/index";
 
 export type IndexDtfPlatformFee = {
   readonly registry: Address;

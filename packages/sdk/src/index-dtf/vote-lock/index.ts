@@ -1,22 +1,17 @@
-import {
-  erc20Abi,
-  getAddress,
-  type Address,
-} from "viem";
-import type { DtfClient } from "../../client.js";
-import { SdkError } from "../../errors.js";
-import { mapAmount } from "../../lib/utils.js";
-import type { Amount, Token } from "../../types/common.js";
-import type { IndexDtf } from "../../types/index-dtf.js";
-import type { SupportedChainId } from "../../defaults.js";
-import type { ContractCallPlan } from "../../contract-call.js";
-import {
-  prepareContractCall,
-  prepareErc20Approval,
-} from "../../contract-call.js";
-import { unstakingManagerAbi } from "../abis/unstaking-manager.js";
-import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
-import { getDtf } from "../dtf/index.js";
+import { erc20Abi, getAddress, type Address } from "viem";
+
+import type { DtfClient } from "@/client";
+import type { ContractCallPlan } from "@/contract-call";
+import type { SupportedChainId } from "@/defaults";
+import type { Amount, Token } from "@/types/common";
+import type { IndexDtf } from "@/types/index-dtf";
+
+import { prepareContractCall, prepareErc20Approval } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
+import { getDtf } from "@/index-dtf/dtf/index";
+import { mapAmount } from "@/lib/utils";
 
 export type VoteLockDao = {
   readonly chainId: number;
@@ -36,10 +31,7 @@ export type VoteLockDao = {
 };
 
 type RawToken = Omit<Token, "address"> & { readonly address: string };
-type RawVoteLockDao = Omit<
-  VoteLockDao,
-  "token" | "underlying" | "rewards" | "dtfs"
-> & {
+type RawVoteLockDao = Omit<VoteLockDao, "token" | "underlying" | "rewards" | "dtfs"> & {
   readonly token: RawToken;
   readonly underlying: { readonly token: RawToken };
   readonly rewards: readonly {
@@ -66,10 +58,7 @@ export type VoteLockState = {
 type VoteLockDepositInput = {
   readonly stToken: Address;
   readonly amount: bigint;
-} & (
-  | { readonly delegateToSelf: true }
-  | { readonly receiver: Address; readonly delegateToSelf?: false }
-);
+} & ({ readonly delegateToSelf: true } | { readonly receiver: Address; readonly delegateToSelf?: false });
 
 export type PrepareVoteLockDepositParams = VoteLockDepositInput & {
   readonly chainId: SupportedChainId;
@@ -83,9 +72,7 @@ export type PrepareVoteLockDepositPlanParams = PrepareVoteLockDepositParams & {
 };
 
 /** Reads all Index DTF vote-lock DAO/APR rows from Reserve API. */
-export async function getVoteLockDaos(
-  client: DtfClient,
-): Promise<readonly VoteLockDao[]> {
+export async function getVoteLockDaos(client: DtfClient): Promise<readonly VoteLockDao[]> {
   const daos = await client.api.get<readonly RawVoteLockDao[]>({
     path: "/dtf/daos",
   });
@@ -129,15 +116,7 @@ export async function getVoteLockState(
   const account = getAddress(params.account);
   const stToken = vault.token.address;
   const underlying = vault.underlying;
-  const [
-    balance,
-    allowance,
-    delegate,
-    maxWithdraw,
-    unstakingDelay,
-    unstakingManager,
-    prices,
-  ] = await Promise.all([
+  const [balance, allowance, delegate, maxWithdraw, unstakingDelay, unstakingManager, prices] = await Promise.all([
     client.viem.readContract({
       address: underlying.address,
       abi: erc20Abi,
@@ -214,9 +193,7 @@ export function prepareVoteLockApproval(params: {
 }
 
 /** Prepares a staking-vault deposit call, optionally self-delegating voting power. */
-export function prepareVoteLockDeposit(
-  params: PrepareVoteLockDepositParams,
-) {
+export function prepareVoteLockDeposit(params: PrepareVoteLockDepositParams) {
   if (params.delegateToSelf) {
     throwIfReceiverIsUnused(params);
 
@@ -241,10 +218,7 @@ export function prepareVoteLockDeposit(
 /** Prepares approval + deposit calls for vote-lock deposits. */
 export function prepareVoteLockDepositPlan(
   params: PrepareVoteLockDepositPlanParams,
-): ContractCallPlan<
-  ReturnType<typeof prepareVoteLockDeposit>,
-  ReturnType<typeof prepareVoteLockApproval>
-> {
+): ContractCallPlan<ReturnType<typeof prepareVoteLockDeposit>, ReturnType<typeof prepareVoteLockApproval>> {
   const call = prepareVoteLockDeposit(params);
 
   if (!params.approval) {

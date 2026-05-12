@@ -20,9 +20,7 @@ export function normalizeQueryKeyValue(value: unknown): unknown {
   const normalized: Record<string, unknown> = {};
 
   for (const key of Object.keys(value).sort()) {
-    const normalizedValue = normalizeQueryKeyValue(
-      (value as Record<string, unknown>)[key],
-    );
+    const normalizedValue = normalizeQueryKeyValue((value as Record<string, unknown>)[key]);
 
     if (normalizedValue !== undefined) {
       normalized[key] = normalizedValue;

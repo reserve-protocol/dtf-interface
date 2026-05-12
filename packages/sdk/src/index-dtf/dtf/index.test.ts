@@ -1,15 +1,9 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { getAddress, type PublicClient } from "viem";
-import { createDtfClient, type DtfClient } from "../../client.js";
-import {
-  getDtf,
-  getBasket,
-  getBasketSnapshot,
-  getBrand,
-  getPrice,
-  getPriceHistory,
-} from "./index.js";
-import { mapIndexDtf } from "./mappers.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { createDtfClient, type DtfClient } from "@/client";
+import { getDtf, getBasket, getBasketSnapshot, getBrand, getPrice, getPriceHistory } from "@/index-dtf/dtf/index";
+import { mapIndexDtf } from "@/index-dtf/dtf/mappers";
 
 describe("Index DTF getters", () => {
   afterEach(() => {
@@ -76,9 +70,7 @@ describe("Index DTF getters", () => {
     expect(price.address).toBe("0x0000000000000000000000000000000000000001");
     expect(price.chainId).toBe(8453);
     expect(price.price).toBe(152.96);
-    expect(price.basket[0]?.token.address).toBe(
-      "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
-    );
+    expect(price.basket[0]?.token.address).toBe("0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c");
     expect(price.basket[0]?.amount.raw).toBe(1443507783055415n);
     expect(fetch).toHaveBeenCalledOnce();
 
@@ -161,9 +153,7 @@ describe("Index DTF getters", () => {
       blockNumber: 123n,
     });
 
-    expect(snapshot.basket[0]?.address).toBe(
-      "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    );
+    expect(snapshot.basket[0]?.address).toBe("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48");
     expect(fetch).toHaveBeenCalledOnce();
 
     const [snapshotUrl] = fetch.mock.calls[0] as unknown as [URL];
@@ -320,9 +310,7 @@ describe("Index DTF getters", () => {
       [usdc, weth],
       [1_000_000n, 2_000_000_000_000_000_000n],
     ]);
-    const multicall = vi.fn(
-      async () => ["USD Coin", "USDC", 6, "Wrapped Ether", "WETH", 18],
-    );
+    const multicall = vi.fn(async () => ["USD Coin", "USDC", 6, "Wrapped Ether", "WETH", 18]);
     const client = createDtfClient({
       chains: {
         1: {

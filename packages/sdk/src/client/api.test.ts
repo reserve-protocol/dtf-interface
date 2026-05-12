@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createDtfClient } from "../client.js";
+
+import { createDtfClient } from "@/client";
 
 describe("Reserve API helpers", () => {
   afterEach(() => {
@@ -23,10 +24,7 @@ describe("Reserve API helpers", () => {
     const client = createDtfClient({ apiBaseUrl: "https://api.example" });
     const prices = await client.api.getTokenPrices({
       chainId: 8453,
-      addresses: [
-        "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-        "0x4200000000000000000000000000000000000006",
-      ],
+      addresses: ["0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "0x4200000000000000000000000000000000000006"],
     });
 
     expect(prices).toEqual([
@@ -88,10 +86,7 @@ describe("Reserve API helpers", () => {
     const client = createDtfClient({ apiBaseUrl: "https://api.example" });
     const prices = await client.api.getBasketTokenPricesWithSnapshot({
       chainId: 8453,
-      assets: [
-        "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-        "0x4200000000000000000000000000000000000006",
-      ],
+      assets: ["0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "0x4200000000000000000000000000000000000006"],
       timestamp: 1_715_000_000,
     });
 
@@ -108,8 +103,6 @@ describe("Reserve API helpers", () => {
     expect(fetch).toHaveBeenCalledTimes(3);
 
     const [historicalUrl] = fetch.mock.calls[1] as unknown as [URL];
-    expect(String(historicalUrl)).toContain(
-      "historical/prices?chainId=8453&from=1714996400&to=1715003600&interval=1h",
-    );
+    expect(String(historicalUrl)).toContain("historical/prices?chainId=8453&from=1714996400&to=1715003600&interval=1h");
   });
 });

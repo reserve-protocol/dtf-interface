@@ -1,17 +1,19 @@
 import { getAddress, type Address } from "viem";
-import type { DtfClient } from "../../../client.js";
-import { SdkError } from "../../../errors.js";
-import { getTokensData } from "../../../tokens/index.js";
-import { getTokenPrices, getTokenVolatilities } from "../../../tokens/prices.js";
-import type { TokenVolatility } from "../../../types/common.js";
+
+import type { DtfClient } from "@/client";
+import type { TokenVolatility } from "@/types/common";
+
+import { SdkError } from "@/errors";
 import {
   DEFAULT_MAX_AUCTION_SIZE_USD,
   PRICE_ERROR_BY_VOLATILITY,
   type BuildIndexDtfStartRebalanceParams,
   type IndexDtfBasketToken,
   type IndexDtfBasketTokenInput,
-} from "./types.js";
-import { assertPositiveNumber } from "./validation.js";
+} from "@/index-dtf/dtf/basket/types";
+import { assertPositiveNumber } from "@/index-dtf/dtf/basket/validation";
+import { getTokensData } from "@/tokens/index";
+import { getTokenPrices, getTokenVolatilities } from "@/tokens/prices";
 
 export async function getBasketTokens(
   client: DtfClient,
@@ -100,7 +102,8 @@ export async function getBasketPriceErrors(
   }
   for (const token of inputTokens) {
     if (token.priceError !== undefined) explicitErrors.set(token.address.toLowerCase(), token.priceError);
-    if (token.priceVolatility !== undefined) explicitVolatilities.set(token.address.toLowerCase(), token.priceVolatility);
+    if (token.priceVolatility !== undefined)
+      explicitVolatilities.set(token.address.toLowerCase(), token.priceVolatility);
   }
 
   const missingVolatility = tokenOrder.filter((address) => {
@@ -108,9 +111,10 @@ export async function getBasketPriceErrors(
 
     return !explicitErrors.has(key) && !explicitVolatilities.has(key);
   });
-  const fetchedVolatilities = missingVolatility.length > 0
-    ? await getTokenVolatilities(client, { chainId: params.chainId, addresses: missingVolatility })
-    : {};
+  const fetchedVolatilities =
+    missingVolatility.length > 0
+      ? await getTokenVolatilities(client, { chainId: params.chainId, addresses: missingVolatility })
+      : {};
   const fetchedVolatilityByAddress = new Map(
     Object.entries(fetchedVolatilities).map(([address, volatility]) => [address.toLowerCase(), volatility]),
   );

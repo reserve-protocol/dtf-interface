@@ -1,26 +1,25 @@
 import { FolioVersion, getOpenAuction, getTargetBasket } from "@reserve-protocol/dtf-rebalance-lib";
 import { getAddress, type Address } from "viem";
-import type { SupportedChainId } from "../../defaults.js";
-import { SdkError } from "../../errors.js";
-import { prepareContractCall } from "../../contract-call.js";
-import { dtfIndexAbi } from "../abis/dtf-index-abi.js";
-import type { BuiltIndexDtfOpenAuction, IndexDtfOpenAuctionInput, OpenAuctionArgs } from "./types.js";
 
-type OpenAuctionContractArgs = readonly [
-  bigint,
-  readonly Address[],
-  readonly OpenAuctionArgs["newWeights"][number][],
-  readonly OpenAuctionArgs["newPrices"][number][],
-  OpenAuctionArgs["newLimits"],
-];
+import type { SupportedChainId } from "@/defaults";
+import type {
+  BuiltIndexDtfOpenAuction,
+  IndexDtfOpenAuctionInput,
+  IndexDtfTargetBasketPriceMode,
+  OpenAuctionArgs,
+} from "@/index-dtf/rebalance/types";
+
+import { prepareContractCall } from "@/contract-call";
+import { SdkError } from "@/errors";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
 /**
  * Builds the v5 launcher `openAuction` args with `dtf-rebalance-lib`.
  * Historical and current inputs stay explicit so bots cannot mix time sources by accident.
  */
-export function prepareIndexDtfOpenAuctionArgs(
-  params: IndexDtfOpenAuctionInput,
-): BuiltIndexDtfOpenAuction {
+export function prepareIndexDtfOpenAuctionArgs(params: IndexDtfOpenAuctionInput): BuiltIndexDtfOpenAuction {
+  validateOpenAuctionInput(params);
+
   const tokenMap = new Map(params.tokens.map((token) => [token.address.toLowerCase(), token]));
   const decimals: bigint[] = [];
   const currentPrices: number[] = [];
@@ -56,9 +55,7 @@ export function prepareIndexDtfOpenAuctionArgs(
     weights.push(initialWeight);
   }
 
-  const targetPrices = params.isTrackingDtf || params.isHybridDtf
-    ? currentPrices
-    : snapshotPrices;
+  const targetPrices = getTargetBasketPriceMode(params) === "current" ? currentPrices : snapshotPrices;
   const targetBasket = getTargetBasket(weights, targetPrices, decimals, false);
   const [args, metrics] = getOpenAuction(
     FolioVersion.V5,
@@ -76,6 +73,30 @@ export function prepareIndexDtfOpenAuctionArgs(
   );
 
   return { args, metrics, targetBasket };
+}
+
+function validateOpenAuctionInput(params: IndexDtfOpenAuctionInput) {
+  if (!Number.isFinite(params.rebalancePercent) || params.rebalancePercent < 0 || params.rebalancePercent > 100) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "rebalancePercent must be between 0 and 100",
+      meta: { rebalancePercent: params.rebalancePercent },
+    });
+  }
+}
+
+function getTargetBasketPriceMode(params: IndexDtfOpenAuctionInput): IndexDtfTargetBasketPriceMode {
+  const mode = params.targetBasketPriceMode ?? (params.isTrackingDtf || params.isHybridDtf ? "current" : "snapshot");
+
+  if (mode !== "current" && mode !== "snapshot") {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "targetBasketPriceMode must be current or snapshot",
+      meta: { targetBasketPriceMode: mode },
+    });
+  }
+
+  return mode;
 }
 
 /** Prepares a v5 launcher `openAuction(...)` contract call. */

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createDtfClient } from "../client.js";
-import { createWalletClient } from "./viem.js";
 
-const privateKey =
-  "0x0000000000000000000000000000000000000000000000000000000000000001";
+import { createDtfClient } from "@/client";
+import { createWalletClient } from "@/client/viem";
+
+const privateKey = "0x0000000000000000000000000000000000000000000000000000000000000001";
 
 describe("viem wallet helpers", () => {
   it("creates a wallet client from a private key", () => {
@@ -13,9 +13,7 @@ describe("viem wallet helpers", () => {
       rpcUrls: ["https://example.com"],
     });
 
-    expect(walletClient.account?.address).toBe(
-      "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
-    );
+    expect(walletClient.account?.address).toBe("0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf");
     expect(walletClient.chain?.id).toBe(8453);
   });
 
@@ -32,9 +30,7 @@ describe("viem wallet helpers", () => {
       privateKey,
     });
 
-    expect(walletClient.account?.address).toBe(
-      "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
-    );
+    expect(walletClient.account?.address).toBe("0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf");
     expect(walletClient.chain?.id).toBe(8453);
   });
 });

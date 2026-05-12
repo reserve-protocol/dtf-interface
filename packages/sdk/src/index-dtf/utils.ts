@@ -1,5 +1,6 @@
 import { getAddress, type Address } from "viem";
-import type { IndexDtf, IndexDtfInput } from "../types/index-dtf.js";
+
+import type { IndexDtf, IndexDtfInput } from "@/types/index-dtf";
 
 export function getIndexDtfIdentity(input: IndexDtfInput): {
   readonly address: Address;

@@ -1,8 +1,10 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { encodeFunctionData } from "viem";
-import type { DtfClient } from "../../client.js";
-import { dtfIndexProposalAbi } from "../abis/proposal-decoder.js";
-import { getProposal, getProposals } from "./index.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import type { DtfClient } from "@/client";
+
+import { dtfIndexProposalAbi } from "@/index-dtf/abis/proposal-decoder";
+import { getProposal, getProposals } from "@/index-dtf/governance/index";
 
 describe("Index DTF governance proposals", () => {
   afterEach(() => {
@@ -38,8 +40,7 @@ describe("Index DTF governance proposals", () => {
       },
       proposal: {
         id: "42",
-        timelockId:
-          "0x0000000000000000000000000000000000000000000000000000000000000042",
+        timelockId: "0x0000000000000000000000000000000000000000000000000000000000000042",
         description: "Proposal description",
         creationTime: "999000",
         voteStart: "999900",
@@ -123,8 +124,7 @@ describe("Index DTF governance proposals", () => {
       creationBlock: 123,
       voteStart: 999900,
       voteEnd: 1000100,
-      timelockId:
-        "0x0000000000000000000000000000000000000000000000000000000000000042",
+      timelockId: "0x0000000000000000000000000000000000000000000000000000000000000042",
       votingState: {
         state: "ACTIVE",
         deadline: 100,
@@ -153,11 +153,7 @@ describe("Index DTF governance proposals", () => {
       "0x0000000000000000000000000000000000000005",
       "0x0000000000000000000000000000000000000003",
     ]);
-    expect(proposal.calldatas).toEqual([
-      setMandateCalldata,
-      "0x1234",
-      "0x12345678",
-    ]);
+    expect(proposal.calldatas).toEqual([setMandateCalldata, "0x1234", "0x12345678"]);
     expect(proposal.decoded.calls).toEqual([
       {
         index: 0,
@@ -247,9 +243,7 @@ describe("Index DTF governance proposals", () => {
             governance: {
               id: "0x0000000000000000000000000000000000000003",
             },
-            legacyGovernance: [
-              "0x0000000000000000000000000000000000000005",
-            ],
+            legacyGovernance: ["0x0000000000000000000000000000000000000005"],
           },
         },
       })
@@ -331,10 +325,7 @@ describe("Index DTF governance proposals", () => {
         limit: 100,
       },
     });
-    expect(proposals.map((proposal) => proposal.id)).toEqual([
-      "newer",
-      "older",
-    ]);
+    expect(proposals.map((proposal) => proposal.id)).toEqual(["newer", "older"]);
     expect(proposals[0]).toMatchObject({
       id: "newer",
       state: "QUORUM_NOT_REACHED",
@@ -406,9 +397,7 @@ describe("Index DTF governance proposals", () => {
     const proposals = await getProposals(client, {
       address: "0x0000000000000000000000000000000000000007",
       chainId: 1,
-      governanceAddresses: [
-        "0x0000000000000000000000000000000000000001",
-      ],
+      governanceAddresses: ["0x0000000000000000000000000000000000000001"],
     });
 
     expect(queryIndex).toHaveBeenCalledTimes(1);

@@ -1,7 +1,6 @@
 import { getAddress } from "viem";
-import type { DtfClient } from "../../client.js";
-import { getLatestBlockTimepoint } from "../../client/viem.js";
-import { mapAmount } from "../../lib/utils.js";
+
+import type { DtfClient } from "@/client";
 import type {
   GetIndexDtfProposalVoterStateParams,
   GetIndexDtfProposalVotesParams,
@@ -11,9 +10,12 @@ import type {
   IndexDtfProposalVotes,
   IndexDtfProposerState,
   IndexDtfVoterState,
-} from "../../types/governance.js";
-import { dtfIndexGovernanceAbi } from "../abis/dtf-index-governance.js";
-import { dtfIndexStakingVaultAbi } from "../abis/dtf-index-staking-vault.js";
+} from "@/types/governance";
+
+import { getLatestBlockTimepoint } from "@/client/viem";
+import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
+import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { mapAmount } from "@/lib/utils";
 
 export async function getVoterState(
   client: DtfClient,
@@ -65,9 +67,7 @@ export async function getProposerState(
 ): Promise<IndexDtfProposerState> {
   const governance = getAddress(params.governance);
   const account = getAddress(params.account);
-  const timepoint =
-    params.timepoint ??
-    (await getLatestBlockTimepoint(client.viem, params.chainId));
+  const timepoint = params.timepoint ?? (await getLatestBlockTimepoint(client.viem, params.chainId));
   const baseCall = {
     chainId: params.chainId,
     address: governance,
@@ -98,15 +98,13 @@ export async function getProposalVotes(
   client: DtfClient,
   params: GetIndexDtfProposalVotesParams,
 ): Promise<IndexDtfProposalVotes> {
-  const [againstVotes, forVotes, abstainVotes] = await client.viem.readContract(
-    {
-      chainId: params.chainId,
-      address: getAddress(params.governance),
-      abi: dtfIndexGovernanceAbi,
-      functionName: "proposalVotes",
-      args: [BigInt(params.proposalId)],
-    },
-  );
+  const [againstVotes, forVotes, abstainVotes] = await client.viem.readContract({
+    chainId: params.chainId,
+    address: getAddress(params.governance),
+    abi: dtfIndexGovernanceAbi,
+    functionName: "proposalVotes",
+    args: [BigInt(params.proposalId)],
+  });
 
   return {
     againstVotes: mapAmount(againstVotes),
@@ -120,13 +118,9 @@ export async function getProposalVoterState(
   params: GetIndexDtfProposalVoterStateParams,
 ): Promise<IndexDtfProposalVoterState> {
   const account = getAddress(params.account);
-  const latestTimepoint = await getLatestBlockTimepoint(
-    client.viem,
-    params.chainId,
-  );
+  const latestTimepoint = await getLatestBlockTimepoint(client.viem, params.chainId);
   const proposalTimepoint = BigInt(Math.max(params.proposal.voteStart - 1, 0));
-  const timepoint =
-    latestTimepoint < proposalTimepoint ? latestTimepoint : proposalTimepoint;
+  const timepoint = latestTimepoint < proposalTimepoint ? latestTimepoint : proposalTimepoint;
   const votingPower = await client.viem.readContract({
     chainId: params.chainId,
     address: getAddress(params.governance),
@@ -134,10 +128,7 @@ export async function getProposalVoterState(
     functionName: "getVotes",
     args: [account, timepoint],
   });
-  const vote =
-    params.proposal.votes.find(
-      (proposalVote) => getAddress(proposalVote.voter) === account,
-    )?.choice ?? null;
+  const vote = params.proposal.votes.find((proposalVote) => getAddress(proposalVote.voter) === account)?.choice ?? null;
 
   return {
     account,

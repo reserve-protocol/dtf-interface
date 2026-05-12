@@ -1,6 +1,6 @@
-import type { DtfClient } from "../client.js";
-import type { SupportedChainId } from "../defaults.js";
-import type { DtfStatus } from "../types/common.js";
+import type { DtfClient } from "@/client";
+import type { SupportedChainId } from "@/defaults";
+import type { DtfStatus } from "@/types/common";
 
 export type DiscoverDtf = {
   readonly address: string;
@@ -17,12 +17,7 @@ export type GetDiscoverDtfsOptions = {
 
 export async function getDiscoverDtfs(
   client: DtfClient,
-  {
-    chainId,
-    limit,
-    offset,
-    sort,
-  }: GetDiscoverDtfsOptions = {},
+  { chainId, limit, offset, sort }: GetDiscoverDtfsOptions = {},
 ): Promise<readonly DiscoverDtf[]> {
   const dtfs = await client.api.get<readonly DiscoverDtf[]>({
     path: "/discover/dtfs",

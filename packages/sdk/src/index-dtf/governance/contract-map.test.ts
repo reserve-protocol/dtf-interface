@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildProposalContractMap, getContractAliases } from "./contract-map.js";
+
+import { buildProposalContractMap, getContractAliases } from "@/index-dtf/governance/contract-map";
 
 describe("Index DTF proposal contract map", () => {
   it("labels shared owner and basket governance without losing the timelock", () => {
@@ -26,10 +27,8 @@ describe("Index DTF proposal contract map", () => {
     });
 
     expect(getContractAliases(contractMap)).toMatchObject({
-      "0x0000000000000000000000000000000000000001":
-        "Owner/Basket Governance",
-      "0x0000000000000000000000000000000000000006":
-        "Owner/Basket Governance Timelock",
+      "0x0000000000000000000000000000000000000001": "Owner/Basket Governance",
+      "0x0000000000000000000000000000000000000006": "Owner/Basket Governance Timelock",
     });
   });
 });

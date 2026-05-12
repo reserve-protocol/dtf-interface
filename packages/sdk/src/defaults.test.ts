@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createDtfClient } from "./client.js";
-import {
-  DEFAULT_RPC_URLS,
-  INDEX_DTF_SUBGRAPH_URL,
-  supportedChainIds,
-} from "./defaults.js";
+
+import { createDtfClient } from "@/client";
+import { DEFAULT_RPC_URLS, INDEX_DTF_SUBGRAPH_URL, supportedChainIds } from "@/defaults";
 
 describe("chain defaults", () => {
   it("keeps supported chains explicit", () => {
@@ -15,9 +12,7 @@ describe("chain defaults", () => {
     const client = createDtfClient();
 
     expect(client.subgraph.getIndexUrl(56)).toBe(INDEX_DTF_SUBGRAPH_URL[56]);
-    expect(() => client.subgraph.getYieldUrl(56)).toThrow(
-      "No Yield DTF subgraph configured for chain id: 56",
-    );
+    expect(() => client.subgraph.getYieldUrl(56)).toThrow("No Yield DTF subgraph configured for chain id: 56");
   });
 
   it("configures default RPC fallbacks for every supported chain", () => {
@@ -37,9 +32,6 @@ describe("chain defaults", () => {
       },
     });
 
-    expect(client.viem.getRpcUrls(1)).toEqual([
-      "https://mainnet.example",
-      ...DEFAULT_RPC_URLS[1],
-    ]);
+    expect(client.viem.getRpcUrls(1)).toEqual(["https://mainnet.example", ...DEFAULT_RPC_URLS[1]]);
   });
 });

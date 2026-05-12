@@ -1,17 +1,22 @@
-import type { AuctionMetrics, OpenAuctionArgs, PriceRange, Rebalance, RebalanceLimits, WeightRange } from "@reserve-protocol/dtf-rebalance-lib";
+import type {
+  AuctionMetrics,
+  OpenAuctionArgs,
+  PriceRange,
+  Rebalance,
+  RebalanceLimits,
+  WeightRange,
+} from "@reserve-protocol/dtf-rebalance-lib";
 import type { Address } from "viem";
-import type { DtfParams, Token } from "../../types/common.js";
-import type { IndexDtfInput } from "../../types/index-dtf.js";
+
+import type { DtfParams, Token } from "@/types/common";
+import type { IndexDtfInput } from "@/types/index-dtf";
 
 export type GetIndexDtfRebalancesParams = IndexDtfInput & {
   readonly limit?: number;
   readonly offset?: number;
 };
 
-export type GetIndexDtfRebalancesOptions = Pick<
-  GetIndexDtfRebalancesParams,
-  "limit" | "offset"
->;
+export type GetIndexDtfRebalancesOptions = Pick<GetIndexDtfRebalancesParams, "limit" | "offset">;
 
 export type GetIndexDtfRebalanceParams = {
   readonly id?: string;
@@ -71,6 +76,8 @@ export type IndexDtfCurrentRebalance = Rebalance & {
   readonly bidsEnabled: boolean;
 };
 
+export type IndexDtfTargetBasketPriceMode = "current" | "snapshot";
+
 export type IndexDtfOpenAuctionInput = {
   readonly rebalance: IndexDtfCurrentRebalance;
   readonly tokens: readonly Token[];
@@ -85,6 +92,13 @@ export type IndexDtfOpenAuctionInput = {
   readonly rebalancePercent: number;
   readonly isTrackingDtf: boolean;
   readonly isHybridDtf?: boolean;
+  /**
+   * Price source used to derive the target basket.
+   *
+   * Defaults to the legacy mode: current prices for tracking or hybrid DTFs,
+   * snapshot prices for native DTFs.
+   */
+  readonly targetBasketPriceMode?: IndexDtfTargetBasketPriceMode;
 };
 
 export type BuiltIndexDtfOpenAuction = {

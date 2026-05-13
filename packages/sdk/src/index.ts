@@ -95,6 +95,7 @@ export {
   getIndexDtfGuardians,
   getIndexDtfIssuanceState,
   getIndexDtfLegacyVoteLocks,
+  getIndexDtfLatestAuction,
   getIndexDtfMandate,
   getIndexDtfOptimisticGovernance,
   getIndexDtfOptimisticProposalContext,

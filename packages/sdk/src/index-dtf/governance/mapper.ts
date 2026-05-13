@@ -19,6 +19,7 @@ type SubgraphIndexDtfProposalSummary = {
   readonly creationTime: string;
   readonly state: ProposalState;
   readonly isOptimistic?: boolean | null;
+  readonly vetoThreshold?: string | null;
   readonly forWeightedVotes: string;
   readonly abstainWeightedVotes: string;
   readonly againstWeightedVotes: string;
@@ -66,6 +67,7 @@ export function mapIndexDtfProposalSummary(
     ...(proposal.isOptimistic === null || proposal.isOptimistic === undefined
       ? {}
       : { isOptimistic: proposal.isOptimistic }),
+    ...(proposal.vetoThreshold ? { vetoThreshold: BigInt(proposal.vetoThreshold) } : {}),
     creationTime: Number(proposal.creationTime),
     creationBlock: Number(proposal.creationBlock),
     voteStart: Number(proposal.voteStart),

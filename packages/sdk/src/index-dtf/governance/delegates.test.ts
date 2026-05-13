@@ -16,8 +16,14 @@ describe("Index DTF governance delegates", () => {
         delegates: [
           {
             address: "0x0000000000000000000000000000000000000002",
-            delegatedVotes: "3000000000000000000",
+            delegatedVotesRaw: "3000000000000000000",
+            optimisticDelegatedVotesRaw: "2000000000000000000",
             numberVotes: 4,
+            numberOptimisticVotes: 2,
+            hasBeenStandardDelegate: true,
+            hasBeenOptimisticDelegate: true,
+            tokenHoldersRepresentedAmount: 3,
+            optimisticTokenHoldersRepresentedAmount: 1,
           },
         ],
       },
@@ -49,7 +55,16 @@ describe("Index DTF governance delegates", () => {
           raw: 3000000000000000000n,
           formatted: "3",
         },
+        optimisticDelegatedVotes: {
+          raw: 2000000000000000000n,
+          formatted: "2",
+        },
         numberVotes: 4,
+        numberOptimisticVotes: 2,
+        hasBeenStandardDelegate: true,
+        hasBeenOptimisticDelegate: true,
+        tokenHoldersRepresentedAmount: 3,
+        optimisticTokenHoldersRepresentedAmount: 1,
       },
     ]);
   });

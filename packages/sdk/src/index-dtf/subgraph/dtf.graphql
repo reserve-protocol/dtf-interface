@@ -27,29 +27,53 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
     priceControl
     ownerGovernance {
       id
+      name
+      version
       votingDelay
       votingPeriod
       proposalThreshold
+      quorumVotes
       quorumNumerator
       quorumDenominator
+      isOptimistic
+      optimisticVetoDelay
+      optimisticVetoPeriod
+      optimisticVetoThreshold
+      optimisticProposalThrottleCapacity
+      optimisticSelectorRegistry
+      optimisticProposers
       timelock {
         id
         guardians
+        optimisticProposers
         executionDelay
+        type
       }
     }
     legacyAdmins
     tradingGovernance {
       id
+      name
+      version
       votingDelay
       votingPeriod
       proposalThreshold
+      quorumVotes
       quorumNumerator
       quorumDenominator
+      isOptimistic
+      optimisticVetoDelay
+      optimisticVetoPeriod
+      optimisticVetoThreshold
+      optimisticProposalThrottleCapacity
+      optimisticSelectorRegistry
+      optimisticProposers
       timelock {
         id
         guardians
+        optimisticProposers
         executionDelay
+        type
       }
     }
     legacyAuctionApprovers
@@ -85,6 +109,12 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
         totalBurned
         totalMinted
       }
+      currentDelegates
+      totalDelegates
+      delegatedVotesRaw
+      currentOptimisticDelegates
+      totalOptimisticDelegates
+      optimisticDelegatedVotesRaw
       underlying {
         name
         symbol
@@ -93,15 +123,27 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
       }
       governance {
         id
+        name
+        version
         votingDelay
         votingPeriod
         proposalThreshold
+        quorumVotes
         quorumNumerator
         quorumDenominator
+        isOptimistic
+        optimisticVetoDelay
+        optimisticVetoPeriod
+        optimisticVetoThreshold
+        optimisticProposalThrottleCapacity
+        optimisticSelectorRegistry
+        optimisticProposers
         timelock {
           id
           guardians
+          optimisticProposers
           executionDelay
+          type
         }
       }
       legacyGovernance
@@ -125,6 +167,8 @@ query GetIndexDtfProposals($governanceIds: [ID!]!, $limit: Int = 100) {
       description
       creationTime
       state
+      isOptimistic
+      vetoThreshold
       forWeightedVotes
       abstainWeightedVotes
       againstWeightedVotes
@@ -161,6 +205,8 @@ query GetAllIndexDtfProposals($limit: Int = 100, $offset: Int = 0, $where: Propo
     description
     creationTime
     state
+    isOptimistic
+    vetoThreshold
     forWeightedVotes
     abstainWeightedVotes
     againstWeightedVotes
@@ -209,12 +255,14 @@ fragment IndexDtfProposalContractContext on DTF {
   legacyAuctionApprovers
   ownerGovernance {
     id
+    optimisticSelectorRegistry
     timelock {
       id
     }
   }
   tradingGovernance {
     id
+    optimisticSelectorRegistry
     timelock {
       id
     }
@@ -224,6 +272,7 @@ fragment IndexDtfProposalContractContext on DTF {
     legacyGovernance
     governance {
       id
+      optimisticSelectorRegistry
       timelock {
         id
       }
@@ -245,6 +294,8 @@ query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
     queueBlock
     queueTime
     state
+    isOptimistic
+    vetoThreshold
     executionETA
     executionTime
     executionBlock
@@ -272,6 +323,7 @@ query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
     executionTxnHash
     governance {
       id
+      optimisticSelectorRegistry
       timelock {
         id
         type
@@ -294,8 +346,14 @@ query GetIndexDtfDelegates($stToken: ID!, $limit: Int = 10) {
       where: { address_not: "0x0000000000000000000000000000000000000000" }
     ) {
       address
-      delegatedVotes
+      delegatedVotesRaw
+      optimisticDelegatedVotesRaw
       numberVotes
+      numberOptimisticVotes
+      hasBeenStandardDelegate
+      hasBeenOptimisticDelegate
+      tokenHoldersRepresentedAmount
+      optimisticTokenHoldersRepresentedAmount
     }
   }
 }

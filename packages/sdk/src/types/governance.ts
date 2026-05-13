@@ -214,6 +214,7 @@ export type IndexDtfProposalSummary = {
   readonly againstWeightedVotes: Amount;
   readonly abstainWeightedVotes: Amount;
   readonly isOptimistic?: boolean;
+  readonly vetoThreshold?: bigint;
   readonly voteToken?: Address;
   readonly optimistic?: IndexDtfOptimisticProposalContext;
   readonly votingState: ProposalVotingState;
@@ -281,7 +282,13 @@ export type IndexDtfProposalDetail = IndexDtfProposalSummary & {
 export type IndexDtfDelegate = {
   readonly address: Address;
   readonly delegatedVotes: Amount;
+  readonly optimisticDelegatedVotes: Amount;
   readonly numberVotes: number;
+  readonly numberOptimisticVotes: number;
+  readonly hasBeenStandardDelegate: boolean;
+  readonly hasBeenOptimisticDelegate: boolean;
+  readonly tokenHoldersRepresentedAmount: number;
+  readonly optimisticTokenHoldersRepresentedAmount: number;
 };
 
 export type IndexDtfGuardianGroup =

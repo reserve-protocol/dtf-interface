@@ -40,17 +40,33 @@ export type TokenWithSnapshot = Token & {
 export type Timelock = {
   readonly address: Address;
   readonly guardians: readonly Address[];
+  readonly optimisticProposers: readonly Address[];
   readonly executionDelay: number;
+  readonly type: string;
+};
+
+export type OptimisticGovernanceSettings = {
+  readonly vetoDelay: number;
+  readonly vetoPeriod: number;
+  readonly vetoThreshold: number;
+  readonly proposalThrottleCapacity: bigint;
+  readonly selectorRegistry: Address;
+  readonly proposers: readonly Address[];
 };
 
 export type Governance = {
   readonly address: Address;
+  readonly name: string;
+  readonly version: string;
   readonly votingDelay: number;
   readonly votingPeriod: number;
   readonly proposalThreshold: number;
+  readonly quorumVotes?: Amount;
   readonly quorumNumerator: number;
   readonly quorumDenominator: number;
   readonly quorum: number;
+  readonly isOptimistic: boolean;
+  readonly optimistic?: OptimisticGovernanceSettings;
   readonly timelock: Timelock;
 };
 

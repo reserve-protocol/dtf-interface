@@ -94,6 +94,7 @@ import {
 import {
   getActiveAuction,
   getBidQuote,
+  getLatestAuction,
   getIndexDtfCurrentRebalance,
   getCompletedRebalance,
   getCompletedRebalances,
@@ -365,6 +366,8 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
       }),
     getActiveAuction: (options?: BlockNumberOption | BlockNumber) =>
       getActiveAuction(client, { address, chainId, ...blockParams(options) }),
+    getLatestAuction: (options?: BlockNumberOption | BlockNumber) =>
+      getLatestAuction(client, { address, chainId, ...blockParams(options) }),
     getBidQuote: (
       quote: Omit<Parameters<typeof getBidQuote>[1], "address" | "chainId">,
     ) => getBidQuote(client, { ...quote, address, chainId }),

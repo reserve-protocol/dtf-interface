@@ -5,6 +5,7 @@ import type { DtfClient } from "@/client";
 import {
   getActiveAuction,
   getBidQuote,
+  getLatestAuction,
   prepareIndexDtfBid,
   prepareIndexDtfCloseAuction,
   prepareIndexDtfEndRebalance,
@@ -20,14 +21,19 @@ describe("Index DTF rebalance execution", () => {
   });
 
   it("reads the latest auction from RPC", async () => {
-    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
     const readContract = vi
       .fn()
       .mockResolvedValueOnce(3n)
       .mockResolvedValueOnce([9n, 999_900n, 1_000_100n]);
-    const client = { viem: { readContract } } as unknown as DtfClient;
+    const getBlock = vi.fn(async () => ({ timestamp: 1_000_000n }));
+    const client = {
+      viem: {
+        readContract,
+        getPublicClient: vi.fn(() => ({ getBlock })),
+      },
+    } as unknown as DtfClient;
 
-    const auction = await getActiveAuction(client, {
+    const auction = await getLatestAuction(client, {
       address: DTF,
       chainId: 1,
     });
@@ -39,6 +45,7 @@ describe("Index DTF rebalance execution", () => {
         args: [2n],
       }),
     );
+    expect(getBlock).toHaveBeenCalledWith();
     expect(auction).toEqual({
       auctionId: 2n,
       rebalanceNonce: 9n,
@@ -52,8 +59,74 @@ describe("Index DTF rebalance execution", () => {
     const readContract = vi.fn(async () => 0n);
     const client = { viem: { readContract } } as unknown as DtfClient;
 
-    await expect(getActiveAuction(client, { address: DTF, chainId: 1 })).resolves.toBeNull();
+    await expect(getLatestAuction(client, { address: DTF, chainId: 1 })).resolves.toBeNull();
     expect(readContract).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns only the active latest auction from RPC", async () => {
+    const readContract = vi
+      .fn()
+      .mockResolvedValueOnce(3n)
+      .mockResolvedValueOnce([9n, 999_900n, 1_000_100n]);
+    const getBlock = vi.fn(async () => ({ timestamp: 1_000_000n }));
+    const client = {
+      viem: {
+        readContract,
+        getPublicClient: vi.fn(() => ({ getBlock })),
+      },
+    } as unknown as DtfClient;
+
+    const auction = await getActiveAuction(client, {
+      address: DTF,
+      chainId: 1,
+    });
+
+    expect(auction).toEqual({
+      auctionId: 2n,
+      rebalanceNonce: 9n,
+      startTime: 999_900n,
+      endTime: 1_000_100n,
+      isActive: true,
+    });
+  });
+
+  it("returns null when the latest auction is not active", async () => {
+    const readContract = vi
+      .fn()
+      .mockResolvedValueOnce(3n)
+      .mockResolvedValueOnce([9n, 999_000n, 999_900n]);
+    const getBlock = vi.fn(async () => ({ timestamp: 1_000_000n }));
+    const client = {
+      viem: {
+        readContract,
+        getPublicClient: vi.fn(() => ({ getBlock })),
+      },
+    } as unknown as DtfClient;
+
+    await expect(getActiveAuction(client, { address: DTF, chainId: 1 })).resolves.toBeNull();
+  });
+
+  it("uses block timestamp for historical active auction reads", async () => {
+    const readContract = vi
+      .fn()
+      .mockResolvedValueOnce(3n)
+      .mockResolvedValueOnce([9n, 999_900n, 1_000_100n]);
+    const getBlock = vi.fn(async () => ({ timestamp: 1_000_000n }));
+    const client = {
+      viem: {
+        readContract,
+        getPublicClient: vi.fn(() => ({ getBlock })),
+      },
+    } as unknown as DtfClient;
+
+    const auction = await getActiveAuction(client, {
+      address: DTF,
+      chainId: 1,
+      blockNumber: 123n,
+    });
+
+    expect(getBlock).toHaveBeenCalledWith({ blockNumber: 123n });
+    expect(auction?.isActive).toBe(true);
   });
 
   it("reads v5 bid quotes with stable token order", async () => {

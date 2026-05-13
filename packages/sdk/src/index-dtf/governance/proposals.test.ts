@@ -33,6 +33,7 @@ describe("Index DTF governance proposals", () => {
         legacyAuctionApprovers: [],
         ownerGovernance: {
           id: "0x0000000000000000000000000000000000000001",
+          optimisticSelectorRegistry: null,
           timelock: {
             id: "0x0000000000000000000000000000000000000006",
           },
@@ -54,6 +55,8 @@ describe("Index DTF governance proposals", () => {
         queueBlock: null,
         queueTime: null,
         state: "PENDING",
+        isOptimistic: false,
+        vetoThreshold: null,
         executionETA: null,
         executionTime: null,
         executionBlock: null,
@@ -87,6 +90,7 @@ describe("Index DTF governance proposals", () => {
         executionTxnHash: null,
         governance: {
           id: "0x0000000000000000000000000000000000000001",
+          optimisticSelectorRegistry: null,
           timelock: {
             id: "0x0000000000000000000000000000000000000006",
             type: "OWNER",
@@ -131,6 +135,7 @@ describe("Index DTF governance proposals", () => {
       proposer: "0x0000000000000000000000000000000000000002",
       description: "Proposal description",
       state: "ACTIVE",
+      isOptimistic: false,
       creationTime: 999000,
       creationBlock: 123,
       voteStart: 999900,
@@ -448,6 +453,8 @@ describe("Index DTF governance proposals", () => {
           proposer: "0x0000000000000000000000000000000000000002",
           governance: "0x0000000000000000000000000000000000000001",
           timelock: "0x0000000000000000000000000000000000000008",
+          isOptimistic: true,
+          vetoThreshold: "1000000000000000000",
         }),
       ],
     }));
@@ -478,6 +485,8 @@ describe("Index DTF governance proposals", () => {
       governance: "0x0000000000000000000000000000000000000001",
       timelock: "0x0000000000000000000000000000000000000008",
       state: "QUEUED",
+      isOptimistic: true,
+      vetoThreshold: 1000000000000000000n,
     });
   });
 
@@ -545,6 +554,8 @@ function createProposalSummary({
   proposer,
   governance,
   timelock,
+  isOptimistic,
+  vetoThreshold,
 }: {
   readonly id: string;
   readonly description?: string;
@@ -560,6 +571,8 @@ function createProposalSummary({
   readonly proposer: string;
   readonly governance: string;
   readonly timelock: string;
+  readonly isOptimistic?: boolean;
+  readonly vetoThreshold?: string;
 }) {
   return {
     id,
@@ -571,6 +584,8 @@ function createProposalSummary({
     againstWeightedVotes,
     executionETA: null,
     executionTime: null,
+    isOptimistic,
+    vetoThreshold,
     quorumVotes,
     voteStart,
     voteEnd,

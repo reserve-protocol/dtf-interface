@@ -145,6 +145,7 @@ export { listIndexDtfs } from "@/index-dtf/protocol/index";
 export {
   getActiveAuction as getIndexDtfActiveAuction,
   getBidQuote as getIndexDtfBidQuote,
+  getLatestAuction as getIndexDtfLatestAuction,
   getIndexDtfCurrentRebalance,
   getCompletedRebalance as getIndexDtfCompletedRebalance,
   getCompletedRebalances as getIndexDtfCompletedRebalances,

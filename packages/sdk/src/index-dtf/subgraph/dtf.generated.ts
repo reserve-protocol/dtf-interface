@@ -210,6 +210,27 @@ export type AccountBalance_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  optimisticDelegate?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_?: InputMaybe<Delegate_Filter>;
+  optimisticDelegate_contains?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_ends_with?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_gt?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_gte?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticDelegate_lt?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_lte?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_not?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_not_contains?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticDelegate_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_starts_with?: InputMaybe<Scalars['String']['input']>;
+  optimisticDelegate_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   or?: InputMaybe<Array<InputMaybe<AccountBalance_Filter>>>;
   timestamp?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
@@ -252,11 +273,30 @@ export type AccountBalance_OrderBy =
   | 'delegate__address'
   | 'delegate__delegatedVotes'
   | 'delegate__delegatedVotesRaw'
+  | 'delegate__hasBeenOptimisticDelegate'
+  | 'delegate__hasBeenStandardDelegate'
   | 'delegate__id'
+  | 'delegate__numberOptimisticVotes'
   | 'delegate__numberVotes'
+  | 'delegate__optimisticDelegatedVotes'
+  | 'delegate__optimisticDelegatedVotesRaw'
+  | 'delegate__optimisticTokenHoldersRepresentedAmount'
   | 'delegate__tokenHoldersRepresentedAmount'
   | 'firstHoldTimestamp'
   | 'id'
+  | 'optimisticDelegate'
+  | 'optimisticDelegate__address'
+  | 'optimisticDelegate__delegatedVotes'
+  | 'optimisticDelegate__delegatedVotesRaw'
+  | 'optimisticDelegate__hasBeenOptimisticDelegate'
+  | 'optimisticDelegate__hasBeenStandardDelegate'
+  | 'optimisticDelegate__id'
+  | 'optimisticDelegate__numberOptimisticVotes'
+  | 'optimisticDelegate__numberVotes'
+  | 'optimisticDelegate__optimisticDelegatedVotes'
+  | 'optimisticDelegate__optimisticDelegatedVotesRaw'
+  | 'optimisticDelegate__optimisticTokenHoldersRepresentedAmount'
+  | 'optimisticDelegate__tokenHoldersRepresentedAmount'
   | 'timestamp'
   | 'token'
   | 'token__address'
@@ -1084,7 +1124,13 @@ export type Dtf_OrderBy =
   | 'ownerAddress'
   | 'ownerGovernance'
   | 'ownerGovernance__id'
+  | 'ownerGovernance__isOptimistic'
   | 'ownerGovernance__name'
+  | 'ownerGovernance__optimisticProposalThrottleCapacity'
+  | 'ownerGovernance__optimisticSelectorRegistry'
+  | 'ownerGovernance__optimisticVetoDelay'
+  | 'ownerGovernance__optimisticVetoPeriod'
+  | 'ownerGovernance__optimisticVetoThreshold'
   | 'ownerGovernance__proposalCount'
   | 'ownerGovernance__proposalThreshold'
   | 'ownerGovernance__proposalsCanceled'
@@ -1103,10 +1149,14 @@ export type Dtf_OrderBy =
   | 'stToken'
   | 'stTokenAddress'
   | 'stToken__currentDelegates'
+  | 'stToken__currentOptimisticDelegates'
   | 'stToken__delegatedVotes'
   | 'stToken__delegatedVotesRaw'
   | 'stToken__id'
+  | 'stToken__optimisticDelegatedVotes'
+  | 'stToken__optimisticDelegatedVotesRaw'
   | 'stToken__totalDelegates'
+  | 'stToken__totalOptimisticDelegates'
   | 'timestamp'
   | 'token'
   | 'token__address'
@@ -1126,7 +1176,13 @@ export type Dtf_OrderBy =
   | 'totalRevenue'
   | 'tradingGovernance'
   | 'tradingGovernance__id'
+  | 'tradingGovernance__isOptimistic'
   | 'tradingGovernance__name'
+  | 'tradingGovernance__optimisticProposalThrottleCapacity'
+  | 'tradingGovernance__optimisticSelectorRegistry'
+  | 'tradingGovernance__optimisticVetoDelay'
+  | 'tradingGovernance__optimisticVetoPeriod'
+  | 'tradingGovernance__optimisticVetoThreshold'
   | 'tradingGovernance__proposalCount'
   | 'tradingGovernance__proposalThreshold'
   | 'tradingGovernance__proposalsCanceled'
@@ -1211,6 +1267,10 @@ export type DelegateChange_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  isOptimistic?: InputMaybe<Scalars['Boolean']['input']>;
+  isOptimistic_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  isOptimistic_not?: InputMaybe<Scalars['Boolean']['input']>;
+  isOptimistic_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   logIndex?: InputMaybe<Scalars['BigInt']['input']>;
   logIndex_gt?: InputMaybe<Scalars['BigInt']['input']>;
   logIndex_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1288,6 +1348,7 @@ export type DelegateChange_OrderBy =
   | 'delegate'
   | 'delegator'
   | 'id'
+  | 'isOptimistic'
   | 'logIndex'
   | 'previousDelegate'
   | 'tokenAddress'
@@ -1341,6 +1402,10 @@ export type DelegateVotingPowerChange_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  isOptimistic?: InputMaybe<Scalars['Boolean']['input']>;
+  isOptimistic_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  isOptimistic_not?: InputMaybe<Scalars['Boolean']['input']>;
+  isOptimistic_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   logIndex?: InputMaybe<Scalars['BigInt']['input']>;
   logIndex_gt?: InputMaybe<Scalars['BigInt']['input']>;
   logIndex_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1413,6 +1478,7 @@ export type DelegateVotingPowerChange_OrderBy =
   | 'blockTimestamp'
   | 'delegate'
   | 'id'
+  | 'isOptimistic'
   | 'logIndex'
   | 'newBalance'
   | 'previousBalance'
@@ -1459,6 +1525,14 @@ export type Delegate_Filter = {
   delegatedVotes_lte?: InputMaybe<Scalars['BigDecimal']['input']>;
   delegatedVotes_not?: InputMaybe<Scalars['BigDecimal']['input']>;
   delegatedVotes_not_in?: InputMaybe<Array<Scalars['BigDecimal']['input']>>;
+  hasBeenOptimisticDelegate?: InputMaybe<Scalars['Boolean']['input']>;
+  hasBeenOptimisticDelegate_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  hasBeenOptimisticDelegate_not?: InputMaybe<Scalars['Boolean']['input']>;
+  hasBeenOptimisticDelegate_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  hasBeenStandardDelegate?: InputMaybe<Scalars['Boolean']['input']>;
+  hasBeenStandardDelegate_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  hasBeenStandardDelegate_not?: InputMaybe<Scalars['Boolean']['input']>;
+  hasBeenStandardDelegate_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -1467,6 +1541,14 @@ export type Delegate_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  numberOptimisticVotes?: InputMaybe<Scalars['Int']['input']>;
+  numberOptimisticVotes_gt?: InputMaybe<Scalars['Int']['input']>;
+  numberOptimisticVotes_gte?: InputMaybe<Scalars['Int']['input']>;
+  numberOptimisticVotes_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  numberOptimisticVotes_lt?: InputMaybe<Scalars['Int']['input']>;
+  numberOptimisticVotes_lte?: InputMaybe<Scalars['Int']['input']>;
+  numberOptimisticVotes_not?: InputMaybe<Scalars['Int']['input']>;
+  numberOptimisticVotes_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   numberVotes?: InputMaybe<Scalars['Int']['input']>;
   numberVotes_gt?: InputMaybe<Scalars['Int']['input']>;
   numberVotes_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -1475,6 +1557,31 @@ export type Delegate_Filter = {
   numberVotes_lte?: InputMaybe<Scalars['Int']['input']>;
   numberVotes_not?: InputMaybe<Scalars['Int']['input']>;
   numberVotes_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  optimisticDelegatedVotes?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotesRaw?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticDelegatedVotesRaw_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_not?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticDelegatedVotes_gt?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_gte?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_in?: InputMaybe<Array<Scalars['BigDecimal']['input']>>;
+  optimisticDelegatedVotes_lt?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_lte?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_not?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_not_in?: InputMaybe<Array<Scalars['BigDecimal']['input']>>;
+  optimisticTokenHoldersRepresentedAmount?: InputMaybe<Scalars['Int']['input']>;
+  optimisticTokenHoldersRepresentedAmount_gt?: InputMaybe<Scalars['Int']['input']>;
+  optimisticTokenHoldersRepresentedAmount_gte?: InputMaybe<Scalars['Int']['input']>;
+  optimisticTokenHoldersRepresentedAmount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  optimisticTokenHoldersRepresentedAmount_lt?: InputMaybe<Scalars['Int']['input']>;
+  optimisticTokenHoldersRepresentedAmount_lte?: InputMaybe<Scalars['Int']['input']>;
+  optimisticTokenHoldersRepresentedAmount_not?: InputMaybe<Scalars['Int']['input']>;
+  optimisticTokenHoldersRepresentedAmount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  optimisticTokenHoldersRepresented_?: InputMaybe<AccountBalance_Filter>;
   or?: InputMaybe<Array<InputMaybe<Delegate_Filter>>>;
   proposals_?: InputMaybe<Proposal_Filter>;
   token?: InputMaybe<Scalars['String']['input']>;
@@ -1514,17 +1621,28 @@ export type Delegate_OrderBy =
   | 'address'
   | 'delegatedVotes'
   | 'delegatedVotesRaw'
+  | 'hasBeenOptimisticDelegate'
+  | 'hasBeenStandardDelegate'
   | 'id'
+  | 'numberOptimisticVotes'
   | 'numberVotes'
+  | 'optimisticDelegatedVotes'
+  | 'optimisticDelegatedVotesRaw'
+  | 'optimisticTokenHoldersRepresented'
+  | 'optimisticTokenHoldersRepresentedAmount'
   | 'proposals'
   | 'token'
   | 'tokenHoldersRepresented'
   | 'tokenHoldersRepresentedAmount'
   | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
   | 'token__id'
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
   | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates'
   | 'votes';
 
 export type Event_Filter = {
@@ -1751,6 +1869,12 @@ export type GovernanceTimelock_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  optimisticProposers?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_not?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_not_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_not_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
   or?: InputMaybe<Array<InputMaybe<GovernanceTimelock_Filter>>>;
   type?: InputMaybe<Scalars['String']['input']>;
   type_contains?: InputMaybe<Scalars['String']['input']>;
@@ -1779,7 +1903,13 @@ export type GovernanceTimelock_OrderBy =
   | 'executionDelay'
   | 'governance'
   | 'governance__id'
+  | 'governance__isOptimistic'
   | 'governance__name'
+  | 'governance__optimisticProposalThrottleCapacity'
+  | 'governance__optimisticSelectorRegistry'
+  | 'governance__optimisticVetoDelay'
+  | 'governance__optimisticVetoPeriod'
+  | 'governance__optimisticVetoThreshold'
   | 'governance__proposalCount'
   | 'governance__proposalThreshold'
   | 'governance__proposalsCanceled'
@@ -1793,6 +1923,7 @@ export type GovernanceTimelock_OrderBy =
   | 'governance__votingPeriod'
   | 'guardians'
   | 'id'
+  | 'optimisticProposers'
   | 'type';
 
 export type Governance_Filter = {
@@ -1807,6 +1938,10 @@ export type Governance_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  isOptimistic?: InputMaybe<Scalars['Boolean']['input']>;
+  isOptimistic_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  isOptimistic_not?: InputMaybe<Scalars['Boolean']['input']>;
+  isOptimistic_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   name_contains?: InputMaybe<Scalars['String']['input']>;
   name_contains_nocase?: InputMaybe<Scalars['String']['input']>;
@@ -1827,6 +1962,54 @@ export type Governance_Filter = {
   name_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   name_starts_with?: InputMaybe<Scalars['String']['input']>;
   name_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  optimisticProposalThrottleCapacity?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticProposalThrottleCapacity_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticProposalThrottleCapacity_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticProposalThrottleCapacity_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticProposalThrottleCapacity_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticProposalThrottleCapacity_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticProposalThrottleCapacity_not?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticProposalThrottleCapacity_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticProposers?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_not?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_not_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticProposers_not_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticSelectorRegistry?: InputMaybe<Scalars['Bytes']['input']>;
+  optimisticSelectorRegistry_contains?: InputMaybe<Scalars['Bytes']['input']>;
+  optimisticSelectorRegistry_gt?: InputMaybe<Scalars['Bytes']['input']>;
+  optimisticSelectorRegistry_gte?: InputMaybe<Scalars['Bytes']['input']>;
+  optimisticSelectorRegistry_in?: InputMaybe<Array<Scalars['Bytes']['input']>>;
+  optimisticSelectorRegistry_lt?: InputMaybe<Scalars['Bytes']['input']>;
+  optimisticSelectorRegistry_lte?: InputMaybe<Scalars['Bytes']['input']>;
+  optimisticSelectorRegistry_not?: InputMaybe<Scalars['Bytes']['input']>;
+  optimisticSelectorRegistry_not_contains?: InputMaybe<Scalars['Bytes']['input']>;
+  optimisticSelectorRegistry_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>;
+  optimisticVetoDelay?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoDelay_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoDelay_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoDelay_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticVetoDelay_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoDelay_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoDelay_not?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoDelay_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticVetoPeriod?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoPeriod_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoPeriod_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoPeriod_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticVetoPeriod_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoPeriod_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoPeriod_not?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoPeriod_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticVetoThreshold?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoThreshold_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoThreshold_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoThreshold_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticVetoThreshold_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoThreshold_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoThreshold_not?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticVetoThreshold_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   or?: InputMaybe<Array<InputMaybe<Governance_Filter>>>;
   proposalCount?: InputMaybe<Scalars['BigInt']['input']>;
   proposalCount_gt?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1975,7 +2158,14 @@ export type Governance_Filter = {
 
 export type Governance_OrderBy =
   | 'id'
+  | 'isOptimistic'
   | 'name'
+  | 'optimisticProposalThrottleCapacity'
+  | 'optimisticProposers'
+  | 'optimisticSelectorRegistry'
+  | 'optimisticVetoDelay'
+  | 'optimisticVetoPeriod'
+  | 'optimisticVetoThreshold'
   | 'proposalCount'
   | 'proposalThreshold'
   | 'proposals'
@@ -1992,10 +2182,14 @@ export type Governance_OrderBy =
   | 'timelock__type'
   | 'token'
   | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
   | 'token__id'
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
   | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates'
   | 'version'
   | 'votingDelay'
   | 'votingPeriod';
@@ -2206,10 +2400,14 @@ export type Lock_OrderBy =
   | 'lockId'
   | 'token'
   | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
   | 'token__id'
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
   | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates'
   | 'unlockTime';
 
 export type Minting_Filter = {
@@ -2574,6 +2772,10 @@ export type Proposal_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  isOptimistic?: InputMaybe<Scalars['Boolean']['input']>;
+  isOptimistic_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  isOptimistic_not?: InputMaybe<Scalars['Boolean']['input']>;
+  isOptimistic_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   or?: InputMaybe<Array<InputMaybe<Proposal_Filter>>>;
   proposer?: InputMaybe<Scalars['String']['input']>;
   proposer_?: InputMaybe<Delegate_Filter>;
@@ -2745,6 +2947,14 @@ export type Proposal_Filter = {
   values_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   values_not?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   values_not_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  vetoThreshold?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  vetoThreshold_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_not?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   voteEnd?: InputMaybe<Scalars['BigInt']['input']>;
   voteEnd_gt?: InputMaybe<Scalars['BigInt']['input']>;
   voteEnd_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -2789,7 +2999,13 @@ export type Proposal_OrderBy =
   | 'forWeightedVotes'
   | 'governance'
   | 'governance__id'
+  | 'governance__isOptimistic'
   | 'governance__name'
+  | 'governance__optimisticProposalThrottleCapacity'
+  | 'governance__optimisticSelectorRegistry'
+  | 'governance__optimisticVetoDelay'
+  | 'governance__optimisticVetoPeriod'
+  | 'governance__optimisticVetoThreshold'
   | 'governance__proposalCount'
   | 'governance__proposalThreshold'
   | 'governance__proposalsCanceled'
@@ -2802,12 +3018,19 @@ export type Proposal_OrderBy =
   | 'governance__votingDelay'
   | 'governance__votingPeriod'
   | 'id'
+  | 'isOptimistic'
   | 'proposer'
   | 'proposer__address'
   | 'proposer__delegatedVotes'
   | 'proposer__delegatedVotesRaw'
+  | 'proposer__hasBeenOptimisticDelegate'
+  | 'proposer__hasBeenStandardDelegate'
   | 'proposer__id'
+  | 'proposer__numberOptimisticVotes'
   | 'proposer__numberVotes'
+  | 'proposer__optimisticDelegatedVotes'
+  | 'proposer__optimisticDelegatedVotesRaw'
+  | 'proposer__optimisticTokenHoldersRepresentedAmount'
   | 'proposer__tokenHoldersRepresentedAmount'
   | 'queueAccount'
   | 'queueAccount__id'
@@ -2824,6 +3047,7 @@ export type Proposal_OrderBy =
   | 'totalWeightedVotes'
   | 'txnHash'
   | 'values'
+  | 'vetoThreshold'
   | 'voteEnd'
   | 'voteStart'
   | 'votes';
@@ -3712,10 +3936,14 @@ export type RewardClaim_OrderBy =
   | 'timestamp'
   | 'token'
   | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
   | 'token__id'
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
   | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates'
   | 'txnHash';
 
 export type StakingTokenRewards_Filter = {
@@ -3799,10 +4027,14 @@ export type StakingTokenRewards_OrderBy =
   | 'rewardToken__type'
   | 'stToken'
   | 'stToken__currentDelegates'
+  | 'stToken__currentOptimisticDelegates'
   | 'stToken__delegatedVotes'
   | 'stToken__delegatedVotesRaw'
   | 'stToken__id'
-  | 'stToken__totalDelegates';
+  | 'stToken__optimisticDelegatedVotes'
+  | 'stToken__optimisticDelegatedVotesRaw'
+  | 'stToken__totalDelegates'
+  | 'stToken__totalOptimisticDelegates';
 
 export type StakingToken_Filter = {
   /** Filter for the block changed event. */
@@ -3816,6 +4048,14 @@ export type StakingToken_Filter = {
   currentDelegates_lte?: InputMaybe<Scalars['BigInt']['input']>;
   currentDelegates_not?: InputMaybe<Scalars['BigInt']['input']>;
   currentDelegates_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentOptimisticDelegates?: InputMaybe<Scalars['BigInt']['input']>;
+  currentOptimisticDelegates_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentOptimisticDelegates_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentOptimisticDelegates_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentOptimisticDelegates_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentOptimisticDelegates_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentOptimisticDelegates_not?: InputMaybe<Scalars['BigInt']['input']>;
+  currentOptimisticDelegates_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   daos_?: InputMaybe<Governance_Filter>;
   delegatedVotes?: InputMaybe<Scalars['BigDecimal']['input']>;
   delegatedVotesRaw?: InputMaybe<Scalars['BigInt']['input']>;
@@ -3870,6 +4110,22 @@ export type StakingToken_Filter = {
   legacyGovernance_not?: InputMaybe<Array<Scalars['String']['input']>>;
   legacyGovernance_not_contains?: InputMaybe<Array<Scalars['String']['input']>>;
   legacyGovernance_not_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
+  optimisticDelegatedVotes?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotesRaw?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticDelegatedVotesRaw_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_not?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticDelegatedVotesRaw_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticDelegatedVotes_gt?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_gte?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_in?: InputMaybe<Array<Scalars['BigDecimal']['input']>>;
+  optimisticDelegatedVotes_lt?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_lte?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_not?: InputMaybe<Scalars['BigDecimal']['input']>;
+  optimisticDelegatedVotes_not_in?: InputMaybe<Array<Scalars['BigDecimal']['input']>>;
   or?: InputMaybe<Array<InputMaybe<StakingToken_Filter>>>;
   rewards_?: InputMaybe<StakingTokenRewards_Filter>;
   token?: InputMaybe<Scalars['String']['input']>;
@@ -3901,6 +4157,14 @@ export type StakingToken_Filter = {
   totalDelegates_lte?: InputMaybe<Scalars['BigInt']['input']>;
   totalDelegates_not?: InputMaybe<Scalars['BigInt']['input']>;
   totalDelegates_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalOptimisticDelegates?: InputMaybe<Scalars['BigInt']['input']>;
+  totalOptimisticDelegates_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalOptimisticDelegates_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalOptimisticDelegates_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalOptimisticDelegates_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalOptimisticDelegates_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalOptimisticDelegates_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalOptimisticDelegates_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   underlying?: InputMaybe<Scalars['String']['input']>;
   underlying_?: InputMaybe<Token_Filter>;
   underlying_contains?: InputMaybe<Scalars['String']['input']>;
@@ -3926,6 +4190,7 @@ export type StakingToken_Filter = {
 
 export type StakingToken_OrderBy =
   | 'currentDelegates'
+  | 'currentOptimisticDelegates'
   | 'daos'
   | 'delegatedVotes'
   | 'delegatedVotesRaw'
@@ -3933,7 +4198,13 @@ export type StakingToken_OrderBy =
   | 'dtfs'
   | 'governance'
   | 'governance__id'
+  | 'governance__isOptimistic'
   | 'governance__name'
+  | 'governance__optimisticProposalThrottleCapacity'
+  | 'governance__optimisticSelectorRegistry'
+  | 'governance__optimisticVetoDelay'
+  | 'governance__optimisticVetoPeriod'
+  | 'governance__optimisticVetoThreshold'
   | 'governance__proposalCount'
   | 'governance__proposalThreshold'
   | 'governance__proposalsCanceled'
@@ -3947,6 +4218,8 @@ export type StakingToken_OrderBy =
   | 'governance__votingPeriod'
   | 'id'
   | 'legacyGovernance'
+  | 'optimisticDelegatedVotes'
+  | 'optimisticDelegatedVotesRaw'
   | 'rewards'
   | 'token'
   | 'token__address'
@@ -3964,6 +4237,7 @@ export type StakingToken_OrderBy =
   | 'token__transferCount'
   | 'token__type'
   | 'totalDelegates'
+  | 'totalOptimisticDelegates'
   | 'underlying'
   | 'underlying__address'
   | 'underlying__burnCount'
@@ -4113,6 +4387,7 @@ export type TimelockOperation_OrderBy =
   | 'proposal__forDelegateVotes'
   | 'proposal__forWeightedVotes'
   | 'proposal__id'
+  | 'proposal__isOptimistic'
   | 'proposal__queueBlock'
   | 'proposal__queueTime'
   | 'proposal__queueTxnHash'
@@ -4123,6 +4398,7 @@ export type TimelockOperation_OrderBy =
   | 'proposal__totalDelegateVotes'
   | 'proposal__totalWeightedVotes'
   | 'proposal__txnHash'
+  | 'proposal__vetoThreshold'
   | 'proposal__voteEnd'
   | 'proposal__voteStart'
   | 'timestamp'
@@ -4536,6 +4812,38 @@ export type TokenMonthlySnapshot_Filter = {
   blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>;
   blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>;
   blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeBurnAmount?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeBurnAmount_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeBurnAmount_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeBurnAmount_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeBurnAmount_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeBurnAmount_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeBurnAmount_not?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeBurnAmount_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeExternalRevenue?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeExternalRevenue_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeExternalRevenue_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeExternalRevenue_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeExternalRevenue_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeExternalRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeExternalRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeExternalRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeGovernanceRevenue?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeGovernanceRevenue_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeGovernanceRevenue_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeGovernanceRevenue_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeGovernanceRevenue_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeGovernanceRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeGovernanceRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeGovernanceRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeHolderCount?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeHolderCount_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeHolderCount_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeHolderCount_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeHolderCount_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeHolderCount_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeHolderCount_not?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeHolderCount_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   cumulativeMintAmount?: InputMaybe<Scalars['BigInt']['input']>;
   cumulativeMintAmount_gt?: InputMaybe<Scalars['BigInt']['input']>;
   cumulativeMintAmount_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -4560,6 +4868,14 @@ export type TokenMonthlySnapshot_Filter = {
   cumulativeRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
   cumulativeRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
   cumulativeRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentHolderCount?: InputMaybe<Scalars['BigInt']['input']>;
+  currentHolderCount_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentHolderCount_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentHolderCount_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentHolderCount_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentHolderCount_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentHolderCount_not?: InputMaybe<Scalars['BigInt']['input']>;
+  currentHolderCount_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -4584,6 +4900,14 @@ export type TokenMonthlySnapshot_Filter = {
   monthlyBurnCount_lte?: InputMaybe<Scalars['Int']['input']>;
   monthlyBurnCount_not?: InputMaybe<Scalars['Int']['input']>;
   monthlyBurnCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  monthlyEventCount?: InputMaybe<Scalars['Int']['input']>;
+  monthlyEventCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  monthlyEventCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  monthlyEventCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  monthlyEventCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  monthlyEventCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  monthlyEventCount_not?: InputMaybe<Scalars['Int']['input']>;
+  monthlyEventCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   monthlyExternalRevenue?: InputMaybe<Scalars['BigInt']['input']>;
   monthlyExternalRevenue_gt?: InputMaybe<Scalars['BigInt']['input']>;
   monthlyExternalRevenue_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -4640,6 +4964,22 @@ export type TokenMonthlySnapshot_Filter = {
   monthlyTotalSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
   monthlyTotalSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
   monthlyTotalSupply_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  monthlyTransferAmount?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlyTransferAmount_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlyTransferAmount_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlyTransferAmount_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  monthlyTransferAmount_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlyTransferAmount_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlyTransferAmount_not?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlyTransferAmount_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  monthlyTransferCount?: InputMaybe<Scalars['Int']['input']>;
+  monthlyTransferCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  monthlyTransferCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  monthlyTransferCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  monthlyTransferCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  monthlyTransferCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  monthlyTransferCount_not?: InputMaybe<Scalars['Int']['input']>;
+  monthlyTransferCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   or?: InputMaybe<Array<InputMaybe<TokenMonthlySnapshot_Filter>>>;
   timestamp?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
@@ -4674,12 +5014,18 @@ export type TokenMonthlySnapshot_Filter = {
 
 export type TokenMonthlySnapshot_OrderBy =
   | 'blockNumber'
+  | 'cumulativeBurnAmount'
+  | 'cumulativeExternalRevenue'
+  | 'cumulativeGovernanceRevenue'
+  | 'cumulativeHolderCount'
   | 'cumulativeMintAmount'
   | 'cumulativeProtocolRevenue'
   | 'cumulativeRevenue'
+  | 'currentHolderCount'
   | 'id'
   | 'monthlyBurnAmount'
   | 'monthlyBurnCount'
+  | 'monthlyEventCount'
   | 'monthlyExternalRevenue'
   | 'monthlyGovernanceRevenue'
   | 'monthlyMintAmount'
@@ -4687,6 +5033,8 @@ export type TokenMonthlySnapshot_OrderBy =
   | 'monthlyProtocolRevenue'
   | 'monthlyRevenue'
   | 'monthlyTotalSupply'
+  | 'monthlyTransferAmount'
+  | 'monthlyTransferCount'
   | 'timestamp'
   | 'token'
   | 'token__address'
@@ -5540,10 +5888,14 @@ export type UnstakingManager_OrderBy =
   | 'id'
   | 'token'
   | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
   | 'token__id'
-  | 'token__totalDelegates';
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
+  | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates';
 
 export type Version_Filter = {
   /** Filter for the block changed event. */
@@ -5717,6 +6069,7 @@ export type VoteDailySnapshot_OrderBy =
   | 'proposal__forDelegateVotes'
   | 'proposal__forWeightedVotes'
   | 'proposal__id'
+  | 'proposal__isOptimistic'
   | 'proposal__queueBlock'
   | 'proposal__queueTime'
   | 'proposal__queueTxnHash'
@@ -5727,6 +6080,7 @@ export type VoteDailySnapshot_OrderBy =
   | 'proposal__totalDelegateVotes'
   | 'proposal__totalWeightedVotes'
   | 'proposal__txnHash'
+  | 'proposal__vetoThreshold'
   | 'proposal__voteEnd'
   | 'proposal__voteStart'
   | 'timestamp'
@@ -5911,6 +6265,7 @@ export type Vote_OrderBy =
   | 'proposal__forDelegateVotes'
   | 'proposal__forWeightedVotes'
   | 'proposal__id'
+  | 'proposal__isOptimistic'
   | 'proposal__queueBlock'
   | 'proposal__queueTime'
   | 'proposal__queueTxnHash'
@@ -5921,6 +6276,7 @@ export type Vote_OrderBy =
   | 'proposal__totalDelegateVotes'
   | 'proposal__totalWeightedVotes'
   | 'proposal__txnHash'
+  | 'proposal__vetoThreshold'
   | 'proposal__voteEnd'
   | 'proposal__voteStart'
   | 'reason'
@@ -5929,8 +6285,14 @@ export type Vote_OrderBy =
   | 'voter__address'
   | 'voter__delegatedVotes'
   | 'voter__delegatedVotesRaw'
+  | 'voter__hasBeenOptimisticDelegate'
+  | 'voter__hasBeenStandardDelegate'
   | 'voter__id'
+  | 'voter__numberOptimisticVotes'
   | 'voter__numberVotes'
+  | 'voter__optimisticDelegatedVotes'
+  | 'voter__optimisticDelegatedVotesRaw'
+  | 'voter__optimisticTokenHoldersRepresentedAmount'
   | 'voter__tokenHoldersRepresentedAmount'
   | 'weight';
 
@@ -5946,7 +6308,7 @@ export type GetIndexDtfQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfQuery = { dtf?: { id: string, proxyAdmin: string, timestamp: string, deployer: string, ownerAddress: string, admins: Array<string>, mintingFee: string, tvlFee: string, annualizedTvlFee: string, mandate: string, auctionDelay: string, auctionLength: string, auctionApprovers: Array<string>, auctionLaunchers: Array<string>, brandManagers: Array<string>, totalRevenue: string, protocolRevenue: string, governanceRevenue: string, externalRevenue: string, feeRecipients: string, bidsEnabled?: boolean | null, trustedFillerRegistry?: string | null, trustedFillerEnabled?: boolean | null, weightControl: boolean, priceControl: number, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumNumerator?: string | null, quorumDenominator?: string | null, timelock: { id: string, guardians: Array<string>, executionDelay: string } } | null, tradingGovernance?: { id: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumNumerator?: string | null, quorumDenominator?: string | null, timelock: { id: string, guardians: Array<string>, executionDelay: string } } | null, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, stToken?: { id: string, legacyGovernance: Array<string>, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, underlying?: { name: string, symbol: string, address: string, decimals: number } | null, governance?: { id: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumNumerator?: string | null, quorumDenominator?: string | null, timelock: { id: string, guardians: Array<string>, executionDelay: string } } | null, rewards: Array<{ rewardToken: { address: string, name: string, symbol: string, decimals: number } }> } | null } | null };
+export type GetIndexDtfQuery = { dtf?: { id: string, proxyAdmin: string, timestamp: string, deployer: string, ownerAddress: string, admins: Array<string>, mintingFee: string, tvlFee: string, annualizedTvlFee: string, mandate: string, auctionDelay: string, auctionLength: string, auctionApprovers: Array<string>, auctionLaunchers: Array<string>, brandManagers: Array<string>, totalRevenue: string, protocolRevenue: string, governanceRevenue: string, externalRevenue: string, feeRecipients: string, bidsEnabled?: boolean | null, trustedFillerRegistry?: string | null, trustedFillerEnabled?: boolean | null, weightControl: boolean, priceControl: number, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, tradingGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, stToken?: { id: string, currentDelegates: string, totalDelegates: string, delegatedVotesRaw: string, currentOptimisticDelegates: string, totalOptimisticDelegates: string, optimisticDelegatedVotesRaw: string, legacyGovernance: Array<string>, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, underlying?: { name: string, symbol: string, address: string, decimals: number } | null, governance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, rewards: Array<{ rewardToken: { address: string, name: string, symbol: string, decimals: number } }> } | null } | null };
 
 export type GetIndexDtfProposalsQueryVariables = Exact<{
   governanceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
@@ -5954,7 +6316,7 @@ export type GetIndexDtfProposalsQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalsQuery = { governances: Array<{ id: string, proposalCount: string, proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, timelock: { id: string } } }> }> };
+export type GetIndexDtfProposalsQuery = { governances: Array<{ id: string, proposalCount: string, proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, timelock: { id: string } } }> }> };
 
 export type GetAllIndexDtfProposalsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -5963,7 +6325,7 @@ export type GetAllIndexDtfProposalsQueryVariables = Exact<{
 }>;
 
 
-export type GetAllIndexDtfProposalsQuery = { proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, timelock: { id: string } } }> };
+export type GetAllIndexDtfProposalsQuery = { proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, timelock: { id: string } } }> };
 
 export type GetIndexDtfProposalGovernanceAddressesQueryVariables = Exact<{
   dtfId: Scalars['ID']['input'];
@@ -5972,7 +6334,7 @@ export type GetIndexDtfProposalGovernanceAddressesQueryVariables = Exact<{
 
 export type GetIndexDtfProposalGovernanceAddressesQuery = { dtf?: { legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null, stToken?: { legacyGovernance: Array<string>, governance?: { id: string } | null } | null } | null };
 
-export type IndexDtfProposalContractContextFragment = { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, timelock: { id: string } } | null, tradingGovernance?: { id: string, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, timelock: { id: string } } | null } | null };
+export type IndexDtfProposalContractContextFragment = { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null };
 
 export type GetIndexDtfProposalQueryVariables = Exact<{
   proposalId: Scalars['ID']['input'];
@@ -5980,7 +6342,7 @@ export type GetIndexDtfProposalQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, timelock: { id: string } } | null, tradingGovernance?: { id: string, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, timelock: { id: string } } | null } | null } | null, proposal?: { id: string, timelockId?: string | null, description: string, creationTime: string, voteStart: string, voteEnd: string, queueBlock?: string | null, queueTime?: string | null, state: ProposalState, executionETA?: string | null, executionTime?: string | null, executionBlock?: string | null, creationBlock: string, cancellationTime?: string | null, calldatas?: Array<string> | null, targets?: Array<string> | null, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, abstainDelegateVotes: string, againstDelegateVotes: string, executionTxnHash?: string | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governance: { id: string, timelock: { id: string, type: string } } } | null };
+export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null } | null, proposal?: { id: string, timelockId?: string | null, description: string, creationTime: string, voteStart: string, voteEnd: string, queueBlock?: string | null, queueTime?: string | null, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, executionETA?: string | null, executionTime?: string | null, executionBlock?: string | null, creationBlock: string, cancellationTime?: string | null, calldatas?: Array<string> | null, targets?: Array<string> | null, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, abstainDelegateVotes: string, againstDelegateVotes: string, executionTxnHash?: string | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governance: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string, type: string } } } | null };
 
 export type GetIndexDtfDelegatesQueryVariables = Exact<{
   stToken: Scalars['ID']['input'];
@@ -5988,7 +6350,7 @@ export type GetIndexDtfDelegatesQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfDelegatesQuery = { stakingToken?: { id: string, totalDelegates: string, token: { totalSupply: string }, delegates: Array<{ address: string, delegatedVotes: string, numberVotes: number }> } | null };
+export type GetIndexDtfDelegatesQuery = { stakingToken?: { id: string, totalDelegates: string, token: { totalSupply: string }, delegates: Array<{ address: string, delegatedVotesRaw: string, optimisticDelegatedVotesRaw: string, numberVotes: number, numberOptimisticVotes: number, hasBeenStandardDelegate: boolean, hasBeenOptimisticDelegate: boolean, tokenHoldersRepresentedAmount: number, optimisticTokenHoldersRepresentedAmount: number }> } | null };
 
 export type GetIndexDtfRebalancesQueryVariables = Exact<{
   dtf: Scalars['String']['input'];
@@ -6056,12 +6418,14 @@ export const IndexDtfProposalContractContextFragmentDoc = new TypedDocumentStrin
   legacyAuctionApprovers
   ownerGovernance {
     id
+    optimisticSelectorRegistry
     timelock {
       id
     }
   }
   tradingGovernance {
     id
+    optimisticSelectorRegistry
     timelock {
       id
     }
@@ -6071,6 +6435,7 @@ export const IndexDtfProposalContractContextFragmentDoc = new TypedDocumentStrin
     legacyGovernance
     governance {
       id
+      optimisticSelectorRegistry
       timelock {
         id
       }
@@ -6108,29 +6473,53 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
     priceControl
     ownerGovernance {
       id
+      name
+      version
       votingDelay
       votingPeriod
       proposalThreshold
+      quorumVotes
       quorumNumerator
       quorumDenominator
+      isOptimistic
+      optimisticVetoDelay
+      optimisticVetoPeriod
+      optimisticVetoThreshold
+      optimisticProposalThrottleCapacity
+      optimisticSelectorRegistry
+      optimisticProposers
       timelock {
         id
         guardians
+        optimisticProposers
         executionDelay
+        type
       }
     }
     legacyAdmins
     tradingGovernance {
       id
+      name
+      version
       votingDelay
       votingPeriod
       proposalThreshold
+      quorumVotes
       quorumNumerator
       quorumDenominator
+      isOptimistic
+      optimisticVetoDelay
+      optimisticVetoPeriod
+      optimisticVetoThreshold
+      optimisticProposalThrottleCapacity
+      optimisticSelectorRegistry
+      optimisticProposers
       timelock {
         id
         guardians
+        optimisticProposers
         executionDelay
+        type
       }
     }
     legacyAuctionApprovers
@@ -6166,6 +6555,12 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
         totalBurned
         totalMinted
       }
+      currentDelegates
+      totalDelegates
+      delegatedVotesRaw
+      currentOptimisticDelegates
+      totalOptimisticDelegates
+      optimisticDelegatedVotesRaw
       underlying {
         name
         symbol
@@ -6174,15 +6569,27 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
       }
       governance {
         id
+        name
+        version
         votingDelay
         votingPeriod
         proposalThreshold
+        quorumVotes
         quorumNumerator
         quorumDenominator
+        isOptimistic
+        optimisticVetoDelay
+        optimisticVetoPeriod
+        optimisticVetoThreshold
+        optimisticProposalThrottleCapacity
+        optimisticSelectorRegistry
+        optimisticProposers
         timelock {
           id
           guardians
+          optimisticProposers
           executionDelay
+          type
         }
       }
       legacyGovernance
@@ -6207,6 +6614,8 @@ export const GetIndexDtfProposalsDocument = new TypedDocumentString(`
       description
       creationTime
       state
+      isOptimistic
+      vetoThreshold
       forWeightedVotes
       abstainWeightedVotes
       againstWeightedVotes
@@ -6244,6 +6653,8 @@ export const GetAllIndexDtfProposalsDocument = new TypedDocumentString(`
     description
     creationTime
     state
+    isOptimistic
+    vetoThreshold
     forWeightedVotes
     abstainWeightedVotes
     againstWeightedVotes
@@ -6301,6 +6712,8 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
     queueBlock
     queueTime
     state
+    isOptimistic
+    vetoThreshold
     executionETA
     executionTime
     executionBlock
@@ -6328,6 +6741,7 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
     executionTxnHash
     governance {
       id
+      optimisticSelectorRegistry
       timelock {
         id
         type
@@ -6342,12 +6756,14 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
   legacyAuctionApprovers
   ownerGovernance {
     id
+    optimisticSelectorRegistry
     timelock {
       id
     }
   }
   tradingGovernance {
     id
+    optimisticSelectorRegistry
     timelock {
       id
     }
@@ -6357,6 +6773,7 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
     legacyGovernance
     governance {
       id
+      optimisticSelectorRegistry
       timelock {
         id
       }
@@ -6378,8 +6795,14 @@ export const GetIndexDtfDelegatesDocument = new TypedDocumentString(`
       where: {address_not: "0x0000000000000000000000000000000000000000"}
     ) {
       address
-      delegatedVotes
+      delegatedVotesRaw
+      optimisticDelegatedVotesRaw
       numberVotes
+      numberOptimisticVotes
+      hasBeenStandardDelegate
+      hasBeenOptimisticDelegate
+      tokenHoldersRepresentedAmount
+      optimisticTokenHoldersRepresentedAmount
     }
   }
 }

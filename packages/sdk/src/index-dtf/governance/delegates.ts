@@ -36,7 +36,13 @@ export async function getDelegates(
 
   return stakingToken.delegates.map((delegate) => ({
     address: getAddress(delegate.address),
-    delegatedVotes: mapAmount(delegate.delegatedVotes),
+    delegatedVotes: mapAmount(delegate.delegatedVotesRaw),
+    optimisticDelegatedVotes: mapAmount(delegate.optimisticDelegatedVotesRaw),
     numberVotes: Number(delegate.numberVotes),
+    numberOptimisticVotes: Number(delegate.numberOptimisticVotes),
+    hasBeenStandardDelegate: delegate.hasBeenStandardDelegate,
+    hasBeenOptimisticDelegate: delegate.hasBeenOptimisticDelegate,
+    tokenHoldersRepresentedAmount: Number(delegate.tokenHoldersRepresentedAmount),
+    optimisticTokenHoldersRepresentedAmount: Number(delegate.optimisticTokenHoldersRepresentedAmount),
   }));
 }

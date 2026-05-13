@@ -39,6 +39,14 @@ export type VoteLockVault = {
   readonly governance?: Governance;
   readonly legacyGovernance: readonly Address[];
   readonly rewardTokens: readonly Token[];
+  readonly delegation: {
+    readonly currentDelegates: number;
+    readonly totalDelegates: number;
+    readonly delegatedVotes: Amount;
+    readonly currentOptimisticDelegates: number;
+    readonly totalOptimisticDelegates: number;
+    readonly optimisticDelegatedVotes: Amount;
+  };
 };
 
 export type IndexDtfAdminRoles = {

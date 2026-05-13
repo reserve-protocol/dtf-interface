@@ -210,7 +210,7 @@ export async function getPrice(client: DtfClient, params: DtfParams): Promise<In
   const address = getAddress(params.address);
   const response = await client.api.getIndexDtfPrice(params);
 
-  return mapIndexDtfPrice(response, { address, chainId: params.chainId });
+  return mapIndexDtfPrice(response, { address, chainId: params.chainId }, Date.now());
 }
 
 export async function getPrices(
@@ -218,6 +218,7 @@ export async function getPrices(
   params: { readonly chainId: DtfParams["chainId"]; readonly addresses: readonly Address[] },
 ): Promise<readonly IndexDtfBatchPrice[]> {
   const responses = await client.api.getDtfPrices(params);
+  const timestamp = Date.now();
 
   return responses.map((response) => ({
     address: getAddress(response.address),
@@ -235,7 +236,7 @@ export async function getPrices(
       price: asset.price,
       ...(asset.priceSource ? { priceSource: asset.priceSource } : {}),
     })),
-    timestamp: Date.now(),
+    timestamp,
   }));
 }
 

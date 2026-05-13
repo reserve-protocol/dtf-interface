@@ -121,6 +121,7 @@ import { listIndexDtfs } from "@/index-dtf/protocol/index";
 import {
   getActiveAuction,
   getBidQuote,
+  getLatestAuction,
   getIndexDtfCurrentRebalance,
   getCompletedRebalance,
   getCompletedRebalances,
@@ -302,6 +303,8 @@ export function createIndexDtfNamespace(client: DtfClient) {
     ) => getIndexDtfCurrentRebalance(client, params),
     getActiveAuction: (params: Parameters<typeof getActiveAuction>[1]) =>
       getActiveAuction(client, params),
+    getLatestAuction: (params: Parameters<typeof getLatestAuction>[1]) =>
+      getLatestAuction(client, params),
     getBidQuote: (params: Parameters<typeof getBidQuote>[1]) =>
       getBidQuote(client, params),
     prepareBid: prepareIndexDtfBid,

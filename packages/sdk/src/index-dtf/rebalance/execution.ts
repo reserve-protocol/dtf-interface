@@ -8,12 +8,16 @@ import { prepareContractCall } from "@/contract-call";
 import { SdkError } from "@/errors";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
-export type IndexDtfActiveAuction = {
+export type IndexDtfLatestAuction = {
   readonly auctionId: bigint;
   readonly rebalanceNonce: bigint;
   readonly startTime: bigint;
   readonly endTime: bigint;
   readonly isActive: boolean;
+};
+
+export type IndexDtfActiveAuction = Omit<IndexDtfLatestAuction, "isActive"> & {
+  readonly isActive: true;
 };
 
 export type IndexDtfBidQuote = {
@@ -41,10 +45,10 @@ export type PrepareIndexDtfBidParams = {
   readonly data?: Hex;
 };
 
-export async function getActiveAuction(
+export async function getLatestAuction(
   client: DtfClient,
   params: DtfParams,
-): Promise<IndexDtfActiveAuction | null> {
+): Promise<IndexDtfLatestAuction | null> {
   const address = getAddress(params.address);
   const nextAuctionId = await client.viem.readContract({
     chainId: params.chainId,
@@ -67,7 +71,7 @@ export async function getActiveAuction(
     args: [auctionId],
     blockNumber: params.blockNumber,
   });
-  const now = BigInt(Math.floor(Date.now() / 1000));
+  const now = await getAuctionTimestamp(client, params);
 
   return {
     auctionId,
@@ -76,6 +80,31 @@ export async function getActiveAuction(
     endTime,
     isActive: startTime <= now && now < endTime,
   };
+}
+
+export async function getActiveAuction(
+  client: DtfClient,
+  params: DtfParams,
+): Promise<IndexDtfActiveAuction | null> {
+  const auction = await getLatestAuction(client, params);
+
+  return auction?.isActive ? { ...auction, isActive: true } : null;
+}
+
+async function getAuctionTimestamp(client: DtfClient, params: DtfParams): Promise<bigint> {
+  const publicClient = client.viem.getPublicClient(params.chainId);
+
+  if (params.blockNumber === undefined) {
+    const block = await publicClient.getBlock();
+
+    return block.timestamp;
+  }
+
+  const block = await publicClient.getBlock({
+    blockNumber: params.blockNumber,
+  });
+
+  return block.timestamp;
 }
 
 export async function getBidQuote(

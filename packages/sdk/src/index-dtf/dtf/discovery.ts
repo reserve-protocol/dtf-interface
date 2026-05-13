@@ -34,9 +34,12 @@ export type IndexDtfDiscoveryItem = {
   readonly brand?: DtfBrand;
 };
 
-type RawDiscoveryItem = Omit<IndexDtfDiscoveryItem, "address" | "basket" | "chainId"> & {
+type DiscoveryPath = "/discover/dtf" | "/discover/dtfs";
+
+type RawDiscoveryItem = Omit<IndexDtfDiscoveryItem, "address" | "basket" | "chainId" | "status"> & {
   readonly address: string;
   readonly chainId: number;
+  readonly status?: DtfStatus;
   readonly type?: string;
   readonly basket?: readonly (Omit<DtfBasketSummaryAsset, "address"> & {
     readonly address: string;
@@ -51,19 +54,9 @@ export async function discoverIndexDtfs(
   client: DtfClient,
   params: DiscoverIndexDtfsParams = {},
 ): Promise<readonly IndexDtfDiscoveryItem[]> {
-  const response = await client.api.get<readonly RawDiscoveryItem[]>({
-    path: "/discover/dtfs",
-    query: {
-      chainId: params.chainId,
-      brand: params.brand,
-      performance: params.performance,
-      limit: params.limit,
-      offset: params.offset,
-      sort: params.sort,
-    },
-  });
+  const response = await fetchDiscoveryItems(client, "/discover/dtfs", params);
 
-  return response.filter((item) => item.type === undefined || item.type === "index").map(mapDiscoveryItem);
+  return response.filter(isIndexDiscoveryItem).map(mapDiscoveryItem);
 }
 
 /** Discovers Index DTFs from the chain-scoped Reserve API endpoint. */
@@ -71,19 +64,9 @@ export async function discoverIndexDtfsByChain(
   client: DtfClient,
   params: DiscoverIndexDtfsByChainParams,
 ): Promise<readonly IndexDtfDiscoveryItem[]> {
-  const response = await client.api.get<readonly RawDiscoveryItem[]>({
-    path: "/discover/dtf",
-    query: {
-      chainId: params.chainId,
-      brand: params.brand,
-      performance: params.performance,
-      limit: params.limit,
-      offset: params.offset,
-      sort: params.sort,
-    },
-  });
+  const response = await fetchDiscoveryItems(client, "/discover/dtf", params);
 
-  return response.map(mapDiscoveryItem);
+  return response.filter(isIndexDiscoveryItem).map(mapDiscoveryItem);
 }
 
 /**
@@ -94,10 +77,29 @@ export async function getIndexDtfStatus(
   params: { readonly address: Address; readonly chainId: SupportedChainId },
 ): Promise<DtfStatus> {
   const address = getAddress(params.address);
-  const items = await discoverIndexDtfs(client, { chainId: params.chainId, limit: 1000 });
-  const item = items.find((dtf) => dtf.address.toLowerCase() === address.toLowerCase());
+  const limit = 1000;
+  let offset = 0;
 
-  return item?.status ?? "unsupported";
+  while (true) {
+    const items = await fetchDiscoveryItems(client, "/discover/dtfs", {
+      chainId: params.chainId,
+      limit,
+      offset,
+    });
+    const item = items.find(
+      (dtf) => isIndexDiscoveryItem(dtf) && dtf.address.toLowerCase() === address.toLowerCase(),
+    );
+
+    if (item) {
+      return item.status ?? "active";
+    }
+
+    if (items.length < limit) {
+      return "active";
+    }
+
+    offset += limit;
+  }
 }
 
 /**
@@ -130,4 +132,26 @@ function mapDiscoveryItem(item: RawDiscoveryItem): IndexDtfDiscoveryItem {
     ...(item.brand ? { brand: item.brand } : {}),
     ...(item.basket ? { basket: item.basket.map((asset) => ({ ...asset, address: getAddress(asset.address) })) } : {}),
   };
+}
+
+function isIndexDiscoveryItem(item: RawDiscoveryItem): boolean {
+  return item.type === undefined || item.type === "index";
+}
+
+function fetchDiscoveryItems(
+  client: DtfClient,
+  path: DiscoveryPath,
+  params: DiscoverIndexDtfsParams,
+): Promise<readonly RawDiscoveryItem[]> {
+  return client.api.get<readonly RawDiscoveryItem[]>({
+    path,
+    query: {
+      chainId: params.chainId,
+      brand: params.brand,
+      performance: params.performance,
+      limit: params.limit,
+      offset: params.offset,
+      sort: params.sort,
+    },
+  });
 }

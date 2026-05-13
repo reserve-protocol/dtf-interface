@@ -315,16 +315,18 @@ async function getTokenPrices(
       tokens: addresses.join(","),
     },
   });
+  const timestamp = Date.now();
 
   return normalizeTokenPrices(
     addresses,
     response.map((token) => ({
       address: getAddress(token.address),
       price: token.price ?? 0,
-      timestamp: Date.now(),
+      timestamp,
       ...(token.priceSources ? { priceSources: token.priceSources } : {}),
       ...(token.source ? { source: token.source } : {}),
     })),
+    timestamp,
   );
 }
 
@@ -404,7 +406,11 @@ function normalizeAddresses(addresses: readonly Address[]): Address[] {
   return result;
 }
 
-function normalizeTokenPrices(addresses: readonly Address[], prices: readonly TokenPrice[]): readonly TokenPrice[] {
+function normalizeTokenPrices(
+  addresses: readonly Address[],
+  prices: readonly TokenPrice[],
+  timestamp: number,
+): readonly TokenPrice[] {
   const priceByAddress = new Map(prices.map((token) => [token.address.toLowerCase(), token]));
 
   return addresses.map((address) => {
@@ -413,7 +419,7 @@ function normalizeTokenPrices(addresses: readonly Address[], prices: readonly To
     return {
       address,
       price: price?.price ?? 0,
-      timestamp: price?.timestamp ?? Date.now(),
+      timestamp: price?.timestamp ?? timestamp,
       ...(price?.priceSources ? { priceSources: price.priceSources } : {}),
       ...(price?.source ? { source: price.source } : {}),
     };

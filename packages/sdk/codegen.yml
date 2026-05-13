@@ -3,7 +3,7 @@ ignoreNoDocuments: true
 
 generates:
   src/index-dtf/subgraph/dtf.generated.ts:
-    schema: https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-index-base/prod/gn
+    schema: https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-index-base/1.9.1/gn
     documents:
       - src/index-dtf/subgraph/**/*.graphql
     plugins:

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDtfClient, type DtfClient } from "@/client";
 import { getDtf, getBasket, getBasketSnapshot, getBrand, getPrice, getPriceHistory } from "@/index-dtf/dtf/index";
 import { mapIndexDtf } from "@/index-dtf/dtf/mappers";
+import type { GetIndexDtfQuery } from "@/index-dtf/subgraph/dtf.generated";
 
 describe("Index DTF getters", () => {
   afterEach(() => {
@@ -294,11 +295,58 @@ describe("Index DTF getters", () => {
 
   it("maps governance proposal thresholds from D18 fractions to percentages", () => {
     const dtf = mapIndexDtf(createSubgraphDtf(), 1);
+    const authority = dtf.governance.admin.primary;
 
-    expect(dtf.governance.admin.primary).toMatchObject({
-      type: "governance",
-      governance: {
-        proposalThreshold: 1,
+    if (!authority || authority.type !== "governance") {
+      throw new Error("expected governance authority");
+    }
+
+    expect(authority.governance).toMatchObject({
+      name: "Governor",
+      version: "1",
+      proposalThreshold: 1,
+      isOptimistic: false,
+    });
+    expect(authority.governance.optimistic).toBeUndefined();
+  });
+
+  it("maps optimistic governance settings from v1.9 subgraph fields", () => {
+    const subgraphDtf = createSubgraphDtf();
+    subgraphDtf.ownerGovernance = {
+      ...subgraphDtf.ownerGovernance!,
+      isOptimistic: true,
+      optimisticVetoDelay: "10",
+      optimisticVetoPeriod: "20",
+      optimisticVetoThreshold: "200000000000000000",
+      optimisticProposalThrottleCapacity: "3",
+      optimisticSelectorRegistry: "0x0000000000000000000000000000000000000006",
+      optimisticProposers: ["0x0000000000000000000000000000000000000007"],
+      timelock: {
+        ...subgraphDtf.ownerGovernance!.timelock,
+        optimisticProposers: ["0x0000000000000000000000000000000000000008"],
+      },
+    };
+
+    const dtf = mapIndexDtf(subgraphDtf, 1);
+    const authority = dtf.governance.admin.primary;
+
+    if (!authority || authority.type !== "governance") {
+      throw new Error("expected governance authority");
+    }
+
+    expect(authority.governance).toMatchObject({
+      isOptimistic: true,
+      optimistic: {
+        vetoDelay: 10,
+        vetoPeriod: 20,
+        vetoThreshold: 20,
+        proposalThrottleCapacity: 3n,
+        selectorRegistry: "0x0000000000000000000000000000000000000006",
+        proposers: ["0x0000000000000000000000000000000000000007"],
+      },
+      timelock: {
+        optimisticProposers: ["0x0000000000000000000000000000000000000008"],
+        type: "OWNER",
       },
     });
   });
@@ -361,7 +409,7 @@ describe("Index DTF getters", () => {
   });
 });
 
-function createSubgraphDtf() {
+function createSubgraphDtf(): NonNullable<GetIndexDtfQuery["dtf"]> {
   return {
     id: "0x0000000000000000000000000000000000000001",
     proxyAdmin: "0x0000000000000000000000000000000000000002",
@@ -392,15 +440,27 @@ function createSubgraphDtf() {
     legacyAuctionApprovers: [],
     ownerGovernance: {
       id: "0x0000000000000000000000000000000000000004",
+      name: "Governor",
+      version: "1",
       votingDelay: "1",
       votingPeriod: "2",
       proposalThreshold: "10000000000000000",
+      quorumVotes: "1000000000000000000",
       quorumNumerator: "10000000000000000",
       quorumDenominator: "1000000000000000000",
+      isOptimistic: false,
+      optimisticVetoDelay: null,
+      optimisticVetoPeriod: null,
+      optimisticVetoThreshold: null,
+      optimisticProposalThrottleCapacity: null,
+      optimisticSelectorRegistry: null,
+      optimisticProposers: [],
       timelock: {
         id: "0x0000000000000000000000000000000000000005",
         guardians: [],
+        optimisticProposers: [],
         executionDelay: "3",
+        type: "OWNER",
       },
     },
     tradingGovernance: null,
@@ -420,5 +480,5 @@ function createSubgraphDtf() {
       totalMinted: "0",
     },
     stToken: null,
-  } as never;
+  } as NonNullable<GetIndexDtfQuery["dtf"]>;
 }

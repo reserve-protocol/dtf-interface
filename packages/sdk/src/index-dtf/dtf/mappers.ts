@@ -7,7 +7,15 @@ import type {
 } from "@/client/api";
 import type { SupportedChainId } from "@/defaults";
 import type { GetIndexDtfQuery } from "@/index-dtf/subgraph/dtf.generated";
-import type { Authority, DtfParams, Governance, Token, TokenSnapshot, TokenWithSnapshot } from "@/types/common";
+import type {
+  Authority,
+  DtfParams,
+  Governance,
+  OptimisticGovernanceSettings,
+  Token,
+  TokenSnapshot,
+  TokenWithSnapshot,
+} from "@/types/common";
 import type {
   FeeRecipients,
   IndexDtfBrand,
@@ -120,6 +128,14 @@ export function mapIndexDtf(dtf: SubgraphIndexDtf, chainId: SupportedChainId): I
             ...(dtf.stToken.governance ? { governance: mapGovernance(dtf.stToken.governance) } : {}),
             legacyGovernance: dtf.stToken.legacyGovernance.map(getAddress),
             rewardTokens: dtf.stToken.rewards.map(({ rewardToken }) => mapToken(rewardToken)),
+            delegation: {
+              currentDelegates: Number(dtf.stToken.currentDelegates),
+              totalDelegates: Number(dtf.stToken.totalDelegates),
+              delegatedVotes: mapAmount(dtf.stToken.delegatedVotesRaw),
+              currentOptimisticDelegates: Number(dtf.stToken.currentOptimisticDelegates),
+              totalOptimisticDelegates: Number(dtf.stToken.totalOptimisticDelegates),
+              optimisticDelegatedVotes: mapAmount(dtf.stToken.optimisticDelegatedVotesRaw),
+            },
           },
         }
       : {}),
@@ -174,7 +190,7 @@ export function mapIndexDtfBrand(response: IndexDtfBrandResponse): IndexDtfBrand
   };
 }
 
-export function mapIndexDtfPrice(response: ReserveApiIndexDtfPrice, params: DtfParams): IndexDtfPrice {
+export function mapIndexDtfPrice(response: ReserveApiIndexDtfPrice, params: DtfParams, timestamp: number): IndexDtfPrice {
   return {
     address: getAddress(params.address),
     chainId: params.chainId,
@@ -193,7 +209,7 @@ export function mapIndexDtfPrice(response: ReserveApiIndexDtfPrice, params: DtfP
         ...(asset.priceSource ? { priceSource: asset.priceSource } : {}),
       };
     }),
-    timestamp: Date.now(),
+    timestamp,
   };
 }
 
@@ -238,19 +254,55 @@ function mapAuthority(address: string, governance?: NullableSubgraphGovernance):
 }
 
 function mapGovernance(governance: SubgraphGovernance): Governance {
+  const isOptimistic = governance.isOptimistic === true;
+
   return {
     address: getAddress(governance.id),
+    name: governance.name,
+    version: governance.version,
     votingDelay: Number(governance.votingDelay),
     votingPeriod: Number(governance.votingPeriod),
     proposalThreshold: mapD18Percentage(governance.proposalThreshold),
+    ...(governance.quorumVotes === null || governance.quorumVotes === undefined
+      ? {}
+      : { quorumVotes: mapAmount(governance.quorumVotes) }),
     quorumNumerator: Number(governance.quorumNumerator ?? 0),
     quorumDenominator: Number(governance.quorumDenominator ?? 0),
     quorum: calculateQuorum(governance.quorumNumerator, governance.quorumDenominator),
+    isOptimistic,
+    ...(isOptimistic ? { optimistic: mapOptimisticGovernanceSettings(governance) } : {}),
     timelock: {
       address: getAddress(governance.timelock.id),
       guardians: governance.timelock.guardians.map(getAddress),
+      optimisticProposers: (governance.timelock.optimisticProposers ?? []).map(getAddress),
       executionDelay: Number(governance.timelock.executionDelay),
+      type: governance.timelock.type,
     },
+  };
+}
+
+function mapOptimisticGovernanceSettings(governance: SubgraphGovernance): OptimisticGovernanceSettings {
+  if (
+    !governance.optimisticVetoDelay ||
+    !governance.optimisticVetoPeriod ||
+    !governance.optimisticVetoThreshold ||
+    !governance.optimisticProposalThrottleCapacity ||
+    !governance.optimisticSelectorRegistry
+  ) {
+    throw new SdkError({
+      code: "INVALID_RESPONSE",
+      message: `Optimistic governance is missing required settings: ${governance.id}`,
+      meta: { governance: governance.id },
+    });
+  }
+
+  return {
+    vetoDelay: Number(governance.optimisticVetoDelay),
+    vetoPeriod: Number(governance.optimisticVetoPeriod),
+    vetoThreshold: mapD18Percentage(governance.optimisticVetoThreshold),
+    proposalThrottleCapacity: BigInt(governance.optimisticProposalThrottleCapacity),
+    selectorRegistry: getAddress(governance.optimisticSelectorRegistry),
+    proposers: (governance.optimisticProposers ?? []).map(getAddress),
   };
 }
 

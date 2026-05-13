@@ -25,6 +25,8 @@ export type ReserveApiIndexDtfPrice = {
 export type ReserveApiDtfPrice = {
   readonly address: string;
   readonly price: number;
+  readonly marketCap?: number;
+  readonly totalSupply?: number;
   readonly basket: readonly ReserveApiDtfBasketToken[];
 };
 
@@ -52,6 +54,54 @@ export type ReserveApiIndexDtfBasketSnapshot = {
     readonly price: number;
     readonly weight: string;
   }[];
+};
+
+export type ReserveApiIndexDtfRebalanceHistoryItem = {
+  readonly nonce: number;
+  readonly timestamp: number;
+  readonly availableUntil?: number | null;
+  readonly totalRebalancedUsd?: number | null;
+  readonly rebalanceGainLossUsd?: number | null;
+  readonly rebalanceAccuracy?: number | null;
+  readonly isNative?: boolean | null;
+};
+
+export type ReserveApiIndexDtfRebalanceDetail = {
+  readonly nonce: number;
+  readonly timestamp: number;
+  readonly auctions?: readonly {
+    readonly startTime: number;
+    readonly endTime: number;
+    readonly bids: readonly {
+      readonly bidder: string;
+      readonly sellToken: {
+        readonly address: string;
+        readonly symbol: string;
+        readonly name?: string;
+        readonly decimals: number;
+      };
+      readonly buyToken: {
+        readonly address: string;
+        readonly symbol: string;
+        readonly name?: string;
+        readonly decimals: number;
+      };
+      readonly sellAmount: string;
+      readonly buyAmount: string;
+      readonly sellAmountUsd?: number | null;
+      readonly buyAmountUsd?: number | null;
+      readonly priceImpactUsd?: number | null;
+    }[];
+    readonly totalSellAmountUsd?: number | null;
+    readonly totalBuyAmountUsd?: number | null;
+  }[];
+  readonly availableUntil?: number | null;
+  readonly totalRebalancedUsd?: number | null;
+  readonly rebalanceGainLossUsd?: number | null;
+  readonly rebalanceGainLossPercent?: number | null;
+  readonly marketCapAtStart?: number | null;
+  readonly rebalanceAccuracy?: number | null;
+  readonly isNative?: boolean | null;
 };
 
 export type ReserveApiHistoricalTokenPrices = {
@@ -92,6 +142,15 @@ export type GetIndexDtfBasketSnapshotParams = GetIndexDtfPriceParams & {
   readonly blockNumber?: bigint;
 };
 
+export type GetIndexDtfRebalanceHistoryParams = GetIndexDtfPriceParams & {
+  readonly skip?: number;
+  readonly limit?: number;
+};
+
+export type GetIndexDtfRebalanceDetailParams = GetIndexDtfPriceParams & {
+  readonly nonce: number | bigint | string;
+};
+
 export type GetBasketTokenPricesWithSnapshotParams = {
   readonly chainId: SupportedChainId;
   readonly assets: readonly Address[];
@@ -122,6 +181,12 @@ export type DtfClientApi = {
   readonly getIndexDtfBasketSnapshot: (
     params: GetIndexDtfBasketSnapshotParams,
   ) => Promise<ReserveApiIndexDtfBasketSnapshot>;
+  readonly getIndexDtfRebalanceHistory: (
+    params: GetIndexDtfRebalanceHistoryParams,
+  ) => Promise<readonly ReserveApiIndexDtfRebalanceHistoryItem[]>;
+  readonly getIndexDtfRebalanceDetail: (
+    params: GetIndexDtfRebalanceDetailParams,
+  ) => Promise<ReserveApiIndexDtfRebalanceDetail>;
 };
 
 export function createDtfClientApi({ baseUrl }: { readonly baseUrl: string }): DtfClientApi {
@@ -206,6 +271,27 @@ export function createDtfClientApi({ baseUrl }: { readonly baseUrl: string }): D
           chainId: params.chainId,
           blockNumber,
           cache: false,
+        },
+      });
+    },
+    getIndexDtfRebalanceHistory(params) {
+      return apiGet<readonly ReserveApiIndexDtfRebalanceHistoryItem[]>({
+        path: "/dtf/rebalance",
+        query: {
+          address: getAddress(params.address).toLowerCase(),
+          chainId: params.chainId,
+          skip: params.skip ?? 0,
+          limit: params.limit ?? 50,
+        },
+      });
+    },
+    getIndexDtfRebalanceDetail(params) {
+      return apiGet<ReserveApiIndexDtfRebalanceDetail>({
+        path: "/dtf/rebalance",
+        query: {
+          address: getAddress(params.address).toLowerCase(),
+          chainId: params.chainId,
+          nonce: String(params.nonce),
         },
       });
     },

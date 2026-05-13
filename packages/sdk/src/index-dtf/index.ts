@@ -25,11 +25,18 @@ export {
   getMandate as getIndexDtfMandate,
   getPrice as getIndexDtfPrice,
   getPriceHistory as getIndexDtfPriceHistory,
+  getPrices as getIndexDtfPrices,
   getTotalAssets as getIndexDtfTotalAssets,
   getTotalSupply as getIndexDtfTotalSupply,
   getVersion as getIndexDtfVersion,
 } from "@/index-dtf/dtf/index";
-export { discoverIndexDtfs, getIndexDtfStatus, getIndexDtfStatuses } from "@/index-dtf/dtf/discovery";
+export {
+  discoverIndexDtfs,
+  discoverIndexDtfsByChain,
+  getIndexDtfStatus,
+  getIndexDtfStatuses,
+} from "@/index-dtf/dtf/discovery";
+export { getAssetList as getIndexDtfAssetList } from "@/index-dtf/assets/index";
 export { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 export {
   getIndexDtfIssuanceState,
@@ -42,6 +49,7 @@ export {
 export {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
+  getEffectiveRevenueDistribution as getIndexDtfEffectiveRevenueDistribution,
   getIndexDtfPendingFeeShares,
   getIndexDtfPlatformFee,
   getIndexDtfRebalanceControl,
@@ -52,16 +60,41 @@ export { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 
 export { getDelegates as getIndexDtfDelegates } from "@/index-dtf/governance/delegates";
 export { getGuardians as getIndexDtfGuardians } from "@/index-dtf/governance/guardians";
+export { getLegacyVoteLocks as getIndexDtfLegacyVoteLocks } from "@/index-dtf/governance/legacy-vote-lock";
+export {
+  getOptimisticGovernance as getIndexDtfOptimisticGovernance,
+  getOptimisticProposalContext as getIndexDtfOptimisticProposalContext,
+  getOptimisticTimelockRoles as getIndexDtfOptimisticTimelockRoles,
+  getOptimisticVotes as getIndexDtfOptimisticVotes,
+  getPastOptimisticVotes as getIndexDtfPastOptimisticVotes,
+  getProposalThrottleCharges as getIndexDtfProposalThrottleCharges,
+  CANCELLER_ROLE,
+  OPTIMISTIC_PROPOSER_ROLE,
+} from "@/index-dtf/governance/optimistic";
 export {
   prepareIndexDtfCancelProposal,
   prepareIndexDtfExecuteProposal,
   prepareIndexDtfQueueProposal,
+  prepareIndexDtfSubmitOptimisticProposal,
   prepareIndexDtfSubmitProposal,
   prepareIndexDtfVote,
 } from "@/index-dtf/governance/proposal-actions";
 export {
+  getSelectorRegistryAllowedSelectors as getIndexDtfSelectorRegistryAllowedSelectors,
+  getSelectorRegistryIsAllowed as getIndexDtfSelectorRegistryIsAllowed,
+  getSelectorRegistryTargets as getIndexDtfSelectorRegistryTargets,
+  prepareSelectorRegistryRegisterSelectors,
+  prepareSelectorRegistryUnregisterSelectors,
+} from "@/index-dtf/governance/selector-registry";
+export {
   getAllProposals as getAllIndexDtfProposals,
   getProposal as getIndexDtfProposal,
+  getProposalDeadline as getIndexDtfProposalDeadline,
+  getProposalEta as getIndexDtfProposalEta,
+  getProposalRpcDetails as getIndexDtfProposalRpcDetails,
+  getProposalSnapshot as getIndexDtfProposalSnapshot,
+  getProposalState as getIndexDtfProposalState,
+  getProposalStates as getIndexDtfProposalStates,
   getProposals as getIndexDtfProposals,
 } from "@/index-dtf/governance/proposals";
 export {
@@ -85,12 +118,16 @@ export {
   prepareIndexDtfDeprecate,
   prepareIndexDtfRemoveFromAllowlist,
   prepareIndexDtfRemoveFromBasket,
+  prepareIndexDtfRevokeOptimisticProposer,
   prepareIndexDtfSetAuctionLength,
   prepareIndexDtfSetBidsEnabled,
   prepareIndexDtfSetFeeRecipients,
+  prepareIndexDtfSetLateQuorumVoteExtension,
   prepareIndexDtfSetMandate,
   prepareIndexDtfSetMintFee,
   prepareIndexDtfSetName,
+  prepareIndexDtfSetOptimisticParams,
+  prepareIndexDtfSetProposalThrottle,
   prepareIndexDtfSetRebalanceControl,
   prepareIndexDtfSetSelfFee,
   prepareIndexDtfSetTradeAllowlistEnabled,
@@ -106,10 +143,17 @@ export {
 } from "@/index-dtf/governance/voting";
 export { listIndexDtfs } from "@/index-dtf/protocol/index";
 export {
+  getActiveAuction as getIndexDtfActiveAuction,
+  getBidQuote as getIndexDtfBidQuote,
   getIndexDtfCurrentRebalance,
+  getCompletedRebalance as getIndexDtfCompletedRebalance,
+  getCompletedRebalances as getIndexDtfCompletedRebalances,
   getRebalance as getIndexDtfRebalance,
   getRebalanceAuctions as getIndexDtfRebalanceAuctions,
   getRebalances as getIndexDtfRebalances,
+  prepareIndexDtfBid,
+  prepareIndexDtfCloseAuction,
+  prepareIndexDtfEndRebalance,
   prepareIndexDtfOpenAuctionArgs,
   prepareIndexDtfOpenAuction,
   prepareIndexDtfOpenAuctionUnrestricted,
@@ -122,16 +166,19 @@ export {
   prepareVoteLockClaimRewards,
   prepareVoteLockClaimWithdrawal,
   prepareVoteLockDelegate,
+  prepareVoteLockDelegateOptimistic,
   prepareVoteLockDeposit,
   prepareVoteLockDepositPlan,
   prepareVoteLockUnlock,
 } from "@/index-dtf/vote-lock/index";
 
 export type * from "@/index-dtf/dtf/discovery";
+export type * from "@/index-dtf/assets/index";
 export type * from "@/index-dtf/dtf/exposure";
 export type * from "@/index-dtf/dtf/issuance";
 export type * from "@/index-dtf/dtf/revenue";
 export type * from "@/index-dtf/dtf/transactions";
+export type * from "@/index-dtf/governance/selector-registry";
 export type * from "@/index-dtf/governance/propose/calls";
 export type * from "@/index-dtf/rebalance/index";
 export type * from "@/index-dtf/vote-lock/index";

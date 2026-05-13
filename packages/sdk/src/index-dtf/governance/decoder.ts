@@ -2,9 +2,16 @@ import { decodeFunctionData, getAbiItem, getAddress, type Abi, type Address } fr
 
 import type { IndexDtfDecodedCalldata, IndexDtfProposalDecoded, IndexDtfUnknownCalldata } from "@/types/governance";
 
+import { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
 import { getContractAliases, type ProposalContractDecoder } from "@/index-dtf/governance/contract-map";
 
 const UNKNOWN_CONTRACT = "Unknown";
+const FALLBACK_DECODERS: readonly Omit<ProposalContractDecoder, "target">[] = [
+  {
+    contract: "Selector Registry",
+    abi: selectorRegistryAbi,
+  },
+];
 
 type DecodeIndexDtfProposalCalldatasParams = {
   readonly targets: readonly Address[];
@@ -50,6 +57,18 @@ export function decodeIndexDtfProposalCalldatas({
     const contractDecoder = contractMap.get(targetKey);
 
     if (!contractDecoder) {
+      const fallbackDecoded = decodeFallbackProposalCalldata(
+        i,
+        targetAddress,
+        callData,
+      );
+
+      if (fallbackDecoded) {
+        calls.push(fallbackDecoded);
+        pushDecodedContractGroup(dataByContract, dataGroupMap, fallbackDecoded);
+        continue;
+      }
+
       const unknownCall = {
         index: i,
         target: targetAddress,
@@ -139,6 +158,27 @@ function tryDecodeCalldata(
   } catch {
     return undefined;
   }
+}
+
+function decodeFallbackProposalCalldata(
+  index: number,
+  target: Address,
+  callData: `0x${string}`,
+): IndexDtfDecodedCalldata | undefined {
+  for (const fallbackDecoder of FALLBACK_DECODERS) {
+    const decoded = decodeProposalCalldata(
+      { ...fallbackDecoder, target },
+      index,
+      target,
+      callData,
+    );
+
+    if (decoded) {
+      return decoded;
+    }
+  }
+
+  return undefined;
 }
 
 function formatAbiInput(input: AbiInput): string {

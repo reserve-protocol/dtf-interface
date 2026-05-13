@@ -11,6 +11,7 @@ import type {
   GetIndexDtfTotalSupplyParams,
   GetIndexDtfVersionParams,
   IndexDtf,
+  IndexDtfBatchPrice,
   IndexDtfBasket,
   IndexDtfBasketSnapshot,
   IndexDtfBasketAssetWithPrice,
@@ -210,6 +211,32 @@ export async function getPrice(client: DtfClient, params: DtfParams): Promise<In
   const response = await client.api.getIndexDtfPrice(params);
 
   return mapIndexDtfPrice(response, { address, chainId: params.chainId });
+}
+
+export async function getPrices(
+  client: DtfClient,
+  params: { readonly chainId: DtfParams["chainId"]; readonly addresses: readonly Address[] },
+): Promise<readonly IndexDtfBatchPrice[]> {
+  const responses = await client.api.getDtfPrices(params);
+
+  return responses.map((response) => ({
+    address: getAddress(response.address),
+    chainId: params.chainId,
+    price: response.price,
+    ...(response.marketCap === undefined ? {} : { marketCap: response.marketCap }),
+    ...(response.totalSupply === undefined ? {} : { totalSupply: response.totalSupply }),
+    basket: response.basket.map((asset) => ({
+      token: {
+        address: getAddress(asset.address),
+        decimals: asset.decimals,
+      },
+      amount: mapAmount(asset.amountRaw, asset.decimals),
+      weight: asset.weight,
+      price: asset.price,
+      ...(asset.priceSource ? { priceSource: asset.priceSource } : {}),
+    })),
+    timestamp: Date.now(),
+  }));
 }
 
 export async function getBrand(client: DtfClient, params: DtfParams): Promise<IndexDtfBrand | undefined> {

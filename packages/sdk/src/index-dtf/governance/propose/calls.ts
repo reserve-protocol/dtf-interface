@@ -6,7 +6,10 @@ import type { PriceControl } from "@/types/index-dtf";
 
 import { prepareContractCall } from "@/contract-call";
 import { SdkError } from "@/errors";
+import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
+import { timelockAbi } from "@/index-dtf/abis/timelock";
+import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
 import { INDEX_DTF_VERSION_5_0_0, getIndexDtfOperation, type IndexDtfOperation } from "@/index-dtf/versions";
 import { Decimal } from "@/lib/decimal";
 
@@ -41,6 +44,18 @@ export type PrepareIndexDtfSetRebalanceControlParams = PrepareIndexDtfCallParams
   readonly weightControl: boolean;
   readonly priceControl: PriceControl;
 };
+
+export type PrepareIndexDtfOptimisticGovernanceCallParams = {
+  readonly governance: Address;
+  readonly chainId: SupportedChainId;
+};
+
+export type PrepareIndexDtfSetOptimisticParamsParams =
+  PrepareIndexDtfOptimisticGovernanceCallParams & {
+    readonly vetoDelay: number | bigint;
+    readonly vetoPeriod: number | bigint;
+    readonly vetoThreshold: bigint;
+  };
 
 export function prepareIndexDtfAddToBasket(params: PrepareIndexDtfTokenCallParams): IndexDtfCall {
   return prepareIndexDtfOperation(
@@ -207,6 +222,66 @@ export function prepareIndexDtfDeprecate(params: PrepareIndexDtfCallParams): Ind
   return prepareIndexDtfOperation(params.address, params.chainId, "deprecate", [], params.version);
 }
 
+export function prepareIndexDtfSetOptimisticParams(
+  params: PrepareIndexDtfSetOptimisticParamsParams,
+): IndexDtfCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.governance,
+    abi: dtfIndexGovernanceOptimisticAbi,
+    functionName: "setOptimisticParams",
+    args: [
+      {
+        vetoDelay: toUintNumber(params.vetoDelay, "vetoDelay"),
+        vetoPeriod: toUintNumber(params.vetoPeriod, "vetoPeriod"),
+        vetoThreshold: toUint(params.vetoThreshold, "vetoThreshold"),
+      },
+    ] as const,
+  });
+}
+
+export function prepareIndexDtfSetProposalThrottle(
+  params: PrepareIndexDtfOptimisticGovernanceCallParams & {
+    readonly capacity: bigint;
+  },
+): IndexDtfCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.governance,
+    abi: dtfIndexGovernanceOptimisticAbi,
+    functionName: "setProposalThrottle",
+    args: [toUint(params.capacity, "capacity")] as const,
+  });
+}
+
+export function prepareIndexDtfSetLateQuorumVoteExtension(
+  params: PrepareIndexDtfOptimisticGovernanceCallParams & {
+    readonly extension: number | bigint;
+  },
+): IndexDtfCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.governance,
+    abi: dtfIndexGovernanceOptimisticAbi,
+    functionName: "setLateQuorumVoteExtension",
+    args: [toUintNumber(params.extension, "extension")] as const,
+  });
+}
+
+export function prepareIndexDtfRevokeOptimisticProposer(params: {
+  readonly timelock: Address;
+  readonly chainId: SupportedChainId;
+  readonly proposer: Address;
+}): IndexDtfCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.timelock,
+    abi: timelockAbi,
+    functionName: "revokeRole",
+    args: [OPTIMISTIC_PROPOSER_ROLE, getAddress(params.proposer)] as const,
+  });
+}
+
 function prepareIndexDtfOperation(
   address: Address,
   chainId: SupportedChainId,
@@ -258,4 +333,41 @@ function toSeconds(value: number | bigint): bigint {
   }
 
   return BigInt(Math.round(value));
+}
+
+function toUint(value: number | bigint, field: string): bigint {
+  if (typeof value === "bigint") {
+    if (value < 0n) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: `${field} must be non-negative`,
+        meta: { [field]: value },
+      });
+    }
+
+    return value;
+  }
+
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `${field} must be a non-negative integer`,
+      meta: { [field]: value },
+    });
+  }
+
+  return BigInt(value);
+}
+
+function toUintNumber(value: number | bigint, field: string): number {
+  const integer = toUint(value, field);
+  if (integer > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `${field} is too large to encode safely`,
+      meta: { [field]: value },
+    });
+  }
+
+  return Number(integer);
 }

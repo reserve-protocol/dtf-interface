@@ -4,7 +4,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DtfClient } from "@/client";
 
 import { dtfIndexProposalAbi } from "@/index-dtf/abis/proposal-decoder";
-import { getProposal, getProposals } from "@/index-dtf/governance/index";
+import {
+  getAllProposals,
+  getProposal,
+  getProposalRpcDetails,
+  getProposalState,
+  getProposals,
+} from "@/index-dtf/governance/index";
 
 describe("Index DTF governance proposals", () => {
   afterEach(() => {
@@ -91,6 +97,11 @@ describe("Index DTF governance proposals", () => {
     const client = {
       subgraph: {
         queryIndex,
+      },
+      viem: {
+        readContract: vi.fn(async () => {
+          throw new Error("The contract function returned no data");
+        }),
       },
     } as unknown as DtfClient;
 
@@ -417,6 +428,105 @@ describe("Index DTF governance proposals", () => {
       },
       state: "ACTIVE",
     });
+  });
+
+  it("lists all chain proposals with state filters", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      proposals: [
+        createProposalSummary({
+          id: "global-proposal",
+          creationTime: "999000",
+          state: "QUEUED",
+          forWeightedVotes: "2000000000000000000",
+          abstainWeightedVotes: "1000000000000000000",
+          againstWeightedVotes: "0",
+          quorumVotes: "2000000000000000000",
+          voteStart: "998000",
+          voteEnd: "999000",
+          creationBlock: "10",
+          proposer: "0x0000000000000000000000000000000000000002",
+          governance: "0x0000000000000000000000000000000000000001",
+          timelock: "0x0000000000000000000000000000000000000008",
+        }),
+      ],
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposals = await getAllProposals(client, {
+      chainId: 1,
+      limit: 25,
+      offset: 50,
+      states: ["QUEUED"],
+    });
+
+    expect(queryIndex).toHaveBeenCalledWith({
+      chainId: 1,
+      query: expect.anything(),
+      variables: {
+        limit: 25,
+        offset: 50,
+        where: { state_in: ["QUEUED"] },
+      },
+    });
+    expect(proposals[0]).toMatchObject({
+      id: "global-proposal",
+      governance: "0x0000000000000000000000000000000000000001",
+      timelock: "0x0000000000000000000000000000000000000008",
+      state: "QUEUED",
+    });
+  });
+
+  it("reads proposal state directly from the governor", async () => {
+    const readContract = vi.fn(async () => 5);
+    const client = {
+      viem: { readContract },
+    } as unknown as DtfClient;
+
+    await expect(
+      getProposalState(client, {
+        chainId: 1,
+        governance: "0x0000000000000000000000000000000000000001",
+        proposalId: "42",
+      }),
+    ).resolves.toBe("QUEUED");
+    expect(readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: "state",
+        args: [42n],
+      }),
+    );
+  });
+
+  it("combines proposal RPC timing details for source-of-truth checks", async () => {
+    const readContract = vi
+      .fn()
+      .mockResolvedValueOnce(1)
+      .mockResolvedValueOnce(1_000_100n)
+      .mockResolvedValueOnce(1_000_200n)
+      .mockResolvedValueOnce(999_900n);
+    const client = {
+      viem: { readContract },
+    } as unknown as DtfClient;
+
+    const details = await getProposalRpcDetails(client, {
+      chainId: 8453,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId: 7n,
+    });
+
+    expect(details).toEqual({
+      proposalId: "7",
+      state: "ACTIVE",
+      eta: 1_000_100n,
+      deadline: 1_000_200n,
+      snapshot: 999_900n,
+    });
+    expect(readContract).toHaveBeenCalledTimes(4);
   });
 });
 

@@ -11,7 +11,9 @@ describe("Index DTF governance voting", () => {
       .mockResolvedValueOnce("0x0000000000000000000000000000000000000002")
       .mockResolvedValueOnce(5000000000000000000n)
       .mockResolvedValueOnce(3000000000000000000n)
-      .mockResolvedValueOnce(10000000000000000000n);
+      .mockResolvedValueOnce(10000000000000000000n)
+      .mockResolvedValueOnce("0x0000000000000000000000000000000000000003")
+      .mockResolvedValueOnce(2000000000000000000n);
     const client = {
       viem: {
         readContract,
@@ -24,15 +26,19 @@ describe("Index DTF governance voting", () => {
       account: "0x0000000000000000000000000000000000000002",
     });
 
-    expect(readContract).toHaveBeenCalledTimes(4);
+    expect(readContract).toHaveBeenCalledTimes(6);
     expect(state).toMatchObject({
       account: "0x0000000000000000000000000000000000000002",
       delegate: "0x0000000000000000000000000000000000000002",
+      optimisticDelegate: "0x0000000000000000000000000000000000000003",
       balance: { raw: 5000000000000000000n, formatted: "5" },
       votingPower: { raw: 3000000000000000000n, formatted: "3" },
+      optimisticVotingPower: { raw: 2000000000000000000n, formatted: "2" },
       voteSupply: { raw: 10000000000000000000n, formatted: "10" },
       isSelfDelegated: true,
+      isOptimisticSelfDelegated: false,
       hasVotingPower: true,
+      hasOptimisticVotingPower: true,
     });
   });
 
@@ -111,6 +117,54 @@ describe("Index DTF governance voting", () => {
       vote: "FOR",
       hasVoted: true,
       hasVotingPower: true,
+    });
+  });
+
+  it("reads optimistic proposal voter state from the vote token snapshot", async () => {
+    const getBlock = vi.fn(async () => ({ timestamp: 1_000_000_000n }));
+    const readContract = vi
+      .fn()
+      .mockResolvedValueOnce(4000000000000000000n)
+      .mockResolvedValueOnce(2000000000000000000n);
+    const client = {
+      viem: {
+        getPublicClient: vi.fn(() => ({ getBlock })),
+        readContract,
+      },
+    } as unknown as DtfClient;
+
+    const state = await getProposalVoterState(client, {
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      account: "0x0000000000000000000000000000000000000002",
+      proposal: {
+        id: "1",
+        isOptimistic: true,
+        optimistic: {
+          proposalId: "1",
+          voteToken: "0x0000000000000000000000000000000000000003",
+          snapshot: 999_800n,
+          snapshotSupply: { raw: 10n, formatted: "10" },
+          vetoThreshold: 1n,
+          vetoThresholdVotes: { raw: 1n, formatted: "1" },
+        },
+        voteToken: "0x0000000000000000000000000000000000000003",
+        voteStart: 999_900,
+        votes: [],
+      },
+    });
+
+    expect(readContract).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        functionName: "getPastOptimisticVotes",
+        args: ["0x0000000000000000000000000000000000000002", 999800n],
+      }),
+    );
+    expect(state).toMatchObject({
+      votingPower: { raw: 4000000000000000000n, formatted: "4" },
+      optimisticVotingPower: { raw: 2000000000000000000n, formatted: "2" },
+      hasOptimisticVotingPower: true,
     });
   });
 });

@@ -13,6 +13,13 @@ export type DiscoverIndexDtfsParams = {
   readonly sort?: string;
 };
 
+export type DiscoverIndexDtfsByChainParams = Omit<
+  DiscoverIndexDtfsParams,
+  "chainId"
+> & {
+  readonly chainId: SupportedChainId;
+};
+
 export type IndexDtfDiscoveryItem = {
   readonly address: Address;
   readonly chainId: SupportedChainId;
@@ -57,6 +64,26 @@ export async function discoverIndexDtfs(
   });
 
   return response.filter((item) => item.type === undefined || item.type === "index").map(mapDiscoveryItem);
+}
+
+/** Discovers Index DTFs from the chain-scoped Reserve API endpoint. */
+export async function discoverIndexDtfsByChain(
+  client: DtfClient,
+  params: DiscoverIndexDtfsByChainParams,
+): Promise<readonly IndexDtfDiscoveryItem[]> {
+  const response = await client.api.get<readonly RawDiscoveryItem[]>({
+    path: "/discover/dtf",
+    query: {
+      chainId: params.chainId,
+      brand: params.brand,
+      performance: params.performance,
+      limit: params.limit,
+      offset: params.offset,
+      sort: params.sort,
+    },
+  });
+
+  return response.map(mapDiscoveryItem);
 }
 
 /**

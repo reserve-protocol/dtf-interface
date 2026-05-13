@@ -3,6 +3,7 @@ import { getAddress, type Address } from "viem";
 import type { Authority } from "@/types/common";
 import type {
   IndexDtfGuardianGroup,
+  IndexDtfOptimisticProposalContext,
   IndexDtfProposalSummary,
   ProposalState,
   ProposalVotingState,
@@ -10,6 +11,8 @@ import type {
 import type { IndexDtf } from "@/types/index-dtf";
 
 import { dedupeAddresses, getCurrentTime } from "@/lib/utils";
+
+const D18 = 10n ** 18n;
 
 export type DtfGovernanceAddressContext = {
   readonly ownerGovernance?: { readonly id: string } | null;
@@ -30,9 +33,15 @@ type ProposalVoteStateInput = Pick<
   | "forWeightedVotes"
   | "quorumVotes"
   | "state"
+  | "isOptimistic"
   | "voteEnd"
   | "voteStart"
->;
+> & {
+  readonly optimistic?: Pick<
+    IndexDtfOptimisticProposalContext,
+    "snapshotSupply" | "vetoThreshold"
+  >;
+};
 
 type MutableProposalVotingState = {
   state: ProposalState;
@@ -40,6 +49,7 @@ type MutableProposalVotingState = {
   quorum: boolean;
   forVotesReachedQuorum: boolean;
   participationQuorumReached: boolean;
+  vetoReached: boolean;
   for: number;
   against: number;
   abstain: number;
@@ -91,10 +101,16 @@ export function getZeroValues(length: number): bigint[] {
 export function getVoteState(proposal: ProposalVoteStateInput, timestamp = getCurrentTime()): ProposalVotingState {
   const state = createInitialVotingState(proposal.state);
 
+  const isOptimistic = proposal.isOptimistic === true;
+
   if (proposal.state === "QUEUED" && proposal.executionETA) {
     state.deadline = proposal.executionETA - timestamp;
   } else if (proposal.state === "PENDING") {
-    if (timestamp >= proposal.voteStart && timestamp < proposal.voteEnd) {
+    if (timestamp >= proposal.voteEnd && proposal.optimistic) {
+      state.state = getOptimisticFinalState(proposal);
+    } else if (timestamp >= proposal.voteEnd && isOptimistic) {
+      state.state = proposal.state;
+    } else if (timestamp >= proposal.voteStart && timestamp < proposal.voteEnd) {
       state.state = "ACTIVE";
       state.deadline = proposal.voteEnd - timestamp;
     } else if (timestamp < proposal.voteStart) {
@@ -104,7 +120,14 @@ export function getVoteState(proposal: ProposalVoteStateInput, timestamp = getCu
     }
   } else if (proposal.state === "ACTIVE") {
     if (timestamp >= proposal.voteEnd) {
-      if (proposal.againstWeightedVotes.raw > proposal.forWeightedVotes.raw || proposal.forWeightedVotes.raw === 0n) {
+      if (proposal.optimistic) {
+        state.state = getOptimisticFinalState(proposal);
+      } else if (isOptimistic) {
+        state.state = proposal.state;
+      } else if (
+        proposal.againstWeightedVotes.raw > proposal.forWeightedVotes.raw ||
+        proposal.forWeightedVotes.raw === 0n
+      ) {
         state.state = "DEFEATED";
       } else if (proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw < proposal.quorumVotes.raw) {
         state.state = "QUORUM_NOT_REACHED";
@@ -121,7 +144,12 @@ export function getVoteState(proposal: ProposalVoteStateInput, timestamp = getCu
   state.quorum = proposal.forWeightedVotes.raw > 0n && proposal.forWeightedVotes.raw >= proposal.quorumVotes.raw;
   state.forVotesReachedQuorum = state.quorum;
   state.participationQuorumReached =
-    proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw >= proposal.quorumVotes.raw;
+    proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw >=
+    proposal.quorumVotes.raw;
+  state.vetoReached = proposal.optimistic
+    ? proposal.againstWeightedVotes.raw >=
+      getOptimisticVetoThresholdVotes(proposal.optimistic)
+    : false;
 
   if (totalVotes > 0n) {
     state.for = getVotePercentage(proposal.forWeightedVotes.raw, totalVotes);
@@ -155,10 +183,38 @@ function createInitialVotingState(state: ProposalState): MutableProposalVotingSt
     quorum: false,
     forVotesReachedQuorum: false,
     participationQuorumReached: false,
+    vetoReached: false,
     for: 0,
     against: 0,
     abstain: 0,
   };
+}
+
+export function getOptimisticVetoThresholdVotes(
+  optimistic: Pick<
+    IndexDtfOptimisticProposalContext,
+    "snapshotSupply" | "vetoThreshold"
+  >,
+): bigint {
+  const thresholdVotes =
+    (optimistic.vetoThreshold * optimistic.snapshotSupply.raw) / D18;
+
+  return thresholdVotes > 0n ? thresholdVotes : 1n;
+}
+
+function getOptimisticFinalState(proposal: ProposalVoteStateInput): ProposalState {
+  if (!proposal.optimistic) {
+    return proposal.state;
+  }
+
+  if (proposal.optimistic.snapshotSupply.raw === 0n) {
+    return "CANCELED";
+  }
+
+  return proposal.againstWeightedVotes.raw >=
+    getOptimisticVetoThresholdVotes(proposal.optimistic)
+    ? "DEFEATED"
+    : "SUCCEEDED";
 }
 
 function getVotePercentage(votes: bigint, totalVotes: bigint): number {

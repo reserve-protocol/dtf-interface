@@ -5956,6 +5956,15 @@ export type GetIndexDtfProposalsQueryVariables = Exact<{
 
 export type GetIndexDtfProposalsQuery = { governances: Array<{ id: string, proposalCount: string, proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, timelock: { id: string } } }> }> };
 
+export type GetAllIndexDtfProposalsQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<Proposal_Filter>;
+}>;
+
+
+export type GetAllIndexDtfProposalsQuery = { proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, timelock: { id: string } } }> };
+
 export type GetIndexDtfProposalGovernanceAddressesQueryVariables = Exact<{
   dtfId: Scalars['ID']['input'];
 }>;
@@ -6222,6 +6231,41 @@ export const GetIndexDtfProposalsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetIndexDtfProposalsQuery, GetIndexDtfProposalsQueryVariables>;
+export const GetAllIndexDtfProposalsDocument = new TypedDocumentString(`
+    query GetAllIndexDtfProposals($limit: Int = 100, $offset: Int = 0, $where: Proposal_filter) {
+  proposals(
+    first: $limit
+    skip: $offset
+    orderBy: creationTime
+    orderDirection: desc
+    where: $where
+  ) {
+    id
+    description
+    creationTime
+    state
+    forWeightedVotes
+    abstainWeightedVotes
+    againstWeightedVotes
+    executionETA
+    executionTime
+    quorumVotes
+    voteStart
+    voteEnd
+    executionBlock
+    creationBlock
+    proposer {
+      address
+    }
+    governance {
+      id
+      timelock {
+        id
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetAllIndexDtfProposalsQuery, GetAllIndexDtfProposalsQueryVariables>;
 export const GetIndexDtfProposalGovernanceAddressesDocument = new TypedDocumentString(`
     query GetIndexDtfProposalGovernanceAddresses($dtfId: ID!) {
   dtf(id: $dtfId) {

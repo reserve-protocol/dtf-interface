@@ -25,9 +25,22 @@ export type IndexDtfPlatformFee = {
 export type IndexDtfRevenue = {
   readonly financials: Financials;
   readonly feeRecipients: IndexDtf["fees"]["recipients"];
+  readonly effectiveDistribution: IndexDtfRevenueDistribution;
   readonly pendingFeeShares: Amount;
   readonly pendingFeeSharesUsd: number;
   readonly platformFee: IndexDtfPlatformFee;
+};
+
+export type IndexDtfRevenueDistribution = {
+  readonly platform: {
+    readonly recipient: Address;
+    readonly percentage: string;
+  };
+  readonly recipients: readonly {
+    readonly address: Address;
+    readonly configuredPercentage: string;
+    readonly effectivePercentage: string;
+  }[];
 };
 
 /** Reads the live v5 `bidsEnabled()` flag for settings and auction mode UIs. */
@@ -143,9 +156,36 @@ export async function getIndexDtfRevenue(
   return {
     financials: dtf.financials,
     feeRecipients: dtf.fees.recipients,
+    effectiveDistribution: getEffectiveRevenueDistribution(
+      dtf.fees.recipients,
+      platformFee,
+    ),
     pendingFeeShares,
     pendingFeeSharesUsd: new Decimal(pendingFeeShares.formatted).mul(price.price).toNumber(),
     platformFee,
+  };
+}
+
+export function getEffectiveRevenueDistribution(
+  feeRecipients: IndexDtf["fees"]["recipients"],
+  platformFee: IndexDtfPlatformFee,
+): IndexDtfRevenueDistribution {
+  const platformPercentage = new Decimal(platformFee.percent);
+  const recipientPool = new Decimal(100).minus(platformPercentage);
+
+  return {
+    platform: {
+      recipient: platformFee.recipient,
+      percentage: platformPercentage.toString(),
+    },
+    recipients: feeRecipients.map((recipient) => ({
+      address: recipient.address,
+      configuredPercentage: recipient.percentage,
+      effectivePercentage: new Decimal(recipient.percentage)
+        .mul(recipientPool)
+        .div(100)
+        .toString(),
+    })),
   };
 }
 

@@ -10,6 +10,7 @@ export type IndexDtfGovernanceInput = Address | readonly Address[];
 
 export type GetIndexDtfProposalsOptions = {
   readonly limit?: number;
+  readonly includeOptimisticState?: boolean;
 };
 
 type GetIndexDtfProposalsByAddressParams = DtfParams & {
@@ -39,11 +40,32 @@ export type GetAllIndexDtfProposalsParams = {
   readonly limit?: number;
   readonly offset?: number;
   readonly states?: readonly ProposalState[];
+  readonly includeOptimisticState?: boolean;
 };
 
 export type GetIndexDtfProposalParams = {
   readonly proposalId: string;
 } & DtfParams;
+
+export type GetIndexDtfProposalStateParams = {
+  readonly chainId: SupportedChainId;
+  readonly governance: Address;
+  readonly proposalId: string | bigint;
+};
+
+export type GetIndexDtfProposalStatesParams = {
+  readonly chainId: SupportedChainId;
+  readonly governance: Address;
+  readonly proposalIds: readonly (string | bigint)[];
+};
+
+export type IndexDtfProposalRpcDetails = {
+  readonly proposalId: string;
+  readonly state: ProposalState;
+  readonly eta: bigint;
+  readonly deadline: bigint;
+  readonly snapshot: bigint;
+};
 
 export type GetIndexDtfDelegatesParams = {
   readonly chainId: SupportedChainId;
@@ -58,6 +80,43 @@ export type GetIndexDtfVoterStateParams = {
   readonly stToken: Address;
   readonly account: Address;
 };
+
+export type GetIndexDtfOptimisticVotesParams = {
+  readonly chainId: SupportedChainId;
+  readonly voteToken: Address;
+  readonly account: Address;
+};
+
+export type GetIndexDtfPastOptimisticVotesParams =
+  GetIndexDtfOptimisticVotesParams & {
+    readonly timepoint?: bigint;
+  };
+
+export type GetIndexDtfOptimisticProposalContextParams = {
+  readonly chainId: SupportedChainId;
+  readonly governance: Address;
+  readonly proposalId: string | bigint;
+  readonly isOptimistic?: boolean;
+};
+
+export type GetIndexDtfLegacyVoteLocksParams =
+  | DtfParams
+  | { readonly dtf: IndexDtf }
+  | {
+      readonly chainId: SupportedChainId;
+      readonly currentVoteLock: Address;
+      readonly legacyGovernance: readonly Address[];
+    };
+
+export type GetIndexDtfOptimisticGovernanceParams = {
+  readonly chainId: SupportedChainId;
+  readonly governance: Address;
+};
+
+export type GetIndexDtfProposalThrottleChargesParams =
+  GetIndexDtfOptimisticGovernanceParams & {
+    readonly account: Address;
+  };
 
 export type GetIndexDtfProposerStateParams = {
   readonly chainId: SupportedChainId;
@@ -76,7 +135,10 @@ export type GetIndexDtfProposalVoterStateParams = {
   readonly chainId: SupportedChainId;
   readonly governance: Address;
   readonly account: Address;
-  readonly proposal: Pick<IndexDtfProposalDetail, "id" | "voteStart" | "votes">;
+  readonly proposal: Pick<
+    IndexDtfProposalDetail,
+    "id" | "isOptimistic" | "optimistic" | "voteStart" | "voteToken" | "votes"
+  >;
 };
 
 export type ProposalState =
@@ -98,9 +160,37 @@ export type ProposalVotingState = {
   readonly quorum: boolean;
   readonly forVotesReachedQuorum: boolean;
   readonly participationQuorumReached: boolean;
+  readonly vetoReached: boolean;
   readonly for: number;
   readonly against: number;
   readonly abstain: number;
+};
+
+export type IndexDtfOptimisticGovernanceParams = {
+  readonly vetoDelay: bigint;
+  readonly vetoPeriod: bigint;
+  readonly vetoThreshold: bigint;
+};
+
+export type IndexDtfOptimisticProposalContext = {
+  readonly proposalId: string;
+  readonly voteToken: Address;
+  readonly snapshot: bigint;
+  readonly snapshotSupply: Amount;
+  readonly vetoThreshold: bigint;
+  readonly vetoThresholdVotes: Amount;
+};
+
+export type IndexDtfOptimisticGovernance = {
+  readonly governance: Address;
+  readonly token: Address;
+  readonly timelock: Address;
+  readonly selectorRegistry: Address;
+  readonly lateQuorumVoteExtension: bigint;
+  readonly proposalThrottleCapacity: bigint;
+  readonly optimisticParams: IndexDtfOptimisticGovernanceParams;
+  readonly optimisticProposers: readonly Address[];
+  readonly guardians: readonly Address[];
 };
 
 export type IndexDtfProposalSummary = {
@@ -123,6 +213,9 @@ export type IndexDtfProposalSummary = {
   readonly forWeightedVotes: Amount;
   readonly againstWeightedVotes: Amount;
   readonly abstainWeightedVotes: Amount;
+  readonly isOptimistic?: boolean;
+  readonly voteToken?: Address;
+  readonly optimistic?: IndexDtfOptimisticProposalContext;
   readonly votingState: ProposalVotingState;
 };
 
@@ -213,11 +306,15 @@ export type IndexDtfGuardians = {
 export type IndexDtfVoterState = {
   readonly account: Address;
   readonly delegate: Address;
+  readonly optimisticDelegate: Address | null;
   readonly balance: Amount;
   readonly votingPower: Amount;
+  readonly optimisticVotingPower: Amount | null;
   readonly voteSupply: Amount;
   readonly isSelfDelegated: boolean;
+  readonly isOptimisticSelfDelegated: boolean;
   readonly hasVotingPower: boolean;
+  readonly hasOptimisticVotingPower: boolean;
 };
 
 export type IndexDtfProposerState = {
@@ -237,9 +334,11 @@ export type IndexDtfProposalVotes = {
 export type IndexDtfProposalVoterState = {
   readonly account: Address;
   readonly votingPower: Amount;
+  readonly optimisticVotingPower: Amount | null;
   readonly vote: string | null;
   readonly hasVoted: boolean;
   readonly hasVotingPower: boolean;
+  readonly hasOptimisticVotingPower: boolean;
 };
 
 export type IndexDtfVoteSupport = 0 | 1 | 2;
@@ -276,3 +375,6 @@ export type ExecuteIndexDtfProposalParams = IndexDtfProposalActionParams;
 export type CancelIndexDtfProposalParams = IndexDtfProposalActionParams;
 
 export type ProposeIndexDtfProposalParams = IndexDtfProposalActionParams;
+
+export type SubmitOptimisticIndexDtfProposalParams =
+  IndexDtfProposalActionParams;

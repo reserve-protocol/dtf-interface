@@ -4,13 +4,18 @@ import type { DtfClient } from "@/client";
 import type { DtfParams } from "@/types/common";
 import type {
   GetAllIndexDtfProposalsParams,
+  GetIndexDtfProposalStateParams,
+  GetIndexDtfProposalStatesParams,
   GetIndexDtfProposalParams,
   GetIndexDtfProposalsParams,
+  IndexDtfProposalRpcDetails,
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
+  ProposalState,
 } from "@/types/governance";
 
 import { SdkError } from "@/errors";
+import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { DEFAULT_PROPOSAL_LIMIT } from "@/index-dtf/governance/constants";
 import { buildProposalContractMap } from "@/index-dtf/governance/contract-map";
 import { decodeIndexDtfProposalCalldatas } from "@/index-dtf/governance/decoder";
@@ -19,8 +24,11 @@ import {
   mapIndexDtfProposal,
   mapIndexDtfProposalSummary,
   mapProposalGovernanceContractContext,
+  type ParsedIndexDtfProposal,
+  type ParsedIndexDtfProposalSummary,
   type SubgraphGovernedIndexDtfProposalDtf,
 } from "@/index-dtf/governance/mapper";
+import { getOptimisticProposalContext } from "@/index-dtf/governance/optimistic";
 import {
   getDtfProposalGovernanceIds,
   getProposalGovernanceAddresses,
@@ -29,11 +37,25 @@ import {
   type DtfGovernanceAddressContext,
 } from "@/index-dtf/governance/utils";
 import {
+  GetAllIndexDtfProposalsDocument,
   GetIndexDtfProposalDocument,
   GetIndexDtfProposalGovernanceAddressesDocument,
   GetIndexDtfProposalsDocument,
+  type Proposal_Filter,
 } from "@/index-dtf/subgraph/dtf.generated";
 import { getCurrentTime } from "@/lib/utils";
+
+const PROPOSAL_STATE_BY_ID = [
+  "PENDING",
+  "ACTIVE",
+  "CANCELED",
+  "DEFEATED",
+  "SUCCEEDED",
+  "QUEUED",
+  "EXPIRED",
+  "EXECUTED",
+  "VETOED",
+] as const satisfies readonly ProposalState[];
 
 export async function getProposals(
   client: DtfClient,
@@ -45,7 +67,14 @@ export async function getProposals(
     const governanceIds = normalizeGovernanceIds(params.governanceAddresses);
     const dtf = params.address ? { address: getAddress(params.address), chainId: params.chainId } : undefined;
 
-    return getProposalsByGovernanceIds(client, params.chainId, governanceIds, limit, dtf);
+    return getProposalsByGovernanceIds(
+      client,
+      params.chainId,
+      governanceIds,
+      limit,
+      params.includeOptimisticState ?? false,
+      dtf,
+    );
   }
 
   if (params.dtf) {
@@ -55,24 +84,136 @@ export async function getProposals(
     };
     const governanceIds = normalizeGovernanceIds(getProposalGovernanceAddresses(params.dtf));
 
-    return getProposalsByGovernanceIds(client, dtf.chainId, governanceIds, limit, dtf);
+    return getProposalsByGovernanceIds(
+      client,
+      dtf.chainId,
+      governanceIds,
+      limit,
+      params.includeOptimisticState ?? false,
+      dtf,
+    );
   }
 
   const dtf = { address: getAddress(params.address), chainId: params.chainId };
   const governanceIds = await fetchDtfProposalGovernanceIds(client, dtf);
 
-  return getProposalsByGovernanceIds(client, dtf.chainId, governanceIds, limit, dtf);
+  return getProposalsByGovernanceIds(
+    client,
+    dtf.chainId,
+    governanceIds,
+    limit,
+    params.includeOptimisticState ?? false,
+    dtf,
+  );
 }
 
 export async function getAllProposals(
-  _client: DtfClient,
-  _params: GetAllIndexDtfProposalsParams,
+  client: DtfClient,
+  params: GetAllIndexDtfProposalsParams,
 ): Promise<readonly IndexDtfProposalSummary[]> {
-  throw new SdkError({
-    code: "NOT_IMPLEMENTED",
-    message: "getAllIndexDtfProposals is not implemented yet.",
-    meta: { method: "getAllIndexDtfProposals" },
+  const where = getProposalFilter(params.states);
+  const { proposals } = await client.subgraph.queryIndex({
+    chainId: params.chainId,
+    query: GetAllIndexDtfProposalsDocument,
+    variables: {
+      limit: params.limit ?? DEFAULT_PROPOSAL_LIMIT,
+      offset: params.offset ?? 0,
+      ...(where ? { where } : {}),
+    },
   });
+
+  return finalizeProposalSummaries(
+    client,
+    proposals.map((proposal) =>
+      mapIndexDtfProposalSummary(proposal, params.chainId),
+    ),
+    params.includeOptimisticState ?? false,
+  );
+}
+
+export async function getProposalState(
+  client: DtfClient,
+  params: GetIndexDtfProposalStateParams,
+): Promise<ProposalState> {
+  const state = await client.viem.readContract({
+    chainId: params.chainId,
+    address: getAddress(params.governance),
+    abi: dtfIndexGovernanceAbi,
+    functionName: "state",
+    args: [BigInt(params.proposalId)],
+  });
+
+  return mapProposalState(state);
+}
+
+export async function getProposalStates(
+  client: DtfClient,
+  params: GetIndexDtfProposalStatesParams,
+): Promise<readonly ProposalState[]> {
+  return Promise.all(
+    params.proposalIds.map((proposalId) =>
+      getProposalState(client, { ...params, proposalId }),
+    ),
+  );
+}
+
+export async function getProposalEta(
+  client: DtfClient,
+  params: GetIndexDtfProposalStateParams,
+): Promise<bigint> {
+  return client.viem.readContract({
+    chainId: params.chainId,
+    address: getAddress(params.governance),
+    abi: dtfIndexGovernanceAbi,
+    functionName: "proposalEta",
+    args: [BigInt(params.proposalId)],
+  });
+}
+
+export async function getProposalDeadline(
+  client: DtfClient,
+  params: GetIndexDtfProposalStateParams,
+): Promise<bigint> {
+  return client.viem.readContract({
+    chainId: params.chainId,
+    address: getAddress(params.governance),
+    abi: dtfIndexGovernanceAbi,
+    functionName: "proposalDeadline",
+    args: [BigInt(params.proposalId)],
+  });
+}
+
+export async function getProposalSnapshot(
+  client: DtfClient,
+  params: GetIndexDtfProposalStateParams,
+): Promise<bigint> {
+  return client.viem.readContract({
+    chainId: params.chainId,
+    address: getAddress(params.governance),
+    abi: dtfIndexGovernanceAbi,
+    functionName: "proposalSnapshot",
+    args: [BigInt(params.proposalId)],
+  });
+}
+
+export async function getProposalRpcDetails(
+  client: DtfClient,
+  params: GetIndexDtfProposalStateParams,
+): Promise<IndexDtfProposalRpcDetails> {
+  const [state, eta, deadline, snapshot] = await Promise.all([
+    getProposalState(client, params),
+    getProposalEta(client, params),
+    getProposalDeadline(client, params),
+    getProposalSnapshot(client, params),
+  ]);
+
+  return {
+    proposalId: String(params.proposalId),
+    state,
+    eta,
+    deadline,
+    snapshot,
+  };
 }
 
 export async function getProposal(
@@ -105,7 +246,10 @@ export async function getProposal(
 
   const governedDtf = dtf as SubgraphGovernedIndexDtfProposalDtf;
 
-  const parsedProposal = mapIndexDtfProposal(proposal, governedDtf, chainId);
+  const parsedProposal = await withOptionalOptimisticProposalContext(
+    client,
+    mapIndexDtfProposal(proposal, governedDtf, chainId),
+  );
   const proposalWithVoteState = withVoteState(parsedProposal, getCurrentTime());
   const contractMap = buildProposalContractMap({
     chainId,
@@ -129,6 +273,7 @@ async function getProposalsByGovernanceIds(
   chainId: DtfParams["chainId"],
   governanceIds: readonly string[],
   limit: number,
+  includeOptimisticState: boolean,
   dtf?: DtfParams,
 ): Promise<readonly IndexDtfProposalSummary[]> {
   if (governanceIds.length === 0) {
@@ -147,10 +292,90 @@ async function getProposalsByGovernanceIds(
   const timestamp = getCurrentTime();
   const proposals = governances
     .flatMap((governance) => governance.proposals)
-    .map((proposal) => withVoteState(mapIndexDtfProposalSummary(proposal, chainId, dtf), timestamp))
+    .map((proposal) => mapIndexDtfProposalSummary(proposal, chainId, dtf))
     .sort((a, b) => b.creationTime - a.creationTime);
 
-  return proposals.slice(0, limit);
+  const limitedProposals = proposals.slice(0, limit);
+
+  return finalizeProposalSummaries(
+    client,
+    limitedProposals,
+    includeOptimisticState,
+    timestamp,
+  );
+}
+
+async function finalizeProposalSummaries(
+  client: DtfClient,
+  proposals: readonly ParsedIndexDtfProposalSummary[],
+  includeOptimisticState: boolean,
+  timestamp = getCurrentTime(),
+): Promise<readonly IndexDtfProposalSummary[]> {
+  if (!includeOptimisticState) {
+    return proposals.map((proposal) => withVoteState(proposal, timestamp));
+  }
+
+  const optimisticProposals = await Promise.all(
+    proposals.map((proposal) => withOptionalOptimisticProposalContext(client, proposal)),
+  );
+
+  return optimisticProposals.map((proposal) => withVoteState(proposal, timestamp));
+}
+
+async function withOptionalOptimisticProposalContext<
+  T extends ParsedIndexDtfProposal | ParsedIndexDtfProposalSummary,
+>(client: DtfClient, proposal: T): Promise<T> {
+  if (proposal.isOptimistic === false) {
+    return proposal;
+  }
+
+  const contextParams = {
+    chainId: proposal.chainId,
+    governance: proposal.governance,
+    proposalId: proposal.id,
+    ...(proposal.isOptimistic === undefined
+      ? {}
+      : { isOptimistic: proposal.isOptimistic }),
+  };
+
+  const optimistic = await getOptimisticProposalContext(client, contextParams);
+
+  if (!optimistic) {
+    return proposal;
+  }
+
+  return {
+    ...proposal,
+    isOptimistic: true,
+    voteToken: optimistic.voteToken,
+    optimistic,
+  };
+}
+
+function getProposalFilter(
+  states: readonly ProposalState[] | undefined,
+): Proposal_Filter | undefined {
+  if (!states || states.length === 0) {
+    return undefined;
+  }
+
+  const stateFilter = [...states] as NonNullable<Proposal_Filter["state_in"]>;
+
+  return { state_in: stateFilter };
+}
+
+function mapProposalState(state: number | bigint): ProposalState {
+  const mappedState = PROPOSAL_STATE_BY_ID[Number(state)];
+
+  if (!mappedState) {
+    throw new SdkError({
+      code: "INVALID_RESPONSE",
+      message: `Unknown proposal state id: ${state}`,
+      meta: { state },
+    });
+  }
+
+  return mappedState;
 }
 
 async function fetchDtfProposalGovernanceIds(client: DtfClient, params: DtfParams): Promise<readonly string[]> {

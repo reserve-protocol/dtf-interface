@@ -1,0 +1,148 @@
+export const dtfIndexGovernanceOptimisticAbi = [
+  {
+    type: "function",
+    name: "getOptimisticVotes",
+    inputs: [
+      { name: "account", type: "address", internalType: "address" },
+      { name: "timepoint", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "isOptimistic",
+    inputs: [
+      { name: "proposalId", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "lateQuorumVoteExtension",
+    inputs: [],
+    outputs: [{ name: "", type: "uint48", internalType: "uint48" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "optimisticParams",
+    inputs: [],
+    outputs: [
+      { name: "vetoDelay", type: "uint48", internalType: "uint48" },
+      { name: "vetoPeriod", type: "uint32", internalType: "uint32" },
+      { name: "vetoThreshold", type: "uint256", internalType: "uint256" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "proposalSnapshot",
+    inputs: [
+      { name: "proposalId", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "proposalThrottleCapacity",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "proposalThrottleCharges",
+    inputs: [{ name: "account", type: "address", internalType: "address" }],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "proposeOptimistic",
+    inputs: [
+      { name: "targets", type: "address[]", internalType: "address[]" },
+      { name: "values", type: "uint256[]", internalType: "uint256[]" },
+      { name: "calldatas", type: "bytes[]", internalType: "bytes[]" },
+      { name: "description", type: "string", internalType: "string" },
+    ],
+    outputs: [{ name: "proposalId", type: "uint256", internalType: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "selectorRegistry",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "contract IOptimisticSelectorRegistry",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "timelock",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "setLateQuorumVoteExtension",
+    inputs: [{ name: "newVoteExtension", type: "uint48", internalType: "uint48" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setOptimisticParams",
+    inputs: [
+      {
+        name: "params",
+        type: "tuple",
+        internalType: "struct IReserveOptimisticGovernor.OptimisticGovernanceParams",
+        components: [
+          { name: "vetoDelay", type: "uint48", internalType: "uint48" },
+          { name: "vetoPeriod", type: "uint32", internalType: "uint32" },
+          { name: "vetoThreshold", type: "uint256", internalType: "uint256" },
+        ],
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setProposalThrottle",
+    inputs: [
+      {
+        name: "newProposalThrottleCapacity",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "token",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "contract IERC5805" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "vetoThreshold",
+    inputs: [
+      { name: "proposalId", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+] as const;

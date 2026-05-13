@@ -2,15 +2,24 @@ import { getAddress } from "viem";
 
 import type { DtfClient } from "@/client";
 import type {
+  GetIndexDtfCompletedRebalanceParams,
+  GetIndexDtfCompletedRebalancesParams,
   GetIndexDtfRebalanceParams,
   GetIndexDtfRebalancesParams,
   IndexDtfAuction,
+  IndexDtfCompletedRebalance,
+  IndexDtfCompletedRebalanceDetail,
   IndexDtfRebalance,
 } from "@/index-dtf/rebalance/types";
 
 import { SdkError } from "@/errors";
 import { getIndexDtfCurrentRebalance } from "@/index-dtf/rebalance/current";
-import { mapSubgraphAuction, mapSubgraphRebalance } from "@/index-dtf/rebalance/mappers";
+import {
+  mapApiCompletedRebalance,
+  mapApiCompletedRebalanceDetail,
+  mapSubgraphAuction,
+  mapSubgraphRebalance,
+} from "@/index-dtf/rebalance/mappers";
 import {
   GetIndexDtfRebalanceDocument,
   GetIndexDtfRebalanceByNonceDocument,
@@ -20,6 +29,7 @@ import {
 import { getIndexDtfIdentity } from "@/index-dtf/utils";
 
 export * from "@/index-dtf/rebalance/current";
+export * from "@/index-dtf/rebalance/execution";
 export * from "@/index-dtf/rebalance/open-auction";
 export * from "@/index-dtf/rebalance/types";
 
@@ -40,6 +50,37 @@ export async function getRebalances(
   });
 
   return response.rebalances.map(mapSubgraphRebalance);
+}
+
+/** Reads completed Index DTF rebalance metrics from Reserve API. */
+export async function getCompletedRebalances(
+  client: DtfClient,
+  params: GetIndexDtfCompletedRebalancesParams,
+): Promise<readonly IndexDtfCompletedRebalance[]> {
+  const { address, chainId } = getIndexDtfIdentity(params);
+  const rebalances = await client.api.getIndexDtfRebalanceHistory({
+    address,
+    chainId,
+    ...(params.skip === undefined ? {} : { skip: params.skip }),
+    ...(params.limit === undefined ? {} : { limit: params.limit }),
+  });
+
+  return rebalances.map(mapApiCompletedRebalance);
+}
+
+/** Reads completed Index DTF rebalance detail and auction metrics from Reserve API. */
+export async function getCompletedRebalance(
+  client: DtfClient,
+  params: GetIndexDtfCompletedRebalanceParams,
+): Promise<IndexDtfCompletedRebalanceDetail> {
+  const { address, chainId } = getIndexDtfIdentity(params);
+  const rebalance = await client.api.getIndexDtfRebalanceDetail({
+    address,
+    chainId,
+    nonce: params.nonce,
+  });
+
+  return mapApiCompletedRebalanceDetail(rebalance);
 }
 
 /** Reads one Index DTF rebalance by id or by DTF address + nonce. */

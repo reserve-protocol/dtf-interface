@@ -13,6 +13,7 @@ import { describe, expect, it } from "vitest";
 import {
   prepareIndexDtfCancelProposal,
   prepareIndexDtfQueueProposal,
+  prepareIndexDtfSubmitOptimisticProposal,
   prepareIndexDtfSubmitProposal,
 } from "@/index-dtf/governance/proposal-actions";
 
@@ -39,6 +40,28 @@ describe("Index DTF proposal actions", () => {
       [0n],
       ["0x1234"],
       "Proposal description",
+    ]);
+  });
+
+  it("prepares optimistic propose calls from a proposal payload", () => {
+    const call = prepareIndexDtfSubmitOptimisticProposal({
+      chainId: 8453,
+      proposal: {
+        governance: "0x0000000000000000000000000000000000000001",
+        targets: ["0x0000000000000000000000000000000000000003"],
+        calldatas: ["0x1234"],
+        description: "Optimistic proposal",
+      },
+    });
+
+    expect(call.chainId).toBe(8453);
+    expect(call.to).toBe("0x0000000000000000000000000000000000000001");
+    expect(call.contract.functionName).toBe("proposeOptimistic");
+    expect(call.contract.args).toEqual([
+      ["0x0000000000000000000000000000000000000003"],
+      [0n],
+      ["0x1234"],
+      "Optimistic proposal",
     ]);
   });
 

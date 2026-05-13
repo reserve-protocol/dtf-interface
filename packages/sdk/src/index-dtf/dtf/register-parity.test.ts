@@ -2,26 +2,35 @@ import { decodeFunctionData, erc20Abi, parseEther } from "viem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createDtfClient, type DtfClient } from "@/client";
+import { getAssetList } from "@/index-dtf/assets/index";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
 import { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
-import { discoverIndexDtfs, getIndexDtfStatus } from "@/index-dtf/dtf/discovery";
+import { discoverIndexDtfs, discoverIndexDtfsByChain, getIndexDtfStatus } from "@/index-dtf/dtf/discovery";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
+import { getPrices } from "@/index-dtf/dtf/index";
+import {
+  getCompletedRebalance,
+  getCompletedRebalances,
+  getRebalance,
+  getRebalances,
+} from "@/index-dtf/rebalance/index";
+import {
+  prepareVoteLockClaimRewards,
+  prepareVoteLockClaimWithdrawal,
+  prepareVoteLockDelegateOptimistic,
+  prepareVoteLockDeposit,
+  prepareVoteLockDepositPlan,
+} from "@/index-dtf/vote-lock/index";
 import {
   getIndexDtfRedeemMinAmounts,
   prepareIndexDtfMint,
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
 } from "@/index-dtf/dtf/issuance";
-import { prepareIndexDtfDistributeFees } from "@/index-dtf/dtf/revenue";
+import { getEffectiveRevenueDistribution, prepareIndexDtfDistributeFees } from "@/index-dtf/dtf/revenue";
 import { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
-import { getRebalance, getRebalances } from "@/index-dtf/rebalance/index";
-import {
-  prepareVoteLockClaimRewards,
-  prepareVoteLockClaimWithdrawal,
-  prepareVoteLockDeposit,
-  prepareVoteLockDepositPlan,
-} from "@/index-dtf/vote-lock/index";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const TOKEN = "0x0000000000000000000000000000000000000002";
@@ -48,6 +57,92 @@ describe("Index DTF Register parity SDK surfaces", () => {
     expect(dtfs).toHaveLength(1);
     expect(dtfs[0]?.address).toBe(DTF);
     expect(status).toBe("deprecated");
+  });
+
+  it("supports chain-scoped Index DTF discovery", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json([
+        { address: DTF, chainId: 8453, status: "active", symbol: "DTF" },
+      ]),
+    );
+    vi.stubGlobal("fetch", fetch);
+    const client = createDtfClient({ apiBaseUrl: "https://api.example" });
+
+    const dtfs = await discoverIndexDtfsByChain(client, {
+      chainId: 8453,
+      limit: 10,
+      sort: "marketCap",
+    });
+
+    expect(dtfs[0]?.address).toBe(DTF);
+    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe(
+      "https://api.example/discover/dtf?chainId=8453&limit=10&sort=marketCap",
+    );
+  });
+
+  it("exposes the zapper asset list used by deploy and basket flows", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json([
+        {
+          address: TOKEN,
+          chainId: 8453,
+          decimals: 18,
+          name: "Token",
+          symbol: "TKN",
+          volatility: "medium",
+        },
+      ]),
+    );
+    vi.stubGlobal("fetch", fetch);
+    const client = createDtfClient({ apiBaseUrl: "https://api.example" });
+
+    const assets = await getAssetList(client, { chainId: 8453, unfiltered: true });
+
+    expect(assets[0]?.address).toBe(TOKEN);
+    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe(
+      "https://api.example/zapper/tokens?chainId=8453&unfiltered=true",
+    );
+  });
+
+  it("fetches batch current Index DTF prices", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const fetch = vi.fn(async () =>
+      Response.json([
+        {
+          address: DTF,
+          price: 2,
+          marketCap: 200,
+          totalSupply: 100,
+          basket: [
+            {
+              address: TOKEN,
+              amount: 1,
+              amountRaw: "1000000000000000000",
+              decimals: 18,
+              price: 1,
+              weight: "50",
+            },
+          ],
+        },
+      ]),
+    );
+    vi.stubGlobal("fetch", fetch);
+    const client = createDtfClient({ apiBaseUrl: "https://api.example" });
+
+    const prices = await getPrices(client, { chainId: 1, addresses: [DTF] });
+
+    expect(prices[0]).toMatchObject({
+      address: DTF,
+      chainId: 1,
+      price: 2,
+      marketCap: 200,
+      totalSupply: 100,
+      timestamp: 1_000_000_000,
+    });
+    expect(prices[0]?.basket[0]?.amount.raw).toBe(1000000000000000000n);
+    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe(
+      "https://api.example/current/dtfs?chainId=1&addresses=0x0000000000000000000000000000000000000001",
+    );
   });
 
   it("treats missing API discovery status as unsupported", async () => {
@@ -143,13 +238,13 @@ describe("Index DTF Register parity SDK surfaces", () => {
   it("prepares fee and vote-lock calls", () => {
     const distribute = prepareIndexDtfDistributeFees({ address: DTF, chainId: 1 });
     const deposit = prepareVoteLockDeposit({ stToken: DTF, chainId: 1, amount: parseEther("1"), delegateToSelf: true });
+    const optimisticDelegate = prepareVoteLockDelegateOptimistic({ stToken: DTF, chainId: 1, delegatee: ACCOUNT });
     const rewards = prepareVoteLockClaimRewards({ stToken: DTF, chainId: 1, rewardTokens: [TOKEN] });
     const withdrawal = prepareVoteLockClaimWithdrawal({ unstakingManager: DTF, chainId: 1, lockId: 1n });
 
     expect(decodeFunctionData({ abi: dtfIndexAbi, data: distribute.data }).functionName).toBe("distributeFees");
-    expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: deposit.data }).functionName).toBe(
-      "depositAndDelegate",
-    );
+    expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: deposit.data }).functionName).toBe("depositAndDelegate");
+    expect(decodeFunctionData({ abi: dtfIndexStakingVaultOptimisticAbi, data: optimisticDelegate.data }).functionName).toBe("delegateOptimistic");
     expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: rewards.data }).functionName).toBe("claimRewards");
     expect(decodeFunctionData({ abi: unstakingManagerAbi, data: withdrawal.data }).functionName).toBe("claimLock");
     expect(() =>
@@ -161,6 +256,39 @@ describe("Index DTF Register parity SDK surfaces", () => {
         receiver: ACCOUNT,
       } as never),
     ).toThrow("receiver");
+  });
+
+  it("computes effective revenue distribution after platform fee", () => {
+    const distribution = getEffectiveRevenueDistribution(
+      [
+        { address: DTF, percentage: "60" },
+        { address: ACCOUNT, percentage: "40" },
+      ],
+      {
+        registry: DTF,
+        recipient: TOKEN,
+        numerator: 1n,
+        denominator: 2n,
+        floor: 0n,
+        percent: 50,
+      },
+    );
+
+    expect(distribution).toEqual({
+      platform: { recipient: TOKEN, percentage: "50" },
+      recipients: [
+        {
+          address: DTF,
+          configuredPercentage: "60",
+          effectivePercentage: "30",
+        },
+        {
+          address: ACCOUNT,
+          configuredPercentage: "40",
+          effectivePercentage: "20",
+        },
+      ],
+    });
   });
 
   it("prepares vote-lock deposit plans", () => {
@@ -271,5 +399,92 @@ describe("Index DTF Register parity SDK surfaces", () => {
         variables: { dtf: DTF.toLowerCase(), nonce: "1" },
       }),
     );
+  });
+
+  it("reads completed rebalance metrics from Reserve API", async () => {
+    const getIndexDtfRebalanceHistory = vi.fn(async () => [
+      {
+        nonce: 4,
+        timestamp: 100,
+        availableUntil: 200,
+        totalRebalancedUsd: 50,
+      },
+    ]);
+    const getIndexDtfRebalanceDetail = vi.fn(async () => ({
+      nonce: 4,
+      timestamp: 100,
+      rebalanceGainLossUsd: null,
+      auctions: [
+        {
+          startTime: 101,
+          endTime: 120,
+          bids: [
+            {
+              bidder: ACCOUNT,
+              sellToken: { address: TOKEN, symbol: "TKN", decimals: 18 },
+              buyToken: { address: DTF, symbol: "DTF", decimals: 18 },
+              sellAmount: "1000000000000000000",
+              buyAmount: "2000000000000000000",
+              sellAmountUsd: null,
+              buyAmountUsd: 2,
+            },
+          ],
+        },
+      ],
+      totalRebalancedUsd: 50,
+    }));
+    const client = {
+      api: { getIndexDtfRebalanceHistory, getIndexDtfRebalanceDetail },
+    } as unknown as DtfClient;
+
+    const history = await getCompletedRebalances(client, {
+      address: DTF,
+      chainId: 1,
+      skip: 10,
+      limit: 5,
+    });
+    const detail = await getCompletedRebalance(client, {
+      address: DTF,
+      chainId: 1,
+      nonce: 4n,
+    });
+
+    expect(history[0]).toMatchObject({
+      nonce: 4,
+      totalRebalancedUsd: 50,
+    });
+    expect(detail.auctions[0]?.bids[0]).toMatchObject({
+      bidder: ACCOUNT,
+      sellToken: { address: TOKEN, name: "TKN" },
+      sellAmount: 1000000000000000000n,
+    });
+    expect(detail).not.toHaveProperty("rebalanceGainLossUsd");
+    expect(detail.auctions[0]?.bids[0]).not.toHaveProperty("sellAmountUsd");
+    expect(getIndexDtfRebalanceHistory).toHaveBeenCalledWith({
+      address: DTF,
+      chainId: 1,
+      skip: 10,
+      limit: 5,
+    });
+    expect(getIndexDtfRebalanceDetail).toHaveBeenCalledWith({
+      address: DTF,
+      chainId: 1,
+      nonce: 4n,
+    });
+  });
+
+  it("rejects completed rebalance detail responses without auctions", async () => {
+    const client = {
+      api: {
+        getIndexDtfRebalanceDetail: vi.fn(async () => ({
+          nonce: 4,
+          timestamp: 100,
+        })),
+      },
+    } as unknown as DtfClient;
+
+    await expect(
+      getCompletedRebalance(client, { address: DTF, chainId: 1, nonce: 4n }),
+    ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
   });
 });

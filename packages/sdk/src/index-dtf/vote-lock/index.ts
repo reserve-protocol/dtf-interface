@@ -9,8 +9,10 @@ import type { IndexDtf } from "@/types/index-dtf";
 import { prepareContractCall, prepareErc20Approval } from "@/contract-call";
 import { SdkError } from "@/errors";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
 import { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
 import { getDtf } from "@/index-dtf/dtf/index";
+import { isUnsupportedOptimisticContractError } from "@/index-dtf/optimistic-errors";
 import { mapAmount } from "@/lib/utils";
 
 export type VoteLockDao = {
@@ -49,7 +51,10 @@ export type VoteLockState = {
   readonly underlyingBalance: Amount;
   readonly underlyingAllowance: Amount;
   readonly delegate: Address;
+  readonly optimisticDelegate: Address | null;
   readonly maxWithdraw: Amount;
+  readonly optimisticVotingPower: Amount | null;
+  readonly hasOptimisticVotingPower: boolean;
   readonly unstakingDelay: bigint;
   readonly unstakingManager: Address;
   readonly underlyingPrice?: number;
@@ -116,7 +121,17 @@ export async function getVoteLockState(
   const account = getAddress(params.account);
   const stToken = vault.token.address;
   const underlying = vault.underlying;
-  const [balance, allowance, delegate, maxWithdraw, unstakingDelay, unstakingManager, prices] = await Promise.all([
+  const [
+    balance,
+    allowance,
+    delegate,
+    maxWithdraw,
+    unstakingDelay,
+    unstakingManager,
+    optimisticDelegate,
+    optimisticVotingPower,
+    prices,
+  ] = await Promise.all([
     client.viem.readContract({
       address: underlying.address,
       abi: erc20Abi,
@@ -157,6 +172,8 @@ export async function getVoteLockState(
       functionName: "unstakingManager",
       chainId: params.chainId,
     }),
+    readOptimisticDelegate(client, params.chainId, stToken, account),
+    readOptimisticVotingPower(client, params.chainId, stToken, account),
     client.api.getTokenPrices({
       chainId: params.chainId,
       addresses: [underlying.address],
@@ -170,7 +187,11 @@ export async function getVoteLockState(
     underlyingBalance: mapAmount(balance, underlying.decimals),
     underlyingAllowance: mapAmount(allowance, underlying.decimals),
     delegate: getAddress(delegate),
+    optimisticDelegate,
     maxWithdraw: mapAmount(maxWithdraw, underlying.decimals),
+    optimisticVotingPower:
+      optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower),
+    hasOptimisticVotingPower: (optimisticVotingPower ?? 0n) > 0n,
     unstakingDelay,
     unstakingManager: getAddress(unstakingManager),
     ...(prices[0] ? { underlyingPrice: prices[0].price } : {}),
@@ -249,6 +270,56 @@ function throwIfReceiverIsUnused(params: VoteLockDepositInput) {
   }
 }
 
+async function readOptimisticDelegate(
+  client: DtfClient,
+  chainId: SupportedChainId,
+  stToken: Address,
+  account: Address,
+) {
+  try {
+    const delegate = await client.viem.readContract({
+      chainId,
+      address: stToken,
+      abi: dtfIndexStakingVaultOptimisticAbi,
+      functionName: "optimisticDelegates",
+      args: [account],
+    });
+
+    return getAddress(delegate);
+  } catch (error) {
+    if (!isUnsupportedOptimisticContractError(error)) {
+      throw error;
+    }
+
+    return null;
+  }
+}
+
+async function readOptimisticVotingPower(
+  client: DtfClient,
+  chainId: SupportedChainId,
+  stToken: Address,
+  account: Address,
+) {
+  try {
+    const votes = await client.viem.readContract({
+      chainId,
+      address: stToken,
+      abi: dtfIndexStakingVaultOptimisticAbi,
+      functionName: "getOptimisticVotes",
+      args: [account],
+    });
+
+    return votes ?? null;
+  } catch (error) {
+    if (!isUnsupportedOptimisticContractError(error)) {
+      throw error;
+    }
+
+    return null;
+  }
+}
+
 function mapVoteLockDao(dao: RawVoteLockDao): VoteLockDao {
   return {
     ...dao,
@@ -280,6 +351,21 @@ export function prepareVoteLockDelegate(params: {
     address: params.stToken,
     abi: dtfIndexStakingVaultAbi,
     functionName: "delegate",
+    args: [getAddress(params.delegatee)] as const,
+  });
+}
+
+/** Prepares a staking-vault optimistic delegation call used for veto power. */
+export function prepareVoteLockDelegateOptimistic(params: {
+  readonly stToken: Address;
+  readonly chainId: SupportedChainId;
+  readonly delegatee: Address;
+}) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.stToken,
+    abi: dtfIndexStakingVaultOptimisticAbi,
+    functionName: "delegateOptimistic",
     args: [getAddress(params.delegatee)] as const,
   });
 }

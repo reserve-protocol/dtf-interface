@@ -1,12 +1,31 @@
 import { getAddress, type Address } from "viem";
 
-import type { IndexDtfAuction, IndexDtfBid, IndexDtfRebalance } from "@/index-dtf/rebalance/types";
+import type { ReserveApiIndexDtfRebalanceDetail } from "@/client/api";
+import type { Token } from "@/types/common";
+
+import { SdkError } from "@/errors";
 import type {
   GetIndexDtfRebalanceQuery,
   GetIndexDtfRebalanceAuctionsQuery,
   GetIndexDtfRebalancesQuery,
 } from "@/index-dtf/subgraph/dtf.generated";
-import type { Token } from "@/types/common";
+import type {
+  IndexDtfAuction,
+  IndexDtfBid,
+  IndexDtfCompletedRebalance,
+  IndexDtfCompletedRebalanceDetail,
+  IndexDtfRebalance,
+} from "@/index-dtf/rebalance/types";
+
+type ApiCompletedRebalance = {
+  readonly nonce: number;
+  readonly timestamp: number;
+  readonly availableUntil?: number | null;
+  readonly totalRebalancedUsd?: number | null;
+  readonly rebalanceGainLossUsd?: number | null;
+  readonly rebalanceAccuracy?: number | null;
+  readonly isNative?: boolean | null;
+};
 
 type SubgraphRebalance =
   | GetIndexDtfRebalancesQuery["rebalances"][number]
@@ -61,6 +80,65 @@ export function mapSubgraphAuction(auction: SubgraphAuction): IndexDtfAuction {
   };
 }
 
+export function mapApiCompletedRebalance(
+  rebalance: ApiCompletedRebalance,
+): IndexDtfCompletedRebalance {
+  return {
+    nonce: rebalance.nonce,
+    timestamp: rebalance.timestamp,
+    ...numberField("availableUntil", rebalance.availableUntil),
+    ...numberField("totalRebalancedUsd", rebalance.totalRebalancedUsd),
+    ...numberField("rebalanceGainLossUsd", rebalance.rebalanceGainLossUsd),
+    ...numberField("rebalanceAccuracy", rebalance.rebalanceAccuracy),
+    ...(rebalance.isNative === null || rebalance.isNative === undefined
+      ? {}
+      : { isNative: rebalance.isNative }),
+  };
+}
+
+export function mapApiCompletedRebalanceDetail(
+  rebalance: ReserveApiIndexDtfRebalanceDetail,
+): IndexDtfCompletedRebalanceDetail {
+  if (!rebalance.auctions) {
+    throw new SdkError({
+      code: "INVALID_RESPONSE",
+      message: "Reserve API completed rebalance detail is missing auctions",
+      meta: { nonce: rebalance.nonce },
+    });
+  }
+
+  return {
+    ...mapApiCompletedRebalance(rebalance),
+    auctions: rebalance.auctions.map((auction) => ({
+      startTime: auction.startTime,
+      endTime: auction.endTime,
+      bids: auction.bids.map((bid) => ({
+        bidder: getAddress(bid.bidder),
+        sellToken: mapToken(bid.sellToken),
+        buyToken: mapToken(bid.buyToken),
+        sellAmount: BigInt(bid.sellAmount),
+        buyAmount: BigInt(bid.buyAmount),
+        ...numberField("sellAmountUsd", bid.sellAmountUsd),
+        ...numberField("buyAmountUsd", bid.buyAmountUsd),
+        ...numberField("priceImpactUsd", bid.priceImpactUsd),
+      })),
+      ...numberField("totalSellAmountUsd", auction.totalSellAmountUsd),
+      ...numberField("totalBuyAmountUsd", auction.totalBuyAmountUsd),
+    })),
+    ...numberField("rebalanceGainLossPercent", rebalance.rebalanceGainLossPercent),
+    ...numberField("marketCapAtStart", rebalance.marketCapAtStart),
+  };
+}
+
+function numberField<TKey extends string>(
+  key: TKey,
+  value: number | null | undefined,
+): Record<TKey, number> | Record<string, never> {
+  return value === null || value === undefined
+    ? {}
+    : ({ [key]: value } as Record<TKey, number>);
+}
+
 function mapSubgraphBid(bid: SubgraphBid): IndexDtfBid {
   return {
     id: bid.id,
@@ -77,13 +155,13 @@ function mapSubgraphBid(bid: SubgraphBid): IndexDtfBid {
 
 function mapToken(token: {
   readonly address: string;
-  readonly name: string;
+  readonly name?: string;
   readonly symbol: string;
   readonly decimals: number;
 }): Token {
   return {
     address: getAddress(token.address) as Address,
-    name: token.name,
+    name: token.name ?? token.symbol,
     symbol: token.symbol,
     decimals: token.decimals,
   };

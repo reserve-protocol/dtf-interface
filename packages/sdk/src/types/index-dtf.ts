@@ -117,6 +117,11 @@ export type IndexDtfPrice = {
   readonly timestamp: number;
 };
 
+export type IndexDtfBatchPrice = Omit<IndexDtfPrice, "marketCap" | "totalSupply"> & {
+  readonly marketCap?: number;
+  readonly totalSupply?: number;
+};
+
 export type IndexDtfBasketAsset = {
   readonly token: Token;
   readonly balance: Amount;
@@ -243,6 +248,11 @@ export type GetIndexDtfTotalSupplyParams = DtfParams;
 export type GetIndexDtfTotalAssetsParams = DtfParams;
 
 export type GetIndexDtfPriceParams = DtfParams;
+
+export type GetIndexDtfPricesParams = {
+  readonly chainId: SupportedChainId;
+  readonly addresses: readonly Address[];
+};
 
 export type GetIndexDtfPriceHistoryParams = IndexDtfIdentityParams & {
   readonly from: number;

@@ -18,12 +18,14 @@ import type {
   IndexDtfProposalPayload,
   ProposeIndexDtfProposalParams,
   QueueIndexDtfProposalParams,
+  SubmitOptimisticIndexDtfProposalParams,
   VoteIndexDtfProposalParams,
 } from "@/types/governance";
 
 import { prepareContractCall } from "@/contract-call";
 import { SdkError } from "@/errors";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
+import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { getZeroValues } from "@/index-dtf/governance/utils";
 
@@ -90,6 +92,22 @@ export function prepareIndexDtfSubmitProposal(params: ProposeIndexDtfProposalPar
     address: params.proposal.governance,
     abi: dtfIndexGovernanceAbi,
     functionName: "propose",
+    args: [targets, values, calldatas, params.proposal.description] as const,
+  });
+}
+
+export function prepareIndexDtfSubmitOptimisticProposal(
+  params: SubmitOptimisticIndexDtfProposalParams,
+) {
+  const targets = params.proposal.targets.map(getAddress);
+  const calldatas = [...params.proposal.calldatas];
+  const values = getZeroValues(targets.length);
+
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.proposal.governance,
+    abi: dtfIndexGovernanceOptimisticAbi,
+    functionName: "proposeOptimistic",
     args: [targets, values, calldatas, params.proposal.description] as const,
   });
 }

@@ -149,6 +149,40 @@ query GetIndexDtfProposals($governanceIds: [ID!]!, $limit: Int = 100) {
   }
 }
 
+query GetAllIndexDtfProposals($limit: Int = 100, $offset: Int = 0, $where: Proposal_filter) {
+  proposals(
+    first: $limit
+    skip: $offset
+    orderBy: creationTime
+    orderDirection: desc
+    where: $where
+  ) {
+    id
+    description
+    creationTime
+    state
+    forWeightedVotes
+    abstainWeightedVotes
+    againstWeightedVotes
+    executionETA
+    executionTime
+    quorumVotes
+    voteStart
+    voteEnd
+    executionBlock
+    creationBlock
+    proposer {
+      address
+    }
+    governance {
+      id
+      timelock {
+        id
+      }
+    }
+  }
+}
+
 query GetIndexDtfProposalGovernanceAddresses($dtfId: ID!) {
   dtf(id: $dtfId) {
     ownerGovernance {

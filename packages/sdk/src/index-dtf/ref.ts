@@ -10,6 +10,10 @@ import type {
 import type { BlockNumber, DtfParams } from "@/types/common";
 import type {
   GetIndexDtfDelegatesParams,
+  GetIndexDtfOptimisticGovernanceParams,
+  GetIndexDtfOptimisticProposalContextParams,
+  GetIndexDtfProposalStateParams,
+  GetIndexDtfProposalThrottleChargesParams,
   GetIndexDtfProposalVoterStateParams,
   GetIndexDtfProposalVotesParams,
   GetIndexDtfProposalsOptions,
@@ -59,7 +63,16 @@ import { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 import {
   getDelegates,
   getGuardians,
+  getLegacyVoteLocks,
+  getOptimisticGovernance,
+  getOptimisticProposalContext,
   getProposal,
+  getProposalDeadline,
+  getProposalEta,
+  getProposalRpcDetails,
+  getProposalSnapshot,
+  getProposalState,
+  getProposalThrottleCharges,
   getProposalVoterState,
   getProposalVotes,
   getProposals,
@@ -68,6 +81,7 @@ import {
   prepareIndexDtfCancelProposal,
   prepareIndexDtfExecuteProposal,
   prepareIndexDtfQueueProposal,
+  prepareIndexDtfSubmitOptimisticProposal,
   prepareIndexDtfSubmitProposal,
   prepareIndexDtfVote,
 } from "@/index-dtf/governance/index";
@@ -78,13 +92,22 @@ import {
   buildIndexDtfSettingsProposal,
 } from "@/index-dtf/governance/propose/index";
 import {
+  getActiveAuction,
+  getBidQuote,
   getIndexDtfCurrentRebalance,
+  getCompletedRebalance,
+  getCompletedRebalances,
   getRebalance,
   getRebalanceAuctions,
   getRebalances,
+  prepareIndexDtfBid,
+  prepareIndexDtfCloseAuction,
+  prepareIndexDtfEndRebalance,
   prepareIndexDtfOpenAuctionArgs,
   prepareIndexDtfOpenAuction,
   prepareIndexDtfOpenAuctionUnrestricted,
+  type GetIndexDtfCompletedRebalanceParams,
+  type GetIndexDtfCompletedRebalancesOptions,
   type GetIndexDtfRebalanceParams,
 } from "@/index-dtf/rebalance/index";
 import {
@@ -94,6 +117,7 @@ import {
   prepareVoteLockClaimRewards,
   prepareVoteLockClaimWithdrawal,
   prepareVoteLockDelegate,
+  prepareVoteLockDelegateOptimistic,
   prepareVoteLockDeposit,
   prepareVoteLockDepositPlan,
   prepareVoteLockUnlock,
@@ -187,23 +211,74 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
         address,
         chainId,
       }),
-    prepareDistributeFees: () => prepareIndexDtfDistributeFees({ address, chainId }),
-    getProposals: (options: GetIndexDtfProposalsOptions = {}) => getProposals(client, { ...options, address, chainId }),
-    getProposal: (proposalId: string) => getProposal(client, { proposalId, address, chainId }),
-    getDelegates: (options: Pick<GetIndexDtfDelegatesParams, "stToken" | "limit">) =>
-      getDelegates(client, { ...options, chainId }),
+    prepareDistributeFees: () =>
+      prepareIndexDtfDistributeFees({ address, chainId }),
+    getProposals: (options: GetIndexDtfProposalsOptions = {}) =>
+      getProposals(client, { ...options, address, chainId }),
+    getProposal: (proposalId: string) =>
+      getProposal(client, { proposalId, address, chainId }),
+    getProposalState: (
+      proposal: Pick<GetIndexDtfProposalStateParams, "governance" | "proposalId">,
+    ) => getProposalState(client, { ...proposal, chainId }),
+    getProposalEta: (
+      proposal: Pick<GetIndexDtfProposalStateParams, "governance" | "proposalId">,
+    ) => getProposalEta(client, { ...proposal, chainId }),
+    getProposalDeadline: (
+      proposal: Pick<GetIndexDtfProposalStateParams, "governance" | "proposalId">,
+    ) => getProposalDeadline(client, { ...proposal, chainId }),
+    getProposalSnapshot: (
+      proposal: Pick<GetIndexDtfProposalStateParams, "governance" | "proposalId">,
+    ) => getProposalSnapshot(client, { ...proposal, chainId }),
+    getProposalRpcDetails: (
+      proposal: Pick<GetIndexDtfProposalStateParams, "governance" | "proposalId">,
+    ) => getProposalRpcDetails(client, { ...proposal, chainId }),
+    getDelegates: (
+      options: Pick<GetIndexDtfDelegatesParams, "stToken" | "limit">,
+    ) => getDelegates(client, { ...options, chainId }),
     getGuardians: () => getGuardians(client, { address, chainId }),
-    getVoterState: (voter: Pick<GetIndexDtfVoterStateParams, "account" | "stToken">) =>
-      getVoterState(client, { ...voter, chainId }),
-    getProposerState: (proposer: Pick<GetIndexDtfProposerStateParams, "account" | "governance" | "timepoint">) =>
-      getProposerState(client, { ...proposer, chainId }),
-    getProposalVotes: (votes: Pick<GetIndexDtfProposalVotesParams, "governance" | "proposalId">) =>
-      getProposalVotes(client, { ...votes, chainId }),
-    getProposalVoterState: (voter: Pick<GetIndexDtfProposalVoterStateParams, "account" | "governance" | "proposal">) =>
-      getProposalVoterState(client, { ...voter, chainId }),
-    buildBasketProposal: (proposal: Omit<BuildIndexDtfBasketProposalParams, "address" | "chainId">) =>
-      buildIndexDtfBasketProposal(client, { ...proposal, address, chainId }),
-    buildBasketSettingsProposal: (proposal: Omit<BuildIndexDtfBasketSettingsProposalParams, "address" | "chainId">) =>
+    getLegacyVoteLocks: () => getLegacyVoteLocks(client, { address, chainId }),
+    getVoterState: (
+      voter: Pick<GetIndexDtfVoterStateParams, "account" | "stToken">,
+    ) => getVoterState(client, { ...voter, chainId }),
+    getOptimisticGovernance: (
+      governance: Pick<GetIndexDtfOptimisticGovernanceParams, "governance">,
+    ) => getOptimisticGovernance(client, { ...governance, chainId }),
+    getOptimisticProposalContext: (
+      proposal: Pick<
+        GetIndexDtfOptimisticProposalContextParams,
+        "governance" | "proposalId"
+      >,
+    ) => getOptimisticProposalContext(client, { ...proposal, chainId }),
+    getProposalThrottleCharges: (
+      charges: Pick<
+        GetIndexDtfProposalThrottleChargesParams,
+        "account" | "governance"
+      >,
+    ) => getProposalThrottleCharges(client, { ...charges, chainId }),
+    getProposerState: (
+      proposer: Pick<
+        GetIndexDtfProposerStateParams,
+        "account" | "governance" | "timepoint"
+      >,
+    ) => getProposerState(client, { ...proposer, chainId }),
+    getProposalVotes: (
+      votes: Pick<GetIndexDtfProposalVotesParams, "governance" | "proposalId">,
+    ) => getProposalVotes(client, { ...votes, chainId }),
+    getProposalVoterState: (
+      voter: Pick<
+        GetIndexDtfProposalVoterStateParams,
+        "account" | "governance" | "proposal"
+      >,
+    ) => getProposalVoterState(client, { ...voter, chainId }),
+    buildBasketProposal: (
+      proposal: Omit<BuildIndexDtfBasketProposalParams, "address" | "chainId">,
+    ) => buildIndexDtfBasketProposal(client, { ...proposal, address, chainId }),
+    buildBasketSettingsProposal: (
+      proposal: Omit<
+        BuildIndexDtfBasketSettingsProposalParams,
+        "address" | "chainId"
+      >,
+    ) =>
       buildIndexDtfBasketSettingsProposal(client, {
         ...proposal,
         address,
@@ -214,32 +289,93 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
         ...proposal,
         address,
         chainId,
-      }),
+    }),
     buildSettingsProposal: (proposal: Omit<BuildIndexDtfSettingsProposalParams, "address" | "chainId">) =>
       buildIndexDtfSettingsProposal(client, { ...proposal, address, chainId }),
-    prepareVote: (call: Omit<Parameters<typeof prepareIndexDtfVote>[0], "chainId">) =>
-      prepareIndexDtfVote({ ...call, chainId }),
-    prepareQueueProposal: (call: Omit<Parameters<typeof prepareIndexDtfQueueProposal>[0], "chainId">) =>
-      prepareIndexDtfQueueProposal({ ...call, chainId }),
-    prepareExecuteProposal: (call: Omit<Parameters<typeof prepareIndexDtfExecuteProposal>[0], "chainId">) =>
-      prepareIndexDtfExecuteProposal({ ...call, chainId }),
-    prepareCancelProposal: (call: Omit<Parameters<typeof prepareIndexDtfCancelProposal>[0], "chainId">) =>
-      prepareIndexDtfCancelProposal({ ...call, chainId }),
-    prepareSubmitProposal: (call: Omit<Parameters<typeof prepareIndexDtfSubmitProposal>[0], "chainId">) =>
-      prepareIndexDtfSubmitProposal({ ...call, chainId }),
-    getRebalances: (options: Omit<Parameters<typeof getRebalances>[1], "address" | "chainId"> = {}) =>
-      getRebalances(client, { ...options, address, chainId }),
-    getRebalance: (rebalance: string | bigint | Omit<GetIndexDtfRebalanceParams, "address" | "chainId">) =>
+    prepareVote: (
+      call: Omit<
+        Parameters<typeof prepareIndexDtfVote>[0],
+        "chainId"
+      >,
+    ) => prepareIndexDtfVote({ ...call, chainId }),
+    prepareQueueProposal: (
+      call: Omit<
+        Parameters<typeof prepareIndexDtfQueueProposal>[0],
+        "chainId"
+      >,
+    ) => prepareIndexDtfQueueProposal({ ...call, chainId }),
+    prepareExecuteProposal: (
+      call: Omit<
+        Parameters<typeof prepareIndexDtfExecuteProposal>[0],
+        "chainId"
+      >,
+    ) => prepareIndexDtfExecuteProposal({ ...call, chainId }),
+    prepareCancelProposal: (
+      call: Omit<
+        Parameters<typeof prepareIndexDtfCancelProposal>[0],
+        "chainId"
+      >,
+    ) => prepareIndexDtfCancelProposal({ ...call, chainId }),
+    prepareSubmitProposal: (
+      call: Omit<
+        Parameters<typeof prepareIndexDtfSubmitProposal>[0],
+        "chainId"
+      >,
+    ) => prepareIndexDtfSubmitProposal({ ...call, chainId }),
+    prepareSubmitOptimisticProposal: (
+      call: Omit<
+        Parameters<typeof prepareIndexDtfSubmitOptimisticProposal>[0],
+        "chainId"
+      >,
+    ) => prepareIndexDtfSubmitOptimisticProposal({ ...call, chainId }),
+    getRebalances: (
+      options: Omit<
+        Parameters<typeof getRebalances>[1],
+        "address" | "chainId"
+      > = {},
+    ) => getRebalances(client, { ...options, address, chainId }),
+    getRebalance: (
+      rebalance:
+        | string
+        | bigint
+        | Omit<GetIndexDtfRebalanceParams, "address" | "chainId">,
+    ) =>
       typeof rebalance === "object"
         ? getRebalance(client, { ...rebalance, address, chainId })
         : getRebalance(client, { address, chainId, nonce: rebalance }),
-    getRebalanceAuctions: (rebalanceId: string) => getRebalanceAuctions(client, { chainId, rebalanceId }),
+    getCompletedRebalances: (options: GetIndexDtfCompletedRebalancesOptions = {}) =>
+      getCompletedRebalances(client, { ...options, address, chainId }),
+    getCompletedRebalance: (
+      rebalance:
+        | number
+        | string
+        | bigint
+        | Omit<GetIndexDtfCompletedRebalanceParams, "address" | "chainId">,
+    ) =>
+      typeof rebalance === "object"
+        ? getCompletedRebalance(client, { ...rebalance, address, chainId })
+        : getCompletedRebalance(client, { address, chainId, nonce: rebalance }),
+    getRebalanceAuctions: (rebalanceId: string) =>
+      getRebalanceAuctions(client, { chainId, rebalanceId }),
     getCurrentRebalance: (options?: BlockNumberOption | BlockNumber) =>
       getIndexDtfCurrentRebalance(client, {
         address,
         chainId,
         ...blockParams(options),
       }),
+    getActiveAuction: (options?: BlockNumberOption | BlockNumber) =>
+      getActiveAuction(client, { address, chainId, ...blockParams(options) }),
+    getBidQuote: (
+      quote: Omit<Parameters<typeof getBidQuote>[1], "address" | "chainId">,
+    ) => getBidQuote(client, { ...quote, address, chainId }),
+    prepareBid: (
+      call: Omit<Parameters<typeof prepareIndexDtfBid>[0], "address" | "chainId">,
+    ) => prepareIndexDtfBid({ ...call, address, chainId }),
+    prepareCloseAuction: (
+      call: Omit<Parameters<typeof prepareIndexDtfCloseAuction>[0], "address" | "chainId">,
+    ) => prepareIndexDtfCloseAuction({ ...call, address, chainId }),
+    prepareEndRebalance: () =>
+      prepareIndexDtfEndRebalance({ address, chainId }),
     prepareOpenAuctionArgs: prepareIndexDtfOpenAuctionArgs,
     prepareOpenAuction: (call: Omit<Parameters<typeof prepareIndexDtfOpenAuction>[0], "address" | "chainId">) =>
       prepareIndexDtfOpenAuction({ ...call, address, chainId }),
@@ -259,13 +395,26 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
     prepareVoteLockDeposit: (call: VoteLockDepositRefParams) => prepareVoteLockDeposit({ ...call, chainId }),
     prepareVoteLockDepositPlan: (call: VoteLockDepositPlanRefParams) =>
       prepareVoteLockDepositPlan({ ...call, chainId }),
-    prepareVoteLockDelegate: (call: Omit<Parameters<typeof prepareVoteLockDelegate>[0], "chainId">) =>
-      prepareVoteLockDelegate({ ...call, chainId }),
-    prepareVoteLockUnlock: (call: Omit<Parameters<typeof prepareVoteLockUnlock>[0], "chainId">) =>
-      prepareVoteLockUnlock({ ...call, chainId }),
-    prepareVoteLockClaimRewards: (call: Omit<Parameters<typeof prepareVoteLockClaimRewards>[0], "chainId">) =>
-      prepareVoteLockClaimRewards({ ...call, chainId }),
-    prepareVoteLockClaimWithdrawal: (call: Omit<Parameters<typeof prepareVoteLockClaimWithdrawal>[0], "chainId">) =>
-      prepareVoteLockClaimWithdrawal({ ...call, chainId }),
+    prepareVoteLockDelegate: (
+      call: Omit<Parameters<typeof prepareVoteLockDelegate>[0], "chainId">,
+    ) => prepareVoteLockDelegate({ ...call, chainId }),
+    prepareVoteLockDelegateOptimistic: (
+      call: Omit<
+        Parameters<typeof prepareVoteLockDelegateOptimistic>[0],
+        "chainId"
+      >,
+    ) => prepareVoteLockDelegateOptimistic({ ...call, chainId }),
+    prepareVoteLockUnlock: (
+      call: Omit<Parameters<typeof prepareVoteLockUnlock>[0], "chainId">,
+    ) => prepareVoteLockUnlock({ ...call, chainId }),
+    prepareVoteLockClaimRewards: (
+      call: Omit<Parameters<typeof prepareVoteLockClaimRewards>[0], "chainId">,
+    ) => prepareVoteLockClaimRewards({ ...call, chainId }),
+    prepareVoteLockClaimWithdrawal: (
+      call: Omit<
+        Parameters<typeof prepareVoteLockClaimWithdrawal>[0],
+        "chainId"
+      >,
+    ) => prepareVoteLockClaimWithdrawal({ ...call, chainId }),
   };
 }

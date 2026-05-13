@@ -105,4 +105,47 @@ describe("Reserve API helpers", () => {
     const [historicalUrl] = fetch.mock.calls[1] as unknown as [URL];
     expect(String(historicalUrl)).toContain("historical/prices?chainId=8453&from=1714996400&to=1715003600&interval=1h");
   });
+
+  it("fetches completed rebalance history and detail", async () => {
+    const fetch = vi.fn(async (url: URL) => {
+      const value = String(url);
+
+      if (value.includes("nonce=4")) {
+        return Response.json({ nonce: 4, timestamp: 100, auctions: [] });
+      }
+
+      return Response.json([
+        {
+          nonce: 4,
+          timestamp: 100,
+          availableUntil: 200,
+          totalRebalancedUsd: 50,
+        },
+      ]);
+    });
+    vi.stubGlobal("fetch", fetch);
+    const client = createDtfClient({ apiBaseUrl: "https://api.example" });
+    const address = "0x0000000000000000000000000000000000000001";
+
+    const history = await client.api.getIndexDtfRebalanceHistory({
+      address,
+      chainId: 1,
+      skip: 10,
+      limit: 5,
+    });
+    const detail = await client.api.getIndexDtfRebalanceDetail({
+      address,
+      chainId: 1,
+      nonce: 4n,
+    });
+
+    expect(history[0]?.totalRebalancedUsd).toBe(50);
+    expect(detail.nonce).toBe(4);
+    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe(
+      "https://api.example/dtf/rebalance?address=0x0000000000000000000000000000000000000001&chainId=1&skip=10&limit=5",
+    );
+    expect(String((fetch.mock.calls[1] as unknown as [URL])[0])).toBe(
+      "https://api.example/dtf/rebalance?address=0x0000000000000000000000000000000000000001&chainId=1&nonce=4",
+    );
+  });
 });

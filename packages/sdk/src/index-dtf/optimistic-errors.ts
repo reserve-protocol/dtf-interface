@@ -10,3 +10,18 @@ export function isUnsupportedOptimisticContractError(error: unknown): boolean {
     (message.includes("function") && message.includes("not found"))
   );
 }
+
+export function isUnsupportedVoteLockOptimisticReadError(error: unknown): boolean {
+  const message = error instanceof Error
+    ? error.message.toLowerCase()
+    : String(error).toLowerCase();
+
+  // Older staking vaults do not implement optimistic delegation/vote reads and revert via fallback.
+  return (
+    isUnsupportedOptimisticContractError(error) ||
+    (message.includes("execution reverted") &&
+      (message.includes("optimisticdelegates") ||
+        message.includes("getoptimisticvotes") ||
+        message.includes("getpastoptimisticvotes")))
+  );
+}

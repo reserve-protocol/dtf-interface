@@ -14,6 +14,8 @@ Do not use `plans/` as proof that an API exists. Check `sdk/api-surface.md` and 
 
 - `zapper-integration.md`: pending Zapper SDK integration work for quote/deploy/zap transaction surfaces.
 
+No other active implementation plans are tracked here.
+
 ## Plan File Rules
 
 Every plan should include:

@@ -43,7 +43,7 @@ Register may label roles differently. Encode the contract role, not the UI label
 
 ## Version History
 
-Only include version deltas verified from `reserve-index-dtf/CHANGELOG.md` and current source.
+Only include version deltas verified from source, changelogs, or SDK ABIs. Older public docs and local contract source may not describe every deployed SDK target.
 
 | Version | Important Deltas |
 | --- | --- |
@@ -51,8 +51,8 @@ Only include version deltas verified from `reserve-index-dtf/CHANGELOG.md` and c
 | `2.0.0` | Repeatable auctions, dust limits, minimum mint output. |
 | `3.0.0` | Skipped/deprecated path around individual repeatable auctions against target weights. |
 | `4.0.0` | Trusted fillers, rebalance targets, auction overhaul, daily fee accounting, `AUCTION_APPROVER` replaced by `REBALANCE_MANAGER`. |
-| `5.0.0` | Full weight range in `startRebalance`, max auction sizes, optional disabling of permissionless bids, mutable name. |
-| `6.0.0` | Token allowlist controls, Folio self-fee, per-Folio max auction length, per-auction custom lengths. |
+| `5.0.0` | SDK-supported write ABI for current deployed Index DTF settings and rebalance proposal flows. |
+| `6.0.0` | SDK-supported write ABI with v6-specific settings names such as `setMaxAuctionLength`; verify function support from ABI before encoding. |
 
 ## SDK Version Handling
 
@@ -62,6 +62,8 @@ The SDK maps version-sensitive operations to the right ABI/function name. Exampl
 - v6 auction length setter: `setMaxAuctionLength`.
 
 Version-sensitive code belongs in one mapping layer. Product builders should accept a known DTF version or fetch it when needed.
+
+Source owner: SDK ABI/version routing is owned by `dtf-sdk/packages/sdk/src/index-dtf/versions.ts`; protocol mechanics are owned by the Index DTF contract repo.
 
 ## ABI Gotchas
 

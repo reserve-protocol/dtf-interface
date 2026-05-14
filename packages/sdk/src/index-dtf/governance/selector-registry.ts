@@ -40,7 +40,7 @@ export async function getSelectorRegistryTargets(
     functionName: "targets",
   });
 
-  return targets.map(getAddress);
+  return targets;
 }
 
 export async function getSelectorRegistryAllowedSelectors(

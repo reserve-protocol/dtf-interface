@@ -34,6 +34,7 @@
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "playground:index": "tsx playground/index-dtf.ts",
     "test": "vitest run --passWithNoTests",
+    "test:smoke:index": "RUN_INDEX_DTF_SMOKE=1 vitest run --passWithNoTests src/index-dtf/live-smoke.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

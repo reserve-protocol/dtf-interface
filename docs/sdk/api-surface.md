@@ -1,6 +1,6 @@
 # SDK API Surface
 
-This doc describes the intended public API shape. Verify exact exports in source before adding examples to public docs.
+This doc summarizes the implemented public API shape. Verify exact exports in source before adding examples to public docs.
 
 ## Entry Points
 
@@ -10,9 +10,17 @@ Main package exports live in:
 - `packages/sdk/src/index-dtf/index.ts`
 - `packages/sdk/src/index-dtf/namespace.ts`
 
+## Namespaces
+
+`createDtfSdk()` returns these namespaces:
+
+- `sdk.index`: implemented Index DTF reads, builders, and refs.
+- `sdk.portfolio`: implemented portfolio helpers.
+- `sdk.yield`: placeholder boundary only; `yield.get` and `yield.list` throw `NOT_IMPLEMENTED`.
+
 ## Index Namespace
 
-The Index namespace should expose product actions such as:
+The Index namespace currently exposes product actions such as:
 
 - get DTF metadata.
 - get basket/current state.
@@ -24,6 +32,8 @@ The Index namespace should expose product actions such as:
 - prepare mint/redeem calls.
 - prepare deploy calls.
 - build proposal calls.
+
+Do not document Zapper quote/deploy/zap methods here until code exists. Current Zapper behavior and pending SDK work live in `docs/integrations/zapper.md` and `docs/plans/zapper-integration.md`.
 
 ## Refs
 
@@ -72,6 +82,7 @@ Keep examples small and compile-check them before publishing externally. These d
 ## Source References
 
 - `dtf-sdk/packages/sdk/src/index.ts`
+- `dtf-sdk/packages/sdk/src/create-dtf-sdk.ts`
 - `dtf-sdk/packages/sdk/src/index-dtf/index.ts`
 - `dtf-sdk/packages/sdk/src/index-dtf/namespace.ts`
 - `dtf-sdk/packages/sdk/src/contract-call.ts`

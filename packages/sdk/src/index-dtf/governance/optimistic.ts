@@ -80,7 +80,7 @@ export async function getOptimisticProposalContext(
   ]);
   const snapshotSupply = await client.viem.readContract({
     chainId: params.chainId,
-    address: getAddress(token),
+    address: token,
     abi: dtfIndexStakingVaultAbi,
     functionName: "getPastTotalSupply",
     args: [snapshot],
@@ -93,7 +93,7 @@ export async function getOptimisticProposalContext(
 
   return {
     proposalId: String(proposalId),
-    voteToken: getAddress(token),
+    voteToken: token,
     snapshot,
     snapshotSupply: mappedSnapshotSupply,
     vetoThreshold,
@@ -158,14 +158,14 @@ export async function getOptimisticGovernance(
   ];
   const roles = await getOptimisticTimelockRoles(client, {
     chainId: params.chainId,
-    timelock: getAddress(timelock),
+    timelock,
   });
 
   return {
     governance,
-    token: getAddress(token),
-    timelock: getAddress(timelock),
-    selectorRegistry: getAddress(selectorRegistry),
+    token,
+    timelock,
+    selectorRegistry,
     lateQuorumVoteExtension: toBigInt(lateQuorumVoteExtension),
     proposalThrottleCapacity,
     optimisticParams: {
@@ -296,7 +296,7 @@ async function readRoleMembers(
     ),
   );
 
-  return members.map(getAddress);
+  return members;
 }
 
 function toBigInt(value: number | bigint): bigint {

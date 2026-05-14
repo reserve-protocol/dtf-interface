@@ -32,7 +32,7 @@ This file collects facts that are easy to get wrong. Check it before changing SD
 ## Version Mismatches
 
 - `reserve-index-dtf` source may be ahead of live deployed versions.
-- Current source version is v6, but the SDK may need v5 and v6 ABI support.
+- Current SDK write builders support v5 and v6 ABI targets. Do not assume every deployed DTF uses the latest ABI.
 - Older docs and comments can mention v3 or v4 signatures. Verify against the ABI/version being encoded.
 - `startRebalance`, `openAuction`, and `bid` signatures have changed across versions.
 
@@ -42,6 +42,14 @@ This file collects facts that are easy to get wrong. Check it before changing SD
 - Entity IDs should be verified in mappings, not only `schema.graphql` comments.
 - Generated `subgraph.yaml` may represent only one network. Check `subgraph.yaml.mustache` and `networks.json` for multi-network behavior.
 - Proposal state is event-driven and not continuously recomputed every block.
+- If a staking/vote-lock token was attached after the relevant GovernanceDeployer events, the Index subgraph can know the `stToken` but miss `stToken.governance` and owner-governance links. Treat this as indexed-data incompleteness, not proof that no governance exists.
+- Some legacy vote-lock governance arrays can contain zero/stale entries. RPC reads should skip unreadable legacy governance entries rather than failing the whole vote-lock view.
+
+Source owner: Index subgraph relationship gaps belong in `dtf-index-subgraph`; SDK code should avoid fabricating missing governance relationships unless the data model explicitly supports it.
+
+## SDK Footguns
+
+- Do not pass `getAddress` directly to `Array.map`. `map` passes the index as the second argument, and viem treats that as the optional checksum-chain argument. Use `items.map((address) => getAddress(address))`.
 
 ## Register Behavior
 

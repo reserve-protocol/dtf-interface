@@ -112,8 +112,8 @@ export async function getIndexDtfPlatformFee(
   });
 
   return {
-    registry: getAddress(registry),
-    recipient: getAddress(recipient),
+    registry,
+    recipient,
     numerator,
     denominator,
     floor,
@@ -138,7 +138,7 @@ export async function getIndexDtfApprovedRevenueTokens(
     chainId: params.chainId,
   });
 
-  return getTokensData(client.viem.getPublicClient(params.chainId), addresses.map(getAddress));
+  return getTokensData(client.viem.getPublicClient(params.chainId), addresses);
 }
 
 /** Combines Register settings/revenue reads into one current DTF revenue view. */

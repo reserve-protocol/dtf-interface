@@ -25,7 +25,7 @@ export async function getTokenData(publicClient: PublicClient, address: Address)
   return token;
 }
 
-export async function getTokensData(publicClient: PublicClient, addresses: Address[]): Promise<readonly Token[]> {
+export async function getTokensData(publicClient: PublicClient, addresses: readonly Address[]): Promise<readonly Token[]> {
   if (addresses.length === 0) {
     return [];
   }

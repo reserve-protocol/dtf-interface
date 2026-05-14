@@ -124,7 +124,7 @@ async function readToAssets(
     chainId,
   });
 
-  return { assets: assets.map(getAddress), amounts };
+  return { assets, amounts };
 }
 
 async function readTokenBalances(publicClient: PublicClient, tokens: readonly Address[], account: Address) {

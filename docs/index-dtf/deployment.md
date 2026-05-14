@@ -17,12 +17,11 @@ High-level flow:
 1. Deploy proxy admin and proxy using a deployment nonce/salt.
 2. Transfer initial basket assets from deployer to the new Folio.
 3. Initialize Folio with basic details, additional details, flags, and initial shares.
-4. Grant roles:
-   - owner gets admin.
-   - basket managers get `REBALANCE_MANAGER`.
-   - auction launchers get `AUCTION_LAUNCHER`.
-   - brand managers get `BRAND_MANAGER`.
-5. Renounce deployer admin if owner is not deployer.
+4. Grant admin to the owner.
+5. Grant `REBALANCE_MANAGER` to basket managers.
+6. Grant `AUCTION_LAUNCHER` to auction launchers.
+7. Grant `BRAND_MANAGER` to brand managers.
+8. Renounce deployer admin if owner is not deployer.
 
 The deploy caller must approve each initial basket asset to the Folio deployer before deployment.
 
@@ -85,6 +84,8 @@ Register-style deploy revenue distribution:
 5. Last recipient is adjusted so portions sum exactly to `1e18`.
 
 The SDK should use the same deterministic recipient math for deploy and settings proposals.
+
+Source owner: deploy transaction shape is owned by `reserve-index-dtf/contracts/deployer/FolioDeployer.sol`; product defaults and validation are owned by Register.
 
 ## SDK Deploy Builders
 

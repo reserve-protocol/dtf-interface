@@ -22,6 +22,12 @@ Yield subgraph prices can be stale because they update on indexed onchain activi
 
 Raw Yield subgraph discovery can include unsupported or spam deployments. Product discovery should filter through supported token registries/whitelists.
 
+## SDK Boundary
+
+The current SDK does not implement Yield discovery or detail reads. `sdk.yield.get` and `sdk.yield.list` throw `NOT_IMPLEMENTED`.
+
+Source owner: use `reserve-sdk` and the Yield subgraph as references for future implementation, but verify endpoint and schema details before coding.
+
 ## Source References
 
 - `reserve-sdk/docs/yield-dtf-reference.md`

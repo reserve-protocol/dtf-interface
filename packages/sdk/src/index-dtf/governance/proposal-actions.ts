@@ -117,7 +117,7 @@ export function prepareIndexDtfGovernorCancelProposal(params: CancelIndexDtfProp
 }
 
 export function prepareIndexDtfSubmitProposal(params: ProposeIndexDtfProposalParams) {
-  const targets = params.proposal.targets.map(getAddress);
+  const targets = params.proposal.targets.map((target) => getAddress(target));
   const calldatas = [...params.proposal.calldatas];
   const values = getZeroValues(targets.length);
 
@@ -133,7 +133,7 @@ export function prepareIndexDtfSubmitProposal(params: ProposeIndexDtfProposalPar
 export function prepareIndexDtfSubmitOptimisticProposal(
   params: SubmitOptimisticIndexDtfProposalParams,
 ) {
-  const targets = params.proposal.targets.map(getAddress);
+  const targets = params.proposal.targets.map((target) => getAddress(target));
   const calldatas = [...params.proposal.calldatas];
   const values = getZeroValues(targets.length);
 
@@ -149,7 +149,7 @@ export function prepareIndexDtfSubmitOptimisticProposal(
 function getProposalTxArgs(
   proposal: IndexDtfProposalPayload,
 ): [readonly Address[], readonly bigint[], readonly Hex[], Hex] {
-  const targets = proposal.targets.map(getAddress);
+  const targets = proposal.targets.map((target) => getAddress(target));
 
   return [targets, getZeroValues(targets.length), [...proposal.calldatas], hashIndexDtfProposalDescription(proposal.description)];
 }
@@ -167,7 +167,7 @@ function getTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
 }
 
 function calculateLegacyTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
-  const targets = proposal.targets.map(getAddress);
+  const targets = proposal.targets.map((target) => getAddress(target));
 
   return keccak256(
     encodeAbiParameters(TIMELOCK_OPERATION_PARAMS, [

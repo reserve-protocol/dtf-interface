@@ -192,15 +192,14 @@ export async function getTotalAssets(
     functionName: "totalAssets",
     blockNumber: params.blockNumber,
   });
-  const normalizedTokens = tokens.map((token) => getAddress(token));
   const balanceByToken: Record<Address, bigint> = {};
 
-  for (let i = 0; i < normalizedTokens.length; i++) {
-    balanceByToken[normalizedTokens[i]!] = balances[i]!;
+  for (let i = 0; i < tokens.length; i++) {
+    balanceByToken[tokens[i]!] = balances[i]!;
   }
 
   return {
-    tokens: normalizedTokens,
+    tokens,
     balances,
     balanceByToken,
   };

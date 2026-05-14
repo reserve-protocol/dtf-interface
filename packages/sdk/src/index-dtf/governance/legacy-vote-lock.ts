@@ -1,4 +1,4 @@
-import { getAddress, type Address } from "viem";
+import { getAddress, zeroAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
 import type { GetIndexDtfLegacyVoteLocksParams } from "@/types/governance";
@@ -13,25 +13,24 @@ export async function getLegacyVoteLocks(
 ): Promise<readonly Address[]> {
   const context = await getLegacyVoteLockContext(client, params);
 
-  if (!context || context.legacyGovernance.length === 0) {
+  const legacyGovernance = context?.legacyGovernance.filter((governance) => governance.toLowerCase() !== zeroAddress);
+
+  if (!context || !legacyGovernance || legacyGovernance.length === 0) {
     return [];
   }
 
   const legacyVoteLocks = await Promise.all(
-    context.legacyGovernance.map((governance) =>
-      client.viem.readContract({
-        chainId: context.chainId,
-        address: governance,
-        abi: dtfIndexGovernanceAbi,
-        functionName: "token",
-      }),
-    ),
+    legacyGovernance.map((governance) => readLegacyVoteLock(client, context.chainId, governance)),
   );
   const currentVoteLock = context.currentVoteLock.toLowerCase();
   const result: Address[] = [];
 
   for (const voteLock of legacyVoteLocks) {
-    const address = getAddress(voteLock);
+    if (!voteLock) {
+      continue;
+    }
+
+    const address = voteLock;
 
     if (address.toLowerCase() === currentVoteLock) {
       continue;
@@ -43,6 +42,27 @@ export async function getLegacyVoteLocks(
   }
 
   return result;
+}
+
+async function readLegacyVoteLock(
+  client: DtfClient,
+  chainId: IndexDtf["chainId"],
+  governance: Address,
+): Promise<Address | null> {
+  try {
+    return await client.viem.readContract({
+      chainId,
+      address: governance,
+      abi: dtfIndexGovernanceAbi,
+      functionName: "token",
+    });
+  } catch (error) {
+    if (isUnreadableLegacyGovernance(error)) {
+      return null;
+    }
+
+    throw error;
+  }
 }
 
 async function getLegacyVoteLockContext(
@@ -57,7 +77,7 @@ async function getLegacyVoteLockContext(
     return {
       chainId: params.chainId,
       currentVoteLock: getAddress(params.currentVoteLock),
-      legacyGovernance: params.legacyGovernance.map(getAddress),
+      legacyGovernance: params.legacyGovernance.map((address) => getAddress(address)),
     };
   }
 
@@ -72,4 +92,13 @@ async function getLegacyVoteLockContext(
     currentVoteLock: dtf.voteLockVault.token.address,
     legacyGovernance: dtf.voteLockVault.legacyGovernance,
   };
+}
+
+function isUnreadableLegacyGovernance(error: unknown): boolean {
+  const message = error instanceof Error
+    ? error.message.toLowerCase()
+    : String(error).toLowerCase();
+
+  // Legacy subgraph rows can include stale governor addresses that no longer expose token().
+  return message.includes("returned no data") || message.includes('function "token" reverted');
 }

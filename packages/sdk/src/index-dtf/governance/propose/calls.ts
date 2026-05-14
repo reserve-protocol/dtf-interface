@@ -214,7 +214,7 @@ export function prepareIndexDtfAddToAllowlist(
     params.address,
     params.chainId,
     "addToAllowlist",
-    [params.tokens.map(getAddress)],
+    [params.tokens.map((token) => getAddress(token))],
     params.version,
   );
 }
@@ -226,7 +226,7 @@ export function prepareIndexDtfRemoveFromAllowlist(
     params.address,
     params.chainId,
     "removeFromAllowlist",
-    [params.tokens.map(getAddress)],
+    [params.tokens.map((token) => getAddress(token))],
     params.version,
   );
 }
@@ -369,7 +369,7 @@ export function prepareIndexDtfTimelockExecuteBatch(
     readonly value?: bigint;
   },
 ): IndexDtfCall {
-  const targets = params.targets.map(getAddress);
+  const targets = params.targets.map((target) => getAddress(target));
   const values = params.values ?? targets.map(() => 0n);
 
   if (targets.length !== params.calldatas.length || targets.length !== values.length) {

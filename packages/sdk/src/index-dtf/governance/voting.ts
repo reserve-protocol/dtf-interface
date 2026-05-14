@@ -17,7 +17,7 @@ import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
-import { isUnsupportedOptimisticContractError } from "@/index-dtf/optimistic-errors";
+import { isUnsupportedVoteLockOptimisticReadError } from "@/index-dtf/optimistic-errors";
 import { mapAmount } from "@/lib/utils";
 
 export async function getVoterState(
@@ -199,9 +199,9 @@ async function readOptimisticDelegate(
       args: [account],
     });
 
-    return getAddress(delegate);
+    return delegate;
   } catch (error) {
-    if (!isUnsupportedOptimisticContractError(error)) {
+    if (!isUnsupportedVoteLockOptimisticReadError(error)) {
       throw error;
     }
 
@@ -226,7 +226,7 @@ async function readVoteLockOptimisticVotes(
 
     return votes ?? null;
   } catch (error) {
-    if (!isUnsupportedOptimisticContractError(error)) {
+    if (!isUnsupportedVoteLockOptimisticReadError(error)) {
       throw error;
     }
 
@@ -256,14 +256,12 @@ async function getProposalVoteToken(
     return getAddress(voteToken);
   }
 
-  return getAddress(
-    await client.viem.readContract({
-      chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "token",
-    }),
-  );
+  return client.viem.readContract({
+    chainId,
+    address: governance,
+    abi: dtfIndexGovernanceOptimisticAbi,
+    functionName: "token",
+  });
 }
 
 async function readPastOptimisticVotes(
@@ -286,7 +284,7 @@ async function readPastOptimisticVotes(
 
     return votes ?? null;
   } catch (error) {
-    if (!isUnsupportedOptimisticContractError(error)) {
+    if (!isUnsupportedVoteLockOptimisticReadError(error)) {
       throw error;
     }
 

@@ -306,7 +306,7 @@ export function extractIndexDtfDeployedAddress(logs: readonly Log[]): Address {
   });
 
   if (governed[0]?.args.folio) {
-    return getAddress(governed[0].args.folio);
+    return governed[0].args.folio;
   }
 
   const ungoverned = parseEventLogs({
@@ -316,7 +316,7 @@ export function extractIndexDtfDeployedAddress(logs: readonly Log[]): Address {
   });
 
   if (ungoverned[0]?.args.folio) {
-    return getAddress(ungoverned[0].args.folio);
+    return ungoverned[0].args.folio;
   }
 
   throw new SdkError({
@@ -333,7 +333,7 @@ export function extractIndexDtfDeployedStakingTokenAddress(logs: readonly Log[])
   });
 
   if (events[0]?.args.stToken) {
-    return getAddress(events[0].args.stToken);
+    return events[0].args.stToken;
   }
 
   throw new SdkError({
@@ -428,7 +428,7 @@ function normalizeGovernanceRoles(roles: IndexDtfDeployGovernanceRoles = {}) {
 }
 
 function normalizeAddresses(addresses: readonly Address[]): Address[] {
-  return addresses.map(getAddress);
+  return addresses.map((address) => getAddress(address));
 }
 
 function toUint(value: number | bigint, field: string): bigint {

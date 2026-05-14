@@ -35,6 +35,12 @@ Yield DTF basket/backing state is live protocol state. Prefer RPC/facade reads f
 
 Unlike Index DTFs, Yield DTFs do not rely on Reserve API as the default source for current price/discovery surfaces in the same way.
 
+## SDK Boundary
+
+The current SDK has only a placeholder Yield namespace. `sdk.yield.get` and `sdk.yield.list` throw `NOT_IMPLEMENTED` until Yield reads are intentionally added.
+
+Source owner: existing Yield behavior should be verified from the previous Reserve SDK, Yield subgraph, and public protocol docs before promoting it into implemented SDK docs.
+
 ## Source References
 
 - `protocol-docs-website/protocol_pages/protocol/yield_dtfs/*`

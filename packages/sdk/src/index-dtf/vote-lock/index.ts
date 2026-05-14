@@ -12,7 +12,7 @@ import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vaul
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
 import { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
 import { getDtf } from "@/index-dtf/dtf/index";
-import { isUnsupportedOptimisticContractError } from "@/index-dtf/optimistic-errors";
+import { isUnsupportedVoteLockOptimisticReadError } from "@/index-dtf/optimistic-errors";
 import { mapAmount } from "@/lib/utils";
 
 export type VoteLockDao = {
@@ -186,14 +186,14 @@ export async function getVoteLockState(
     account,
     underlyingBalance: mapAmount(balance, underlying.decimals),
     underlyingAllowance: mapAmount(allowance, underlying.decimals),
-    delegate: getAddress(delegate),
+    delegate,
     optimisticDelegate,
     maxWithdraw: mapAmount(maxWithdraw, underlying.decimals),
     optimisticVotingPower:
       optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower),
     hasOptimisticVotingPower: (optimisticVotingPower ?? 0n) > 0n,
     unstakingDelay,
-    unstakingManager: getAddress(unstakingManager),
+    unstakingManager,
     ...(prices[0] ? { underlyingPrice: prices[0].price } : {}),
   };
 }
@@ -285,9 +285,9 @@ async function readOptimisticDelegate(
       args: [account],
     });
 
-    return getAddress(delegate);
+    return delegate;
   } catch (error) {
-    if (!isUnsupportedOptimisticContractError(error)) {
+    if (!isUnsupportedVoteLockOptimisticReadError(error)) {
       throw error;
     }
 
@@ -312,7 +312,7 @@ async function readOptimisticVotingPower(
 
     return votes ?? null;
   } catch (error) {
-    if (!isUnsupportedOptimisticContractError(error)) {
+    if (!isUnsupportedVoteLockOptimisticReadError(error)) {
       throw error;
     }
 
@@ -399,7 +399,7 @@ export function prepareVoteLockClaimRewards(params: {
     address: params.stToken,
     abi: dtfIndexStakingVaultAbi,
     functionName: "claimRewards",
-    args: [params.rewardTokens.map(getAddress)] as const,
+    args: [params.rewardTokens.map((token) => getAddress(token))] as const,
   });
 }
 

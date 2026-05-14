@@ -119,5 +119,5 @@ function getRedeemArgs(params: {
   readonly assets: readonly Address[];
   readonly minAmountsOut: readonly bigint[];
 }): RedeemArgs {
-  return [params.shares, getAddress(params.receiver), params.assets.map(getAddress), params.minAmountsOut] as const;
+  return [params.shares, getAddress(params.receiver), params.assets.map((address) => getAddress(address)), params.minAmountsOut] as const;
 }

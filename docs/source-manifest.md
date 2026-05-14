@@ -1,6 +1,6 @@
 # Source Manifest
 
-This file records which source owns which facts. Source references are repo-relative so these docs can be shared without local machine paths.
+This file records which source owns which facts. Source references use `repo/path` when they cross repository boundaries and repo-relative paths inside a repo's own section. Do not use local absolute paths.
 
 ## Primary Repos
 
@@ -113,8 +113,11 @@ Use public docs for concepts and user-facing language. Verify technical claims b
 | Proposal UI state | `register/src/lib/governance.ts` | `dtf-index-subgraph/src/governance/*` |
 | Optimistic governance indexing | `dtf-index-subgraph/src/governance/*` | `dtf-index-subgraph/docs/optimistic-governance.md` |
 | Vote-lock UI | `register/src/views/index-dtf/overview/components/staking/*` | `reserve-index-dtf/contracts/deployer/FolioDeployer.sol` |
+| Index vote-lock/governance relationships | `dtf-index-subgraph/src/staking-token/*` | `dtf-index-subgraph/src/deploy/*` |
 | Index subgraph IDs | `dtf-index-subgraph/src/*` | `dtf-index-subgraph/schema.graphql` |
 | SDK API names | `dtf-sdk/packages/sdk/src/index.ts` | `dtf-sdk/packages/sdk/src/index-dtf/namespace.ts` |
+| Yield DTF mechanics | `reserve-sdk/docs/yield-dtf-reference.md` | `protocol-docs-website/protocol_pages/protocol/yield_dtfs/*` |
+| Yield SDK boundary | `dtf-sdk/packages/sdk/src/create-dtf-sdk.ts` | `dtf-sdk/docs/yield-dtf/*` |
 
 ## Do Not Use As Sole Authority
 

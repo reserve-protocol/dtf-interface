@@ -41,6 +41,28 @@ export function prepareIndexDtfVote(params: VoteIndexDtfProposalParams) {
   });
 }
 
+export function prepareIndexDtfVoteWithReason(params: VoteIndexDtfProposalParams & { readonly reason: string }) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.governance,
+    abi: dtfIndexGovernanceAbi,
+    functionName: "castVoteWithReason",
+    args: [BigInt(params.proposalId), params.support, params.reason] as const,
+  });
+}
+
+export function prepareIndexDtfVoteWithReasonAndParams(
+  params: VoteIndexDtfProposalParams & { readonly reason: string; readonly voteParams: Hex },
+) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.governance,
+    abi: dtfIndexGovernanceAbi,
+    functionName: "castVoteWithReasonAndParams",
+    args: [BigInt(params.proposalId), params.support, params.reason, params.voteParams] as const,
+  });
+}
+
 export function prepareIndexDtfQueueProposal(params: QueueIndexDtfProposalParams) {
   const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(params.proposal);
 
@@ -82,6 +104,18 @@ export function prepareIndexDtfCancelProposal(params: CancelIndexDtfProposalPara
   });
 }
 
+export function prepareIndexDtfGovernorCancelProposal(params: CancelIndexDtfProposalParams) {
+  const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(params.proposal);
+
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.proposal.governance,
+    abi: dtfIndexGovernanceAbi,
+    functionName: "cancel",
+    args: [targets, values, calldatas, descriptionHash] as const,
+  });
+}
+
 export function prepareIndexDtfSubmitProposal(params: ProposeIndexDtfProposalParams) {
   const targets = params.proposal.targets.map(getAddress);
   const calldatas = [...params.proposal.calldatas];
@@ -117,7 +151,11 @@ function getProposalTxArgs(
 ): [readonly Address[], readonly bigint[], readonly Hex[], Hex] {
   const targets = proposal.targets.map(getAddress);
 
-  return [targets, getZeroValues(targets.length), [...proposal.calldatas], keccak256(toBytes(proposal.description))];
+  return [targets, getZeroValues(targets.length), [...proposal.calldatas], hashIndexDtfProposalDescription(proposal.description)];
+}
+
+export function hashIndexDtfProposalDescription(description: string): Hex {
+  return keccak256(toBytes(description));
 }
 
 function getTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {

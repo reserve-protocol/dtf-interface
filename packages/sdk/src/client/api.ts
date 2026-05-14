@@ -7,6 +7,8 @@ import { get, post, type GetOptions, type PostOptions } from "@/transports/api";
 
 export type ReserveApiDtfBasketToken = {
   readonly address: string;
+  readonly name?: string;
+  readonly symbol?: string;
   readonly amount: number;
   readonly amountRaw: string;
   readonly decimals: number;

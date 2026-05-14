@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createDtfClient } from "@/client";
-import { listIndexDtfs } from "@/index-dtf/protocol/index";
+import { getIndexDtfCatalogEntries, listIndexDtfs, resolveIndexDtfAlias } from "@/index-dtf/protocol/index";
 
 describe("Index DTF catalog list", () => {
   const client = createDtfClient();
@@ -24,5 +24,19 @@ describe("Index DTF catalog list", () => {
     expect(dtfs.length).toBeGreaterThan(0);
     expect(dtfs.every((dtf) => dtf.chainId === 8453)).toBe(true);
     expect(dtfs.every((dtf) => dtf.status === "active")).toBe(true);
+  });
+
+  it("resolves Index DTF aliases from the catalog only", () => {
+    const [dtf] = getIndexDtfCatalogEntries({ chainId: 8453, status: "active" });
+
+    expect(dtf).toBeDefined();
+    expect(resolveIndexDtfAlias({ input: dtf!.symbol, chainId: dtf!.chainId })).toMatchObject({
+      address: dtf!.address,
+      chainId: dtf!.chainId,
+      symbol: dtf!.symbol,
+    });
+    expect(resolveIndexDtfAlias({ input: dtf!.address })).toMatchObject({ address: dtf!.address });
+    expect(resolveIndexDtfAlias({ input: "   " })).toBeNull();
+    expect(resolveIndexDtfAlias({ input: "not a real dtf" })).toBeNull();
   });
 });

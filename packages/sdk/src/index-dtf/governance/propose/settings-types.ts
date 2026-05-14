@@ -6,7 +6,7 @@ import type { DtfParams } from "@/types/common";
 import type { IndexDtfCall } from "@/types/governance";
 import type { IndexDtf, PriceControl } from "@/types/index-dtf";
 
-import { INDEX_DTF_VERSION_5_0_0 } from "@/index-dtf/versions";
+import { INDEX_DTF_VERSION_5_0_0, INDEX_DTF_VERSION_6_0_0, type IndexDtfVersion } from "@/index-dtf/versions";
 
 const addressSchema = z.string().refine(isAddress, "Invalid address");
 
@@ -44,7 +44,7 @@ export const indexDtfSettingsProposalSchema = z.object({
   brandManagers: z.array(addressSchema).optional(),
   auctionLaunchers: z.array(addressSchema).optional(),
   governanceChanges: indexDtfGovernanceChangesSchema.optional(),
-  version: z.literal(INDEX_DTF_VERSION_5_0_0).optional(),
+  version: z.enum([INDEX_DTF_VERSION_5_0_0, INDEX_DTF_VERSION_6_0_0]).optional(),
   revenueDistribution: z
     .object({
       platformFee: z.coerce.number().min(0).lt(100),
@@ -130,7 +130,7 @@ export type BuildIndexDtfSettingsProposalParams = DtfParams & {
   readonly governanceChanges?: IndexDtfGovernanceChanges;
   readonly quorumDenominator?: number;
   readonly revenueDistribution?: IndexDtfRevenueDistributionInput;
-  readonly version?: typeof INDEX_DTF_VERSION_5_0_0 | undefined;
+  readonly version?: IndexDtfVersion | undefined;
 };
 
 export type {

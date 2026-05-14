@@ -1,6 +1,7 @@
 import { getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
+import type { ReserveApiDtfPrice } from "@/client/api";
 import type { SupportedChainId } from "@/defaults";
 import type { DtfBrand, DtfBasketSummaryAsset, DtfPerformancePoint, DtfStatus } from "@/types/common";
 
@@ -46,6 +47,41 @@ type RawDiscoveryItem = Omit<IndexDtfDiscoveryItem, "address" | "basket" | "chai
   })[];
 };
 
+type SubgraphDiscoveryDtf = {
+  readonly id: string;
+  readonly annualizedTvlFee: string;
+  readonly timestamp: string;
+  readonly token: {
+    readonly name: string;
+    readonly symbol: string;
+  };
+};
+
+type SubgraphDiscoveryResponse = {
+  readonly dtfs: readonly SubgraphDiscoveryDtf[];
+};
+
+export type DiscoverIndexDtfsFromSubgraphParams = {
+  readonly chainId: SupportedChainId;
+  readonly first?: number;
+  readonly skip?: number;
+  readonly excludeAddresses?: readonly Address[];
+};
+
+const SUBGRAPH_DISCOVERY_QUERY = `
+  query DiscoverIndexDtfsFromSubgraph($first: Int!, $skip: Int!) {
+    dtfs(first: $first, skip: $skip, orderBy: timestamp, orderDirection: desc) {
+      id
+      annualizedTvlFee
+      timestamp
+      token {
+        name
+        symbol
+      }
+    }
+  }
+`;
+
 /**
  * Discovers Index DTFs from Reserve API, including optional Register-style
  * performance and brand fields when requested.
@@ -67,6 +103,36 @@ export async function discoverIndexDtfsByChain(
   const response = await fetchDiscoveryItems(client, "/discover/dtf", params);
 
   return response.filter(isIndexDiscoveryItem).map(mapDiscoveryItem);
+}
+
+/**
+ * Discovers freshly indexed Index DTFs from the subgraph and enriches them with
+ * current Reserve API pricing. Curated `/discover/dtf` can lag new deploys.
+ */
+export async function discoverIndexDtfsFromSubgraph(
+  client: DtfClient,
+  params: DiscoverIndexDtfsFromSubgraphParams,
+): Promise<readonly IndexDtfDiscoveryItem[]> {
+  const first = params.first ?? 1000;
+  const skip = params.skip ?? 0;
+  const excluded = new Set((params.excludeAddresses ?? []).map((address) => getAddress(address).toLowerCase()));
+  const data = await client.subgraph.queryIndex<SubgraphDiscoveryResponse, { first: number; skip: number }>({
+    chainId: params.chainId,
+    query: SUBGRAPH_DISCOVERY_QUERY,
+    variables: { first, skip },
+  });
+  const dtfs = data.dtfs.filter((dtf) => !excluded.has(dtf.id.toLowerCase()));
+  const currentByAddress = await getDtfPricesByAddress(
+    client,
+    params.chainId,
+    dtfs.map((dtf) => getAddress(dtf.id)),
+  );
+
+  return dtfs.flatMap((dtf) => {
+    const current = currentByAddress.get(dtf.id.toLowerCase());
+
+    return current ? [mapSubgraphDiscoveryItem(dtf, current, params.chainId)] : [];
+  });
 }
 
 /**
@@ -134,6 +200,30 @@ function mapDiscoveryItem(item: RawDiscoveryItem): IndexDtfDiscoveryItem {
   };
 }
 
+function mapSubgraphDiscoveryItem(
+  item: SubgraphDiscoveryDtf,
+  current: ReserveApiDtfPrice,
+  chainId: SupportedChainId,
+): IndexDtfDiscoveryItem {
+  return {
+    address: getAddress(item.id),
+    chainId,
+    status: "active",
+    name: item.token.name,
+    symbol: item.token.symbol,
+    price: current.price,
+    ...(current.marketCap === undefined ? {} : { marketCap: current.marketCap }),
+    fee: Number(item.annualizedTvlFee) / 1e16,
+    basket: current.basket.map((asset) => ({
+      address: getAddress(asset.address),
+      name: asset.name ?? asset.symbol ?? getAddress(asset.address),
+      symbol: asset.symbol ?? asset.name ?? getAddress(asset.address),
+      weight: asset.weight,
+    })),
+    ...(item.timestamp && current.price ? { performance: [{ timestamp: Number(item.timestamp), value: current.price }] } : {}),
+  };
+}
+
 function isIndexDiscoveryItem(item: RawDiscoveryItem): boolean {
   return item.type === undefined || item.type === "index";
 }
@@ -154,4 +244,30 @@ function fetchDiscoveryItems(
       sort: params.sort,
     },
   });
+}
+
+async function getDtfPricesByAddress(
+  client: DtfClient,
+  chainId: SupportedChainId,
+  addresses: readonly Address[],
+): Promise<ReadonlyMap<string, ReserveApiDtfPrice>> {
+  const rows: ReserveApiDtfPrice[] = [];
+
+  for (let i = 0; i < addresses.length; i += 25) {
+    const chunk = addresses.slice(i, i + 25);
+
+    try {
+      rows.push(...(await client.api.getDtfPrices({ chainId, addresses: chunk })));
+    } catch {
+      for (const address of chunk) {
+        try {
+          rows.push(...(await client.api.getDtfPrices({ chainId, addresses: [address] })));
+        } catch {
+          // Fresh/internal discovery is best-effort; one unpriced DTF should not break the page.
+        }
+      }
+    }
+  }
+
+  return new Map(rows.map((row) => [getAddress(row.address).toLowerCase(), row]));
 }

@@ -25,6 +25,16 @@ export type IndexDtfRevenueDistributionInput = {
   readonly additionalRecipients: readonly IndexDtfRevenueRecipientInput[];
 };
 
+export type IndexDtfFeeRecipient = {
+  readonly recipient: Address;
+  readonly portion: bigint;
+};
+
+export type BuildIndexDtfFeeRecipientsParams = IndexDtfRevenueDistributionInput & {
+  readonly deployer: Address;
+  readonly voteLock?: Address;
+};
+
 export type RevenueDistributionCall = IndexDtfCall;
 
 export function prepareRevenueDistribution(
@@ -40,7 +50,7 @@ export function prepareRevenueDistribution(
 
   validateRevenueDistributionInput(dtf, distribution);
 
-  const recipients = getFeeRecipients({
+  const recipients = buildIndexDtfFeeRecipients({
     platformFee: distribution.platformFee,
     governanceShare: distribution.governanceShare,
     deployerShare: distribution.deployerShare,
@@ -137,21 +147,25 @@ function validateRecipientShares({
   }
 }
 
-function getFeeRecipients({
+export function buildIndexDtfFeeRecipients({
   additionalRecipients,
   deployer,
   deployerShare,
   governanceShare,
   platformFee,
   voteLock,
-}: {
-  readonly platformFee: number;
-  readonly governanceShare: number;
-  readonly deployerShare: number;
-  readonly additionalRecipients: readonly IndexDtfRevenueRecipientInput[];
-  readonly deployer: Address;
-  readonly voteLock?: Address;
-}): { recipient: Address; portion: bigint }[] {
+}: BuildIndexDtfFeeRecipientsParams): IndexDtfFeeRecipient[] {
+  validatePlatformFee(platformFee);
+  validateRevenueDistribution({ platformFee, governanceShare, deployerShare, additionalRecipients });
+  validateRawAdditionalRecipients(additionalRecipients, [deployer, ...(voteLock ? [voteLock] : [])]);
+  validateRecipientShares({
+    platformFee,
+    governanceShare,
+    deployerShare,
+    additionalRecipients,
+    hasVoteLock: !!voteLock,
+  });
+
   const nonPlatformShare = new Decimal(100).minus(platformFee);
   const calculatePortion = (share: number) => {
     const actualFraction = new Decimal(share).div(100);

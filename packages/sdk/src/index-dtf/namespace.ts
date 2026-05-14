@@ -38,12 +38,25 @@ import type { ListIndexDtfsParams } from "@/types/protocol";
 
 import { getAssetList } from "@/index-dtf/assets/index";
 import {
+  buildIndexDtfDeployFeeRecipients,
+  getIndexDtfDeployApprovalAmount,
+  prepareIndexDtfDeploy,
+  prepareIndexDtfDeployAssetApproval,
+  prepareIndexDtfDeployAssetApprovals,
+  prepareIndexDtfDeployGoverned,
+  prepareIndexDtfDeployGovernedPlan,
+  prepareIndexDtfDeployPlan,
+  prepareIndexDtfDeployStakingToken,
+} from "@/index-dtf/deploy/index";
+import {
   discoverIndexDtfs,
   discoverIndexDtfsByChain,
+  discoverIndexDtfsFromSubgraph,
   getIndexDtfStatus,
   getIndexDtfStatuses,
 } from "@/index-dtf/dtf/discovery";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
+import { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 import {
   getBasket,
   getBasketSnapshot,
@@ -101,10 +114,13 @@ import {
   getVoterState,
   prepareIndexDtfCancelProposal,
   prepareIndexDtfExecuteProposal,
+  prepareIndexDtfGovernorCancelProposal,
   prepareIndexDtfQueueProposal,
   prepareIndexDtfSubmitOptimisticProposal,
   prepareIndexDtfSubmitProposal,
   prepareIndexDtfVote,
+  prepareIndexDtfVoteWithReason,
+  prepareIndexDtfVoteWithReasonAndParams,
   getSelectorRegistryAllowedSelectors,
   getSelectorRegistryIsAllowed,
   getSelectorRegistryTargets,
@@ -117,7 +133,15 @@ import {
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
 } from "@/index-dtf/governance/propose/index";
-import { listIndexDtfs } from "@/index-dtf/protocol/index";
+import {
+  prepareIndexDtfRelay,
+  prepareIndexDtfTimelockDelay,
+  prepareIndexDtfTimelockExecuteBatch,
+  prepareIndexDtfTimelockGrantRole,
+  prepareIndexDtfTimelockRevokeRole,
+  prepareIndexDtfUpdateTimelock,
+} from "@/index-dtf/governance/propose/calls";
+import { getIndexDtfCatalogEntries, listIndexDtfs, resolveIndexDtfAlias } from "@/index-dtf/protocol/index";
 import {
   getActiveAuction,
   getBidQuote,
@@ -162,7 +186,11 @@ export function createIndexDtfNamespace(client: DtfClient) {
       discoverIndexDtfs(client, params),
     discoverByChain: (params: Parameters<typeof discoverIndexDtfsByChain>[1]) =>
       discoverIndexDtfsByChain(client, params),
+    discoverFromSubgraph: (params: Parameters<typeof discoverIndexDtfsFromSubgraph>[1]) =>
+      discoverIndexDtfsFromSubgraph(client, params),
     list: (params?: ListIndexDtfsParams) => listIndexDtfs(client, params),
+    getCatalogEntries: getIndexDtfCatalogEntries,
+    resolveAlias: resolveIndexDtfAlias,
     getAssetList: (params: Parameters<typeof getAssetList>[1]) =>
       getAssetList(client, params),
     get: (params: GetIndexDtfParams) => getFull(client, params),
@@ -186,6 +214,8 @@ export function createIndexDtfNamespace(client: DtfClient) {
       getIndexDtfStatuses(client, params),
     getExposure: (params: Parameters<typeof getIndexDtfExposure>[1]) =>
       getIndexDtfExposure(client, params),
+    getHolders: (params: Parameters<typeof getIndexDtfHolders>[1]) =>
+      getIndexDtfHolders(client, params),
     getTransactions: (params: Parameters<typeof getIndexDtfTransactions>[1]) =>
       getIndexDtfTransactions(client, params),
     getBidsEnabled: (params: Parameters<typeof getIndexDtfBidsEnabled>[1]) =>
@@ -212,6 +242,15 @@ export function createIndexDtfNamespace(client: DtfClient) {
     prepareBasketApproval: prepareIndexDtfBasketApproval,
     prepareDistributeFees: prepareIndexDtfDistributeFees,
     getRedeemMinAmounts: getIndexDtfRedeemMinAmounts,
+    buildDeployFeeRecipients: buildIndexDtfDeployFeeRecipients,
+    getDeployApprovalAmount: getIndexDtfDeployApprovalAmount,
+    prepareDeploy: prepareIndexDtfDeploy,
+    prepareDeployGoverned: prepareIndexDtfDeployGoverned,
+    prepareDeployStakingToken: prepareIndexDtfDeployStakingToken,
+    prepareDeployPlan: prepareIndexDtfDeployPlan,
+    prepareDeployGovernedPlan: prepareIndexDtfDeployGovernedPlan,
+    prepareDeployAssetApproval: prepareIndexDtfDeployAssetApproval,
+    prepareDeployAssetApprovals: prepareIndexDtfDeployAssetApprovals,
     getProposals: (params: GetIndexDtfProposalsParams) =>
       getProposals(client, params),
     getProposal: (params: GetIndexDtfProposalParams) =>
@@ -261,11 +300,20 @@ export function createIndexDtfNamespace(client: DtfClient) {
     getProposalVoterState: (params: GetIndexDtfProposalVoterStateParams) =>
       getProposalVoterState(client, params),
     prepareVote: prepareIndexDtfVote,
+    prepareVoteWithReason: prepareIndexDtfVoteWithReason,
+    prepareVoteWithReasonAndParams: prepareIndexDtfVoteWithReasonAndParams,
     prepareQueueProposal: prepareIndexDtfQueueProposal,
     prepareExecuteProposal: prepareIndexDtfExecuteProposal,
     prepareCancelProposal: prepareIndexDtfCancelProposal,
+    prepareGovernorCancelProposal: prepareIndexDtfGovernorCancelProposal,
     prepareSubmitProposal: prepareIndexDtfSubmitProposal,
     prepareSubmitOptimisticProposal: prepareIndexDtfSubmitOptimisticProposal,
+    prepareUpdateTimelock: prepareIndexDtfUpdateTimelock,
+    prepareRelay: prepareIndexDtfRelay,
+    prepareTimelockDelay: prepareIndexDtfTimelockDelay,
+    prepareTimelockGrantRole: prepareIndexDtfTimelockGrantRole,
+    prepareTimelockRevokeRole: prepareIndexDtfTimelockRevokeRole,
+    prepareTimelockExecuteBatch: prepareIndexDtfTimelockExecuteBatch,
     getSelectorRegistryTargets: (
       params: Parameters<typeof getSelectorRegistryTargets>[1],
     ) => getSelectorRegistryTargets(client, params),

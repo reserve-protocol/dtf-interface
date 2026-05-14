@@ -1,4 +1,4 @@
-import { getAddress, parseEther, type Address } from "viem";
+import { getAddress, parseEther, zeroHash, type Address, type Hex } from "viem";
 
 import type { SupportedChainId } from "@/defaults";
 import type { IndexDtfCall } from "@/types/governance";
@@ -6,16 +6,19 @@ import type { PriceControl } from "@/types/index-dtf";
 
 import { prepareContractCall } from "@/contract-call";
 import { SdkError } from "@/errors";
+import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
+import { folioArtifactAbi as indexDtfV6Abi } from "@/index-dtf/abis/folio-artifact";
 import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
-import { INDEX_DTF_VERSION_5_0_0, getIndexDtfOperation, type IndexDtfOperation } from "@/index-dtf/versions";
+import { getIndexDtfOperation, type IndexDtfOperation, type IndexDtfVersion } from "@/index-dtf/versions";
 import { Decimal } from "@/lib/decimal";
 
 export const indexDtfV5WriteAbi = indexDtfV5Abi;
+export const indexDtfV6WriteAbi = indexDtfV6Abi;
 
-export type IndexDtfWriteVersion = typeof INDEX_DTF_VERSION_5_0_0;
+export type IndexDtfWriteVersion = IndexDtfVersion;
 
 export type IndexDtfFeeRecipient = {
   readonly recipient: Address;
@@ -56,6 +59,16 @@ export type PrepareIndexDtfSetOptimisticParamsParams =
     readonly vetoPeriod: number | bigint;
     readonly vetoThreshold: bigint;
   };
+
+export type PrepareIndexDtfGovernorCallParams = {
+  readonly governance: Address;
+  readonly chainId: SupportedChainId;
+};
+
+export type PrepareIndexDtfTimelockCallParams = {
+  readonly timelock: Address;
+  readonly chainId: SupportedChainId;
+};
 
 export function prepareIndexDtfAddToBasket(params: PrepareIndexDtfTokenCallParams): IndexDtfCall {
   return prepareIndexDtfOperation(
@@ -282,6 +295,100 @@ export function prepareIndexDtfRevokeOptimisticProposer(params: {
   });
 }
 
+export function prepareIndexDtfUpdateTimelock(
+  params: PrepareIndexDtfGovernorCallParams & { readonly timelock: Address },
+): IndexDtfCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.governance,
+    abi: dtfIndexGovernanceAbi,
+    functionName: "updateTimelock",
+    args: [getAddress(params.timelock)] as const,
+  });
+}
+
+export function prepareIndexDtfRelay(
+  params: PrepareIndexDtfGovernorCallParams & {
+    readonly target: Address;
+    readonly value?: bigint;
+    readonly data?: Hex;
+  },
+): IndexDtfCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.governance,
+    abi: dtfIndexGovernanceAbi,
+    functionName: "relay",
+    args: [getAddress(params.target), params.value ?? 0n, params.data ?? "0x"] as const,
+  });
+}
+
+export function prepareIndexDtfTimelockDelay(
+  params: PrepareIndexDtfTimelockCallParams & { readonly delay: number | bigint },
+): IndexDtfCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.timelock,
+    abi: timelockAbi,
+    functionName: "updateDelay",
+    args: [toUint(params.delay, "delay")] as const,
+  });
+}
+
+export function prepareIndexDtfTimelockGrantRole(
+  params: PrepareIndexDtfTimelockCallParams & { readonly role: Hex; readonly account: Address },
+): IndexDtfCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.timelock,
+    abi: timelockAbi,
+    functionName: "grantRole",
+    args: [params.role, getAddress(params.account)] as const,
+  });
+}
+
+export function prepareIndexDtfTimelockRevokeRole(
+  params: PrepareIndexDtfTimelockCallParams & { readonly role: Hex; readonly account: Address },
+): IndexDtfCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.timelock,
+    abi: timelockAbi,
+    functionName: "revokeRole",
+    args: [params.role, getAddress(params.account)] as const,
+  });
+}
+
+export function prepareIndexDtfTimelockExecuteBatch(
+  params: PrepareIndexDtfTimelockCallParams & {
+    readonly targets: readonly Address[];
+    readonly calldatas: readonly Hex[];
+    readonly values?: readonly bigint[];
+    readonly predecessor?: Hex;
+    readonly salt?: Hex;
+    readonly value?: bigint;
+  },
+): IndexDtfCall {
+  const targets = params.targets.map(getAddress);
+  const values = params.values ?? targets.map(() => 0n);
+
+  if (targets.length !== params.calldatas.length || targets.length !== values.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "targets, values, and calldatas must have the same length",
+    });
+  }
+
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.timelock,
+    abi: timelockAbi,
+    functionName: "executeBatch",
+    args: [targets, [...values], [...params.calldatas], params.predecessor ?? zeroHash, params.salt ?? zeroHash] as const,
+    ...(params.value === undefined ? {} : { value: params.value }),
+  });
+}
+
 function prepareIndexDtfOperation(
   address: Address,
   chainId: SupportedChainId,
@@ -289,14 +396,6 @@ function prepareIndexDtfOperation(
   args: readonly unknown[],
   version: IndexDtfWriteVersion,
 ): IndexDtfCall {
-  if (version !== INDEX_DTF_VERSION_5_0_0) {
-    throw new SdkError({
-      code: "INVALID_INPUT",
-      message: "Index DTF call builders currently support v5 only",
-      meta: { version },
-    });
-  }
-
   const { abi, functionName } = getIndexDtfOperation(operation, version);
 
   return prepareContractCall({

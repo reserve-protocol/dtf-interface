@@ -5,6 +5,7 @@ import { createDtfClient } from "@/client";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import {
   buildIndexDtfBasketSettingsProposal,
@@ -135,17 +136,19 @@ describe("settings proposal builders", () => {
     ).toBe("setAuctionLength");
   });
 
-  it("rejects non-v5 settings proposal versions", async () => {
-    await expect(
-      buildIndexDtfSettingsProposal({} as never, {
-        address: DTF,
-        chainId: 1,
-        governance: GOVERNANCE,
-        timelock: TIMELOCK,
-        auctionLength: 30,
-        version: "6.0.0" as never,
-      }),
-    ).rejects.toMatchObject({ code: "INVALID_INPUT" });
+  it("builds v6 settings calls with versioned function names", async () => {
+    const proposal = await buildIndexDtfSettingsProposal({} as never, {
+      address: DTF,
+      chainId: 1,
+      governance: GOVERNANCE,
+      timelock: TIMELOCK,
+      auctionLength: 30,
+      version: "6.0.0",
+    });
+
+    expect(decodeFunctionData({ abi: folioArtifactAbi, data: proposal.calldatas[0]! }).functionName).toBe(
+      "setMaxAuctionLength",
+    );
   });
 
   it("builds price-control-only settings calls", async () => {
@@ -195,9 +198,9 @@ describe("settings proposal builders", () => {
     expect(
       indexDtfSettingsProposalSchema.parse({
         auctionLength: 30,
-        version: "5.0.0",
+        version: "6.0.0",
       }),
-    ).toMatchObject({ version: "5.0.0" });
+    ).toMatchObject({ version: "6.0.0" });
   });
 
   it("requires timelock to build settings proposals", async () => {

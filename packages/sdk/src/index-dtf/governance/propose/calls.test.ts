@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   indexDtfV5WriteAbi,
+  indexDtfV6WriteAbi,
   prepareIndexDtfDeprecate,
+  prepareIndexDtfRelay,
   prepareIndexDtfRevokeOptimisticProposer,
   prepareIndexDtfSetAuctionLength,
   prepareIndexDtfSetFeeRecipients,
@@ -11,6 +13,10 @@ import {
   prepareIndexDtfSetMandate,
   prepareIndexDtfSetOptimisticParams,
   prepareIndexDtfSetProposalThrottle,
+  prepareIndexDtfTimelockDelay,
+  prepareIndexDtfTimelockExecuteBatch,
+  prepareIndexDtfTimelockGrantRole,
+  prepareIndexDtfUpdateTimelock,
 } from "@/index-dtf/governance/propose/calls";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
@@ -57,15 +63,15 @@ describe("Index DTF call builders", () => {
     expect(decodeFunctionData({ abi: indexDtfV5WriteAbi, data: oldCall.data }).functionName).toBe("setFeeRecipients");
   });
 
-  it("rejects non-v5 call builder versions", () => {
-    expect(() =>
-      prepareIndexDtfSetAuctionLength({
-        address: DTF,
-        chainId: 1,
-        auctionLength: 1800,
-        version: "6.0.0" as never,
-      }),
-    ).toThrow("v5 only");
+  it("encodes v6 version-sensitive call names", () => {
+    const newCall = prepareIndexDtfSetAuctionLength({
+      address: DTF,
+      chainId: 1,
+      auctionLength: 1800,
+      version: "6.0.0",
+    });
+
+    expect(decodeFunctionData({ abi: indexDtfV6WriteAbi, data: newCall.data }).functionName).toBe("setMaxAuctionLength");
   });
 
   it("keeps unchanged no-arg calls available on older versions", () => {
@@ -146,5 +152,37 @@ describe("Index DTF call builders", () => {
       functionName: "revokeRole",
       args: [OPTIMISTIC_PROPOSER_ROLE, ACCOUNT],
     });
+  });
+
+  it("encodes governor and timelock utility calls", () => {
+    const governance = "0x0000000000000000000000000000000000000003";
+    const timelock = "0x0000000000000000000000000000000000000004";
+    const updateTimelock = prepareIndexDtfUpdateTimelock({ chainId: 1, governance, timelock });
+    const relay = prepareIndexDtfRelay({ chainId: 1, governance, target: DTF, data: "0x1234" });
+    const delay = prepareIndexDtfTimelockDelay({ chainId: 1, timelock, delay: 86_400 });
+    const grant = prepareIndexDtfTimelockGrantRole({
+      chainId: 1,
+      timelock,
+      role: OPTIMISTIC_PROPOSER_ROLE,
+      account: ACCOUNT,
+    });
+    const batch = prepareIndexDtfTimelockExecuteBatch({
+      chainId: 1,
+      timelock,
+      targets: [DTF],
+      calldatas: ["0x1234"],
+    });
+
+    expect(updateTimelock.contract.functionName).toBe("updateTimelock");
+    expect(updateTimelock.contract.args).toEqual([timelock]);
+    expect(relay.contract.functionName).toBe("relay");
+    expect(relay.contract.args).toEqual([DTF, 0n, "0x1234"]);
+    expect(delay.contract.functionName).toBe("updateDelay");
+    expect(delay.contract.args).toEqual([86_400n]);
+    expect(grant.contract.functionName).toBe("grantRole");
+    expect(grant.contract.args).toEqual([OPTIMISTIC_PROPOSER_ROLE, ACCOUNT]);
+    expect(batch.contract.functionName).toBe("executeBatch");
+    expect(batch.contract.args[0]).toEqual([DTF]);
+    expect(batch.contract.args[1]).toEqual([0n]);
   });
 });

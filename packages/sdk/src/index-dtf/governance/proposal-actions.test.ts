@@ -11,10 +11,14 @@ import {
 import { describe, expect, it } from "vitest";
 
 import {
+  hashIndexDtfProposalDescription,
   prepareIndexDtfCancelProposal,
+  prepareIndexDtfGovernorCancelProposal,
   prepareIndexDtfQueueProposal,
   prepareIndexDtfSubmitOptimisticProposal,
   prepareIndexDtfSubmitProposal,
+  prepareIndexDtfVoteWithReason,
+  prepareIndexDtfVoteWithReasonAndParams,
 } from "@/index-dtf/governance/proposal-actions";
 
 const timelockOperationParams = parseAbiParameters("address[], uint256[], bytes[], bytes32, bytes32");
@@ -65,6 +69,29 @@ describe("Index DTF proposal actions", () => {
     ]);
   });
 
+  it("prepares vote calls with reason params", () => {
+    const reasonCall = prepareIndexDtfVoteWithReason({
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId: 42n,
+      support: 1,
+      reason: "Looks good",
+    });
+    const paramsCall = prepareIndexDtfVoteWithReasonAndParams({
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId: "42",
+      support: 0,
+      reason: "No",
+      voteParams: "0x1234",
+    });
+
+    expect(reasonCall.contract.functionName).toBe("castVoteWithReason");
+    expect(reasonCall.contract.args).toEqual([42n, 1, "Looks good"]);
+    expect(paramsCall.contract.functionName).toBe("castVoteWithReasonAndParams");
+    expect(paramsCall.contract.args).toEqual([42n, 0, "No", "0x1234"]);
+  });
+
   it("prepares proposal queue and cancel calls with required timelock", () => {
     const proposal = {
       governance: "0x0000000000000000000000000000000000000001",
@@ -95,6 +122,25 @@ describe("Index DTF proposal actions", () => {
     expect(cancelCall.contract.address).toBe("0x0000000000000000000000000000000000000006");
     expect(cancelCall.contract.functionName).toBe("cancel");
     expect(cancelCall.contract.args).toEqual(["0x0000000000000000000000000000000000000000000000000000000000000042"]);
+  });
+
+  it("prepares governor cancel calls", () => {
+    const proposal = {
+      governance: "0x0000000000000000000000000000000000000001",
+      targets: ["0x0000000000000000000000000000000000000003"],
+      calldatas: ["0x1234"],
+      description: "Proposal description",
+    } as const;
+    const call = prepareIndexDtfGovernorCancelProposal({ chainId: 1, proposal });
+
+    expect(call.contract.address).toBe(proposal.governance);
+    expect(call.contract.functionName).toBe("cancel");
+    expect(call.contract.args).toEqual([
+      proposal.targets,
+      [0n],
+      proposal.calldatas,
+      hashIndexDtfProposalDescription(proposal.description),
+    ]);
   });
 
   it("rejects cancel calls without a timelock", () => {

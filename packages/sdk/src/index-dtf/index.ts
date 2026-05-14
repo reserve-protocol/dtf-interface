@@ -33,11 +33,13 @@ export {
 export {
   discoverIndexDtfs,
   discoverIndexDtfsByChain,
+  discoverIndexDtfsFromSubgraph,
   getIndexDtfStatus,
   getIndexDtfStatuses,
 } from "@/index-dtf/dtf/discovery";
 export { getAssetList as getIndexDtfAssetList } from "@/index-dtf/assets/index";
 export { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
+export { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 export {
   getIndexDtfIssuanceState,
   getIndexDtfRedeemMinAmounts,
@@ -57,6 +59,23 @@ export {
   prepareIndexDtfDistributeFees,
 } from "@/index-dtf/dtf/revenue";
 export { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
+export {
+  buildIndexDtfDeployFeeRecipients,
+  DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+  extractIndexDtfDeployedAddress,
+  extractIndexDtfDeployedStakingTokenAddress,
+  generateIndexDtfDeploymentNonce,
+  getIndexDtfDeployApprovalAmount,
+  INDEX_DTF_DEPLOYER_ADDRESS,
+  INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
+  prepareIndexDtfDeploy,
+  prepareIndexDtfDeployAssetApproval,
+  prepareIndexDtfDeployAssetApprovals,
+  prepareIndexDtfDeployGoverned,
+  prepareIndexDtfDeployGovernedPlan,
+  prepareIndexDtfDeployPlan,
+  prepareIndexDtfDeployStakingToken,
+} from "@/index-dtf/deploy/index";
 
 export { getDelegates as getIndexDtfDelegates } from "@/index-dtf/governance/delegates";
 export { getGuardians as getIndexDtfGuardians } from "@/index-dtf/governance/guardians";
@@ -74,10 +93,14 @@ export {
 export {
   prepareIndexDtfCancelProposal,
   prepareIndexDtfExecuteProposal,
+  prepareIndexDtfGovernorCancelProposal,
   prepareIndexDtfQueueProposal,
   prepareIndexDtfSubmitOptimisticProposal,
   prepareIndexDtfSubmitProposal,
   prepareIndexDtfVote,
+  prepareIndexDtfVoteWithReason,
+  prepareIndexDtfVoteWithReasonAndParams,
+  hashIndexDtfProposalDescription,
 } from "@/index-dtf/governance/proposal-actions";
 export {
   getSelectorRegistryAllowedSelectors as getIndexDtfSelectorRegistryAllowedSelectors,
@@ -113,6 +136,7 @@ export {
 } from "@/index-dtf/governance/propose/index";
 export {
   indexDtfV5WriteAbi,
+  indexDtfV6WriteAbi,
   prepareIndexDtfAddToAllowlist,
   prepareIndexDtfAddToBasket,
   prepareIndexDtfDeprecate,
@@ -133,6 +157,12 @@ export {
   prepareIndexDtfSetTradeAllowlistEnabled,
   prepareIndexDtfSetTrustedFillerRegistry,
   prepareIndexDtfSetTvlFee,
+  prepareIndexDtfRelay,
+  prepareIndexDtfTimelockDelay,
+  prepareIndexDtfTimelockExecuteBatch,
+  prepareIndexDtfTimelockGrantRole,
+  prepareIndexDtfTimelockRevokeRole,
+  prepareIndexDtfUpdateTimelock,
 } from "@/index-dtf/governance/propose/calls";
 export { getProposalGovernanceAddresses as getIndexDtfProposalGovernanceAddresses } from "@/index-dtf/governance/utils";
 export {
@@ -141,7 +171,7 @@ export {
   getProposerState as getIndexDtfProposerState,
   getVoterState as getIndexDtfVoterState,
 } from "@/index-dtf/governance/voting";
-export { listIndexDtfs } from "@/index-dtf/protocol/index";
+export { getIndexDtfCatalogEntries, listIndexDtfs, resolveIndexDtfAlias } from "@/index-dtf/protocol/index";
 export {
   getActiveAuction as getIndexDtfActiveAuction,
   getBidQuote as getIndexDtfBidQuote,
@@ -176,10 +206,13 @@ export {
 export type * from "@/index-dtf/dtf/discovery";
 export type * from "@/index-dtf/assets/index";
 export type * from "@/index-dtf/dtf/exposure";
+export type * from "@/index-dtf/dtf/holders";
 export type * from "@/index-dtf/dtf/issuance";
 export type * from "@/index-dtf/dtf/revenue";
 export type * from "@/index-dtf/dtf/transactions";
+export type * from "@/index-dtf/deploy/index";
 export type * from "@/index-dtf/governance/selector-registry";
 export type * from "@/index-dtf/governance/propose/calls";
+export type * from "@/index-dtf/protocol/index";
 export type * from "@/index-dtf/rebalance/index";
 export type * from "@/index-dtf/vote-lock/index";

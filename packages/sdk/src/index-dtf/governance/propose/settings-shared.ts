@@ -11,7 +11,7 @@ import type { IndexDtf, PriceControl } from "@/types/index-dtf";
 import { SdkError } from "@/errors";
 import { getDtf, getVersion } from "@/index-dtf/dtf/index";
 import { assertNumberRange } from "@/index-dtf/governance/propose/settings-governance";
-import { INDEX_DTF_VERSION_5_0_0, type IndexDtfVersion } from "@/index-dtf/versions";
+import { INDEX_DTF_VERSION_5_0_0, INDEX_DTF_VERSION_6_0_0, type IndexDtfVersion } from "@/index-dtf/versions";
 
 const MAX_TOKEN_NAME_LENGTH = 32;
 const MAX_MINT_FEE = 5;
@@ -72,13 +72,13 @@ export async function getDtfIfNeeded(
 export async function getIndexDtfSettingsVersion(
   client: Parameters<typeof getVersion>[0],
   params: BuildIndexDtfSettingsProposalParams,
-): Promise<typeof INDEX_DTF_VERSION_5_0_0> {
+): Promise<IndexDtfVersion> {
   const version = params.version ?? ((await getVersion(client, params)) as IndexDtfVersion);
 
-  if (version !== INDEX_DTF_VERSION_5_0_0) {
+  if (version !== INDEX_DTF_VERSION_5_0_0 && version !== INDEX_DTF_VERSION_6_0_0) {
     throw new SdkError({
       code: "INVALID_INPUT",
-      message: "Index DTF settings proposals currently support v5 only",
+      message: "Unsupported Index DTF settings proposal version",
       meta: { version },
     });
   }

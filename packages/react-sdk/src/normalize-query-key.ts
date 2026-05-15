@@ -6,7 +6,7 @@ export function normalizeQueryKeyValue(value: unknown): unknown {
   }
 
   if (typeof value === "string") {
-    return isAddress(value) ? value.toLowerCase() : value;
+    return isAddress(value, { strict: false }) ? value.toLowerCase() : value;
   }
 
   if (Array.isArray(value)) {

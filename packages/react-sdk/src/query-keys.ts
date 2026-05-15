@@ -1,9 +1,10 @@
 import type {
-  DtfParams,
   BuildIndexDtfBasketProposalParams,
   BuildIndexDtfBasketSettingsProposalParams,
   BuildIndexDtfDaoSettingsProposalParams,
   BuildIndexDtfSettingsProposalParams,
+  DtfParams,
+  DtfSdk,
   GetDiscoverDtfsOptions,
   GetFullIndexDtfParams,
   GetIndexDtfBasketParams,
@@ -27,6 +28,14 @@ import { getIndexDtfProposalGovernanceAddresses } from "@dtf-interface/sdk";
 import { normalizeQueryKeyValue } from "@/normalize-query-key";
 
 const defaultKey = "default";
+
+type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
+  ? DtfSdk["index"][TKey]
+  : never;
+type IndexMethodParams<TKey extends keyof DtfSdk["index"]> = Parameters<IndexMethod<TKey>>[0];
+type PastOptimisticVotesQueryKeyParams = Omit<IndexMethodParams<"getPastOptimisticVotes">, "timepoint"> & {
+  readonly timepoint: bigint;
+};
 
 function keyParams(params: unknown): unknown {
   return params === undefined ? defaultKey : normalizeQueryKeyValue(params);
@@ -97,6 +106,19 @@ function proposalVoterStateKeyParams(params: GetIndexDtfProposalVoterStateParams
   };
 }
 
+function selectorRegistryIsAllowedKeyParams(
+  params: IndexMethodParams<"getSelectorRegistryIsAllowed"> | undefined,
+): unknown {
+  if (!params) {
+    return params;
+  }
+
+  return {
+    ...params,
+    selector: params.selector.toLowerCase(),
+  };
+}
+
 function sortedAddressSet(addresses: string | readonly string[]): readonly string[] {
   const values = Array.isArray(addresses) ? addresses : [addresses];
 
@@ -142,6 +164,40 @@ export const dtfQueryKeys = {
         [...dtfQueryKeys.index.governance.all(), "proposals", keyParams(indexDtfProposalsKeyParams(params))] as const,
       proposal: (params?: GetIndexDtfProposalParams) =>
         [...dtfQueryKeys.index.governance.all(), "proposal", keyParams(params)] as const,
+      proposalState: (params?: IndexMethodParams<"getProposalState">) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-state", keyParams(params)] as const,
+      proposalStates: (params?: IndexMethodParams<"getProposalStates">) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-states", keyParams(params)] as const,
+      proposalEta: (params?: IndexMethodParams<"getProposalEta">) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-eta", keyParams(params)] as const,
+      proposalDeadline: (params?: IndexMethodParams<"getProposalDeadline">) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-deadline", keyParams(params)] as const,
+      proposalSnapshot: (params?: IndexMethodParams<"getProposalSnapshot">) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-snapshot", keyParams(params)] as const,
+      proposalRpcDetails: (params?: IndexMethodParams<"getProposalRpcDetails">) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-rpc-details", keyParams(params)] as const,
+      optimisticGovernance: (params?: IndexMethodParams<"getOptimisticGovernance">) =>
+        [...dtfQueryKeys.index.governance.all(), "optimistic-governance", keyParams(params)] as const,
+      optimisticProposalContext: (params?: IndexMethodParams<"getOptimisticProposalContext">) =>
+        [...dtfQueryKeys.index.governance.all(), "optimistic-proposal-context", keyParams(params)] as const,
+      optimisticTimelockRoles: (params?: IndexMethodParams<"getOptimisticTimelockRoles">) =>
+        [...dtfQueryKeys.index.governance.all(), "optimistic-timelock-roles", keyParams(params)] as const,
+      optimisticVotes: (params?: IndexMethodParams<"getOptimisticVotes">) =>
+        [...dtfQueryKeys.index.governance.all(), "optimistic-votes", keyParams(params)] as const,
+      pastOptimisticVotes: (params?: PastOptimisticVotesQueryKeyParams) =>
+        [...dtfQueryKeys.index.governance.all(), "past-optimistic-votes", keyParams(params)] as const,
+      proposalThrottleCharges: (params?: IndexMethodParams<"getProposalThrottleCharges">) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-throttle-charges", keyParams(params)] as const,
+      selectorRegistryTargets: (params?: IndexMethodParams<"getSelectorRegistryTargets">) =>
+        [...dtfQueryKeys.index.governance.all(), "selector-registry-targets", keyParams(params)] as const,
+      selectorRegistryAllowedSelectors: (params?: IndexMethodParams<"getSelectorRegistryAllowedSelectors">) =>
+        [...dtfQueryKeys.index.governance.all(), "selector-registry-allowed-selectors", keyParams(params)] as const,
+      selectorRegistryIsAllowed: (params?: IndexMethodParams<"getSelectorRegistryIsAllowed">) =>
+        [
+          ...dtfQueryKeys.index.governance.all(),
+          "selector-registry-is-allowed",
+          keyParams(selectorRegistryIsAllowedKeyParams(params)),
+        ] as const,
       buildBasketProposal: (params?: BuildIndexDtfBasketProposalParams) =>
         [...dtfQueryKeys.index.governance.all(), "build-basket-proposal", keyParams(params)] as const,
       buildBasketSettingsProposal: (params?: BuildIndexDtfBasketSettingsProposalParams) =>

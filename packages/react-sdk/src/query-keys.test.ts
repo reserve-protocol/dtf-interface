@@ -119,6 +119,71 @@ describe("dtfQueryKeys", () => {
       },
     ]);
   });
+
+  it("normalizes proposal RPC state keys", () => {
+    const key = dtfQueryKeys.index.governance.proposalRpcDetails({
+      chainId: 1,
+      governance: "0x000000000000000000000000000000000000000A",
+      proposalId: 42n,
+    });
+
+    expect(key).toEqual([
+      "dtf",
+      "index",
+      "governance",
+      "proposal-rpc-details",
+      {
+        chainId: 1,
+        governance: "0x000000000000000000000000000000000000000a",
+        proposalId: "42",
+      },
+    ]);
+  });
+
+  it("normalizes optimistic governance keys", () => {
+    const key = dtfQueryKeys.index.governance.pastOptimisticVotes({
+      account: "0x000000000000000000000000000000000000000A",
+      chainId: 1,
+      timepoint: 123n,
+      voteToken: "0x000000000000000000000000000000000000000B",
+    });
+
+    expect(key).toEqual([
+      "dtf",
+      "index",
+      "governance",
+      "past-optimistic-votes",
+      {
+        account: "0x000000000000000000000000000000000000000a",
+        chainId: 1,
+        timepoint: "123",
+        voteToken: "0x000000000000000000000000000000000000000b",
+      },
+    ]);
+  });
+
+  it("normalizes selector registry keys", () => {
+    const firstKey = dtfQueryKeys.index.governance.selectorRegistryIsAllowed({
+      chainId: 1,
+      registry: "0x000000000000000000000000000000000000000A",
+      selector: "0xABCDEF12",
+      target: "0x000000000000000000000000000000000000000B",
+    });
+    const secondKey = dtfQueryKeys.index.governance.selectorRegistryIsAllowed({
+      chainId: 1,
+      registry: "0x000000000000000000000000000000000000000a",
+      selector: "0xabcdef12",
+      target: "0x000000000000000000000000000000000000000b",
+    });
+
+    expect(firstKey).toEqual(secondKey);
+    expect(firstKey[4]).toEqual({
+      chainId: 1,
+      registry: "0x000000000000000000000000000000000000000a",
+      selector: "0xabcdef12",
+      target: "0x000000000000000000000000000000000000000b",
+    });
+  });
 });
 
 function createDtfKeyFixture() {

@@ -8,10 +8,12 @@ describe("normalizeQueryKeyValue", () => {
       normalizeQueryKeyValue({
         amount: 10n,
         address: "0x000000000000000000000000000000000000000A",
+        unchecked: "0x000000000000000000000000000000000000000B",
       }),
     ).toEqual({
       address: "0x000000000000000000000000000000000000000a",
       amount: "10",
+      unchecked: "0x000000000000000000000000000000000000000b",
     });
   });
 

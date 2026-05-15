@@ -45,6 +45,19 @@ import { dtfQueryKeys } from "@/query-keys";
 
 export type IndexDtfList = Awaited<ReturnType<DtfSdk["index"]["list"]>>;
 
+type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
+  ? DtfSdk["index"][TKey]
+  : never;
+type IndexMethodParams<TKey extends keyof DtfSdk["index"]> = Parameters<IndexMethod<TKey>>[0];
+type IndexMethodResult<TKey extends keyof DtfSdk["index"]> = Awaited<ReturnType<IndexMethod<TKey>>>;
+
+export type IndexDtfPastOptimisticVotesQueryParams = Omit<
+  IndexMethodParams<"getPastOptimisticVotes">,
+  "timepoint"
+> & {
+  readonly timepoint: bigint;
+};
+
 export type DtfQueryOptions<TQueryFnData, TData = TQueryFnData> = Omit<
   UseQueryOptions<TQueryFnData, DefaultError, TData, QueryKey>,
   "enabled" | "queryFn" | "queryKey"
@@ -199,6 +212,220 @@ export function indexDtfProposalQueryOptions<TData = IndexDtfProposalDetail>(
   return createDtfQueryOptions(
     dtfQueryKeys.index.governance.proposal(params),
     () => sdk.index.getProposal(requireParams(params, "indexDtfProposalQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfProposalStateQueryOptions<TData = IndexMethodResult<"getProposalState">>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getProposalState"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getProposalState">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.proposalState(params),
+    () => sdk.index.getProposalState(requireParams(params, "indexDtfProposalStateQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfProposalStatesQueryOptions<TData = IndexMethodResult<"getProposalStates">>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getProposalStates"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getProposalStates">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.proposalStates(params),
+    () => sdk.index.getProposalStates(requireParams(params, "indexDtfProposalStatesQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfProposalEtaQueryOptions<TData = IndexMethodResult<"getProposalEta">>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getProposalEta"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getProposalEta">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.proposalEta(params),
+    () => sdk.index.getProposalEta(requireParams(params, "indexDtfProposalEtaQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfProposalDeadlineQueryOptions<TData = IndexMethodResult<"getProposalDeadline">>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getProposalDeadline"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getProposalDeadline">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.proposalDeadline(params),
+    () => sdk.index.getProposalDeadline(requireParams(params, "indexDtfProposalDeadlineQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfProposalSnapshotQueryOptions<TData = IndexMethodResult<"getProposalSnapshot">>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getProposalSnapshot"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getProposalSnapshot">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.proposalSnapshot(params),
+    () => sdk.index.getProposalSnapshot(requireParams(params, "indexDtfProposalSnapshotQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfProposalRpcDetailsQueryOptions<TData = IndexMethodResult<"getProposalRpcDetails">>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getProposalRpcDetails"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getProposalRpcDetails">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.proposalRpcDetails(params),
+    () => sdk.index.getProposalRpcDetails(requireParams(params, "indexDtfProposalRpcDetailsQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfOptimisticGovernanceQueryOptions<TData = IndexMethodResult<"getOptimisticGovernance">>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getOptimisticGovernance"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getOptimisticGovernance">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.optimisticGovernance(params),
+    () => sdk.index.getOptimisticGovernance(requireParams(params, "indexDtfOptimisticGovernanceQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfOptimisticProposalContextQueryOptions<
+  TData = IndexMethodResult<"getOptimisticProposalContext">,
+>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getOptimisticProposalContext"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getOptimisticProposalContext">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.optimisticProposalContext(params),
+    () =>
+      sdk.index.getOptimisticProposalContext(
+        requireParams(params, "indexDtfOptimisticProposalContextQueryOptions"),
+      ),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfOptimisticTimelockRolesQueryOptions<
+  TData = IndexMethodResult<"getOptimisticTimelockRoles">,
+>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getOptimisticTimelockRoles"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getOptimisticTimelockRoles">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.optimisticTimelockRoles(params),
+    () =>
+      sdk.index.getOptimisticTimelockRoles(requireParams(params, "indexDtfOptimisticTimelockRolesQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfOptimisticVotesQueryOptions<TData = IndexMethodResult<"getOptimisticVotes">>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getOptimisticVotes"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getOptimisticVotes">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.optimisticVotes(params),
+    () => sdk.index.getOptimisticVotes(requireParams(params, "indexDtfOptimisticVotesQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfPastOptimisticVotesQueryOptions<TData = IndexMethodResult<"getPastOptimisticVotes">>(
+  sdk: DtfSdk,
+  params: IndexDtfPastOptimisticVotesQueryParams | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getPastOptimisticVotes">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.pastOptimisticVotes(params),
+    () => sdk.index.getPastOptimisticVotes(requireParams(params, "indexDtfPastOptimisticVotesQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfProposalThrottleChargesQueryOptions<
+  TData = IndexMethodResult<"getProposalThrottleCharges">,
+>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getProposalThrottleCharges"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getProposalThrottleCharges">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.proposalThrottleCharges(params),
+    () => sdk.index.getProposalThrottleCharges(requireParams(params, "indexDtfProposalThrottleChargesQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfSelectorRegistryTargetsQueryOptions<
+  TData = IndexMethodResult<"getSelectorRegistryTargets">,
+>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getSelectorRegistryTargets"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getSelectorRegistryTargets">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.selectorRegistryTargets(params),
+    () => sdk.index.getSelectorRegistryTargets(requireParams(params, "indexDtfSelectorRegistryTargetsQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfSelectorRegistryAllowedSelectorsQueryOptions<
+  TData = IndexMethodResult<"getSelectorRegistryAllowedSelectors">,
+>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getSelectorRegistryAllowedSelectors"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getSelectorRegistryAllowedSelectors">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.selectorRegistryAllowedSelectors(params),
+    () =>
+      sdk.index.getSelectorRegistryAllowedSelectors(
+        requireParams(params, "indexDtfSelectorRegistryAllowedSelectorsQueryOptions"),
+      ),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfSelectorRegistryIsAllowedQueryOptions<
+  TData = IndexMethodResult<"getSelectorRegistryIsAllowed">,
+>(
+  sdk: DtfSdk,
+  params: IndexMethodParams<"getSelectorRegistryIsAllowed"> | undefined,
+  options?: DtfQueryOptions<IndexMethodResult<"getSelectorRegistryIsAllowed">, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.governance.selectorRegistryIsAllowed(params),
+    () => sdk.index.getSelectorRegistryIsAllowed(requireParams(params, "indexDtfSelectorRegistryIsAllowedQueryOptions")),
     params !== undefined,
     options,
   );

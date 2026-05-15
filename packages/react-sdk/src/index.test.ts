@@ -4,9 +4,48 @@ import * as reactSdk from "@/index";
 
 describe("React SDK public surface", () => {
   it("re-exports core prepare helpers without wallet-bound mutation hooks", () => {
+    const publicSurface = reactSdk as Record<string, unknown>;
+    const newQueryOptions = [
+      "indexDtfProposalStateQueryOptions",
+      "indexDtfProposalStatesQueryOptions",
+      "indexDtfProposalEtaQueryOptions",
+      "indexDtfProposalDeadlineQueryOptions",
+      "indexDtfProposalSnapshotQueryOptions",
+      "indexDtfProposalRpcDetailsQueryOptions",
+      "indexDtfOptimisticGovernanceQueryOptions",
+      "indexDtfOptimisticProposalContextQueryOptions",
+      "indexDtfOptimisticTimelockRolesQueryOptions",
+      "indexDtfOptimisticVotesQueryOptions",
+      "indexDtfPastOptimisticVotesQueryOptions",
+      "indexDtfProposalThrottleChargesQueryOptions",
+      "indexDtfSelectorRegistryTargetsQueryOptions",
+      "indexDtfSelectorRegistryAllowedSelectorsQueryOptions",
+      "indexDtfSelectorRegistryIsAllowedQueryOptions",
+    ];
+    const newHooks = [
+      "useIndexDtfProposalState",
+      "useIndexDtfProposalStates",
+      "useIndexDtfProposalEta",
+      "useIndexDtfProposalDeadline",
+      "useIndexDtfProposalSnapshot",
+      "useIndexDtfProposalRpcDetails",
+      "useIndexDtfOptimisticGovernance",
+      "useIndexDtfOptimisticProposalContext",
+      "useIndexDtfOptimisticTimelockRoles",
+      "useIndexDtfOptimisticVotes",
+      "useIndexDtfPastOptimisticVotes",
+      "useIndexDtfProposalThrottleCharges",
+      "useIndexDtfSelectorRegistryTargets",
+      "useIndexDtfSelectorRegistryAllowedSelectors",
+      "useIndexDtfSelectorRegistryIsAllowed",
+    ];
+
     expect(typeof reactSdk.prepareIndexDtfVote).toBe("function");
     expect(typeof reactSdk.prepareIndexDtfQueueProposal).toBe("function");
     expect(typeof reactSdk.createWalletClient).toBe("function");
+    for (const exportName of [...newQueryOptions, ...newHooks]) {
+      expect(typeof publicSurface[exportName]).toBe("function");
+    }
     expect("useIndexDtfVoteMutation" in reactSdk).toBe(false);
     expect("useIndexDtfDelegateMutation" in reactSdk).toBe(false);
   });

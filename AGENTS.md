@@ -27,6 +27,8 @@ Keep code boring and product-shaped.
 
 - Ref APIs should stay flat where possible: `ref.method()`, `ref.method(id)`, or `ref.method(options)` only when options are optional filters.
 - Namespace/direct APIs should use object params when they require multiple values like `{ address, chainId }`.
+- Keep `index-dtf/namespace.ts` and `index-dtf/ref.ts` as composition roots. When a domain surface grows, give that domain its own `reads.ts`, `builders.ts`, `namespace.ts`, and `ref.ts`, then spread the domain factory into the flat root API.
+- Do not add a generic binder abstraction for namespace/ref composition; explicit domain factories are easier to rewrite.
 
 ## Validation
 

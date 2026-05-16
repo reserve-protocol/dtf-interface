@@ -13,7 +13,7 @@ export type ReadVoteLockUnderlyingBalanceParams = {
   readonly account: Address;
 };
 
-export type ReadVoteLockAllowanceParams = ReadVoteLockUnderlyingBalanceParams & {
+export type ReadVoteLockUnderlyingAllowanceParams = ReadVoteLockUnderlyingBalanceParams & {
   readonly stToken: Address;
 };
 
@@ -75,7 +75,7 @@ export function readVoteLockUnderlyingBalance(client: DtfClient, params: ReadVot
   });
 }
 
-export function readVoteLockAllowance(client: DtfClient, params: ReadVoteLockAllowanceParams) {
+export function readVoteLockUnderlyingAllowance(client: DtfClient, params: ReadVoteLockUnderlyingAllowanceParams) {
   return client.viem.readContract({
     address: params.underlying,
     abi: erc20Abi,

@@ -6,16 +6,11 @@ import { dtfQueryKeys } from "@/query-keys";
 import {
   indexDtfOptimisticGovernanceQueryOptions,
   indexDtfOptimisticProposalContextQueryOptions,
+  indexDtfOptimisticProposalVoterStateQueryOptions,
   indexDtfOptimisticTimelockRolesQueryOptions,
   indexDtfOptimisticVotesQueryOptions,
   indexDtfPastOptimisticVotesQueryOptions,
-  indexDtfProposalDeadlineQueryOptions,
-  indexDtfProposalEtaQueryOptions,
   indexDtfProposalQueryOptions,
-  indexDtfProposalRpcDetailsQueryOptions,
-  indexDtfProposalSnapshotQueryOptions,
-  indexDtfProposalStateQueryOptions,
-  indexDtfProposalStatesQueryOptions,
   indexDtfProposalThrottleChargesQueryOptions,
   indexDtfQueryOptions,
   indexDtfSelectorRegistryAllowedSelectorsQueryOptions,
@@ -39,61 +34,13 @@ type QueryOptionCase = {
   readonly result: unknown;
 };
 
-const proposalStateParams = {
+const proposalParams = {
   chainId: 1,
   governance: GOVERNANCE,
   proposalId: 42n,
 } as const;
 
 const newReadQueryOptions: readonly QueryOptionCase[] = [
-  {
-    name: "proposal state",
-    method: "getProposalState",
-    build: indexDtfProposalStateQueryOptions,
-    key: dtfQueryKeys.index.governance.proposalState,
-    params: proposalStateParams,
-    result: "ACTIVE",
-  },
-  {
-    name: "proposal states",
-    method: "getProposalStates",
-    build: indexDtfProposalStatesQueryOptions,
-    key: dtfQueryKeys.index.governance.proposalStates,
-    params: { chainId: 1, governance: GOVERNANCE, proposalIds: [42n, "43"] },
-    result: ["ACTIVE", "QUEUED"],
-  },
-  {
-    name: "proposal eta",
-    method: "getProposalEta",
-    build: indexDtfProposalEtaQueryOptions,
-    key: dtfQueryKeys.index.governance.proposalEta,
-    params: proposalStateParams,
-    result: 10n,
-  },
-  {
-    name: "proposal deadline",
-    method: "getProposalDeadline",
-    build: indexDtfProposalDeadlineQueryOptions,
-    key: dtfQueryKeys.index.governance.proposalDeadline,
-    params: proposalStateParams,
-    result: 11n,
-  },
-  {
-    name: "proposal snapshot",
-    method: "getProposalSnapshot",
-    build: indexDtfProposalSnapshotQueryOptions,
-    key: dtfQueryKeys.index.governance.proposalSnapshot,
-    params: proposalStateParams,
-    result: 12n,
-  },
-  {
-    name: "proposal RPC details",
-    method: "getProposalRpcDetails",
-    build: indexDtfProposalRpcDetailsQueryOptions,
-    key: dtfQueryKeys.index.governance.proposalRpcDetails,
-    params: proposalStateParams,
-    result: { proposalId: "42", state: "ACTIVE", eta: 10n, deadline: 11n, snapshot: 12n },
-  },
   {
     name: "optimistic governance",
     method: "getOptimisticGovernance",
@@ -107,8 +54,34 @@ const newReadQueryOptions: readonly QueryOptionCase[] = [
     method: "getOptimisticProposalContext",
     build: indexDtfOptimisticProposalContextQueryOptions,
     key: dtfQueryKeys.index.governance.optimisticProposalContext,
-    params: proposalStateParams,
+    params: proposalParams,
     result: null,
+  },
+  {
+    name: "optimistic proposal voter state",
+    method: "getOptimisticProposalVoterState",
+    build: indexDtfOptimisticProposalVoterStateQueryOptions,
+    key: dtfQueryKeys.index.governance.optimisticProposalVoterState,
+    params: {
+      account: ACCOUNT,
+      chainId: 1,
+      governance: GOVERNANCE,
+      proposal: {
+        id: "42",
+        optimistic: {
+          proposalId: "42",
+          snapshot: 123n,
+          snapshotSupply: { raw: 1n, formatted: "1" },
+          vetoThreshold: 1n,
+          vetoThresholdVotes: { raw: 1n, formatted: "1" },
+          voteToken: VOTE_TOKEN,
+        },
+        voteStart: 100,
+        voteToken: VOTE_TOKEN,
+        votes: [],
+      },
+    },
+    result: { optimisticVotingPower: { raw: 2n, formatted: "2" } },
   },
   {
     name: "optimistic timelock roles",

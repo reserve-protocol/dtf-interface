@@ -2,21 +2,30 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { DtfClient } from "@/client";
 
-import { getProposalVoterState, getProposerState, getVoterState } from "@/index-dtf/governance/index";
+import {
+  getOptimisticProposalVoterState,
+  getProposalVoterState,
+  getProposerState,
+  getVoterState,
+} from "@/index-dtf/governance/index";
 
 describe("Index DTF governance voting", () => {
   it("reads current vote-lock voter state", async () => {
-    const readContract = vi
+    const multicall = vi
       .fn()
-      .mockResolvedValueOnce("0x0000000000000000000000000000000000000002")
-      .mockResolvedValueOnce(5000000000000000000n)
-      .mockResolvedValueOnce(3000000000000000000n)
-      .mockResolvedValueOnce(10000000000000000000n)
-      .mockResolvedValueOnce("0x0000000000000000000000000000000000000003")
-      .mockResolvedValueOnce(2000000000000000000n);
+      .mockResolvedValueOnce([
+        "0x0000000000000000000000000000000000000002",
+        5000000000000000000n,
+        3000000000000000000n,
+        10000000000000000000n,
+      ])
+      .mockResolvedValueOnce([
+        { status: "success", result: "0x0000000000000000000000000000000000000003" },
+        { status: "success", result: 2000000000000000000n },
+      ]);
     const client = {
       viem: {
-        readContract,
+        getPublicClient: vi.fn(() => ({ multicall })),
       },
     } as unknown as DtfClient;
 
@@ -26,7 +35,29 @@ describe("Index DTF governance voting", () => {
       account: "0x0000000000000000000000000000000000000002",
     });
 
-    expect(readContract).toHaveBeenCalledTimes(6);
+    expect(multicall).toHaveBeenCalledTimes(2);
+    expect(multicall).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        allowFailure: false,
+        contracts: expect.arrayContaining([
+          expect.objectContaining({ functionName: "delegates" }),
+          expect.objectContaining({ functionName: "balanceOf" }),
+          expect.objectContaining({ functionName: "getVotes" }),
+          expect.objectContaining({ functionName: "totalSupply" }),
+        ]),
+      }),
+    );
+    expect(multicall).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        allowFailure: true,
+        contracts: expect.arrayContaining([
+          expect.objectContaining({ functionName: "optimisticDelegates" }),
+          expect.objectContaining({ functionName: "getOptimisticVotes" }),
+        ]),
+      }),
+    );
     expect(state).toMatchObject({
       account: "0x0000000000000000000000000000000000000002",
       delegate: "0x0000000000000000000000000000000000000002",
@@ -44,14 +75,10 @@ describe("Index DTF governance voting", () => {
 
   it("reads proposer state at the latest block timepoint", async () => {
     const getBlock = vi.fn(async () => ({ timestamp: 1_000n }));
-    const readContract = vi
-      .fn()
-      .mockResolvedValueOnce(5000000000000000000n)
-      .mockResolvedValueOnce(3000000000000000000n);
+    const multicall = vi.fn(async () => [5000000000000000000n, 3000000000000000000n]);
     const client = {
       viem: {
-        getPublicClient: vi.fn(() => ({ getBlock })),
-        readContract,
+        getPublicClient: vi.fn(() => ({ getBlock, multicall })),
       },
     } as unknown as DtfClient;
 
@@ -62,11 +89,15 @@ describe("Index DTF governance voting", () => {
     });
 
     expect(getBlock).toHaveBeenCalledOnce();
-    expect(readContract).toHaveBeenNthCalledWith(
-      1,
+    expect(multicall).toHaveBeenCalledWith(
       expect.objectContaining({
-        functionName: "getVotes",
-        args: ["0x0000000000000000000000000000000000000002", 999n],
+        contracts: expect.arrayContaining([
+          expect.objectContaining({
+            functionName: "getVotes",
+            args: ["0x0000000000000000000000000000000000000002", 999n],
+          }),
+          expect.objectContaining({ functionName: "proposalThreshold" }),
+        ]),
       }),
     );
     expect(state).toMatchObject({
@@ -122,10 +153,7 @@ describe("Index DTF governance voting", () => {
 
   it("reads optimistic proposal voter state from the vote token snapshot", async () => {
     const getBlock = vi.fn(async () => ({ timestamp: 1_000_000_000n }));
-    const readContract = vi
-      .fn()
-      .mockResolvedValueOnce(4000000000000000000n)
-      .mockResolvedValueOnce(2000000000000000000n);
+    const readContract = vi.fn(async () => 2000000000000000000n);
     const client = {
       viem: {
         getPublicClient: vi.fn(() => ({ getBlock })),
@@ -133,13 +161,12 @@ describe("Index DTF governance voting", () => {
       },
     } as unknown as DtfClient;
 
-    const state = await getProposalVoterState(client, {
+    const state = await getOptimisticProposalVoterState(client, {
       chainId: 1,
       governance: "0x0000000000000000000000000000000000000001",
       account: "0x0000000000000000000000000000000000000002",
       proposal: {
         id: "1",
-        isOptimistic: true,
         optimistic: {
           proposalId: "1",
           voteToken: "0x0000000000000000000000000000000000000003",
@@ -154,15 +181,13 @@ describe("Index DTF governance voting", () => {
       },
     });
 
-    expect(readContract).toHaveBeenNthCalledWith(
-      2,
+    expect(readContract).toHaveBeenCalledWith(
       expect.objectContaining({
         functionName: "getPastOptimisticVotes",
         args: ["0x0000000000000000000000000000000000000002", 999800n],
       }),
     );
     expect(state).toMatchObject({
-      votingPower: { raw: 4000000000000000000n, formatted: "4" },
       optimisticVotingPower: { raw: 2000000000000000000n, formatted: "2" },
       hasOptimisticVotingPower: true,
     });

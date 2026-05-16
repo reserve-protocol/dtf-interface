@@ -12,14 +12,21 @@ import { getVoteState } from "@/index-dtf/governance/utils";
 
 describe("Index DTF optimistic governance", () => {
   it("reads optimistic proposal veto context", async () => {
+    const multicall = vi.fn(async () => [
+      200000000000000000n,
+      100n,
+      "0x0000000000000000000000000000000000000002",
+    ]);
     const readContract = vi
       .fn()
       .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(200000000000000000n)
-      .mockResolvedValueOnce(100n)
-      .mockResolvedValueOnce("0x0000000000000000000000000000000000000002")
       .mockResolvedValueOnce(100000000000000000000n);
-    const client = { viem: { readContract } } as unknown as DtfClient;
+    const client = {
+      viem: {
+        getPublicClient: vi.fn(() => ({ multicall })),
+        readContract,
+      },
+    } as unknown as DtfClient;
 
     const context = await getOptimisticProposalContext(client, {
       chainId: 1,
@@ -46,6 +53,16 @@ describe("Index DTF optimistic governance", () => {
       expect.objectContaining({
         functionName: "isOptimistic",
         args: [42n],
+      }),
+    );
+    expect(multicall).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allowFailure: false,
+        contracts: expect.arrayContaining([
+          expect.objectContaining({ functionName: "vetoThreshold" }),
+          expect.objectContaining({ functionName: "proposalSnapshot" }),
+          expect.objectContaining({ functionName: "token" }),
+        ]),
       }),
     );
   });
@@ -151,19 +168,26 @@ describe("Index DTF optimistic governance", () => {
   });
 
   it("reads optimistic governance settings", async () => {
-    const readContract = vi
+    const multicall = vi
       .fn()
-      .mockResolvedValueOnce(3600n)
-      .mockResolvedValueOnce(2n)
-      .mockResolvedValueOnce([10n, 20n, 300000000000000000n])
-      .mockResolvedValueOnce("0x0000000000000000000000000000000000000003")
-      .mockResolvedValueOnce("0x0000000000000000000000000000000000000002")
-      .mockResolvedValueOnce("0x0000000000000000000000000000000000000004")
-      .mockResolvedValueOnce(1n)
-      .mockResolvedValueOnce(1n)
-      .mockResolvedValueOnce("0x0000000000000000000000000000000000000005")
-      .mockResolvedValueOnce("0x0000000000000000000000000000000000000006");
-    const client = { viem: { readContract } } as unknown as DtfClient;
+      .mockResolvedValueOnce([
+        3600n,
+        2n,
+        [10n, 20n, 300000000000000000n],
+        "0x0000000000000000000000000000000000000003",
+        "0x0000000000000000000000000000000000000002",
+        "0x0000000000000000000000000000000000000004",
+      ])
+      .mockResolvedValueOnce([1n, 1n])
+      .mockResolvedValueOnce([
+        "0x0000000000000000000000000000000000000005",
+        "0x0000000000000000000000000000000000000006",
+      ]);
+    const client = {
+      viem: {
+        getPublicClient: vi.fn(() => ({ multicall })),
+      },
+    } as unknown as DtfClient;
 
     const governance = await getOptimisticGovernance(client, {
       chainId: 8453,
@@ -185,6 +209,21 @@ describe("Index DTF optimistic governance", () => {
       optimisticProposers: ["0x0000000000000000000000000000000000000005"],
       guardians: ["0x0000000000000000000000000000000000000006"],
     });
+    expect(multicall).toHaveBeenCalledTimes(3);
+    expect(multicall).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        allowFailure: false,
+        contracts: expect.arrayContaining([
+          expect.objectContaining({ functionName: "lateQuorumVoteExtension" }),
+          expect.objectContaining({ functionName: "proposalThrottleCapacity" }),
+          expect.objectContaining({ functionName: "optimisticParams" }),
+          expect.objectContaining({ functionName: "selectorRegistry" }),
+          expect.objectContaining({ functionName: "token" }),
+          expect.objectContaining({ functionName: "timelock" }),
+        ]),
+      }),
+    );
   });
 
   it("reads current and past optimistic voting power from the vote token", async () => {

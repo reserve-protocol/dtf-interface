@@ -126,14 +126,22 @@ smokeDescribe("Index DTF live smoke", () => {
           chainId: BASE_CHAIN_ID,
           proposalId: proposals[0]!.id,
         });
+        const voterStateRead = detail.isOptimistic
+          ? sdk.index.getOptimisticProposalVoterState({
+              chainId: BASE_CHAIN_ID,
+              governance: detail.governance,
+              account: SMOKE_ACCOUNT,
+              proposal: detail,
+            })
+          : sdk.index.getProposalVoterState({
+              chainId: BASE_CHAIN_ID,
+              governance: detail.governance,
+              account: SMOKE_ACCOUNT,
+              proposal: detail,
+            });
         const [proposalVotes, proposalVoterState] = await Promise.all([
           sdk.index.getProposalVotes({ chainId: BASE_CHAIN_ID, governance: detail.governance, proposalId: detail.id }),
-          sdk.index.getProposalVoterState({
-            chainId: BASE_CHAIN_ID,
-            governance: detail.governance,
-            account: SMOKE_ACCOUNT,
-            proposal: detail,
-          }),
+          voterStateRead,
         ]);
 
         expect(detail.targets.length).toBe(detail.calldatas.length);

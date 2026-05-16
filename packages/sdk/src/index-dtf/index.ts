@@ -112,12 +112,6 @@ export {
 export {
   getAllProposals as getAllIndexDtfProposals,
   getProposal as getIndexDtfProposal,
-  getProposalDeadline as getIndexDtfProposalDeadline,
-  getProposalEta as getIndexDtfProposalEta,
-  getProposalRpcDetails as getIndexDtfProposalRpcDetails,
-  getProposalSnapshot as getIndexDtfProposalSnapshot,
-  getProposalState as getIndexDtfProposalState,
-  getProposalStates as getIndexDtfProposalStates,
   getProposals as getIndexDtfProposals,
 } from "@/index-dtf/governance/proposals";
 export {
@@ -166,6 +160,7 @@ export {
 } from "@/index-dtf/governance/propose/calls";
 export { getProposalGovernanceAddresses as getIndexDtfProposalGovernanceAddresses } from "@/index-dtf/governance/utils";
 export {
+  getOptimisticProposalVoterState as getIndexDtfOptimisticProposalVoterState,
   getProposalVoterState as getIndexDtfProposalVoterState,
   getProposalVotes as getIndexDtfProposalVotes,
   getProposerState as getIndexDtfProposerState,

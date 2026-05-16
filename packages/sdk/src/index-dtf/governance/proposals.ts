@@ -4,18 +4,14 @@ import type { DtfClient } from "@/client";
 import type { DtfParams } from "@/types/common";
 import type {
   GetAllIndexDtfProposalsParams,
-  GetIndexDtfProposalStateParams,
-  GetIndexDtfProposalStatesParams,
   GetIndexDtfProposalParams,
   GetIndexDtfProposalsParams,
-  IndexDtfProposalRpcDetails,
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
   ProposalState,
 } from "@/types/governance";
 
 import { SdkError } from "@/lib/errors";
-import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { DEFAULT_PROPOSAL_LIMIT } from "@/index-dtf/governance/constants";
 import { buildProposalContractMap } from "@/index-dtf/governance/contract-map";
 import { decodeIndexDtfProposalCalldatas } from "@/index-dtf/governance/decoder";
@@ -44,18 +40,6 @@ import {
   type Proposal_Filter,
 } from "@/index-dtf/subgraph/dtf.generated";
 import { getCurrentTime } from "@/lib/utils";
-
-const PROPOSAL_STATE_BY_ID = [
-  "PENDING",
-  "ACTIVE",
-  "CANCELED",
-  "DEFEATED",
-  "SUCCEEDED",
-  "QUEUED",
-  "EXPIRED",
-  "EXECUTED",
-  "VETOED",
-] as const satisfies readonly ProposalState[];
 
 export async function getProposals(
   client: DtfClient,
@@ -129,91 +113,6 @@ export async function getAllProposals(
     ),
     params.includeOptimisticState ?? false,
   );
-}
-
-export async function getProposalState(
-  client: DtfClient,
-  params: GetIndexDtfProposalStateParams,
-): Promise<ProposalState> {
-  const state = await client.viem.readContract({
-    chainId: params.chainId,
-    address: getAddress(params.governance),
-    abi: dtfIndexGovernanceAbi,
-    functionName: "state",
-    args: [BigInt(params.proposalId)],
-  });
-
-  return mapProposalState(state);
-}
-
-export async function getProposalStates(
-  client: DtfClient,
-  params: GetIndexDtfProposalStatesParams,
-): Promise<readonly ProposalState[]> {
-  return Promise.all(
-    params.proposalIds.map((proposalId) =>
-      getProposalState(client, { ...params, proposalId }),
-    ),
-  );
-}
-
-export async function getProposalEta(
-  client: DtfClient,
-  params: GetIndexDtfProposalStateParams,
-): Promise<bigint> {
-  return client.viem.readContract({
-    chainId: params.chainId,
-    address: getAddress(params.governance),
-    abi: dtfIndexGovernanceAbi,
-    functionName: "proposalEta",
-    args: [BigInt(params.proposalId)],
-  });
-}
-
-export async function getProposalDeadline(
-  client: DtfClient,
-  params: GetIndexDtfProposalStateParams,
-): Promise<bigint> {
-  return client.viem.readContract({
-    chainId: params.chainId,
-    address: getAddress(params.governance),
-    abi: dtfIndexGovernanceAbi,
-    functionName: "proposalDeadline",
-    args: [BigInt(params.proposalId)],
-  });
-}
-
-export async function getProposalSnapshot(
-  client: DtfClient,
-  params: GetIndexDtfProposalStateParams,
-): Promise<bigint> {
-  return client.viem.readContract({
-    chainId: params.chainId,
-    address: getAddress(params.governance),
-    abi: dtfIndexGovernanceAbi,
-    functionName: "proposalSnapshot",
-    args: [BigInt(params.proposalId)],
-  });
-}
-
-export async function getProposalRpcDetails(
-  client: DtfClient,
-  params: GetIndexDtfProposalStateParams,
-): Promise<IndexDtfProposalRpcDetails> {
-  const [state, eta, deadline, snapshot] = await Promise.all([
-    getProposalState(client, params),
-    getProposalEta(client, params),
-    getProposalDeadline(client, params),
-    getProposalSnapshot(client, params),
-  ]);
-
-  return {
-    proposalId: String(params.proposalId),
-    state,
-    eta,
-    deadline,
-    snapshot,
-  };
 }
 
 export async function getProposal(
@@ -362,20 +261,6 @@ function getProposalFilter(
   const stateFilter = [...states] as NonNullable<Proposal_Filter["state_in"]>;
 
   return { state_in: stateFilter };
-}
-
-function mapProposalState(state: number | bigint): ProposalState {
-  const mappedState = PROPOSAL_STATE_BY_ID[Number(state)];
-
-  if (!mappedState) {
-    throw new SdkError({
-      code: "INVALID_RESPONSE",
-      message: `Unknown proposal state id: ${state}`,
-      meta: { state },
-    });
-  }
-
-  return mappedState;
 }
 
 async function fetchDtfProposalGovernanceIds(client: DtfClient, params: DtfParams): Promise<readonly string[]> {

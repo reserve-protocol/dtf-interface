@@ -47,26 +47,6 @@ export type GetIndexDtfProposalParams = {
   readonly proposalId: string;
 } & DtfParams;
 
-export type GetIndexDtfProposalStateParams = {
-  readonly chainId: SupportedChainId;
-  readonly governance: Address;
-  readonly proposalId: string | bigint;
-};
-
-export type GetIndexDtfProposalStatesParams = {
-  readonly chainId: SupportedChainId;
-  readonly governance: Address;
-  readonly proposalIds: readonly (string | bigint)[];
-};
-
-export type IndexDtfProposalRpcDetails = {
-  readonly proposalId: string;
-  readonly state: ProposalState;
-  readonly eta: bigint;
-  readonly deadline: bigint;
-  readonly snapshot: bigint;
-};
-
 export type GetIndexDtfDelegatesParams = {
   readonly chainId: SupportedChainId;
   readonly stToken: Address;
@@ -137,7 +117,17 @@ export type GetIndexDtfProposalVoterStateParams = {
   readonly account: Address;
   readonly proposal: Pick<
     IndexDtfProposalDetail,
-    "id" | "isOptimistic" | "optimistic" | "voteStart" | "voteToken" | "votes"
+    "id" | "voteStart" | "votes"
+  >;
+};
+
+export type GetIndexDtfOptimisticProposalVoterStateParams = {
+  readonly chainId: SupportedChainId;
+  readonly governance: Address;
+  readonly account: Address;
+  readonly proposal: Pick<
+    IndexDtfProposalDetail,
+    "id" | "optimistic" | "voteStart" | "voteToken" | "votes"
   >;
 };
 
@@ -152,7 +142,7 @@ export type ProposalState =
   | "EXECUTED"
   | "VETOED"
   | "QUORUM_NOT_REACHED"
-  | string;
+  | (string & {});
 
 export type ProposalVotingState = {
   readonly state: ProposalState;
@@ -341,10 +331,16 @@ export type IndexDtfProposalVotes = {
 export type IndexDtfProposalVoterState = {
   readonly account: Address;
   readonly votingPower: Amount;
-  readonly optimisticVotingPower: Amount | null;
   readonly vote: string | null;
   readonly hasVoted: boolean;
   readonly hasVotingPower: boolean;
+};
+
+export type IndexDtfOptimisticProposalVoterState = {
+  readonly account: Address;
+  readonly optimisticVotingPower: Amount | null;
+  readonly vote: string | null;
+  readonly hasVoted: boolean;
   readonly hasOptimisticVotingPower: boolean;
 };
 

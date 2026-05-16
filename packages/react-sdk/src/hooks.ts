@@ -16,6 +16,7 @@ import type {
   GetIndexDtfParams,
   GetIndexDtfPriceHistoryParams,
   GetIndexDtfPriceParams,
+  GetIndexDtfOptimisticProposalVoterStateParams,
   GetIndexDtfProposalParams,
   GetIndexDtfProposalVoterStateParams,
   GetIndexDtfProposalVotesParams,
@@ -29,6 +30,7 @@ import type {
   IndexDtfGuardians,
   IndexDtfPrice,
   IndexDtfPricePoint,
+  IndexDtfOptimisticProposalVoterState,
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
   IndexDtfProposalVoterState,
@@ -55,18 +57,13 @@ import {
   indexDtfListQueryOptions,
   indexDtfOptimisticGovernanceQueryOptions,
   indexDtfOptimisticProposalContextQueryOptions,
+  indexDtfOptimisticProposalVoterStateQueryOptions,
   indexDtfOptimisticTimelockRolesQueryOptions,
   indexDtfOptimisticVotesQueryOptions,
   indexDtfPastOptimisticVotesQueryOptions,
   indexDtfPriceHistoryQueryOptions,
   indexDtfPriceQueryOptions,
-  indexDtfProposalDeadlineQueryOptions,
-  indexDtfProposalEtaQueryOptions,
   indexDtfProposalQueryOptions,
-  indexDtfProposalRpcDetailsQueryOptions,
-  indexDtfProposalSnapshotQueryOptions,
-  indexDtfProposalStateQueryOptions,
-  indexDtfProposalStatesQueryOptions,
   indexDtfProposalThrottleChargesQueryOptions,
   indexDtfProposalVoterStateQueryOptions,
   indexDtfProposalVotesQueryOptions,
@@ -176,60 +173,6 @@ export function useIndexDtfProposal<TData = IndexDtfProposalDetail>(
   const sdk = useDtfSdk();
 
   return useQuery(indexDtfProposalQueryOptions(sdk, params, options));
-}
-
-export function useIndexDtfProposalState<TData = IndexMethodResult<"getProposalState">>(
-  params: IndexMethodParams<"getProposalState"> | undefined,
-  options?: DtfQueryOptions<IndexMethodResult<"getProposalState">, TData>,
-) {
-  const sdk = useDtfSdk();
-
-  return useQuery(indexDtfProposalStateQueryOptions(sdk, params, options));
-}
-
-export function useIndexDtfProposalStates<TData = IndexMethodResult<"getProposalStates">>(
-  params: IndexMethodParams<"getProposalStates"> | undefined,
-  options?: DtfQueryOptions<IndexMethodResult<"getProposalStates">, TData>,
-) {
-  const sdk = useDtfSdk();
-
-  return useQuery(indexDtfProposalStatesQueryOptions(sdk, params, options));
-}
-
-export function useIndexDtfProposalEta<TData = IndexMethodResult<"getProposalEta">>(
-  params: IndexMethodParams<"getProposalEta"> | undefined,
-  options?: DtfQueryOptions<IndexMethodResult<"getProposalEta">, TData>,
-) {
-  const sdk = useDtfSdk();
-
-  return useQuery(indexDtfProposalEtaQueryOptions(sdk, params, options));
-}
-
-export function useIndexDtfProposalDeadline<TData = IndexMethodResult<"getProposalDeadline">>(
-  params: IndexMethodParams<"getProposalDeadline"> | undefined,
-  options?: DtfQueryOptions<IndexMethodResult<"getProposalDeadline">, TData>,
-) {
-  const sdk = useDtfSdk();
-
-  return useQuery(indexDtfProposalDeadlineQueryOptions(sdk, params, options));
-}
-
-export function useIndexDtfProposalSnapshot<TData = IndexMethodResult<"getProposalSnapshot">>(
-  params: IndexMethodParams<"getProposalSnapshot"> | undefined,
-  options?: DtfQueryOptions<IndexMethodResult<"getProposalSnapshot">, TData>,
-) {
-  const sdk = useDtfSdk();
-
-  return useQuery(indexDtfProposalSnapshotQueryOptions(sdk, params, options));
-}
-
-export function useIndexDtfProposalRpcDetails<TData = IndexMethodResult<"getProposalRpcDetails">>(
-  params: IndexMethodParams<"getProposalRpcDetails"> | undefined,
-  options?: DtfQueryOptions<IndexMethodResult<"getProposalRpcDetails">, TData>,
-) {
-  const sdk = useDtfSdk();
-
-  return useQuery(indexDtfProposalRpcDetailsQueryOptions(sdk, params, options));
 }
 
 export function useIndexDtfOptimisticGovernance<TData = IndexMethodResult<"getOptimisticGovernance">>(
@@ -403,4 +346,13 @@ export function useIndexDtfProposalVoterState<TData = IndexDtfProposalVoterState
   const sdk = useDtfSdk();
 
   return useQuery(indexDtfProposalVoterStateQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfOptimisticProposalVoterState<TData = IndexDtfOptimisticProposalVoterState>(
+  params: GetIndexDtfOptimisticProposalVoterStateParams | undefined,
+  options?: DtfQueryOptions<IndexDtfOptimisticProposalVoterState, TData>,
+) {
+  const sdk = useDtfSdk();
+
+  return useQuery(indexDtfOptimisticProposalVoterStateQueryOptions(sdk, params, options));
 }

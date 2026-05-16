@@ -7,8 +7,6 @@ import { dtfIndexProposalAbi } from "@/index-dtf/abis/proposal-decoder";
 import {
   getAllProposals,
   getProposal,
-  getProposalRpcDetails,
-  getProposalState,
   getProposals,
 } from "@/index-dtf/governance/index";
 
@@ -490,53 +488,6 @@ describe("Index DTF governance proposals", () => {
     });
   });
 
-  it("reads proposal state directly from the governor", async () => {
-    const readContract = vi.fn(async () => 5);
-    const client = {
-      viem: { readContract },
-    } as unknown as DtfClient;
-
-    await expect(
-      getProposalState(client, {
-        chainId: 1,
-        governance: "0x0000000000000000000000000000000000000001",
-        proposalId: "42",
-      }),
-    ).resolves.toBe("QUEUED");
-    expect(readContract).toHaveBeenCalledWith(
-      expect.objectContaining({
-        functionName: "state",
-        args: [42n],
-      }),
-    );
-  });
-
-  it("combines proposal RPC timing details for source-of-truth checks", async () => {
-    const readContract = vi
-      .fn()
-      .mockResolvedValueOnce(1)
-      .mockResolvedValueOnce(1_000_100n)
-      .mockResolvedValueOnce(1_000_200n)
-      .mockResolvedValueOnce(999_900n);
-    const client = {
-      viem: { readContract },
-    } as unknown as DtfClient;
-
-    const details = await getProposalRpcDetails(client, {
-      chainId: 8453,
-      governance: "0x0000000000000000000000000000000000000001",
-      proposalId: 7n,
-    });
-
-    expect(details).toEqual({
-      proposalId: "7",
-      state: "ACTIVE",
-      eta: 1_000_100n,
-      deadline: 1_000_200n,
-      snapshot: 999_900n,
-    });
-    expect(readContract).toHaveBeenCalledTimes(4);
-  });
 });
 
 function createProposalSummary({

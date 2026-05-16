@@ -120,22 +120,54 @@ describe("dtfQueryKeys", () => {
     ]);
   });
 
-  it("normalizes proposal RPC state keys", () => {
-    const key = dtfQueryKeys.index.governance.proposalRpcDetails({
+  it("keys optimistic proposal voter state by snapshot, token, and account vote", () => {
+    const key = dtfQueryKeys.index.governance.optimisticProposalVoterState({
+      account: "0x000000000000000000000000000000000000000A",
       chainId: 1,
-      governance: "0x000000000000000000000000000000000000000A",
-      proposalId: 42n,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposal: {
+        id: "42",
+        optimistic: {
+          proposalId: "42",
+          snapshot: 123n,
+          snapshotSupply: { raw: 1n, formatted: "1" },
+          vetoThreshold: 1n,
+          vetoThresholdVotes: { raw: 1n, formatted: "1" },
+          voteToken: "0x000000000000000000000000000000000000000B",
+        },
+        voteStart: 100,
+        voteToken: "0x000000000000000000000000000000000000000B",
+        votes: [
+          {
+            voter: "0x000000000000000000000000000000000000000C",
+            choice: "FOR",
+            weight: { raw: 1n, formatted: "1" },
+          },
+          {
+            voter: "0x000000000000000000000000000000000000000A",
+            choice: "AGAINST",
+            weight: { raw: 2n, formatted: "2" },
+          },
+        ],
+      },
     });
 
     expect(key).toEqual([
       "dtf",
       "index",
       "governance",
-      "proposal-rpc-details",
+      "optimistic-proposal-voter-state",
       {
+        account: "0x000000000000000000000000000000000000000a",
         chainId: 1,
-        governance: "0x000000000000000000000000000000000000000a",
-        proposalId: "42",
+        governance: "0x0000000000000000000000000000000000000001",
+        proposal: {
+          id: "42",
+          optimisticSnapshot: "123",
+          vote: "AGAINST",
+          voteStart: 100,
+          voteToken: "0x000000000000000000000000000000000000000b",
+        },
       },
     ]);
   });

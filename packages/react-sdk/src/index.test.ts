@@ -6,14 +6,9 @@ describe("React SDK public surface", () => {
   it("re-exports core prepare helpers without wallet-bound mutation hooks", () => {
     const publicSurface = reactSdk as Record<string, unknown>;
     const newQueryOptions = [
-      "indexDtfProposalStateQueryOptions",
-      "indexDtfProposalStatesQueryOptions",
-      "indexDtfProposalEtaQueryOptions",
-      "indexDtfProposalDeadlineQueryOptions",
-      "indexDtfProposalSnapshotQueryOptions",
-      "indexDtfProposalRpcDetailsQueryOptions",
       "indexDtfOptimisticGovernanceQueryOptions",
       "indexDtfOptimisticProposalContextQueryOptions",
+      "indexDtfOptimisticProposalVoterStateQueryOptions",
       "indexDtfOptimisticTimelockRolesQueryOptions",
       "indexDtfOptimisticVotesQueryOptions",
       "indexDtfPastOptimisticVotesQueryOptions",
@@ -23,14 +18,9 @@ describe("React SDK public surface", () => {
       "indexDtfSelectorRegistryIsAllowedQueryOptions",
     ];
     const newHooks = [
-      "useIndexDtfProposalState",
-      "useIndexDtfProposalStates",
-      "useIndexDtfProposalEta",
-      "useIndexDtfProposalDeadline",
-      "useIndexDtfProposalSnapshot",
-      "useIndexDtfProposalRpcDetails",
       "useIndexDtfOptimisticGovernance",
       "useIndexDtfOptimisticProposalContext",
+      "useIndexDtfOptimisticProposalVoterState",
       "useIndexDtfOptimisticTimelockRoles",
       "useIndexDtfOptimisticVotes",
       "useIndexDtfPastOptimisticVotes",

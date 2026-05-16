@@ -1,12 +1,15 @@
-import { getAddress } from "viem";
+import { getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
 import type {
+  GetIndexDtfOptimisticProposalVoterStateParams,
   GetIndexDtfProposalVoterStateParams,
   GetIndexDtfProposalVotesParams,
   GetIndexDtfProposerStateParams,
   GetIndexDtfVoterStateParams,
+  IndexDtfOptimisticProposalVoterState,
   IndexDtfProposalVoterState,
+  IndexDtfProposalVote,
   IndexDtfProposalVotes,
   IndexDtfProposerState,
   IndexDtfVoterState,
@@ -20,6 +23,15 @@ import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-st
 import { isUnsupportedVoteLockOptimisticReadError } from "@/index-dtf/governance/optimistic-errors";
 import { mapAmount } from "@/lib/utils";
 
+type VotingMulticallResult<T> =
+  | { readonly status: "success"; readonly result: T }
+  | { readonly status: "failure"; readonly error: Error };
+
+type OptionalOptimisticVoterStateResults = readonly [
+  VotingMulticallResult<Address>,
+  VotingMulticallResult<bigint>,
+];
+
 export async function getVoterState(
   client: DtfClient,
   params: GetIndexDtfVoterStateParams,
@@ -27,40 +39,53 @@ export async function getVoterState(
   const stToken = getAddress(params.stToken);
   const account = getAddress(params.account);
   const baseCall = {
-    chainId: params.chainId,
     address: stToken,
     abi: dtfIndexStakingVaultAbi,
   } as const;
-  const [
-    delegate,
-    balance,
-    votingPower,
-    voteSupply,
-    optimisticDelegate,
-    optimisticVotingPower,
-  ] = await Promise.all([
-    client.viem.readContract({
-      ...baseCall,
-      functionName: "delegates",
-      args: [account],
-    }),
-    client.viem.readContract({
-      ...baseCall,
-      functionName: "balanceOf",
-      args: [account],
-    }),
-    client.viem.readContract({
-      ...baseCall,
-      functionName: "getVotes",
-      args: [account],
-    }),
-    client.viem.readContract({
-      ...baseCall,
-      functionName: "totalSupply",
-    }),
-    readOptimisticDelegate(client, params.chainId, stToken, account),
-    readVoteLockOptimisticVotes(client, params.chainId, stToken, account),
-  ]);
+  const publicClient = client.viem.getPublicClient(params.chainId);
+  const [delegate, balance, votingPower, voteSupply] = (await publicClient.multicall({
+    allowFailure: false,
+    contracts: [
+      {
+        ...baseCall,
+        functionName: "delegates",
+        args: [account],
+      },
+      {
+        ...baseCall,
+        functionName: "balanceOf",
+        args: [account],
+      },
+      {
+        ...baseCall,
+        functionName: "getVotes",
+        args: [account],
+      },
+      {
+        ...baseCall,
+        functionName: "totalSupply",
+      },
+    ],
+  })) as readonly [Address, bigint, bigint, bigint];
+  const [optimisticDelegateResult, optimisticVotingPowerResult] = (await publicClient.multicall({
+    allowFailure: true,
+    contracts: [
+      {
+        address: stToken,
+        abi: dtfIndexStakingVaultOptimisticAbi,
+        functionName: "optimisticDelegates",
+        args: [account],
+      },
+      {
+        address: stToken,
+        abi: dtfIndexStakingVaultOptimisticAbi,
+        functionName: "getOptimisticVotes",
+        args: [account],
+      },
+    ],
+  })) as OptionalOptimisticVoterStateResults;
+  const optimisticDelegate = getOptionalOptimisticResult(optimisticDelegateResult);
+  const optimisticVotingPower = getOptionalOptimisticResult(optimisticVotingPowerResult);
   const mappedOptimisticVotingPower =
     optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower);
 
@@ -88,21 +113,25 @@ export async function getProposerState(
   const account = getAddress(params.account);
   const timepoint = params.timepoint ?? (await getLatestBlockTimepoint(client.viem, params.chainId));
   const baseCall = {
-    chainId: params.chainId,
     address: governance,
     abi: dtfIndexGovernanceAbi,
   } as const;
-  const [votingPower, proposalThreshold] = await Promise.all([
-    client.viem.readContract({
-      ...baseCall,
-      functionName: "getVotes",
-      args: [account, timepoint],
-    }),
-    client.viem.readContract({
-      ...baseCall,
-      functionName: "proposalThreshold",
-    }),
-  ]);
+  const [votingPower, proposalThreshold] = (await client.viem
+    .getPublicClient(params.chainId)
+    .multicall({
+      allowFailure: false,
+      contracts: [
+        {
+          ...baseCall,
+          functionName: "getVotes",
+          args: [account, timepoint],
+        },
+        {
+          ...baseCall,
+          functionName: "proposalThreshold",
+        },
+      ],
+    })) as readonly [bigint, bigint];
 
   return {
     account,
@@ -152,91 +181,54 @@ export async function getProposalVoterState(
     functionName: "getVotes",
     args: [account, timepoint],
   });
-  const optimisticVotingPower = params.proposal.isOptimistic
-    ? await readPastOptimisticVotes(
-        client,
-        params.chainId,
-        await getProposalVoteToken(
-          client,
-          params.chainId,
-          governance,
-          params.proposal.voteToken,
-        ),
-        account,
-        getOptimisticProposalTimepoint(latestTimepoint, params.proposal),
-      )
-    : null;
-  const mappedOptimisticVotingPower =
-    optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower);
-  const vote =
-    params.proposal.votes.find(
-      (proposalVote) => getAddress(proposalVote.voter) === account,
-    )?.choice ?? null;
+  const vote = getAccountProposalVote(params.proposal.votes, account);
 
   return {
     account,
     votingPower: mapAmount(votingPower),
-    optimisticVotingPower: mappedOptimisticVotingPower,
     vote,
     hasVoted: vote !== null,
     hasVotingPower: votingPower > 0n,
+  };
+}
+
+export async function getOptimisticProposalVoterState(
+  client: DtfClient,
+  params: GetIndexDtfOptimisticProposalVoterStateParams,
+): Promise<IndexDtfOptimisticProposalVoterState> {
+  const account = getAddress(params.account);
+  const latestTimepoint = await getLatestBlockTimepoint(
+    client.viem,
+    params.chainId,
+  );
+  const governance = getAddress(params.governance);
+  const optimisticVotingPower = await readPastOptimisticVotes(
+    client,
+    params.chainId,
+    await getProposalVoteToken(
+      client,
+      params.chainId,
+      governance,
+      params.proposal.voteToken,
+    ),
+    account,
+    getOptimisticProposalTimepoint(latestTimepoint, params.proposal),
+  );
+  const vote = getAccountProposalVote(params.proposal.votes, account);
+
+  return {
+    account,
+    optimisticVotingPower:
+      optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower),
+    vote,
+    hasVoted: vote !== null,
     hasOptimisticVotingPower: (optimisticVotingPower ?? 0n) > 0n,
   };
 }
 
-async function readOptimisticDelegate(
-  client: DtfClient,
-  chainId: GetIndexDtfVoterStateParams["chainId"],
-  stToken: GetIndexDtfVoterStateParams["stToken"],
-  account: GetIndexDtfVoterStateParams["account"],
-) {
-  try {
-    const delegate = await client.viem.readContract({
-      chainId,
-      address: stToken,
-      abi: dtfIndexStakingVaultOptimisticAbi,
-      functionName: "optimisticDelegates",
-      args: [account],
-    });
-
-    return delegate;
-  } catch (error) {
-    if (!isUnsupportedVoteLockOptimisticReadError(error)) {
-      throw error;
-    }
-
-    return null;
-  }
-}
-
-async function readVoteLockOptimisticVotes(
-  client: DtfClient,
-  chainId: GetIndexDtfVoterStateParams["chainId"],
-  stToken: GetIndexDtfVoterStateParams["stToken"],
-  account: GetIndexDtfVoterStateParams["account"],
-) {
-  try {
-    const votes = await client.viem.readContract({
-      chainId,
-      address: stToken,
-      abi: dtfIndexStakingVaultOptimisticAbi,
-      functionName: "getOptimisticVotes",
-      args: [account],
-    });
-
-    return votes ?? null;
-  } catch (error) {
-    if (!isUnsupportedVoteLockOptimisticReadError(error)) {
-      throw error;
-    }
-
-    return null;
-  }
-}
-
 function getOptimisticProposalTimepoint(
   latestTimepoint: bigint,
-  proposal: GetIndexDtfProposalVoterStateParams["proposal"],
+  proposal: GetIndexDtfOptimisticProposalVoterStateParams["proposal"],
 ) {
   const optimisticTimepoint =
     proposal.optimistic?.snapshot ?? BigInt(proposal.voteStart);
@@ -246,11 +238,33 @@ function getOptimisticProposalTimepoint(
     : optimisticTimepoint;
 }
 
+function getOptionalOptimisticResult<T>(result: VotingMulticallResult<T>): T | null {
+  if (result.status === "success") {
+    return result.result;
+  }
+
+  if (isUnsupportedVoteLockOptimisticReadError(result.error)) {
+    return null;
+  }
+
+  throw result.error;
+}
+
+function getAccountProposalVote(
+  votes: readonly IndexDtfProposalVote[],
+  account: Address,
+) {
+  const normalizedAccount = account.toLowerCase();
+
+  return votes.find((proposalVote) => proposalVote.voter.toLowerCase() === normalizedAccount)
+    ?.choice ?? null;
+}
+
 async function getProposalVoteToken(
   client: DtfClient,
-  chainId: GetIndexDtfProposalVoterStateParams["chainId"],
-  governance: GetIndexDtfProposalVoterStateParams["governance"],
-  voteToken: GetIndexDtfProposalVoterStateParams["proposal"]["voteToken"],
+  chainId: GetIndexDtfOptimisticProposalVoterStateParams["chainId"],
+  governance: GetIndexDtfOptimisticProposalVoterStateParams["governance"],
+  voteToken: GetIndexDtfOptimisticProposalVoterStateParams["proposal"]["voteToken"],
 ) {
   if (voteToken) {
     return getAddress(voteToken);
@@ -266,11 +280,11 @@ async function getProposalVoteToken(
 
 async function readPastOptimisticVotes(
   client: DtfClient,
-  chainId: GetIndexDtfProposalVoterStateParams["chainId"],
+  chainId: GetIndexDtfOptimisticProposalVoterStateParams["chainId"],
   voteToken: NonNullable<
-    GetIndexDtfProposalVoterStateParams["proposal"]["voteToken"]
+    GetIndexDtfOptimisticProposalVoterStateParams["proposal"]["voteToken"]
   >,
-  account: GetIndexDtfProposalVoterStateParams["account"],
+  account: GetIndexDtfOptimisticProposalVoterStateParams["account"],
   timepoint: bigint,
 ) {
   try {

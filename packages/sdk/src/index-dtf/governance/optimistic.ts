@@ -1,6 +1,7 @@
 import { getAddress, type Address, type Hex } from "viem";
 
 import type { DtfClient } from "@/client";
+import type { Amount } from "@/types/common";
 import type {
   GetIndexDtfOptimisticGovernanceParams,
   GetIndexDtfOptimisticProposalContextParams,
@@ -56,28 +57,30 @@ export async function getOptimisticProposalContext(
     return null;
   }
 
-  const [vetoThreshold, snapshot, token] = await Promise.all([
-    client.viem.readContract({
-      chainId: params.chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "vetoThreshold",
-      args: [proposalId],
-    }),
-    client.viem.readContract({
-      chainId: params.chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "proposalSnapshot",
-      args: [proposalId],
-    }),
-    client.viem.readContract({
-      chainId: params.chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "token",
-    }),
-  ]);
+  const [vetoThreshold, snapshot, token] = (await client.viem
+    .getPublicClient(params.chainId)
+    .multicall({
+      allowFailure: false,
+      contracts: [
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "vetoThreshold",
+          args: [proposalId],
+        },
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "proposalSnapshot",
+          args: [proposalId],
+        },
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "token",
+        },
+      ],
+    })) as readonly [bigint, bigint, Address];
   const snapshotSupply = await client.viem.readContract({
     chainId: params.chainId,
     address: token,
@@ -113,49 +116,49 @@ export async function getOptimisticGovernance(
     selectorRegistry,
     token,
     timelock,
-  ] = await Promise.all([
-    client.viem.readContract({
-      chainId: params.chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "lateQuorumVoteExtension",
-    }),
-    client.viem.readContract({
-      chainId: params.chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "proposalThrottleCapacity",
-    }),
-    client.viem.readContract({
-      chainId: params.chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "optimisticParams",
-    }),
-    client.viem.readContract({
-      chainId: params.chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "selectorRegistry",
-    }),
-    client.viem.readContract({
-      chainId: params.chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "token",
-    }),
-    client.viem.readContract({
-      chainId: params.chainId,
-      address: governance,
-      abi: dtfIndexGovernanceOptimisticAbi,
-      functionName: "timelock",
-    }),
-  ]);
-  const [vetoDelay, vetoPeriod, vetoThreshold] = optimisticParams as readonly [
-    number | bigint,
+  ] = (await client.viem.getPublicClient(params.chainId).multicall({
+    allowFailure: false,
+    contracts: [
+      {
+        address: governance,
+        abi: dtfIndexGovernanceOptimisticAbi,
+        functionName: "lateQuorumVoteExtension",
+      },
+      {
+        address: governance,
+        abi: dtfIndexGovernanceOptimisticAbi,
+        functionName: "proposalThrottleCapacity",
+      },
+      {
+        address: governance,
+        abi: dtfIndexGovernanceOptimisticAbi,
+        functionName: "optimisticParams",
+      },
+      {
+        address: governance,
+        abi: dtfIndexGovernanceOptimisticAbi,
+        functionName: "selectorRegistry",
+      },
+      {
+        address: governance,
+        abi: dtfIndexGovernanceOptimisticAbi,
+        functionName: "token",
+      },
+      {
+        address: governance,
+        abi: dtfIndexGovernanceOptimisticAbi,
+        functionName: "timelock",
+      },
+    ],
+  })) as readonly [
     number | bigint,
     bigint,
+    readonly [number | bigint, number | bigint, bigint],
+    Address,
+    Address,
+    Address,
   ];
+  const [vetoDelay, vetoPeriod, vetoThreshold] = optimisticParams;
   const roles = await getOptimisticTimelockRoles(client, {
     chainId: params.chainId,
     timelock,
@@ -185,31 +188,37 @@ export async function getOptimisticTimelockRoles(
   },
 ) {
   const timelock = getAddress(params.timelock);
-  const [optimisticProposerCount, guardianCount] = await Promise.all([
-    readRoleMemberCount(
-      client,
-      params.chainId,
-      timelock,
-      OPTIMISTIC_PROPOSER_ROLE,
-    ),
-    readRoleMemberCount(client, params.chainId, timelock, CANCELLER_ROLE),
-  ]);
-  const [optimisticProposers, guardians] = await Promise.all([
-    readRoleMembers(
-      client,
-      params.chainId,
-      timelock,
-      OPTIMISTIC_PROPOSER_ROLE,
-      optimisticProposerCount,
-    ),
-    readRoleMembers(
-      client,
-      params.chainId,
-      timelock,
-      CANCELLER_ROLE,
-      guardianCount,
-    ),
-  ]);
+  const publicClient = client.viem.getPublicClient(params.chainId);
+  const [optimisticProposerCount, guardianCount] = (await publicClient.multicall({
+    allowFailure: false,
+    contracts: [
+      {
+        address: timelock,
+        abi: optimisticTimelockAbi,
+        functionName: "getRoleMemberCount",
+        args: [OPTIMISTIC_PROPOSER_ROLE],
+      },
+      {
+        address: timelock,
+        abi: optimisticTimelockAbi,
+        functionName: "getRoleMemberCount",
+        args: [CANCELLER_ROLE],
+      },
+    ],
+  })) as readonly [bigint, bigint];
+  const memberCalls = [
+    ...getRoleMemberCalls(timelock, OPTIMISTIC_PROPOSER_ROLE, optimisticProposerCount),
+    ...getRoleMemberCalls(timelock, CANCELLER_ROLE, guardianCount),
+  ];
+  const members = memberCalls.length === 0
+    ? []
+    : ((await publicClient.multicall({
+        allowFailure: false,
+        contracts: memberCalls,
+      })) as readonly Address[]);
+  const optimisticProposerCountNumber = Number(optimisticProposerCount);
+  const optimisticProposers = members.slice(0, optimisticProposerCountNumber);
+  const guardians = members.slice(optimisticProposerCountNumber);
 
   return { optimisticProposers, guardians };
 }
@@ -217,7 +226,7 @@ export async function getOptimisticTimelockRoles(
 export async function getProposalThrottleCharges(
   client: DtfClient,
   params: GetIndexDtfProposalThrottleChargesParams,
-) {
+): Promise<bigint> {
   const charges = await client.viem.readContract({
     chainId: params.chainId,
     address: getAddress(params.governance),
@@ -232,7 +241,7 @@ export async function getProposalThrottleCharges(
 export async function getOptimisticVotes(
   client: DtfClient,
   params: GetIndexDtfOptimisticVotesParams,
-) {
+): Promise<Amount> {
   const votes = await client.viem.readContract({
     chainId: params.chainId,
     address: getAddress(params.voteToken),
@@ -247,7 +256,7 @@ export async function getOptimisticVotes(
 export async function getPastOptimisticVotes(
   client: DtfClient,
   params: GetIndexDtfPastOptimisticVotesParams,
-) {
+): Promise<Amount> {
   const timepoint =
     params.timepoint ??
     (await getLatestBlockTimepoint(client.viem, params.chainId));
@@ -262,41 +271,13 @@ export async function getPastOptimisticVotes(
   return mapAmount(votes);
 }
 
-async function readRoleMemberCount(
-  client: DtfClient,
-  chainId: GetIndexDtfOptimisticGovernanceParams["chainId"],
-  timelock: Address,
-  role: Hex,
-) {
-  return client.viem.readContract({
-    chainId,
+function getRoleMemberCalls(timelock: Address, role: Hex, count: bigint) {
+  return Array.from({ length: Number(count) }, (_, index) => ({
     address: timelock,
     abi: optimisticTimelockAbi,
-    functionName: "getRoleMemberCount",
-    args: [role],
-  });
-}
-
-async function readRoleMembers(
-  client: DtfClient,
-  chainId: GetIndexDtfOptimisticGovernanceParams["chainId"],
-  timelock: Address,
-  role: Hex,
-  count: bigint,
-): Promise<readonly Address[]> {
-  const members = await Promise.all(
-    Array.from({ length: Number(count) }, (_, index) =>
-      client.viem.readContract({
-        chainId,
-        address: timelock,
-        abi: optimisticTimelockAbi,
-        functionName: "getRoleMember",
-        args: [role, BigInt(index)],
-      }),
-    ),
-  );
-
-  return members;
+    functionName: "getRoleMember",
+    args: [role, BigInt(index)],
+  }) as const);
 }
 
 function toBigInt(value: number | bigint): bigint {

@@ -1,7 +1,7 @@
 import { getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type { Amount } from "@/types/common";
 
 import { Decimal } from "@/lib/decimal";

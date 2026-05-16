@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 
 import type { DtfClient } from "@/client";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type { TokenVolatility } from "@/types/common";
 
 export type GetAssetListParams = {

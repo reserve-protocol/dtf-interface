@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { SdkError } from "@/errors";
+import type { SdkError } from "@/lib/errors";
 
 import { createDtfClient } from "@/client";
 

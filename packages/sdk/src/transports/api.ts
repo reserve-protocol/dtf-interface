@@ -1,23 +1,23 @@
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 
 type Query = Record<string, boolean | number | string | null | undefined>;
 
 export type GetOptions = {
   readonly baseUrl: string;
   readonly path: string;
-  readonly query?: Query;
+  readonly query?: Query | undefined;
 };
 
 export type PostOptions<TBody = unknown> = GetOptions & {
   readonly body?: TBody;
 };
 
-export async function get<TResult>({ baseUrl, path, query }: GetOptions): Promise<TResult> {
-  const url = createUrl({
-    baseUrl,
-    path,
-    ...(query === undefined ? {} : { query }),
-  });
+export async function get<TResult>({
+  baseUrl,
+  path,
+  query,
+}: GetOptions): Promise<TResult> {
+  const url = createUrl({ baseUrl, path, query });
   const response = await fetch(url);
 
   return readResponse<TResult>(response, url);
@@ -29,11 +29,7 @@ export async function post<TResult, TBody = unknown>({
   path,
   query,
 }: PostOptions<TBody>): Promise<TResult> {
-  const url = createUrl({
-    baseUrl,
-    path,
-    ...(query === undefined ? {} : { query }),
-  });
+  const url = createUrl({ baseUrl, path, query });
   const response = await fetch(url, {
     method: "POST",
     ...(body === undefined
@@ -61,7 +57,10 @@ function createUrl({ baseUrl, path, query }: GetOptions): URL {
   return url;
 }
 
-async function readResponse<TResult>(response: Response, url: URL): Promise<TResult> {
+async function readResponse<TResult>(
+  response: Response,
+  url: URL,
+): Promise<TResult> {
   if (!response.ok) {
     throw new SdkError({
       code: "REQUEST_FAILED",

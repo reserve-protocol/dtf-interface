@@ -1,11 +1,11 @@
 import { getAddress, parseEther, zeroHash, type Address, type Hex } from "viem";
 
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type { IndexDtfCall } from "@/types/governance";
 import type { PriceControl } from "@/types/index-dtf";
 
-import { prepareContractCall } from "@/contract-call";
-import { SdkError } from "@/errors";
+import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { folioArtifactAbi as indexDtfV6Abi } from "@/index-dtf/abis/folio-artifact";
@@ -14,6 +14,7 @@ import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
 import { getIndexDtfOperation, type IndexDtfOperation, type IndexDtfVersion } from "@/index-dtf/versions";
 import { Decimal } from "@/lib/decimal";
+import { toUint, toUintNumber } from "@/lib/utils";
 
 export const indexDtfV5WriteAbi = indexDtfV5Abi;
 export const indexDtfV6WriteAbi = indexDtfV6Abi;
@@ -432,41 +433,4 @@ function toSeconds(value: number | bigint): bigint {
   }
 
   return BigInt(Math.round(value));
-}
-
-function toUint(value: number | bigint, field: string): bigint {
-  if (typeof value === "bigint") {
-    if (value < 0n) {
-      throw new SdkError({
-        code: "INVALID_INPUT",
-        message: `${field} must be non-negative`,
-        meta: { [field]: value },
-      });
-    }
-
-    return value;
-  }
-
-  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
-    throw new SdkError({
-      code: "INVALID_INPUT",
-      message: `${field} must be a non-negative integer`,
-      meta: { [field]: value },
-    });
-  }
-
-  return BigInt(value);
-}
-
-function toUintNumber(value: number | bigint, field: string): number {
-  const integer = toUint(value, field);
-  if (integer > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new SdkError({
-      code: "INVALID_INPUT",
-      message: `${field} is too large to encode safely`,
-      meta: { [field]: value },
-    });
-  }
-
-  return Number(integer);
 }

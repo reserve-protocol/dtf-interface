@@ -3,7 +3,7 @@ import type { Decimal as DecimalType } from "decimal.js-light";
 import { Decimal } from "@reserve-protocol/dtf-rebalance-lib";
 import { getAddress, parseUnits, type Address } from "viem";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import {
   SHARE_DECIMALS,
   type IndexDtfBasketDefinition,

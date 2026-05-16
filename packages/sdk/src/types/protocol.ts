@@ -1,4 +1,4 @@
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type { DtfStatus } from "@/types/common";
 
 export type ListIndexDtfsParams = {

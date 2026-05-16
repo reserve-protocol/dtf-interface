@@ -4,7 +4,7 @@ import type { DtfClient } from "@/client";
 import type { Amount, Token } from "@/types/common";
 import type { Financials, IndexDtf, PriceControl } from "@/types/index-dtf";
 
-import { prepareContractCall } from "@/contract-call";
+import { prepareContractCall } from "@/lib/contract-call";
 import { daoFeeRegistryAbi } from "@/index-dtf/abis/dao-fee-registry";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";

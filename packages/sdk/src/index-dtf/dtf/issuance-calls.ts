@@ -1,10 +1,10 @@
 import { getAddress, type Address } from "viem";
 
-import type { ContractCallPlan } from "@/contract-call";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
+import type { ContractCallPlan } from "@/lib/contract-call";
 
-import { prepareContractCall, prepareErc20Approval } from "@/contract-call";
-import { SdkError } from "@/errors";
+import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
 type MintArgs = readonly [bigint, Address, bigint];

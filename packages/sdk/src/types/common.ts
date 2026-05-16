@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 
 export type BlockNumber = bigint;
 

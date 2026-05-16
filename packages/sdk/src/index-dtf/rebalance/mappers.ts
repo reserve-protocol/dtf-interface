@@ -3,7 +3,7 @@ import { getAddress, type Address } from "viem";
 import type { ReserveApiIndexDtfRebalanceDetail } from "@/client/api";
 import type { Token } from "@/types/common";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import type {
   GetIndexDtfRebalanceQuery,
   GetIndexDtfRebalanceAuctionsQuery,

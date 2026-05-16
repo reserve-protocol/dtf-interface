@@ -1,6 +1,6 @@
 import type { Abi } from "viem";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
 import { folioArtifactAbi as indexDtfV6Abi } from "@/index-dtf/abis/folio-artifact";
 

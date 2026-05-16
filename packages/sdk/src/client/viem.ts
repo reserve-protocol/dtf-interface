@@ -16,8 +16,8 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import { DEFAULT_RPC_URLS, SUPPORTED_CHAINS, type SupportedChainId } from "@/defaults";
-import { SdkError } from "@/errors";
+import { DEFAULT_RPC_URLS, SUPPORTED_CHAINS, type SupportedChainId } from "@/config";
+import { SdkError } from "@/lib/errors";
 
 export type DtfClientViemChainConfig = {
   readonly chain?: Chain;

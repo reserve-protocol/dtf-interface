@@ -1,6 +1,6 @@
 import { getAddress, type Abi, type Address } from "viem";
 
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 
 import {
   dtfAdminProposalAbi,

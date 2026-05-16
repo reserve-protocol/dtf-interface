@@ -1,19 +1,28 @@
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core";
-
-import { ClientError, request, type RequestDocument, type TypedDocumentString, type Variables } from "graphql-request";
-
-import type { SupportedChainId } from "@/defaults";
-
-import { SdkError, type SdkErrorMeta } from "@/errors";
+import {
+  ClientError,
+  request,
+  type RequestDocument,
+  type TypedDocumentString,
+  type Variables,
+} from "graphql-request";
+import type { SupportedChainId } from "@/config";
+import { SdkError, type SdkErrorMeta } from "@/lib/errors";
 
 type SubgraphProduct = "index" | "yield";
 
-export type SubgraphDocument<TResult, TVariables extends Variables = Record<string, never>> =
+export type SubgraphDocument<
+  TResult,
+  TVariables extends Variables = Record<string, never>,
+> =
   | RequestDocument
   | TypedDocumentNode<TResult, TVariables>
   | TypedDocumentString<TResult, TVariables>;
 
-export type QuerySubgraphOptions<TResult, TVariables extends Variables = Record<string, never>> = {
+export type QuerySubgraphOptions<
+  TResult,
+  TVariables extends Variables = Record<string, never>,
+> = {
   readonly chainId: SupportedChainId;
   readonly product: SubgraphProduct;
   readonly query: SubgraphDocument<TResult, TVariables>;
@@ -22,7 +31,10 @@ export type QuerySubgraphOptions<TResult, TVariables extends Variables = Record<
   readonly variables?: TVariables;
 };
 
-export async function querySubgraph<TResult, TVariables extends Variables = Record<string, never>>({
+export async function querySubgraph<
+  TResult,
+  TVariables extends Variables = Record<string, never>,
+>({
   chainId,
   product,
   query,
@@ -65,7 +77,9 @@ function getSubgraphErrorMeta({
   readonly url: string;
 }): SdkErrorMeta {
   if (cause instanceof ClientError) {
-    const errors = cause.response.errors?.map((error) => error.message).filter(Boolean);
+    const errors = cause.response.errors
+      ?.map((error) => error.message)
+      .filter(Boolean);
 
     return {
       chainId,

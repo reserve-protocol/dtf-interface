@@ -8,7 +8,7 @@ import type {
 import type { Authority, DtfParams, Governance } from "@/types/common";
 import type { IndexDtf, PriceControl } from "@/types/index-dtf";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import { getDtf, getVersion } from "@/index-dtf/dtf/index";
 import { assertNumberRange } from "@/index-dtf/governance/propose/settings-governance";
 import { INDEX_DTF_VERSION_5_0_0, INDEX_DTF_VERSION_6_0_0, type IndexDtfVersion } from "@/index-dtf/versions";

@@ -5,7 +5,7 @@ import type {
   ReserveApiIndexDtfPrice,
   ReserveApiIndexDtfPriceHistory,
 } from "@/client/api";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type { GetIndexDtfQuery } from "@/index-dtf/subgraph/dtf.generated";
 import type {
   Authority,
@@ -28,7 +28,7 @@ import type {
   IndexDtfPricePoint,
 } from "@/types/index-dtf";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import { mapAmount } from "@/lib/utils";
 
 type SubgraphIndexDtf = NonNullable<GetIndexDtfQuery["dtf"]>;

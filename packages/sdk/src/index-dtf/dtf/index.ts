@@ -23,7 +23,7 @@ import type {
   IndexDtfTotalAssets,
 } from "@/types/index-dtf";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import dtfAbi from "@/index-dtf/abis/dtf-index-abi-v6";
 import {
   mapIndexDtf,

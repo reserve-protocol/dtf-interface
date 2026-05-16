@@ -8,7 +8,7 @@ import type {
 } from "@/index-dtf/governance/propose/settings-types";
 import type { IndexDtfCall } from "@/types/governance";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import {

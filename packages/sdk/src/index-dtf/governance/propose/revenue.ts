@@ -3,7 +3,7 @@ import { getAddress, parseEther, type Address } from "viem";
 import type { IndexDtfCall } from "@/types/governance";
 import type { IndexDtf } from "@/types/index-dtf";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import { prepareIndexDtfSetFeeRecipients, type IndexDtfWriteVersion } from "@/index-dtf/governance/propose/calls";
 import { Decimal } from "@/lib/decimal";
 

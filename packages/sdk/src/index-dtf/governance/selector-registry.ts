@@ -1,10 +1,10 @@
 import { getAddress, type Address, type Hex } from "viem";
 
 import type { DtfClient } from "@/client";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 
-import { prepareContractCall } from "@/contract-call";
-import { SdkError } from "@/errors";
+import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
 
 export type IndexDtfSelectorData = {

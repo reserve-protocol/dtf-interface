@@ -1,8 +1,8 @@
 export { createDtfClient } from "@/client";
 export { createWalletClient } from "@/client/viem";
-export { prepareContractCall, prepareErc20Approval } from "@/contract-call";
+export { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
 export { createDtfSdk } from "@/create-dtf-sdk";
-export { SdkError, isSdkError } from "@/errors";
+export { SdkError, isSdkError } from "@/lib/errors";
 export {
   default as dtfCatalog,
   indexDtfs as indexDtfCatalog,
@@ -37,8 +37,8 @@ export type {
   CreateWalletClientParams,
 } from "@/client/viem";
 export type { DtfSdk, DtfSdkConfig } from "@/create-dtf-sdk";
-export type { ContractCall, ContractCallPlan } from "@/contract-call";
-export type { SdkErrorCode, SdkErrorMeta, SdkErrorOptions } from "@/errors";
+export type { ContractCall, ContractCallPlan } from "@/lib/contract-call";
+export type { SdkErrorCode, SdkErrorMeta, SdkErrorOptions } from "@/lib/errors";
 export {
   DEFAULT_API_BASE_URL,
   DEFAULT_RPC_URLS,
@@ -46,8 +46,8 @@ export {
   YIELD_DTF_SUBGRAPH_URL,
   SUPPORTED_CHAINS,
   supportedChainIds,
-} from "@/defaults";
-export type { SupportedChainId } from "@/defaults";
+} from "@/config";
+export type { SupportedChainId } from "@/config";
 export type {
   DtfClientSubgraph,
   DtfClientSubgraphChainConfig,
@@ -57,7 +57,7 @@ export type {
   QueryYieldSubgraphOptions,
 } from "@/client/subgraph";
 export type { SubgraphDocument } from "@/transports/subgraph";
-export { getDiscoverDtfs } from "@/actions/get-discover-dtfs";
+export { getDiscoverDtfs } from "@/client/api/discovery";
 export {
   buildIndexDtfInitialBasket,
   buildIndexDtfBasketProposal,
@@ -246,4 +246,4 @@ export type * from "@/index-dtf/governance/propose/index";
 export type * from "@/index-dtf/index";
 export type * from "@/portfolio/index";
 export type * from "@/types/index";
-export type { DiscoverDtf, GetDiscoverDtfsOptions } from "@/actions/get-discover-dtfs";
+export type { DiscoverDtf, GetDiscoverDtfsOptions } from "@/types/api";

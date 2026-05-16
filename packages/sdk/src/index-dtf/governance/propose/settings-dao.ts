@@ -8,8 +8,8 @@ import type {
 } from "@/index-dtf/governance/propose/settings-types";
 import type { IndexDtfCall } from "@/types/governance";
 
-import { prepareContractCall } from "@/contract-call";
-import { SdkError } from "@/errors";
+import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { buildGovernanceCalls } from "@/index-dtf/governance/propose/settings-governance";

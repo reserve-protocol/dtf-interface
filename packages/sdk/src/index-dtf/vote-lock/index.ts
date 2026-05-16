@@ -1,13 +1,13 @@
 import { erc20Abi, getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
-import type { ContractCallPlan } from "@/contract-call";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
+import type { ContractCallPlan } from "@/lib/contract-call";
 import type { Amount, Token } from "@/types/common";
 import type { IndexDtf } from "@/types/index-dtf";
 
-import { prepareContractCall, prepareErc20Approval } from "@/contract-call";
-import { SdkError } from "@/errors";
+import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
 import { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";

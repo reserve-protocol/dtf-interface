@@ -1,7 +1,7 @@
 import type { Variables } from "graphql-request";
 
-import { supportedChainIds, type SupportedChainId } from "@/defaults";
-import { SdkError } from "@/errors";
+import { supportedChainIds, type SupportedChainId } from "@/config";
+import { SdkError } from "@/lib/errors";
 import { querySubgraph, type SubgraphDocument } from "@/transports/subgraph";
 
 export type DtfClientSubgraphChainConfig = {

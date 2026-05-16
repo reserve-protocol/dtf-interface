@@ -2,7 +2,7 @@ import { indexDtfs as indexDtfCatalog, type CatalogIndexDTF as CatalogIndexDtf }
 import { getAddress, isAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type { ListIndexDtfsParams } from "@/types/protocol";
 
 export type IndexDtfCatalogEntry = CatalogIndexDtf & {

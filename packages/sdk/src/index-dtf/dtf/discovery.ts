@@ -2,7 +2,7 @@ import { getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
 import type { ReserveApiDtfPrice } from "@/client/api";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type { DtfBrand, DtfBasketSummaryAsset, DtfPerformancePoint, DtfStatus } from "@/types/common";
 
 export type DiscoverIndexDtfsParams = {

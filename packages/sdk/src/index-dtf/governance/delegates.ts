@@ -3,7 +3,7 @@ import { getAddress } from "viem";
 import type { DtfClient } from "@/client";
 import type { GetIndexDtfDelegatesParams, IndexDtfDelegate } from "@/types/governance";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import { DEFAULT_DELEGATE_LIMIT } from "@/index-dtf/governance/constants";
 import { GetIndexDtfDelegatesDocument } from "@/index-dtf/subgraph/dtf.generated";
 import { mapAmount } from "@/lib/utils";

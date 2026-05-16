@@ -14,7 +14,7 @@ import type {
   ProposalState,
 } from "@/types/governance";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { DEFAULT_PROPOSAL_LIMIT } from "@/index-dtf/governance/constants";
 import { buildProposalContractMap } from "@/index-dtf/governance/contract-map";

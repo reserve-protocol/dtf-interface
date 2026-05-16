@@ -2,6 +2,8 @@ import { formatUnits, getAddress, type Address } from "viem";
 
 import type { Amount } from "@/types/common";
 
+import { SdkError } from "@/lib/errors";
+
 export function dedupeAddresses(addresses: readonly Address[]): readonly Address[] {
   return [...new Set(addresses)];
 }
@@ -38,4 +40,38 @@ export function uniqueAddresses(addresses: readonly Address[]): Address[] {
 
 export function sameAddress(a: string, b: string): boolean {
   return a.toLowerCase() === b.toLowerCase();
+}
+
+export function toUint(value: number | bigint, field: string): bigint {
+  if (typeof value === "bigint") {
+    if (value < 0n) {
+      throw new SdkError({ code: "INVALID_INPUT", message: `${field} must be non-negative`, meta: { [field]: value } });
+    }
+
+    return value;
+  }
+
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `${field} must be a non-negative integer`,
+      meta: { [field]: value },
+    });
+  }
+
+  return BigInt(value);
+}
+
+export function toUintNumber(value: number | bigint, field: string): number {
+  const integer = toUint(value, field);
+
+  if (integer > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `${field} is too large to encode safely`,
+      meta: { [field]: value },
+    });
+  }
+
+  return Number(integer);
 }

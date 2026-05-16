@@ -9,7 +9,7 @@ import {
   YIELD_DTF_SUBGRAPH_URL,
   supportedChainIds,
   type SupportedChainId,
-} from "@/defaults";
+} from "@/config";
 
 export type DtfChainConfig = DtfClientSubgraphChainConfig & DtfClientViemChainConfig;
 

@@ -7,16 +7,17 @@ import {
   type Log,
 } from "viem";
 
-import type { ContractCallPlan } from "@/contract-call";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
+import type { ContractCallPlan } from "@/lib/contract-call";
 import type { IndexDtfFeeRecipient, IndexDtfRevenueRecipientInput } from "@/index-dtf/governance/propose/revenue";
 import type { PriceControl } from "@/types/index-dtf";
 
-import { prepareContractCall, prepareErc20Approval } from "@/contract-call";
-import { SdkError } from "@/errors";
+import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { indexDtfDeployerAbi } from "@/index-dtf/abis/deployer";
 import { indexDtfGovernanceDeployerAbi } from "@/index-dtf/abis/governance-deployer";
 import { buildIndexDtfFeeRecipients } from "@/index-dtf/governance/propose/revenue";
+import { toUint, toUintNumber } from "@/lib/utils";
 
 export const INDEX_DTF_DEPLOYER_ADDRESS = {
   1: "0x4D201a6e5BF975E2CEE9e5cbDfc803C0Ff122073",
@@ -429,33 +430,4 @@ function normalizeGovernanceRoles(roles: IndexDtfDeployGovernanceRoles = {}) {
 
 function normalizeAddresses(addresses: readonly Address[]): Address[] {
   return addresses.map((address) => getAddress(address));
-}
-
-function toUint(value: number | bigint, field: string): bigint {
-  if (typeof value === "bigint") {
-    if (value < 0n) {
-      throw new SdkError({ code: "INVALID_INPUT", message: `${field} must be non-negative`, meta: { [field]: value } });
-    }
-
-    return value;
-  }
-  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
-    throw new SdkError({ code: "INVALID_INPUT", message: `${field} must be a non-negative integer`, meta: { [field]: value } });
-  }
-
-  return BigInt(value);
-}
-
-function toUintNumber(value: number | bigint, field: string): number {
-  const integer = toUint(value, field);
-
-  if (integer > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new SdkError({
-      code: "INVALID_INPUT",
-      message: `${field} is too large to encode safely`,
-      meta: { [field]: value },
-    });
-  }
-
-  return Number(integer);
 }

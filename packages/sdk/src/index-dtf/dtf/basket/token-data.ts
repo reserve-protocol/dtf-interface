@@ -3,7 +3,7 @@ import { getAddress, type Address } from "viem";
 import type { DtfClient } from "@/client";
 import type { TokenVolatility } from "@/types/common";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import {
   DEFAULT_MAX_AUCTION_SIZE_USD,
   PRICE_ERROR_BY_VOLATILITY,

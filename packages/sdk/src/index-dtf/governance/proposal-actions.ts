@@ -22,8 +22,8 @@ import type {
   VoteIndexDtfProposalParams,
 } from "@/types/governance";
 
-import { prepareContractCall } from "@/contract-call";
-import { SdkError } from "@/errors";
+import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { timelockAbi } from "@/index-dtf/abis/timelock";

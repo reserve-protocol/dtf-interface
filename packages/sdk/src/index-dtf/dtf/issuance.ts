@@ -1,7 +1,7 @@
 import { erc20Abi, getAddress, type Address, type PublicClient } from "viem";
 
 import type { DtfClient } from "@/client";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type { Amount, Token } from "@/types/common";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";

@@ -1,7 +1,7 @@
 import type { Address, Hex } from "viem";
 
-import type { ContractCall } from "@/contract-call";
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
+import type { ContractCall } from "@/lib/contract-call";
 import type { DtfParams } from "@/types/common";
 import type { Amount } from "@/types/common";
 import type { IndexDtf } from "@/types/index-dtf";

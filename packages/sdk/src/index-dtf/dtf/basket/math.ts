@@ -10,7 +10,7 @@ import type {
   IndexDtfInitialBasket,
 } from "@/index-dtf/dtf/basket/types";
 
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import { assertPositiveNumber, validateBasketTokens, validateShares } from "@/index-dtf/dtf/basket/validation";
 
 export function getBasketSharesFromUnits(params: {

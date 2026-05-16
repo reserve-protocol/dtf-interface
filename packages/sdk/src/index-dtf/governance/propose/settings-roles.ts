@@ -1,12 +1,13 @@
 import { keccak256, toBytes, type Address, type Hex } from "viem";
 
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type { IndexDtfCall } from "@/types/governance";
 
-import { prepareContractCall } from "@/contract-call";
-import { SdkError } from "@/errors";
+import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
+import { sameAddress } from "@/lib/utils";
 
 // Register labels owner timelock guardians as GUARDIAN_ROLE, but the contract
 // role bytes are the Timelock CANCELLER_ROLE hash.
@@ -81,8 +82,4 @@ function prepareRoleCall(
     functionName,
     args,
   });
-}
-
-function sameAddress(a: Address, b: Address): boolean {
-  return a.toLowerCase() === b.toLowerCase();
 }

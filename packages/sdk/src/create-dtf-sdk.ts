@@ -1,9 +1,9 @@
 import type { Address } from "viem";
 
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 
 import { createDtfClient, type DtfClient, type DtfClientConfig } from "@/client";
-import { SdkError } from "@/errors";
+import { SdkError } from "@/lib/errors";
 import { createIndexDtfNamespace } from "@/index-dtf/index";
 import { createPortfolioNamespace } from "@/portfolio/index";
 

@@ -1,7 +1,7 @@
 import { FolioVersion, getOpenAuction, getTargetBasket } from "@reserve-protocol/dtf-rebalance-lib";
 import { getAddress, type Address } from "viem";
 
-import type { SupportedChainId } from "@/defaults";
+import type { SupportedChainId } from "@/config";
 import type {
   BuiltIndexDtfOpenAuction,
   IndexDtfOpenAuctionInput,
@@ -9,8 +9,8 @@ import type {
   OpenAuctionArgs,
 } from "@/index-dtf/rebalance/types";
 
-import { prepareContractCall } from "@/contract-call";
-import { SdkError } from "@/errors";
+import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
 /**

@@ -5,7 +5,6 @@ import { dtfIndexAbiV1 } from "@/index-dtf/abis/dtf-index-abi-v1";
 import { dtfIndexAbiV2 } from "@/index-dtf/abis/dtf-index-abi-v2";
 import { dtfIndexAbiV4 } from "@/index-dtf/abis/dtf-index-abi-v4";
 import { folioArtifactAbi as indexDtfArtifactAbi } from "@/index-dtf/abis/folio-artifact";
-import { INDEX_DTF_VERSION_5_0_0, INDEX_DTF_VERSION_6_0_0 } from "@/index-dtf/versions";
 
 export const dtfIndexProposalAbiV1 = dtfIndexAbiV1;
 export const dtfIndexProposalAbiV2 = dtfIndexAbiV2;
@@ -18,8 +17,8 @@ type DtfIndexProposalAbiCatalogEntry = {
 };
 
 export const dtfIndexProposalAbiCatalog: readonly DtfIndexProposalAbiCatalogEntry[] = [
-  { version: INDEX_DTF_VERSION_6_0_0, abi: indexDtfArtifactAbi },
-  { version: INDEX_DTF_VERSION_5_0_0, abi: dtfIndexProposalAbiV5 },
+  { version: "6.0.0", abi: indexDtfArtifactAbi },
+  { version: "5.0.0", abi: dtfIndexProposalAbiV5 },
   { version: "4.0.0", abi: dtfIndexProposalAbiV4 },
   { version: "2.0.0", abi: dtfIndexProposalAbiV2 },
   { version: "1.0.0", abi: dtfIndexProposalAbiV1 },

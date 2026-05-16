@@ -17,7 +17,7 @@ import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
-import { isUnsupportedVoteLockOptimisticReadError } from "@/index-dtf/optimistic-errors";
+import { isUnsupportedVoteLockOptimisticReadError } from "@/index-dtf/governance/optimistic-errors";
 import { mapAmount } from "@/lib/utils";
 
 export async function getVoterState(

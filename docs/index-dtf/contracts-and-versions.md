@@ -56,14 +56,14 @@ Only include version deltas verified from source, changelogs, or SDK ABIs. Older
 
 ## SDK Version Handling
 
-The SDK maps version-sensitive operations to the right ABI/function name. Example:
+The SDK handles version-specific write calls where the affected builder encodes the calldata. Example:
 
 - v5 auction length setter: `setAuctionLength`.
 - v6 auction length setter: `setMaxAuctionLength`.
 
-Version-sensitive code belongs in one mapping layer. Product builders should accept a known DTF version or fetch it when needed.
+Product builders should accept a known DTF version or fetch it when needed. Keep version checks local to the affected write/read handler instead of adding a central operation registry.
 
-Source owner: SDK ABI/version routing is owned by `dtf-sdk/packages/sdk/src/index-dtf/versions.ts`; protocol mechanics are owned by the Index DTF contract repo.
+Source owner: SDK calldata builders are owned by `dtf-sdk/packages/sdk/src/index-dtf/governance/propose/calls.ts`; protocol mechanics are owned by the Index DTF contract repo.
 
 ## ABI Gotchas
 
@@ -92,7 +92,6 @@ Before adding a write builder, verify:
 - `reserve-index-dtf/contracts/governance/FolioGovernor.sol`
 - `reserve-index-dtf/contracts/utils/Versioned.sol`
 - `reserve-index-dtf/CHANGELOG.md`
-- `dtf-sdk/packages/sdk/src/index-dtf/versions.ts`
 - `dtf-sdk/packages/sdk/src/index-dtf/governance/propose/calls.ts`
 
 ## Do Not Infer

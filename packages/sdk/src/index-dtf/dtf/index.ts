@@ -35,7 +35,7 @@ import {
 } from "@/index-dtf/dtf/mappers";
 import { GetIndexDtfDocument } from "@/index-dtf/subgraph/dtf.generated";
 import { mapAmount } from "@/lib/utils";
-import { getTokensData } from "@/tokens/index";
+import { getTokensData } from "@/lib/tokens";
 
 export async function getDtf(client: DtfClient, params: DtfParams): Promise<IndexDtf> {
   const { dtf } = await client.subgraph.queryIndex({

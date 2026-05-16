@@ -37,7 +37,7 @@ export {
   getIndexDtfStatus,
   getIndexDtfStatuses,
 } from "@/index-dtf/dtf/discovery";
-export { getAssetList as getIndexDtfAssetList } from "@/index-dtf/assets/index";
+export { getAssetList as getIndexDtfAssetList } from "@/client/api/assets";
 export { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 export { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 export {
@@ -193,18 +193,60 @@ export {
   getVoteLockDao as getIndexDtfVoteLockDao,
   getVoteLockDaos as getIndexDtfVoteLockDaos,
   getVoteLockState as getIndexDtfVoteLockState,
-  prepareVoteLockApproval,
+  readVoteLockAllRewardTokens,
+  readVoteLockAllowance,
+  readVoteLockAsset,
+  readVoteLockBalanceOf,
+  readVoteLockCheckpoint,
+  readVoteLockClock,
+  readVoteLockClockMode,
+  readVoteLockConvertToAssets,
+  readVoteLockConvertToShares,
+  readVoteLockDelegates,
+  readVoteLockDisallowedRewardToken,
+  readVoteLockGetPastTotalSupply,
+  readVoteLockGetPastVotes,
+  readVoteLockGetVotes,
+  readVoteLockLock,
+  readVoteLockMaxDeposit,
+  readVoteLockMaxMint,
+  readVoteLockMaxRedeem,
+  readVoteLockMaxWithdraw,
+  readVoteLockNumCheckpoints,
+  readVoteLockOptimisticDelegates,
+  readVoteLockOptimisticVotes,
+  readVoteLockPastOptimisticVotes,
+  readVoteLockPreviewDeposit,
+  readVoteLockPreviewMint,
+  readVoteLockPreviewRedeem,
+  readVoteLockPreviewWithdraw,
+  readVoteLockRewardRatio,
+  readVoteLockRewardTracker,
+  readVoteLockTotalAssets,
+  readVoteLockTotalSupply,
+  readVoteLockUnderlyingBalance,
+  readVoteLockUnstakingDelay,
+  readVoteLockUnstakingManager,
+  readVoteLockUnstakingTargetToken,
+  readVoteLockUnstakingVault,
+  readVoteLockUserRewardTracker,
+  prepareVoteLockAddRewardToken,
+  prepareVoteLockCancelLock,
+  prepareVoteLockClaimLock,
   prepareVoteLockClaimRewards,
-  prepareVoteLockClaimWithdrawal,
   prepareVoteLockDelegate,
   prepareVoteLockDelegateOptimistic,
   prepareVoteLockDeposit,
   prepareVoteLockDepositPlan,
-  prepareVoteLockUnlock,
+  prepareVoteLockPoke,
+  prepareVoteLockRemoveRewardToken,
+  prepareVoteLockSetRewardRatio,
+  prepareVoteLockSetUnstakingDelay,
+  prepareVoteLockWithdraw,
 } from "@/index-dtf/vote-lock/index";
 
 export type * from "@/index-dtf/dtf/discovery";
-export type * from "@/index-dtf/assets/index";
+export type { Asset, GetAssetListParams } from "@/types/api";
 export type * from "@/index-dtf/dtf/exposure";
 export type * from "@/index-dtf/dtf/holders";
 export type * from "@/index-dtf/dtf/issuance";

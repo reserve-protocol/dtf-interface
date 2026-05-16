@@ -97,7 +97,7 @@ function normalizeSelectorData(
   selectorData: readonly IndexDtfSelectorData[],
 ): readonly { readonly target: Address; readonly selectors: readonly Hex[] }[] {
   return selectorData.map((data) => ({
-    target: getAddress(data.target),
+    target: data.target,
     selectors: data.selectors.map(normalizeSelector),
   }));
 }

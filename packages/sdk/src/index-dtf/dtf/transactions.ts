@@ -5,7 +5,6 @@ import type { Amount } from "@/types/common";
 import type { IndexDtfInput } from "@/types/index-dtf";
 
 import { GetIndexDtfTransactionsDocument } from "@/index-dtf/subgraph/dtf.generated";
-import { getIndexDtfIdentity } from "@/index-dtf/utils";
 import { mapAmount } from "@/lib/utils";
 
 export type IndexDtfTransactionType = "mint" | "redeem" | "transfer";
@@ -36,9 +35,9 @@ export async function getIndexDtfTransactions(
   client: DtfClient,
   params: GetIndexDtfTransactionsParams,
 ): Promise<readonly IndexDtfTransaction[]> {
-  const { address, chainId } = getIndexDtfIdentity(params);
+  const address = getAddress("id" in params ? params.id : params.address);
   const response = await client.subgraph.queryIndex({
-    chainId,
+    chainId: params.chainId,
     query: GetIndexDtfTransactionsDocument,
     variables: {
       dtf: address.toLowerCase(),
@@ -56,7 +55,7 @@ export async function getIndexDtfTransactions(
       amount,
       ...(params.dtfPriceUsd === undefined ? {} : { amountUsd: Number(amount.formatted) * params.dtfPriceUsd }),
       timestamp: Number(event.timestamp),
-      chainId,
+      chainId: params.chainId,
       ...(event.to?.id ? { to: getAddress(event.to.id) } : {}),
       ...(event.from?.id ? { from: getAddress(event.from.id) } : {}),
       type: mapTransactionType(event.type),

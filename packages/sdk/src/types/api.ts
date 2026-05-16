@@ -2,7 +2,7 @@ import type { Address } from "viem";
 
 import type { SupportedChainId } from "@/config";
 import type { GetOptions, PostOptions } from "@/transports/api";
-import type { DtfStatus, GetTokenPricesParams, TokenPrice } from "@/types/common";
+import type { DtfStatus, GetTokenPricesParams, TokenPrice, TokenVolatility } from "@/types/common";
 
 export type ReserveApiDtfBasketToken = {
   readonly address: string;
@@ -169,6 +169,88 @@ export type GetDiscoverDtfsOptions = {
   readonly limit?: number;
   readonly offset?: number;
   readonly sort?: string;
+};
+
+export type GetAssetListParams = {
+  readonly chainId: SupportedChainId;
+  readonly unfiltered: boolean;
+};
+
+export type Asset = {
+  readonly chainId: SupportedChainId;
+  readonly decimals: number;
+  readonly volatility: TokenVolatility;
+  readonly address: Address;
+  readonly name: string;
+  readonly symbol: string;
+};
+
+export type PortfolioPeriod = "24h" | "7d" | "1m" | "3m" | "1y" | "all";
+
+export type PortfolioReward = {
+  readonly address: Address;
+  readonly chainId: number;
+  readonly symbol: string;
+  readonly name: string;
+  readonly decimals: number;
+  readonly amount: string;
+  readonly value: number;
+};
+
+export type PortfolioVoteLock = {
+  readonly stTokenAddress: Address;
+  readonly chainId: number;
+  readonly name: string;
+  readonly symbol: string;
+  readonly underlying: { readonly address: Address; readonly symbol: string; readonly name: string };
+  readonly dtfs: readonly { readonly address: Address; readonly name: string; readonly symbol: string }[];
+  readonly apy: number;
+  readonly amount: string;
+  readonly value: number;
+  readonly votingPower: string;
+  readonly delegation?: Address;
+  readonly rewards: readonly PortfolioReward[];
+  readonly locks: readonly {
+    readonly lockId: string;
+    readonly amount: string;
+    readonly unlockTime: number;
+    readonly delay: number;
+    readonly value: number;
+  }[];
+  readonly votingWeight: number;
+  readonly activeProposals: readonly unknown[];
+};
+
+export type PortfolioIndexDtf = {
+  readonly address: Address;
+  readonly chainId: number;
+  readonly name: string;
+  readonly symbol: string;
+  readonly amount: string;
+  readonly value: number;
+};
+
+export type AccountPortfolio = {
+  readonly totalHoldingsUSD: number;
+  readonly indexDTFs: readonly PortfolioIndexDtf[];
+  readonly voteLocks: readonly PortfolioVoteLock[];
+};
+
+export type PortfolioTransaction = {
+  readonly chainId: number;
+  readonly timestamp: number;
+  readonly block: number;
+  readonly txHash: string;
+  readonly protocol: string;
+  readonly type: string;
+  readonly title: string;
+  readonly description: string;
+  readonly token: {
+    readonly address: Address;
+    readonly symbol: string;
+    readonly underlying?: { readonly address: Address; readonly symbol: string };
+  } | null;
+  readonly proposalId?: string;
 };
 
 export type DtfClientApi = {

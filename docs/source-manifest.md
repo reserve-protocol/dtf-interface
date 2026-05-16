@@ -107,7 +107,7 @@ Use public docs for concepts and user-facing language. Verify technical claims b
 | Index DTF mint/redeem | `reserve-index-dtf/contracts/Folio.sol` | `register/src/views/index-dtf/issuance/*` |
 | Index DTF fees | `reserve-index-dtf/contracts/utils/FolioLib.sol` | `register/src/views/index-dtf/settings/*` |
 | Index DTF auctions | `reserve-index-dtf/contracts/utils/RebalancingLib.sol` | `register/src/views/index-dtf/governance/views/propose/basket/*` |
-| Index DTF versions | `reserve-index-dtf/CHANGELOG.md` | `dtf-sdk/packages/sdk/src/index-dtf/versions.ts` |
+| Index DTF versions | `reserve-index-dtf/CHANGELOG.md` | `dtf-sdk/packages/sdk/src/index-dtf/governance/propose/calls.ts` |
 | Register routes | `register/src/app-routes.tsx` | `register/docs/*` |
 | Register discovery | `register/src/hooks/useIndexDTFList.ts` | `dtf-sdk/packages/sdk/src/index-dtf/dtf/discovery.ts` |
 | Proposal UI state | `register/src/lib/governance.ts` | `dtf-index-subgraph/src/governance/*` |

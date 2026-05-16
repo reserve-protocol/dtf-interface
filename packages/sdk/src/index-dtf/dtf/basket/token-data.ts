@@ -12,8 +12,8 @@ import {
   type IndexDtfBasketTokenInput,
 } from "@/index-dtf/dtf/basket/types";
 import { assertPositiveNumber } from "@/index-dtf/dtf/basket/validation";
-import { getTokensData } from "@/tokens/index";
-import { getTokenPrices, getTokenVolatilities } from "@/tokens/prices";
+import { getTokensData } from "@/lib/tokens";
+import { getTokenPrices, getTokenVolatilities } from "@/lib/tokens/prices";
 
 export async function getBasketTokens(
   client: DtfClient,

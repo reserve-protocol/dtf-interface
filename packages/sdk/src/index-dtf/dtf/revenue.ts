@@ -11,7 +11,7 @@ import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vaul
 import { getDtf, getPrice } from "@/index-dtf/dtf/index";
 import { Decimal } from "@/lib/decimal";
 import { mapAmount } from "@/lib/utils";
-import { getTokensData } from "@/tokens/index";
+import { getTokensData } from "@/lib/tokens";
 
 export type IndexDtfPlatformFee = {
   readonly registry: Address;

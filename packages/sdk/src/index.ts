@@ -30,6 +30,14 @@ export type {
   TokenPriceWithSnapshot,
 } from "@/client/api";
 export type {
+  AccountPortfolio,
+  PortfolioIndexDtf,
+  PortfolioPeriod,
+  PortfolioReward,
+  PortfolioTransaction,
+  PortfolioVoteLock,
+} from "@/types/api";
+export type {
   DtfClientReadContractParameters,
   DtfClientViem,
   DtfClientViemChainConfig,
@@ -221,16 +229,58 @@ export {
   prepareIndexDtfVote,
   prepareIndexDtfVoteWithReason,
   prepareIndexDtfVoteWithReasonAndParams,
+  readVoteLockAllRewardTokens,
+  readVoteLockAllowance,
+  readVoteLockAsset,
+  readVoteLockBalanceOf,
+  readVoteLockCheckpoint,
+  readVoteLockClock,
+  readVoteLockClockMode,
+  readVoteLockConvertToAssets,
+  readVoteLockConvertToShares,
+  readVoteLockDelegates,
+  readVoteLockDisallowedRewardToken,
+  readVoteLockGetPastTotalSupply,
+  readVoteLockGetPastVotes,
+  readVoteLockGetVotes,
+  readVoteLockLock,
+  readVoteLockMaxDeposit,
+  readVoteLockMaxMint,
+  readVoteLockMaxRedeem,
+  readVoteLockMaxWithdraw,
+  readVoteLockNumCheckpoints,
+  readVoteLockOptimisticDelegates,
+  readVoteLockOptimisticVotes,
+  readVoteLockPastOptimisticVotes,
+  readVoteLockPreviewDeposit,
+  readVoteLockPreviewMint,
+  readVoteLockPreviewRedeem,
+  readVoteLockPreviewWithdraw,
+  readVoteLockRewardRatio,
+  readVoteLockRewardTracker,
+  readVoteLockTotalAssets,
+  readVoteLockTotalSupply,
+  readVoteLockUnderlyingBalance,
+  readVoteLockUnstakingDelay,
+  readVoteLockUnstakingManager,
+  readVoteLockUnstakingTargetToken,
+  readVoteLockUnstakingVault,
+  readVoteLockUserRewardTracker,
   prepareSelectorRegistryRegisterSelectors,
   prepareSelectorRegistryUnregisterSelectors,
-  prepareVoteLockApproval,
+  prepareVoteLockAddRewardToken,
+  prepareVoteLockCancelLock,
+  prepareVoteLockClaimLock,
   prepareVoteLockClaimRewards,
-  prepareVoteLockClaimWithdrawal,
   prepareVoteLockDelegate,
   prepareVoteLockDelegateOptimistic,
   prepareVoteLockDeposit,
   prepareVoteLockDepositPlan,
-  prepareVoteLockUnlock,
+  prepareVoteLockPoke,
+  prepareVoteLockRemoveRewardToken,
+  prepareVoteLockSetRewardRatio,
+  prepareVoteLockSetUnstakingDelay,
+  prepareVoteLockWithdraw,
   resolveIndexDtfAlias,
 } from "@/index-dtf/index";
 export {
@@ -238,12 +288,11 @@ export {
   getAccountPortfolio,
   getAccountPortfolioHistory,
   getAccountPortfolioTransactions,
-} from "@/portfolio/index";
-export { getTokenData, getTokenPrices, getTokenVolatilities, getTokensData } from "@/tokens/index";
+} from "@/client/api/portfolio";
+export { getTokenData, getTokenPrices, getTokenVolatilities, getTokensData } from "@/lib/tokens";
 export type { IndexDtfRef } from "@/index-dtf/index";
 export type * from "@/index-dtf/dtf/basket/index";
 export type * from "@/index-dtf/governance/propose/index";
 export type * from "@/index-dtf/index";
-export type * from "@/portfolio/index";
 export type * from "@/types/index";
 export type { DiscoverDtf, GetDiscoverDtfsOptions } from "@/types/api";

@@ -140,7 +140,6 @@ Avoid generic rebalance frameworks unless a concrete consumer needs one.
 - `register/src/views/index-dtf/governance/views/propose/basket/*`
 - `dtf-sdk/packages/sdk/src/index-dtf/dtf/basket/*`
 - `dtf-sdk/packages/sdk/src/index-dtf/rebalance/*`
-- `dtf-sdk/packages/sdk/src/index-dtf/versions.ts`
 
 ## Do Not Infer
 

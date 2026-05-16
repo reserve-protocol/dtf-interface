@@ -4,7 +4,7 @@ import type { IndexDtfCall } from "@/types/governance";
 import type { IndexDtf } from "@/types/index-dtf";
 
 import { SdkError } from "@/lib/errors";
-import { prepareIndexDtfSetFeeRecipients, type IndexDtfWriteVersion } from "@/index-dtf/governance/propose/calls";
+import { prepareIndexDtfSetFeeRecipients } from "@/index-dtf/governance/propose/calls";
 import { Decimal } from "@/lib/decimal";
 
 const MAX_FEE_RECIPIENTS = 64;
@@ -42,7 +42,7 @@ export function prepareRevenueDistribution(
   chainId: IndexDtf["chainId"],
   dtf: IndexDtf | undefined,
   distribution: IndexDtfRevenueDistributionInput | undefined,
-  version: IndexDtfWriteVersion,
+  version: "5.0.0" | "6.0.0",
 ): RevenueDistributionCall | undefined {
   if (!distribution) {
     return undefined;

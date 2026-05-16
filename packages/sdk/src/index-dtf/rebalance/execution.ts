@@ -144,8 +144,8 @@ export function prepareIndexDtfBid(params: PrepareIndexDtfBidParams) {
     functionName: "bid",
     args: [
       params.auctionId,
-      getAddress(params.sellToken),
-      getAddress(params.buyToken),
+      params.sellToken,
+      params.buyToken,
       params.sellAmount,
       params.maxBuyAmount,
       params.withCallback ?? false,

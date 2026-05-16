@@ -1,19 +1,18 @@
 import { erc20Abi, getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
-import type { SupportedChainId } from "@/config";
-import type { ContractCallPlan } from "@/lib/contract-call";
 import type { Amount, Token } from "@/types/common";
 import type { IndexDtf } from "@/types/index-dtf";
 
-import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
-import { SdkError } from "@/lib/errors";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
-import { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
 import { getDtf } from "@/index-dtf/dtf/index";
-import { isUnsupportedVoteLockOptimisticReadError } from "@/index-dtf/optimistic-errors";
+import { isUnsupportedVoteLockOptimisticReadError } from "@/index-dtf/governance/optimistic-errors";
+import { SdkError } from "@/lib/errors";
 import { mapAmount } from "@/lib/utils";
+
+export * from "@/index-dtf/vote-lock/builders";
+export * from "@/index-dtf/vote-lock/reads";
 
 export type VoteLockDao = {
   readonly chainId: number;
@@ -32,18 +31,6 @@ export type VoteLockDao = {
   readonly apr: number;
 };
 
-type RawToken = Omit<Token, "address"> & { readonly address: string };
-type RawVoteLockDao = Omit<VoteLockDao, "token" | "underlying" | "rewards" | "dtfs"> & {
-  readonly token: RawToken;
-  readonly underlying: { readonly token: RawToken };
-  readonly rewards: readonly {
-    readonly token: RawToken;
-    readonly amount: number;
-    readonly amountUsd: number;
-  }[];
-  readonly dtfs: readonly RawToken[];
-};
-
 export type VoteLockState = {
   readonly stToken: Address;
   readonly underlying: Token;
@@ -60,21 +47,32 @@ export type VoteLockState = {
   readonly underlyingPrice?: number;
 };
 
-type VoteLockDepositInput = {
-  readonly stToken: Address;
-  readonly amount: bigint;
-} & ({ readonly delegateToSelf: true } | { readonly receiver: Address; readonly delegateToSelf?: false });
-
-export type PrepareVoteLockDepositParams = VoteLockDepositInput & {
-  readonly chainId: SupportedChainId;
+type RawToken = Omit<Token, "address"> & { readonly address: string };
+type RawVoteLockDao = Omit<VoteLockDao, "token" | "underlying" | "rewards" | "dtfs"> & {
+  readonly token: RawToken;
+  readonly underlying: { readonly token: RawToken };
+  readonly rewards: readonly {
+    readonly token: RawToken;
+    readonly amount: number;
+    readonly amountUsd: number;
+  }[];
+  readonly dtfs: readonly RawToken[];
 };
 
-export type PrepareVoteLockDepositPlanParams = PrepareVoteLockDepositParams & {
-  readonly approval?: {
-    readonly underlying: Address;
-    readonly amount: bigint;
-  };
-};
+type VoteLockMulticallResult<T> =
+  | { readonly status: "success"; readonly result: T }
+  | { readonly status: "failure"; readonly error: Error };
+
+type VoteLockStateMulticallResults = readonly [
+  VoteLockMulticallResult<bigint>,
+  VoteLockMulticallResult<bigint>,
+  VoteLockMulticallResult<Address>,
+  VoteLockMulticallResult<bigint>,
+  VoteLockMulticallResult<bigint>,
+  VoteLockMulticallResult<Address>,
+  VoteLockMulticallResult<Address>,
+  VoteLockMulticallResult<bigint>,
+];
 
 /** Reads all Index DTF vote-lock DAO/APR rows from Reserve API. */
 export async function getVoteLockDaos(client: DtfClient): Promise<readonly VoteLockDao[]> {
@@ -118,206 +116,110 @@ export async function getVoteLockState(
     });
   }
 
-  const account = getAddress(params.account);
+  const account = params.account;
   const stToken = vault.token.address;
   const underlying = vault.underlying;
+  const prices = await client.api.getTokenPrices({
+    chainId: params.chainId,
+    addresses: [underlying.address],
+  });
   const [
-    balance,
-    allowance,
-    delegate,
-    maxWithdraw,
-    unstakingDelay,
-    unstakingManager,
-    optimisticDelegate,
-    optimisticVotingPower,
-    prices,
-  ] = await Promise.all([
-    client.viem.readContract({
-      address: underlying.address,
-      abi: erc20Abi,
-      functionName: "balanceOf",
-      args: [account],
-      chainId: params.chainId,
-    }),
-    client.viem.readContract({
-      address: underlying.address,
-      abi: erc20Abi,
-      functionName: "allowance",
-      args: [account, stToken],
-      chainId: params.chainId,
-    }),
-    client.viem.readContract({
-      address: stToken,
-      abi: dtfIndexStakingVaultAbi,
-      functionName: "delegates",
-      args: [account],
-      chainId: params.chainId,
-    }),
-    client.viem.readContract({
-      address: stToken,
-      abi: dtfIndexStakingVaultAbi,
-      functionName: "maxWithdraw",
-      args: [account],
-      chainId: params.chainId,
-    }),
-    client.viem.readContract({
-      address: stToken,
-      abi: dtfIndexStakingVaultAbi,
-      functionName: "unstakingDelay",
-      chainId: params.chainId,
-    }),
-    client.viem.readContract({
-      address: stToken,
-      abi: dtfIndexStakingVaultAbi,
-      functionName: "unstakingManager",
-      chainId: params.chainId,
-    }),
-    readOptimisticDelegate(client, params.chainId, stToken, account),
-    readOptimisticVotingPower(client, params.chainId, stToken, account),
-    client.api.getTokenPrices({
-      chainId: params.chainId,
-      addresses: [underlying.address],
-    }),
-  ]);
+    balanceResult,
+    allowanceResult,
+    delegateResult,
+    maxWithdrawResult,
+    unstakingDelayResult,
+    unstakingManagerResult,
+    optimisticDelegateResult,
+    optimisticVotingPowerResult,
+  ] = (await client.viem.getPublicClient(params.chainId).multicall({
+    allowFailure: true,
+    contracts: [
+      {
+        address: underlying.address,
+        abi: erc20Abi,
+        functionName: "balanceOf",
+        args: [account],
+      },
+      {
+        address: underlying.address,
+        abi: erc20Abi,
+        functionName: "allowance",
+        args: [account, stToken],
+      },
+      {
+        address: stToken,
+        abi: dtfIndexStakingVaultAbi,
+        functionName: "delegates",
+        args: [account],
+      },
+      {
+        address: stToken,
+        abi: dtfIndexStakingVaultAbi,
+        functionName: "maxWithdraw",
+        args: [account],
+      },
+      {
+        address: stToken,
+        abi: dtfIndexStakingVaultAbi,
+        functionName: "unstakingDelay",
+      },
+      {
+        address: stToken,
+        abi: dtfIndexStakingVaultAbi,
+        functionName: "unstakingManager",
+      },
+      {
+        address: stToken,
+        abi: dtfIndexStakingVaultOptimisticAbi,
+        functionName: "optimisticDelegates",
+        args: [account],
+      },
+      {
+        address: stToken,
+        abi: dtfIndexStakingVaultOptimisticAbi,
+        functionName: "getOptimisticVotes",
+        args: [account],
+      },
+    ],
+  })) as VoteLockStateMulticallResults;
+
+  if (balanceResult.status === "failure") throw balanceResult.error;
+  if (allowanceResult.status === "failure") throw allowanceResult.error;
+  if (delegateResult.status === "failure") throw delegateResult.error;
+  if (maxWithdrawResult.status === "failure") throw maxWithdrawResult.error;
+  if (unstakingDelayResult.status === "failure") throw unstakingDelayResult.error;
+  if (unstakingManagerResult.status === "failure") throw unstakingManagerResult.error;
+  if (optimisticDelegateResult.status === "failure" && !isUnsupportedVoteLockOptimisticReadError(optimisticDelegateResult.error)) {
+    throw optimisticDelegateResult.error;
+  }
+  if (
+    optimisticVotingPowerResult.status === "failure" &&
+    !isUnsupportedVoteLockOptimisticReadError(optimisticVotingPowerResult.error)
+  ) {
+    throw optimisticVotingPowerResult.error;
+  }
+
+  const optimisticDelegate = optimisticDelegateResult.status === "success" ? optimisticDelegateResult.result : null;
+  const optimisticVotingPower =
+    optimisticVotingPowerResult.status === "success" ? optimisticVotingPowerResult.result : null;
 
   return {
     stToken,
     underlying,
     account,
-    underlyingBalance: mapAmount(balance, underlying.decimals),
-    underlyingAllowance: mapAmount(allowance, underlying.decimals),
-    delegate,
+    underlyingBalance: mapAmount(balanceResult.result, underlying.decimals),
+    underlyingAllowance: mapAmount(allowanceResult.result, underlying.decimals),
+    delegate: delegateResult.result,
     optimisticDelegate,
-    maxWithdraw: mapAmount(maxWithdraw, underlying.decimals),
+    maxWithdraw: mapAmount(maxWithdrawResult.result, underlying.decimals),
     optimisticVotingPower:
       optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower),
     hasOptimisticVotingPower: (optimisticVotingPower ?? 0n) > 0n,
-    unstakingDelay,
-    unstakingManager,
+    unstakingDelay: unstakingDelayResult.result,
+    unstakingManager: unstakingManagerResult.result,
     ...(prices[0] ? { underlyingPrice: prices[0].price } : {}),
   };
-}
-
-/** Prepares underlying-token approval call for a vote-lock deposit. */
-export function prepareVoteLockApproval(params: {
-  readonly underlying: Address;
-  readonly stToken: Address;
-  readonly chainId: SupportedChainId;
-  readonly amount: bigint;
-}) {
-  return prepareErc20Approval({
-    chainId: params.chainId,
-    token: params.underlying,
-    spender: params.stToken,
-    amount: params.amount,
-  });
-}
-
-/** Prepares a staking-vault deposit call, optionally self-delegating voting power. */
-export function prepareVoteLockDeposit(params: PrepareVoteLockDepositParams) {
-  if (params.delegateToSelf) {
-    throwIfReceiverIsUnused(params);
-
-    return prepareContractCall({
-      chainId: params.chainId,
-      address: params.stToken,
-      abi: dtfIndexStakingVaultAbi,
-      functionName: "depositAndDelegate",
-      args: [params.amount] as const,
-    });
-  }
-
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.stToken,
-    abi: dtfIndexStakingVaultAbi,
-    functionName: "deposit",
-    args: [params.amount, getAddress(params.receiver)] as const,
-  });
-}
-
-/** Prepares approval + deposit calls for vote-lock deposits. */
-export function prepareVoteLockDepositPlan(
-  params: PrepareVoteLockDepositPlanParams,
-): ContractCallPlan<ReturnType<typeof prepareVoteLockDeposit>, ReturnType<typeof prepareVoteLockApproval>> {
-  const call = prepareVoteLockDeposit(params);
-
-  if (!params.approval) {
-    return { type: "call", call };
-  }
-
-  return {
-    type: "approval-required",
-    approvals: [
-      prepareVoteLockApproval({
-        chainId: params.chainId,
-        underlying: params.approval.underlying,
-        stToken: params.stToken,
-        amount: params.approval.amount,
-      }),
-    ],
-    call,
-  };
-}
-
-function throwIfReceiverIsUnused(params: VoteLockDepositInput) {
-  if (params.delegateToSelf && "receiver" in params) {
-    throw new SdkError({
-      code: "INVALID_INPUT",
-      message: "receiver is not used for depositAndDelegate",
-      meta: { receiver: params.receiver },
-    });
-  }
-}
-
-async function readOptimisticDelegate(
-  client: DtfClient,
-  chainId: SupportedChainId,
-  stToken: Address,
-  account: Address,
-) {
-  try {
-    const delegate = await client.viem.readContract({
-      chainId,
-      address: stToken,
-      abi: dtfIndexStakingVaultOptimisticAbi,
-      functionName: "optimisticDelegates",
-      args: [account],
-    });
-
-    return delegate;
-  } catch (error) {
-    if (!isUnsupportedVoteLockOptimisticReadError(error)) {
-      throw error;
-    }
-
-    return null;
-  }
-}
-
-async function readOptimisticVotingPower(
-  client: DtfClient,
-  chainId: SupportedChainId,
-  stToken: Address,
-  account: Address,
-) {
-  try {
-    const votes = await client.viem.readContract({
-      chainId,
-      address: stToken,
-      abi: dtfIndexStakingVaultOptimisticAbi,
-      functionName: "getOptimisticVotes",
-      args: [account],
-    });
-
-    return votes ?? null;
-  } catch (error) {
-    if (!isUnsupportedVoteLockOptimisticReadError(error)) {
-      throw error;
-    }
-
-    return null;
-  }
 }
 
 function mapVoteLockDao(dao: RawVoteLockDao): VoteLockDao {
@@ -338,82 +240,4 @@ function mapToken(token: RawToken): Token {
     ...token,
     address: getAddress(token.address),
   };
-}
-
-/** Prepares a staking-vault delegation call. */
-export function prepareVoteLockDelegate(params: {
-  readonly stToken: Address;
-  readonly chainId: SupportedChainId;
-  readonly delegatee: Address;
-}) {
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.stToken,
-    abi: dtfIndexStakingVaultAbi,
-    functionName: "delegate",
-    args: [getAddress(params.delegatee)] as const,
-  });
-}
-
-/** Prepares a staking-vault optimistic delegation call used for veto power. */
-export function prepareVoteLockDelegateOptimistic(params: {
-  readonly stToken: Address;
-  readonly chainId: SupportedChainId;
-  readonly delegatee: Address;
-}) {
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.stToken,
-    abi: dtfIndexStakingVaultOptimisticAbi,
-    functionName: "delegateOptimistic",
-    args: [getAddress(params.delegatee)] as const,
-  });
-}
-
-/** Prepares a staking-vault withdraw call that starts an unlock when delay is enabled. */
-export function prepareVoteLockUnlock(params: {
-  readonly stToken: Address;
-  readonly chainId: SupportedChainId;
-  readonly amount: bigint;
-  readonly account: Address;
-}) {
-  const account = getAddress(params.account);
-
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.stToken,
-    abi: dtfIndexStakingVaultAbi,
-    functionName: "withdraw",
-    args: [params.amount, account, account] as const,
-  });
-}
-
-/** Prepares a staking-vault reward claim call. */
-export function prepareVoteLockClaimRewards(params: {
-  readonly stToken: Address;
-  readonly chainId: SupportedChainId;
-  readonly rewardTokens: readonly Address[];
-}) {
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.stToken,
-    abi: dtfIndexStakingVaultAbi,
-    functionName: "claimRewards",
-    args: [params.rewardTokens.map((token) => getAddress(token))] as const,
-  });
-}
-
-/** Prepares an unstaking-manager `claimLock(lockId)` call. */
-export function prepareVoteLockClaimWithdrawal(params: {
-  readonly unstakingManager: Address;
-  readonly chainId: SupportedChainId;
-  readonly lockId: bigint;
-}) {
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.unstakingManager,
-    abi: unstakingManagerAbi,
-    functionName: "claimLock",
-    args: [params.lockId] as const,
-  });
 }

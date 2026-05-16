@@ -92,6 +92,6 @@ export function prepareErc20Approval(params: {
     address: params.token,
     abi: erc20Abi,
     functionName: "approve",
-    args: [getAddress(params.spender), params.amount] as const,
+    args: [params.spender, params.amount] as const,
   });
 }

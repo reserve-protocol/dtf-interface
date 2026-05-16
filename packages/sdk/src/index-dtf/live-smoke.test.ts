@@ -12,6 +12,7 @@ import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { DEFAULT_INDEX_DTF_DEPLOY_FLAGS } from "@/index-dtf/deploy/index";
+import { prepareErc20Approval } from "@/lib/contract-call";
 
 const BASE_CHAIN_ID = 8453;
 const SMOKE_ACCOUNT = "0x000000000000000000000000000000000000dEaD";
@@ -309,14 +310,14 @@ smokeDescribe("Index DTF live smoke", () => {
           assets: issuance.assets.map((asset) => asset.token.address),
           minAmountsOut: issuance.assets.map(() => 0n),
         });
-        const lockApproval = sdk.index.prepareVoteLockApproval({
+        const lockApproval = prepareErc20Approval({
           chainId: BASE_CHAIN_ID,
-          underlying: voteLockState.underlying.address,
-          stToken,
+          token: voteLockState.underlying.address,
+          spender: stToken,
           amount: 1n,
         });
         const lockDeposit = sdk.index.prepareVoteLockDeposit({ chainId: BASE_CHAIN_ID, stToken, amount: 1n, delegateToSelf: true });
-        const unlock = sdk.index.prepareVoteLockUnlock({ chainId: BASE_CHAIN_ID, stToken, amount: 1n, account: SMOKE_ACCOUNT });
+        const withdraw = sdk.index.prepareVoteLockWithdraw({ chainId: BASE_CHAIN_ID, stToken, amount: 1n, account: SMOKE_ACCOUNT });
         const delegate = sdk.index.prepareVoteLockDelegate({ chainId: BASE_CHAIN_ID, stToken, delegatee: SMOKE_ACCOUNT });
 
         expect(decodeFunctionData({ abi: dtfIndexAbi, data: distributeFees.data }).functionName).toBe("distributeFees");
@@ -325,7 +326,7 @@ smokeDescribe("Index DTF live smoke", () => {
         expect(decodeFunctionData({ abi: dtfIndexAbi, data: redeem.data }).functionName).toBe("redeem");
         expect(lockApproval.contract.functionName).toBe("approve");
         expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: lockDeposit.data }).functionName).toBe("depositAndDelegate");
-        expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: unlock.data }).functionName).toBe("withdraw");
+        expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: withdraw.data }).functionName).toBe("withdraw");
         expect(decodeFunctionData({ abi: dtfIndexStakingVaultAbi, data: delegate.data }).functionName).toBe("delegate");
       },
       180_000,

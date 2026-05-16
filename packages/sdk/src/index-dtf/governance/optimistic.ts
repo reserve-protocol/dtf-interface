@@ -16,7 +16,7 @@ import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-gove
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
 import { optimisticTimelockAbi } from "@/index-dtf/abis/optimistic-timelock";
-import { isUnsupportedOptimisticContractError } from "@/index-dtf/optimistic-errors";
+import { isUnsupportedOptimisticContractError } from "@/index-dtf/governance/optimistic-errors";
 import { getOptimisticVetoThresholdVotes } from "@/index-dtf/governance/utils";
 import { mapAmount } from "@/lib/utils";
 

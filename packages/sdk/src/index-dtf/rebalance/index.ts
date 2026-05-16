@@ -26,7 +26,6 @@ import {
   GetIndexDtfRebalanceAuctionsDocument,
   GetIndexDtfRebalancesDocument,
 } from "@/index-dtf/subgraph/dtf.generated";
-import { getIndexDtfIdentity } from "@/index-dtf/utils";
 
 export * from "@/index-dtf/rebalance/current";
 export * from "@/index-dtf/rebalance/execution";
@@ -38,9 +37,9 @@ export async function getRebalances(
   client: DtfClient,
   params: GetIndexDtfRebalancesParams,
 ): Promise<readonly IndexDtfRebalance[]> {
-  const { address, chainId } = getIndexDtfIdentity(params);
+  const address = getAddress("id" in params ? params.id : params.address);
   const response = await client.subgraph.queryIndex({
-    chainId,
+    chainId: params.chainId,
     query: GetIndexDtfRebalancesDocument,
     variables: {
       dtf: address.toLowerCase(),
@@ -57,10 +56,10 @@ export async function getCompletedRebalances(
   client: DtfClient,
   params: GetIndexDtfCompletedRebalancesParams,
 ): Promise<readonly IndexDtfCompletedRebalance[]> {
-  const { address, chainId } = getIndexDtfIdentity(params);
+  const address = getAddress("id" in params ? params.id : params.address);
   const rebalances = await client.api.getIndexDtfRebalanceHistory({
     address,
-    chainId,
+    chainId: params.chainId,
     ...(params.skip === undefined ? {} : { skip: params.skip }),
     ...(params.limit === undefined ? {} : { limit: params.limit }),
   });
@@ -73,10 +72,9 @@ export async function getCompletedRebalance(
   client: DtfClient,
   params: GetIndexDtfCompletedRebalanceParams,
 ): Promise<IndexDtfCompletedRebalanceDetail> {
-  const { address, chainId } = getIndexDtfIdentity(params);
   const rebalance = await client.api.getIndexDtfRebalanceDetail({
-    address,
-    chainId,
+    address: getAddress(params.address),
+    chainId: params.chainId,
     nonce: params.nonce,
   });
 

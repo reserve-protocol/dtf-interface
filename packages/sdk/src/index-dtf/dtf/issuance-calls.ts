@@ -1,4 +1,4 @@
-import { getAddress, type Address } from "viem";
+import type { Address } from "viem";
 
 import type { SupportedChainId } from "@/config";
 import type { ContractCallPlan } from "@/lib/contract-call";
@@ -110,7 +110,7 @@ function getMintArgs(params: {
   readonly receiver: Address;
   readonly minSharesOut: bigint;
 }): MintArgs {
-  return [params.shares, getAddress(params.receiver), params.minSharesOut] as const;
+  return [params.shares, params.receiver, params.minSharesOut] as const;
 }
 
 function getRedeemArgs(params: {
@@ -119,5 +119,5 @@ function getRedeemArgs(params: {
   readonly assets: readonly Address[];
   readonly minAmountsOut: readonly bigint[];
 }): RedeemArgs {
-  return [params.shares, getAddress(params.receiver), params.assets.map((address) => getAddress(address)), params.minAmountsOut] as const;
+  return [params.shares, params.receiver, params.assets, params.minAmountsOut] as const;
 }

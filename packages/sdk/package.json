@@ -1,5 +1,5 @@
 {
-  "name": "@dtf-interface/sdk",
+  "name": "@reserve-protocol/sdk",
   "version": "0.0.1",
   "description": "Core TypeScript SDK for DTF interface integrations.",
   "keywords": [
@@ -38,8 +38,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@dtf-interface/dtf-catalog": "workspace:*",
     "@graphql-typed-document-node/core": "^3.2.0",
+    "@reserve-protocol/dtf-catalog": "workspace:*",
     "@reserve-protocol/dtf-rebalance-lib": "^3.2.1",
     "decimal.js-light": "^2.5.1",
     "graphql": "^16.13.2",

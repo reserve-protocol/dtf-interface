@@ -1,4 +1,4 @@
-export * from "@dtf-interface/sdk";
+export * from "@reserve-protocol/sdk";
 export { useDtfSdk, DtfSdkProvider } from "@/provider";
 export type { DtfSdkProviderProps } from "@/provider";
 export { normalizeQueryKeyValue } from "@/normalize-query-key";

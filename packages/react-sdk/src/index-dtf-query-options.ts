@@ -1,4 +1,4 @@
-import type { DtfSdk } from "@dtf-interface/sdk";
+import type { DtfSdk } from "@reserve-protocol/sdk";
 import type { QueryKey } from "@tanstack/react-query";
 
 import type { DtfQueryOptions, DtfQueryOptionsResult } from "@/query-options";

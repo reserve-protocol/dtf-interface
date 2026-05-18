@@ -38,7 +38,7 @@ import type {
   IndexDtfProposerState,
   IndexDtfVoterState,
   ListIndexDtfsParams,
-} from "@dtf-interface/sdk";
+} from "@reserve-protocol/sdk";
 
 import { useQuery } from "@tanstack/react-query";
 

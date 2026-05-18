@@ -9,7 +9,7 @@
   "baseBranch": "main",
   "commit": false,
   "fixed": [],
-  "linked": [["@dtf-interface/sdk", "@dtf-interface/react-sdk"]],
+  "linked": [["@reserve-protocol/sdk", "@reserve-protocol/react-sdk"]],
   "access": "public",
   "updateInternalDependencies": "patch",
   "ignore": ["@dtf-interface/tsconfig"]

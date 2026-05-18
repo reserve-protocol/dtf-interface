@@ -1,6 +1,6 @@
 import { createContext, createElement, useContext, useMemo, type PropsWithChildren } from "react";
 
-import { createDtfSdk, type DtfSdk, type DtfSdkConfig } from "@dtf-interface/sdk";
+import { createDtfSdk, type DtfSdk, type DtfSdkConfig } from "@reserve-protocol/sdk";
 
 export type DtfSdkProviderProps = PropsWithChildren<
   DtfSdkConfig & {

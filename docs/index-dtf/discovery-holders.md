@@ -15,7 +15,7 @@ Register uses `/discover/dtfs?performance=true&brand=true`, filters `type === "i
 
 ### Catalog Discovery
 
-The SDK can expose catalog-backed entries from `@dtf-interface/dtf-catalog`. Catalog entries are static/product-curated and useful for aliases or known products, not a complete onchain deployment list.
+The SDK can expose catalog-backed entries from `@reserve-protocol/dtf-catalog`. Catalog entries are static/product-curated and useful for aliases or known products, not a complete onchain deployment list.
 
 ### Subgraph Fresh Discovery
 

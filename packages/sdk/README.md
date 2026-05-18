@@ -1,4 +1,4 @@
-# @dtf-interface/sdk
+# @reserve-protocol/sdk
 
 Core TypeScript SDK for DTF integrations.
 
@@ -12,7 +12,7 @@ Supported products and chains:
 ## Usage
 
 ```ts
-import { createDtfSdk } from "@dtf-interface/sdk";
+import { createDtfSdk } from "@reserve-protocol/sdk";
 
 const sdk = createDtfSdk();
 
@@ -35,7 +35,7 @@ const basketAtBlock = await cmc20.basket(123n);
 With explicit configuration:
 
 ```ts
-import { createDtfSdk } from "@dtf-interface/sdk";
+import { createDtfSdk } from "@reserve-protocol/sdk";
 
 const sdk = createDtfSdk({
   apiBaseUrl: "https://api.reserve.org",
@@ -80,7 +80,7 @@ This is intentionally not part of the normal test suite or CI path.
 SDK errors use stable machine-readable codes:
 
 ```ts
-import { isSdkError } from "@dtf-interface/sdk";
+import { isSdkError } from "@reserve-protocol/sdk";
 
 try {
   await sdk.index.get({ address, chainId });

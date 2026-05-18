@@ -22,9 +22,9 @@ import type {
   GetIndexDtfVoterStateParams,
   IndexDtf,
   ListIndexDtfsParams,
-} from "@dtf-interface/sdk";
+} from "@reserve-protocol/sdk";
 
-import { getIndexDtfProposalGovernanceAddresses } from "@dtf-interface/sdk";
+import { getIndexDtfProposalGovernanceAddresses } from "@reserve-protocol/sdk";
 
 import { normalizeQueryKeyValue } from "@/normalize-query-key";
 

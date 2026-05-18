@@ -41,7 +41,7 @@ import {
   type IndexDtfProposerState,
   type IndexDtfVoterState,
   type ListIndexDtfsParams,
-} from "@dtf-interface/sdk";
+} from "@reserve-protocol/sdk";
 
 import { dtfQueryKeys } from "@/query-keys";
 

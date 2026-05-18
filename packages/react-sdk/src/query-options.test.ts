@@ -1,4 +1,4 @@
-import type { DtfSdk } from "@dtf-interface/sdk";
+import type { DtfSdk } from "@reserve-protocol/sdk";
 
 import { describe, expect, it, vi } from "vitest";
 

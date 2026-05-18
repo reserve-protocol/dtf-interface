@@ -4,7 +4,7 @@ export default defineConfig({
   entry: ["./src/index.ts"],
   deps: {
     neverBundle: [
-      "@dtf-interface/dtf-catalog",
+      "@reserve-protocol/dtf-catalog",
       "@reserve-protocol/dtf-rebalance-lib",
       "decimal.js-light",
       "graphql",

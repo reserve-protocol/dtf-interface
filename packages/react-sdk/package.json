@@ -1,5 +1,5 @@
 {
-  "name": "@dtf-interface/react-sdk",
+  "name": "@reserve-protocol/react-sdk",
   "version": "0.0.1",
   "description": "React Query hooks for DTF interface integrations.",
   "keywords": [
@@ -35,7 +35,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@dtf-interface/sdk": "workspace:*"
+    "@reserve-protocol/sdk": "workspace:*"
   },
   "devDependencies": {
     "@dtf-interface/tsconfig": "workspace:*",

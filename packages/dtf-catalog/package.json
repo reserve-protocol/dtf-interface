@@ -1,7 +1,6 @@
 {
-  "name": "@dtf-interface/dtf-catalog",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@reserve-protocol/dtf-catalog",
+  "version": "0.0.1",
   "description": "Curated DTF catalog for yield and index DTFs.",
   "keywords": [
     "catalog",

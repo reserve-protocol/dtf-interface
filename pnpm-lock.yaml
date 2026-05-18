@@ -65,7 +65,7 @@ importers:
 
   packages/react-sdk:
     dependencies:
-      '@dtf-interface/sdk':
+      '@reserve-protocol/sdk':
         specifier: workspace:*
         version: link:../sdk
     devDependencies:
@@ -99,12 +99,12 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@dtf-interface/dtf-catalog':
-        specifier: workspace:*
-        version: link:../dtf-catalog
       '@graphql-typed-document-node/core':
         specifier: ^3.2.0
         version: 3.2.0(graphql@16.13.2)
+      '@reserve-protocol/dtf-catalog':
+        specifier: workspace:*
+        version: link:../dtf-catalog
       '@reserve-protocol/dtf-rebalance-lib':
         specifier: ^3.2.1
         version: 3.2.1(decimal.js-light@2.5.1)

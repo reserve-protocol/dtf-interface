@@ -7,7 +7,7 @@ export {
   default as dtfCatalog,
   indexDtfs as indexDtfCatalog,
   yieldDtfs as yieldDtfCatalog,
-} from "@dtf-interface/dtf-catalog";
+} from "@reserve-protocol/dtf-catalog";
 export type { DtfClient, DtfChainConfig, DtfClientConfig } from "@/client";
 export type {
   DtfClientApi,

@@ -1,4 +1,4 @@
-import { indexDtfs as indexDtfCatalog, type CatalogIndexDTF as CatalogIndexDtf } from "@dtf-interface/dtf-catalog";
+import { indexDtfs as indexDtfCatalog, type CatalogIndexDTF as CatalogIndexDtf } from "@reserve-protocol/dtf-catalog";
 import { getAddress, isAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";

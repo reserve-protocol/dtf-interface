@@ -164,10 +164,7 @@ export function prepareVoteLockSetUnstakingDelay(params: {
 }
 
 /** Prepares a staking-vault `poke` call. */
-export function prepareVoteLockPoke(params: {
-  readonly stToken: Address;
-  readonly chainId: SupportedChainId;
-}) {
+export function prepareVoteLockPoke(params: { readonly stToken: Address; readonly chainId: SupportedChainId }) {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.stToken,

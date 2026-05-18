@@ -88,8 +88,7 @@ export function createIndexDtfVoteLockNamespace(client: DtfClient) {
       readVoteLockGetPastTotalSupply(client, params),
     readVoteLockGetPastVotes: (params: Parameters<typeof readVoteLockGetPastVotes>[1]) =>
       readVoteLockGetPastVotes(client, params),
-    readVoteLockGetVotes: (params: Parameters<typeof readVoteLockGetVotes>[1]) =>
-      readVoteLockGetVotes(client, params),
+    readVoteLockGetVotes: (params: Parameters<typeof readVoteLockGetVotes>[1]) => readVoteLockGetVotes(client, params),
     readVoteLockLock: (params: Parameters<typeof readVoteLockLock>[1]) => readVoteLockLock(client, params),
     readVoteLockMaxDeposit: (params: Parameters<typeof readVoteLockMaxDeposit>[1]) =>
       readVoteLockMaxDeposit(client, params),

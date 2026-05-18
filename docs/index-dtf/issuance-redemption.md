@@ -83,14 +83,14 @@ The SDK should prepare approval calls, not send them.
 
 ## Data Needed
 
-| Need | Source |
-| --- | --- |
-| Basket assets/balances | RPC `totalAssets()` |
-| Per-share assets | RPC `toAssets(...)` or SDK calculation from live state |
-| User balances | RPC ERC20 `balanceOf` |
-| Allowances | RPC ERC20 `allowance` |
-| Current prices/display | Reserve API |
-| Deprecated/sell-only status | Reserve API discovery/status |
+| Need                        | Source                                                 |
+| --------------------------- | ------------------------------------------------------ |
+| Basket assets/balances      | RPC `totalAssets()`                                    |
+| Per-share assets            | RPC `toAssets(...)` or SDK calculation from live state |
+| User balances               | RPC ERC20 `balanceOf`                                  |
+| Allowances                  | RPC ERC20 `allowance`                                  |
+| Current prices/display      | Reserve API                                            |
+| Deprecated/sell-only status | Reserve API discovery/status                           |
 
 ## SDK Scope
 

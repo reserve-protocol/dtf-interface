@@ -88,14 +88,8 @@ describe("Index DTF proposal calldata decoder", () => {
       ]),
     });
 
-    expect(decoded.calls.map((call) => call.functionName)).toEqual([
-      "setProposalThrottle",
-      "registerSelectors",
-    ]);
-    expect(decoded.calls.map((call) => call.contract)).toEqual([
-      "Owner Governance",
-      "Selector Registry",
-    ]);
+    expect(decoded.calls.map((call) => call.functionName)).toEqual(["setProposalThrottle", "registerSelectors"]);
+    expect(decoded.calls.map((call) => call.contract)).toEqual(["Owner Governance", "Selector Registry"]);
     expect(decoded.unknownCalls).toEqual([]);
   });
 });

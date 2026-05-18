@@ -12,15 +12,8 @@ import { getVoteState } from "@/index-dtf/governance/utils";
 
 describe("Index DTF optimistic governance", () => {
   it("reads optimistic proposal veto context", async () => {
-    const multicall = vi.fn(async () => [
-      200000000000000000n,
-      100n,
-      "0x0000000000000000000000000000000000000002",
-    ]);
-    const readContract = vi
-      .fn()
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(100000000000000000000n);
+    const multicall = vi.fn(async () => [200000000000000000n, 100n, "0x0000000000000000000000000000000000000002"]);
+    const readContract = vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(100000000000000000000n);
     const client = {
       viem: {
         getPublicClient: vi.fn(() => ({ multicall })),

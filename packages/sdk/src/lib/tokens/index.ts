@@ -1,13 +1,13 @@
 import type { Address, PublicClient } from "viem";
+
 import { erc20Abi } from "viem";
+
 import type { Token } from "@/types/common";
+
 import { SdkError } from "@/lib/errors";
 export { getTokenPrices, getTokenVolatilities } from "@/lib/tokens/prices";
 
-export async function getTokenData(
-  publicClient: PublicClient,
-  address: Address,
-): Promise<Token> {
+export async function getTokenData(publicClient: PublicClient, address: Address): Promise<Token> {
   const [token] = await getTokensData(publicClient, [address]);
 
   if (!token) {

@@ -12,7 +12,6 @@ import type {
   IndexDtfRebalance,
 } from "@/index-dtf/rebalance/types";
 
-import { SdkError } from "@/lib/errors";
 import { getIndexDtfCurrentRebalance } from "@/index-dtf/rebalance/current";
 import {
   mapApiCompletedRebalance,
@@ -26,6 +25,7 @@ import {
   GetIndexDtfRebalanceAuctionsDocument,
   GetIndexDtfRebalancesDocument,
 } from "@/index-dtf/subgraph/dtf.generated";
+import { SdkError } from "@/lib/errors";
 
 export * from "@/index-dtf/rebalance/current";
 export * from "@/index-dtf/rebalance/execution";

@@ -1,14 +1,6 @@
 import { getAddress, type Address } from "viem";
 
 import type { ReserveApiIndexDtfRebalanceDetail } from "@/client/api";
-import type { Token } from "@/types/common";
-
-import { SdkError } from "@/lib/errors";
-import type {
-  GetIndexDtfRebalanceQuery,
-  GetIndexDtfRebalanceAuctionsQuery,
-  GetIndexDtfRebalancesQuery,
-} from "@/index-dtf/subgraph/dtf.generated";
 import type {
   IndexDtfAuction,
   IndexDtfBid,
@@ -16,6 +8,14 @@ import type {
   IndexDtfCompletedRebalanceDetail,
   IndexDtfRebalance,
 } from "@/index-dtf/rebalance/types";
+import type {
+  GetIndexDtfRebalanceQuery,
+  GetIndexDtfRebalanceAuctionsQuery,
+  GetIndexDtfRebalancesQuery,
+} from "@/index-dtf/subgraph/dtf.generated";
+import type { Token } from "@/types/common";
+
+import { SdkError } from "@/lib/errors";
 
 type ApiCompletedRebalance = {
   readonly nonce: number;
@@ -80,9 +80,7 @@ export function mapSubgraphAuction(auction: SubgraphAuction): IndexDtfAuction {
   };
 }
 
-export function mapApiCompletedRebalance(
-  rebalance: ApiCompletedRebalance,
-): IndexDtfCompletedRebalance {
+export function mapApiCompletedRebalance(rebalance: ApiCompletedRebalance): IndexDtfCompletedRebalance {
   return {
     nonce: rebalance.nonce,
     timestamp: rebalance.timestamp,
@@ -90,9 +88,7 @@ export function mapApiCompletedRebalance(
     ...numberField("totalRebalancedUsd", rebalance.totalRebalancedUsd),
     ...numberField("rebalanceGainLossUsd", rebalance.rebalanceGainLossUsd),
     ...numberField("rebalanceAccuracy", rebalance.rebalanceAccuracy),
-    ...(rebalance.isNative === null || rebalance.isNative === undefined
-      ? {}
-      : { isNative: rebalance.isNative }),
+    ...(rebalance.isNative === null || rebalance.isNative === undefined ? {} : { isNative: rebalance.isNative }),
   };
 }
 
@@ -134,9 +130,7 @@ function numberField<TKey extends string>(
   key: TKey,
   value: number | null | undefined,
 ): Record<TKey, number> | Record<string, never> {
-  return value === null || value === undefined
-    ? {}
-    : ({ [key]: value } as Record<TKey, number>);
+  return value === null || value === undefined ? {} : ({ [key]: value } as Record<TKey, number>);
 }
 
 function mapSubgraphBid(bid: SubgraphBid): IndexDtfBid {

@@ -23,10 +23,7 @@ export type GetIndexDtfCompletedRebalancesParams = IndexDtfInput & {
   readonly limit?: number;
 };
 
-export type GetIndexDtfCompletedRebalancesOptions = Pick<
-  GetIndexDtfCompletedRebalancesParams,
-  "skip" | "limit"
->;
+export type GetIndexDtfCompletedRebalancesOptions = Pick<GetIndexDtfCompletedRebalancesParams, "skip" | "limit">;
 
 export type GetIndexDtfRebalanceParams = {
   readonly id?: string;

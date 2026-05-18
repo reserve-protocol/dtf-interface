@@ -123,9 +123,10 @@ function mapHolder(
 ): IndexDtfHolder {
   const account = getAddress(holder.account.id);
   const balance = mapAmount(holder.amount, context.decimals);
-  const supplyPercent = context.totalSupply > 0n
-    ? new Decimal(balance.raw.toString()).mul(100).div(context.totalSupply.toString()).toNumber()
-    : 0;
+  const supplyPercent =
+    context.totalSupply > 0n
+      ? new Decimal(balance.raw.toString()).mul(100).div(context.totalSupply.toString()).toNumber()
+      : 0;
   const delegate = holder.delegate?.address ?? holder.delegate?.id;
 
   return {

@@ -21,9 +21,7 @@ describe("Index DTF selector registry", () => {
     const registry = "0x0000000000000000000000000000000000000001";
     const target = "0x0000000000000000000000000000000000000002";
 
-    await expect(
-      getSelectorRegistryTargets(client, { chainId: 1, registry }),
-    ).resolves.toEqual([target]);
+    await expect(getSelectorRegistryTargets(client, { chainId: 1, registry })).resolves.toEqual([target]);
     await expect(
       getSelectorRegistryAllowedSelectors(client, {
         chainId: 1,

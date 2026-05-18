@@ -4,12 +4,12 @@ Index DTF revenue starts with Folio fees and ends in configured recipients, DAO/
 
 ## Fee Types
 
-| Fee | Meaning |
-| --- | --- |
-| TVL fee | Annualized fee charged against Folio supply over time |
-| Mint fee | Fee charged when new shares are minted |
-| Folio self-fee | v6 mechanism for burning/not minting a portion of fee-recipient shares |
-| DAO/platform fee | Protocol-level cut configured through the DAO fee registry |
+| Fee              | Meaning                                                                |
+| ---------------- | ---------------------------------------------------------------------- |
+| TVL fee          | Annualized fee charged against Folio supply over time                  |
+| Mint fee         | Fee charged when new shares are minted                                 |
+| Folio self-fee   | v6 mechanism for burning/not minting a portion of fee-recipient shares |
+| DAO/platform fee | Protocol-level cut configured through the DAO fee registry             |
 
 Contract maximums should be verified against current source before enforcing them in SDK validation.
 

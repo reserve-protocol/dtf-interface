@@ -37,10 +37,7 @@ type ProposalVoteStateInput = Pick<
   | "voteEnd"
   | "voteStart"
 > & {
-  readonly optimistic?: Pick<
-    IndexDtfOptimisticProposalContext,
-    "snapshotSupply" | "vetoThreshold"
-  >;
+  readonly optimistic?: Pick<IndexDtfOptimisticProposalContext, "snapshotSupply" | "vetoThreshold">;
 };
 
 type MutableProposalVotingState = {
@@ -144,11 +141,9 @@ export function getVoteState(proposal: ProposalVoteStateInput, timestamp = getCu
   state.quorum = proposal.forWeightedVotes.raw > 0n && proposal.forWeightedVotes.raw >= proposal.quorumVotes.raw;
   state.forVotesReachedQuorum = state.quorum;
   state.participationQuorumReached =
-    proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw >=
-    proposal.quorumVotes.raw;
+    proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw >= proposal.quorumVotes.raw;
   state.vetoReached = proposal.optimistic
-    ? proposal.againstWeightedVotes.raw >=
-      getOptimisticVetoThresholdVotes(proposal.optimistic)
+    ? proposal.againstWeightedVotes.raw >= getOptimisticVetoThresholdVotes(proposal.optimistic)
     : false;
 
   if (totalVotes > 0n) {
@@ -191,13 +186,9 @@ function createInitialVotingState(state: ProposalState): MutableProposalVotingSt
 }
 
 export function getOptimisticVetoThresholdVotes(
-  optimistic: Pick<
-    IndexDtfOptimisticProposalContext,
-    "snapshotSupply" | "vetoThreshold"
-  >,
+  optimistic: Pick<IndexDtfOptimisticProposalContext, "snapshotSupply" | "vetoThreshold">,
 ): bigint {
-  const thresholdVotes =
-    (optimistic.vetoThreshold * optimistic.snapshotSupply.raw) / D18;
+  const thresholdVotes = (optimistic.vetoThreshold * optimistic.snapshotSupply.raw) / D18;
 
   return thresholdVotes > 0n ? thresholdVotes : 1n;
 }
@@ -211,8 +202,7 @@ function getOptimisticFinalState(proposal: ProposalVoteStateInput): ProposalStat
     return "CANCELED";
   }
 
-  return proposal.againstWeightedVotes.raw >=
-    getOptimisticVetoThresholdVotes(proposal.optimistic)
+  return proposal.againstWeightedVotes.raw >= getOptimisticVetoThresholdVotes(proposal.optimistic)
     ? "DEFEATED"
     : "SUCCEEDED";
 }

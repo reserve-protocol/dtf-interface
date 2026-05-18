@@ -4,15 +4,15 @@ Yield DTF data routing differs from Index DTF data routing.
 
 ## Source Rules
 
-| Data | Source |
-| --- | --- |
-| Current basket/backing | RPC/facade reads |
-| Current protocol status | RPC/facade/component reads |
-| Discovery | Yield subgraph plus supported-token registry |
-| Governance history | Yield subgraph |
-| Revenue/staking history | Yield subgraph |
-| Live staking balances | RPC |
-| Prices | source depends on surface; verify before use |
+| Data                    | Source                                       |
+| ----------------------- | -------------------------------------------- |
+| Current basket/backing  | RPC/facade reads                             |
+| Current protocol status | RPC/facade/component reads                   |
+| Discovery               | Yield subgraph plus supported-token registry |
+| Governance history      | Yield subgraph                               |
+| Revenue/staking history | Yield subgraph                               |
+| Live staking balances   | RPC                                          |
+| Prices                  | source depends on surface; verify before use |
 
 ## Stale Price Warning
 

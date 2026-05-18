@@ -21,11 +21,9 @@ import { isUnsupportedOptimisticContractError } from "@/index-dtf/governance/opt
 import { getOptimisticVetoThresholdVotes } from "@/index-dtf/governance/utils";
 import { mapAmount } from "@/lib/utils";
 
-export const OPTIMISTIC_PROPOSER_ROLE =
-  "0x26f49d08685d9cdd4951a7470bc8fbe9dd0f00419c1a44c1b89f845867ae12e0" as Hex;
+export const OPTIMISTIC_PROPOSER_ROLE = "0x26f49d08685d9cdd4951a7470bc8fbe9dd0f00419c1a44c1b89f845867ae12e0" as Hex;
 
-export const CANCELLER_ROLE =
-  "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783" as Hex;
+export const CANCELLER_ROLE = "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783" as Hex;
 
 export async function getOptimisticProposalContext(
   client: DtfClient,
@@ -57,30 +55,28 @@ export async function getOptimisticProposalContext(
     return null;
   }
 
-  const [vetoThreshold, snapshot, token] = (await client.viem
-    .getPublicClient(params.chainId)
-    .multicall({
-      allowFailure: false,
-      contracts: [
-        {
-          address: governance,
-          abi: dtfIndexGovernanceOptimisticAbi,
-          functionName: "vetoThreshold",
-          args: [proposalId],
-        },
-        {
-          address: governance,
-          abi: dtfIndexGovernanceOptimisticAbi,
-          functionName: "proposalSnapshot",
-          args: [proposalId],
-        },
-        {
-          address: governance,
-          abi: dtfIndexGovernanceOptimisticAbi,
-          functionName: "token",
-        },
-      ],
-    })) as readonly [bigint, bigint, Address];
+  const [vetoThreshold, snapshot, token] = (await client.viem.getPublicClient(params.chainId).multicall({
+    allowFailure: false,
+    contracts: [
+      {
+        address: governance,
+        abi: dtfIndexGovernanceOptimisticAbi,
+        functionName: "vetoThreshold",
+        args: [proposalId],
+      },
+      {
+        address: governance,
+        abi: dtfIndexGovernanceOptimisticAbi,
+        functionName: "proposalSnapshot",
+        args: [proposalId],
+      },
+      {
+        address: governance,
+        abi: dtfIndexGovernanceOptimisticAbi,
+        functionName: "token",
+      },
+    ],
+  })) as readonly [bigint, bigint, Address];
   const snapshotSupply = await client.viem.readContract({
     chainId: params.chainId,
     address: token,
@@ -109,55 +105,49 @@ export async function getOptimisticGovernance(
   params: GetIndexDtfOptimisticGovernanceParams,
 ): Promise<IndexDtfOptimisticGovernance> {
   const governance = getAddress(params.governance);
-  const [
-    lateQuorumVoteExtension,
-    proposalThrottleCapacity,
-    optimisticParams,
-    selectorRegistry,
-    token,
-    timelock,
-  ] = (await client.viem.getPublicClient(params.chainId).multicall({
-    allowFailure: false,
-    contracts: [
-      {
-        address: governance,
-        abi: dtfIndexGovernanceOptimisticAbi,
-        functionName: "lateQuorumVoteExtension",
-      },
-      {
-        address: governance,
-        abi: dtfIndexGovernanceOptimisticAbi,
-        functionName: "proposalThrottleCapacity",
-      },
-      {
-        address: governance,
-        abi: dtfIndexGovernanceOptimisticAbi,
-        functionName: "optimisticParams",
-      },
-      {
-        address: governance,
-        abi: dtfIndexGovernanceOptimisticAbi,
-        functionName: "selectorRegistry",
-      },
-      {
-        address: governance,
-        abi: dtfIndexGovernanceOptimisticAbi,
-        functionName: "token",
-      },
-      {
-        address: governance,
-        abi: dtfIndexGovernanceOptimisticAbi,
-        functionName: "timelock",
-      },
-    ],
-  })) as readonly [
-    number | bigint,
-    bigint,
-    readonly [number | bigint, number | bigint, bigint],
-    Address,
-    Address,
-    Address,
-  ];
+  const [lateQuorumVoteExtension, proposalThrottleCapacity, optimisticParams, selectorRegistry, token, timelock] =
+    (await client.viem.getPublicClient(params.chainId).multicall({
+      allowFailure: false,
+      contracts: [
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "lateQuorumVoteExtension",
+        },
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "proposalThrottleCapacity",
+        },
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "optimisticParams",
+        },
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "selectorRegistry",
+        },
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "token",
+        },
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "timelock",
+        },
+      ],
+    })) as readonly [
+      number | bigint,
+      bigint,
+      readonly [number | bigint, number | bigint, bigint],
+      Address,
+      Address,
+      Address,
+    ];
   const [vetoDelay, vetoPeriod, vetoThreshold] = optimisticParams;
   const roles = await getOptimisticTimelockRoles(client, {
     chainId: params.chainId,
@@ -210,12 +200,13 @@ export async function getOptimisticTimelockRoles(
     ...getRoleMemberCalls(timelock, OPTIMISTIC_PROPOSER_ROLE, optimisticProposerCount),
     ...getRoleMemberCalls(timelock, CANCELLER_ROLE, guardianCount),
   ];
-  const members = memberCalls.length === 0
-    ? []
-    : ((await publicClient.multicall({
-        allowFailure: false,
-        contracts: memberCalls,
-      })) as readonly Address[]);
+  const members =
+    memberCalls.length === 0
+      ? []
+      : ((await publicClient.multicall({
+          allowFailure: false,
+          contracts: memberCalls,
+        })) as readonly Address[]);
   const optimisticProposerCountNumber = Number(optimisticProposerCount);
   const optimisticProposers = members.slice(0, optimisticProposerCountNumber);
   const guardians = members.slice(optimisticProposerCountNumber);
@@ -238,10 +229,7 @@ export async function getProposalThrottleCharges(
   return charges;
 }
 
-export async function getOptimisticVotes(
-  client: DtfClient,
-  params: GetIndexDtfOptimisticVotesParams,
-): Promise<Amount> {
+export async function getOptimisticVotes(client: DtfClient, params: GetIndexDtfOptimisticVotesParams): Promise<Amount> {
   const votes = await client.viem.readContract({
     chainId: params.chainId,
     address: getAddress(params.voteToken),
@@ -257,9 +245,7 @@ export async function getPastOptimisticVotes(
   client: DtfClient,
   params: GetIndexDtfPastOptimisticVotesParams,
 ): Promise<Amount> {
-  const timepoint =
-    params.timepoint ??
-    (await getLatestBlockTimepoint(client.viem, params.chainId));
+  const timepoint = params.timepoint ?? (await getLatestBlockTimepoint(client.viem, params.chainId));
   const votes = await client.viem.readContract({
     chainId: params.chainId,
     address: getAddress(params.voteToken),
@@ -272,12 +258,16 @@ export async function getPastOptimisticVotes(
 }
 
 function getRoleMemberCalls(timelock: Address, role: Hex, count: bigint) {
-  return Array.from({ length: Number(count) }, (_, index) => ({
-    address: timelock,
-    abi: optimisticTimelockAbi,
-    functionName: "getRoleMember",
-    args: [role, BigInt(index)],
-  }) as const);
+  return Array.from(
+    { length: Number(count) },
+    (_, index) =>
+      ({
+        address: timelock,
+        abi: optimisticTimelockAbi,
+        functionName: "getRoleMember",
+        args: [role, BigInt(index)],
+      }) as const,
+  );
 }
 
 function toBigInt(value: number | bigint): bigint {

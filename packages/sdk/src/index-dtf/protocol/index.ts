@@ -38,7 +38,9 @@ export function getIndexDtfCatalogEntries(params: ListIndexDtfsParams = {}): rea
     .map((dtf) => ({ ...dtf, address: getAddress(dtf.address) }));
 }
 
-export function resolveIndexDtfAlias(params: ResolveIndexDtfAliasParams): ResolvedIndexDtfAlias | AmbiguousIndexDtfAlias | null {
+export function resolveIndexDtfAlias(
+  params: ResolveIndexDtfAliasParams,
+): ResolvedIndexDtfAlias | AmbiguousIndexDtfAlias | null {
   const input = params.input.trim().toLowerCase();
   if (!input) {
     return null;

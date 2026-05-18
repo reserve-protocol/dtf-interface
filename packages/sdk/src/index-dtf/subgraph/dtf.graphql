@@ -194,13 +194,7 @@ query GetIndexDtfProposals($governanceIds: [ID!]!, $limit: Int = 100) {
 }
 
 query GetAllIndexDtfProposals($limit: Int = 100, $offset: Int = 0, $where: Proposal_filter) {
-  proposals(
-    first: $limit
-    skip: $offset
-    orderBy: creationTime
-    orderDirection: desc
-    where: $where
-  ) {
+  proposals(first: $limit, skip: $offset, orderBy: creationTime, orderDirection: desc, where: $where) {
     id
     description
     creationTime

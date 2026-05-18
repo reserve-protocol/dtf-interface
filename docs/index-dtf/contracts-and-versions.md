@@ -4,16 +4,16 @@ Index DTF contracts are versioned. Source code can be ahead of live deployments,
 
 ## Core Contracts
 
-| Contract | Purpose |
-| --- | --- |
-| `Folio` | Main Index DTF ERC20, basket, mint/redeem, fees, rebalances, auctions, roles |
-| `FolioDeployer` | Deploys ungoverned and governed Folios |
-| `FolioVersionRegistry` | Tracks registered Folio implementations and latest version |
-| `FolioProxy` | Upgradeable proxy for Folio instances |
-| `FolioProxyAdmin` | Owns upgrade authority for a Folio proxy |
-| `FolioDAOFeeRegistry` | DAO/platform fee recipient, fee numerator, fee floor, per-Folio overrides |
-| `FolioGovernor` | Governor wrapper for governed deployments |
-| Staking vault | Vote-lock vault used by governed deployments; implementation comes from Reserve governor package |
+| Contract               | Purpose                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| `Folio`                | Main Index DTF ERC20, basket, mint/redeem, fees, rebalances, auctions, roles                     |
+| `FolioDeployer`        | Deploys ungoverned and governed Folios                                                           |
+| `FolioVersionRegistry` | Tracks registered Folio implementations and latest version                                       |
+| `FolioProxy`           | Upgradeable proxy for Folio instances                                                            |
+| `FolioProxyAdmin`      | Owns upgrade authority for a Folio proxy                                                         |
+| `FolioDAOFeeRegistry`  | DAO/platform fee recipient, fee numerator, fee floor, per-Folio overrides                        |
+| `FolioGovernor`        | Governor wrapper for governed deployments                                                        |
+| Staking vault          | Vote-lock vault used by governed deployments; implementation comes from Reserve governor package |
 
 ## Folio Responsibilities
 
@@ -32,12 +32,12 @@ Index DTF contracts are versioned. Source code can be ahead of live deployments,
 
 ## Roles
 
-| Role | Meaning |
-| --- | --- |
+| Role                 | Meaning                                                                                                                           |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `DEFAULT_ADMIN_ROLE` | Broad Folio admin. Can update settings, fees, roles, allowlists, deprecate, and own proxy admin flow through governed deployment. |
-| `REBALANCE_MANAGER` | Can start rebalances. Usually the trading/basket governance timelock. |
-| `AUCTION_LAUNCHER` | Can open restricted-window auctions and close/end through privileged checks. Usually semi-trusted launchers. |
-| `BRAND_MANAGER` | Offchain/product role. Used by Register/brand metadata flows, not core onchain basket control. |
+| `REBALANCE_MANAGER`  | Can start rebalances. Usually the trading/basket governance timelock.                                                             |
+| `AUCTION_LAUNCHER`   | Can open restricted-window auctions and close/end through privileged checks. Usually semi-trusted launchers.                      |
+| `BRAND_MANAGER`      | Offchain/product role. Used by Register/brand metadata flows, not core onchain basket control.                                    |
 
 Register may label roles differently. Encode the contract role, not the UI label.
 
@@ -45,13 +45,13 @@ Register may label roles differently. Encode the contract role, not the UI label
 
 Only include version deltas verified from source, changelogs, or SDK ABIs. Older public docs and local contract source may not describe every deployed SDK target.
 
-| Version | Important Deltas |
-| --- | --- |
-| `1.0.0` | Initial release. |
-| `2.0.0` | Repeatable auctions, dust limits, minimum mint output. |
-| `3.0.0` | Skipped/deprecated path around individual repeatable auctions against target weights. |
-| `4.0.0` | Trusted fillers, rebalance targets, auction overhaul, daily fee accounting, `AUCTION_APPROVER` replaced by `REBALANCE_MANAGER`. |
-| `5.0.0` | SDK-supported write ABI for current deployed Index DTF settings and rebalance proposal flows. |
+| Version | Important Deltas                                                                                                                         |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `1.0.0` | Initial release.                                                                                                                         |
+| `2.0.0` | Repeatable auctions, dust limits, minimum mint output.                                                                                   |
+| `3.0.0` | Skipped/deprecated path around individual repeatable auctions against target weights.                                                    |
+| `4.0.0` | Trusted fillers, rebalance targets, auction overhaul, daily fee accounting, `AUCTION_APPROVER` replaced by `REBALANCE_MANAGER`.          |
+| `5.0.0` | SDK-supported write ABI for current deployed Index DTF settings and rebalance proposal flows.                                            |
 | `6.0.0` | SDK-supported write ABI with v6-specific settings names such as `setMaxAuctionLength`; verify function support from ABI before encoding. |
 
 ## SDK Version Handling

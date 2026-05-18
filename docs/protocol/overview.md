@@ -4,10 +4,10 @@ Reserve is a protocol and product ecosystem for asset-backed onchain tokens call
 
 There are two product families:
 
-| Product | Legacy Name | Core Mechanism | Current Product Priority |
-| --- | --- | --- | --- |
-| Index DTF | Folio | Onchain index fund with governance-directed rebalances and auctions | Primary |
-| Yield DTF | RToken | Collateral-backed yield token with revenue distribution and RSR staking | Legacy/support |
+| Product   | Legacy Name | Core Mechanism                                                          | Current Product Priority |
+| --------- | ----------- | ----------------------------------------------------------------------- | ------------------------ |
+| Index DTF | Folio       | Onchain index fund with governance-directed rebalances and auctions     | Primary                  |
+| Yield DTF | RToken      | Collateral-backed yield token with revenue distribution and RSR staking | Legacy/support           |
 
 ## Index DTFs
 
@@ -50,10 +50,10 @@ Yield DTFs are still important protocol context, but Index DTFs are the primary 
 
 Current product scope:
 
-| Product | Chains |
-| --- | --- |
+| Product   | Chains              |
+| --------- | ------------------- |
 | Index DTF | Ethereum, Base, BSC |
-| Yield DTF | Ethereum, Base |
+| Yield DTF | Ethereum, Base      |
 
 Legacy code and older docs can mention Arbitrum. Do not treat legacy frontend constants as product support.
 

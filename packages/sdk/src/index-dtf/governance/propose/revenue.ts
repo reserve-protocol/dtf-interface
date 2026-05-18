@@ -3,9 +3,9 @@ import { getAddress, parseEther, type Address } from "viem";
 import type { IndexDtfCall } from "@/types/governance";
 import type { IndexDtf } from "@/types/index-dtf";
 
-import { SdkError } from "@/lib/errors";
 import { prepareIndexDtfSetFeeRecipients } from "@/index-dtf/governance/propose/calls";
 import { Decimal } from "@/lib/decimal";
+import { SdkError } from "@/lib/errors";
 
 const MAX_FEE_RECIPIENTS = 64;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";

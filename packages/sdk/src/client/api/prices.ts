@@ -1,11 +1,11 @@
 import { getAddress, type Address } from "viem";
 
+import type { GetOptions } from "@/transports/api";
 import type {
   GetBasketTokenPricesWithSnapshotParams,
   ReserveApiHistoricalTokenPrices,
   TokenPriceWithSnapshot,
 } from "@/types/api";
-import type { GetOptions } from "@/transports/api";
 import type { GetTokenPricesParams, TokenPrice } from "@/types/common";
 
 import { uniqueAddresses } from "@/lib/utils";
@@ -19,10 +19,7 @@ type TokenPriceResponse = {
   readonly source?: string;
 };
 
-export async function getApiTokenPrices(
-  apiGet: ApiGet,
-  params: GetTokenPricesParams,
-): Promise<readonly TokenPrice[]> {
+export async function getApiTokenPrices(apiGet: ApiGet, params: GetTokenPricesParams): Promise<readonly TokenPrice[]> {
   const addresses = uniqueAddresses(params.addresses);
 
   if (addresses.length === 0) {

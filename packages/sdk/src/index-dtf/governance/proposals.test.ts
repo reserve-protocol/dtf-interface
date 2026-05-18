@@ -4,11 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DtfClient } from "@/client";
 
 import { dtfIndexProposalAbi } from "@/index-dtf/abis/proposal-decoder";
-import {
-  getAllProposals,
-  getProposal,
-  getProposals,
-} from "@/index-dtf/governance/index";
+import { getAllProposals, getProposal, getProposals } from "@/index-dtf/governance/index";
 
 describe("Index DTF governance proposals", () => {
   afterEach(() => {
@@ -487,7 +483,6 @@ describe("Index DTF governance proposals", () => {
       vetoThreshold: 1000000000000000000n,
     });
   });
-
 });
 
 function createProposalSummary({

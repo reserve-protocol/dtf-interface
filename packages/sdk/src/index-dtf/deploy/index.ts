@@ -1,22 +1,15 @@
-import {
-  getAddress,
-  keccak256,
-  parseEventLogs,
-  type Address,
-  type Hex,
-  type Log,
-} from "viem";
+import { getAddress, keccak256, parseEventLogs, type Address, type Hex, type Log } from "viem";
 
 import type { SupportedChainId } from "@/config";
-import type { ContractCallPlan } from "@/lib/contract-call";
 import type { IndexDtfFeeRecipient, IndexDtfRevenueRecipientInput } from "@/index-dtf/governance/propose/revenue";
+import type { ContractCallPlan } from "@/lib/contract-call";
 import type { PriceControl } from "@/types/index-dtf";
 
-import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
-import { SdkError } from "@/lib/errors";
 import { indexDtfDeployerAbi } from "@/index-dtf/abis/deployer";
 import { indexDtfGovernanceDeployerAbi } from "@/index-dtf/abis/governance-deployer";
 import { buildIndexDtfFeeRecipients } from "@/index-dtf/governance/propose/revenue";
+import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { toUint, toUintNumber } from "@/lib/utils";
 
 export const INDEX_DTF_DEPLOYER_ADDRESS = {

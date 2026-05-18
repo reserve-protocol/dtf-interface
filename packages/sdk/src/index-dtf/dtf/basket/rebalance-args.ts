@@ -2,9 +2,9 @@ import { FolioVersion, getStartRebalance } from "@reserve-protocol/dtf-rebalance
 
 import type { BuildIndexDtfStartRebalanceArgsParams, StartRebalanceArgsV5 } from "@/index-dtf/dtf/basket/types";
 
-import { SdkError } from "@/lib/errors";
 import { getBasketShares } from "@/index-dtf/dtf/basket/math";
 import { assertPositiveNumber, validateBasketTokens } from "@/index-dtf/dtf/basket/validation";
+import { SdkError } from "@/lib/errors";
 
 export function buildStartRebalanceArgs(params: BuildIndexDtfStartRebalanceArgsParams): StartRebalanceArgsV5 {
   if (params.supply <= 0n) {

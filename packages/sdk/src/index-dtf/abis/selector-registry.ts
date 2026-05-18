@@ -37,9 +37,7 @@ export const selectorRegistryAbi = [
     type: "function",
     name: "selectorsAllowed",
     inputs: [{ name: "target", type: "address", internalType: "address" }],
-    outputs: [
-      { name: "allowedSelectors4", type: "bytes4[]", internalType: "bytes4[]" },
-    ],
+    outputs: [{ name: "allowedSelectors4", type: "bytes4[]", internalType: "bytes4[]" }],
     stateMutability: "view",
   },
   {

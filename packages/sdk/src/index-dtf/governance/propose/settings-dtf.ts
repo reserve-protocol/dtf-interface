@@ -8,7 +8,6 @@ import type {
 } from "@/index-dtf/governance/propose/settings-types";
 import type { IndexDtfCall } from "@/types/governance";
 
-import { SdkError } from "@/lib/errors";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import {
@@ -38,6 +37,7 @@ import {
   hasIndexDtfSettingsCall,
   validateDtfSettingsParams,
 } from "@/index-dtf/governance/propose/settings-shared";
+import { SdkError } from "@/lib/errors";
 
 /** Builds a proposal that changes core Index DTF settings. */
 export async function buildIndexDtfSettingsProposal(

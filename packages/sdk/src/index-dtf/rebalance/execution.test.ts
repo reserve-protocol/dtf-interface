@@ -21,10 +21,7 @@ describe("Index DTF rebalance execution", () => {
   });
 
   it("reads the latest auction from RPC", async () => {
-    const readContract = vi
-      .fn()
-      .mockResolvedValueOnce(3n)
-      .mockResolvedValueOnce([9n, 999_900n, 1_000_100n]);
+    const readContract = vi.fn().mockResolvedValueOnce(3n).mockResolvedValueOnce([9n, 999_900n, 1_000_100n]);
     const getBlock = vi.fn(async () => ({ timestamp: 1_000_000n }));
     const client = {
       viem: {
@@ -64,10 +61,7 @@ describe("Index DTF rebalance execution", () => {
   });
 
   it("returns only the active latest auction from RPC", async () => {
-    const readContract = vi
-      .fn()
-      .mockResolvedValueOnce(3n)
-      .mockResolvedValueOnce([9n, 999_900n, 1_000_100n]);
+    const readContract = vi.fn().mockResolvedValueOnce(3n).mockResolvedValueOnce([9n, 999_900n, 1_000_100n]);
     const getBlock = vi.fn(async () => ({ timestamp: 1_000_000n }));
     const client = {
       viem: {
@@ -91,10 +85,7 @@ describe("Index DTF rebalance execution", () => {
   });
 
   it("returns null when the latest auction is not active", async () => {
-    const readContract = vi
-      .fn()
-      .mockResolvedValueOnce(3n)
-      .mockResolvedValueOnce([9n, 999_000n, 999_900n]);
+    const readContract = vi.fn().mockResolvedValueOnce(3n).mockResolvedValueOnce([9n, 999_000n, 999_900n]);
     const getBlock = vi.fn(async () => ({ timestamp: 1_000_000n }));
     const client = {
       viem: {
@@ -107,10 +98,7 @@ describe("Index DTF rebalance execution", () => {
   });
 
   it("uses block timestamp for historical active auction reads", async () => {
-    const readContract = vi
-      .fn()
-      .mockResolvedValueOnce(3n)
-      .mockResolvedValueOnce([9n, 999_900n, 1_000_100n]);
+    const readContract = vi.fn().mockResolvedValueOnce(3n).mockResolvedValueOnce([9n, 999_900n, 1_000_100n]);
     const getBlock = vi.fn(async () => ({ timestamp: 1_000_000n }));
     const client = {
       viem: {
@@ -171,15 +159,7 @@ describe("Index DTF rebalance execution", () => {
     const end = prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453 });
 
     expect(bid.contract.functionName).toBe("bid");
-    expect(bid.contract.args).toEqual([
-      4n,
-      SELL_TOKEN,
-      BUY_TOKEN,
-      100n,
-      130n,
-      true,
-      "0x1234",
-    ]);
+    expect(bid.contract.args).toEqual([4n, SELL_TOKEN, BUY_TOKEN, 100n, 130n, true, "0x1234"]);
     expect(close.contract.functionName).toBe("closeAuction");
     expect(close.contract.args).toEqual([4n]);
     expect(end.contract.functionName).toBe("endRebalance");

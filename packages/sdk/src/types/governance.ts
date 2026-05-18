@@ -67,10 +67,9 @@ export type GetIndexDtfOptimisticVotesParams = {
   readonly account: Address;
 };
 
-export type GetIndexDtfPastOptimisticVotesParams =
-  GetIndexDtfOptimisticVotesParams & {
-    readonly timepoint?: bigint;
-  };
+export type GetIndexDtfPastOptimisticVotesParams = GetIndexDtfOptimisticVotesParams & {
+  readonly timepoint?: bigint;
+};
 
 export type GetIndexDtfOptimisticProposalContextParams = {
   readonly chainId: SupportedChainId;
@@ -93,10 +92,9 @@ export type GetIndexDtfOptimisticGovernanceParams = {
   readonly governance: Address;
 };
 
-export type GetIndexDtfProposalThrottleChargesParams =
-  GetIndexDtfOptimisticGovernanceParams & {
-    readonly account: Address;
-  };
+export type GetIndexDtfProposalThrottleChargesParams = GetIndexDtfOptimisticGovernanceParams & {
+  readonly account: Address;
+};
 
 export type GetIndexDtfProposerStateParams = {
   readonly chainId: SupportedChainId;
@@ -115,20 +113,14 @@ export type GetIndexDtfProposalVoterStateParams = {
   readonly chainId: SupportedChainId;
   readonly governance: Address;
   readonly account: Address;
-  readonly proposal: Pick<
-    IndexDtfProposalDetail,
-    "id" | "voteStart" | "votes"
-  >;
+  readonly proposal: Pick<IndexDtfProposalDetail, "id" | "voteStart" | "votes">;
 };
 
 export type GetIndexDtfOptimisticProposalVoterStateParams = {
   readonly chainId: SupportedChainId;
   readonly governance: Address;
   readonly account: Address;
-  readonly proposal: Pick<
-    IndexDtfProposalDetail,
-    "id" | "optimistic" | "voteStart" | "voteToken" | "votes"
-  >;
+  readonly proposal: Pick<IndexDtfProposalDetail, "id" | "optimistic" | "voteStart" | "voteToken" | "votes">;
 };
 
 export type ProposalState =
@@ -379,5 +371,4 @@ export type CancelIndexDtfProposalParams = IndexDtfProposalActionParams;
 
 export type ProposeIndexDtfProposalParams = IndexDtfProposalActionParams;
 
-export type SubmitOptimisticIndexDtfProposalParams =
-  IndexDtfProposalActionParams;
+export type SubmitOptimisticIndexDtfProposalParams = IndexDtfProposalActionParams;

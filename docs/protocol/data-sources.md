@@ -4,29 +4,29 @@ Reserve integrations should route reads by ownership, not convenience. A compose
 
 ## Index DTF Source Rules
 
-| Data | Source | Why |
-| --- | --- | --- |
-| Live basket assets and balances | RPC `totalAssets()` | Basket is live onchain state |
-| Live share supply | RPC `totalSupply()` | Includes pending fee shares |
-| Current price and basket valuation | Reserve API `/current/dtf`, `/current/dtfs` | API aggregates prices and weights |
-| Discovery/status/listing | Reserve API `/discover/dtf`, `/discover/dtfs` | Product listing and status are curated there |
-| Historical price/performance | Reserve API historical endpoints | API owns analytics windows |
-| Governance metadata | Index subgraph | Historical proposals, governances, roles |
-| Live proposal state | RPC governor reads | Subgraph state can lag or be event-only |
-| Rebalance history | Index subgraph and Reserve API analytics | Subgraph indexes events; API computes product analytics |
-| Active rebalance/auction | RPC `getRebalance()` and contract reads | Must be current |
-| Vote-lock positions/APR | Reserve API `/dtf/daos` | API aggregates user-facing DAO stats |
-| Holder counts/transfers | Index subgraph token/account entities | Transfer-derived indexed history |
+| Data                               | Source                                        | Why                                                     |
+| ---------------------------------- | --------------------------------------------- | ------------------------------------------------------- |
+| Live basket assets and balances    | RPC `totalAssets()`                           | Basket is live onchain state                            |
+| Live share supply                  | RPC `totalSupply()`                           | Includes pending fee shares                             |
+| Current price and basket valuation | Reserve API `/current/dtf`, `/current/dtfs`   | API aggregates prices and weights                       |
+| Discovery/status/listing           | Reserve API `/discover/dtf`, `/discover/dtfs` | Product listing and status are curated there            |
+| Historical price/performance       | Reserve API historical endpoints              | API owns analytics windows                              |
+| Governance metadata                | Index subgraph                                | Historical proposals, governances, roles                |
+| Live proposal state                | RPC governor reads                            | Subgraph state can lag or be event-only                 |
+| Rebalance history                  | Index subgraph and Reserve API analytics      | Subgraph indexes events; API computes product analytics |
+| Active rebalance/auction           | RPC `getRebalance()` and contract reads       | Must be current                                         |
+| Vote-lock positions/APR            | Reserve API `/dtf/daos`                       | API aggregates user-facing DAO stats                    |
+| Holder counts/transfers            | Index subgraph token/account entities         | Transfer-derived indexed history                        |
 
 ## Yield DTF Source Rules
 
-| Data | Source | Why |
-| --- | --- | --- |
-| Basket/backing state | RPC FacadeRead and component contracts | Live protocol state |
-| Governance/history | Yield subgraph | Historical metadata and events |
-| Staking/revenue history | Yield subgraph plus RPC for live state | Subgraph has history; RPC has current state |
-| Discovery | Yield subgraph plus supported-token registry | Raw deployments include unsupported/spam tokens |
-| Prices | Subgraph or RPC depending on surface | No Index-style Reserve API dependency by default |
+| Data                    | Source                                       | Why                                              |
+| ----------------------- | -------------------------------------------- | ------------------------------------------------ |
+| Basket/backing state    | RPC FacadeRead and component contracts       | Live protocol state                              |
+| Governance/history      | Yield subgraph                               | Historical metadata and events                   |
+| Staking/revenue history | Yield subgraph plus RPC for live state       | Subgraph has history; RPC has current state      |
+| Discovery               | Yield subgraph plus supported-token registry | Raw deployments include unsupported/spam tokens  |
+| Prices                  | Subgraph or RPC depending on surface         | No Index-style Reserve API dependency by default |
 
 ## Reserve API
 

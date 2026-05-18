@@ -12,9 +12,7 @@ export const dtfIndexGovernanceOptimisticAbi = [
   {
     type: "function",
     name: "isOptimistic",
-    inputs: [
-      { name: "proposalId", type: "uint256", internalType: "uint256" },
-    ],
+    inputs: [{ name: "proposalId", type: "uint256", internalType: "uint256" }],
     outputs: [{ name: "", type: "bool", internalType: "bool" }],
     stateMutability: "view",
   },
@@ -39,9 +37,7 @@ export const dtfIndexGovernanceOptimisticAbi = [
   {
     type: "function",
     name: "proposalSnapshot",
-    inputs: [
-      { name: "proposalId", type: "uint256", internalType: "uint256" },
-    ],
+    inputs: [{ name: "proposalId", type: "uint256", internalType: "uint256" }],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
@@ -139,9 +135,7 @@ export const dtfIndexGovernanceOptimisticAbi = [
   {
     type: "function",
     name: "vetoThreshold",
-    inputs: [
-      { name: "proposalId", type: "uint256", internalType: "uint256" },
-    ],
+    inputs: [{ name: "proposalId", type: "uint256", internalType: "uint256" }],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },

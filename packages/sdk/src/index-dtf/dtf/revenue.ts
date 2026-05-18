@@ -4,14 +4,14 @@ import type { DtfClient } from "@/client";
 import type { Amount, Token } from "@/types/common";
 import type { Financials, IndexDtf, PriceControl } from "@/types/index-dtf";
 
-import { prepareContractCall } from "@/lib/contract-call";
 import { daoFeeRegistryAbi } from "@/index-dtf/abis/dao-fee-registry";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { getDtf, getPrice } from "@/index-dtf/dtf/index";
+import { prepareContractCall } from "@/lib/contract-call";
 import { Decimal } from "@/lib/decimal";
-import { mapAmount } from "@/lib/utils";
 import { getTokensData } from "@/lib/tokens";
+import { mapAmount } from "@/lib/utils";
 
 export type IndexDtfPlatformFee = {
   readonly registry: Address;
@@ -156,10 +156,7 @@ export async function getIndexDtfRevenue(
   return {
     financials: dtf.financials,
     feeRecipients: dtf.fees.recipients,
-    effectiveDistribution: getEffectiveRevenueDistribution(
-      dtf.fees.recipients,
-      platformFee,
-    ),
+    effectiveDistribution: getEffectiveRevenueDistribution(dtf.fees.recipients, platformFee),
     pendingFeeShares,
     pendingFeeSharesUsd: new Decimal(pendingFeeShares.formatted).mul(price.price).toNumber(),
     platformFee,
@@ -181,10 +178,7 @@ export function getEffectiveRevenueDistribution(
     recipients: feeRecipients.map((recipient) => ({
       address: recipient.address,
       configuredPercentage: recipient.percentage,
-      effectivePercentage: new Decimal(recipient.percentage)
-        .mul(recipientPool)
-        .div(100)
-        .toString(),
+      effectivePercentage: new Decimal(recipient.percentage).mul(recipientPool).div(100).toString(),
     })),
   };
 }

@@ -197,7 +197,11 @@ export function mapIndexDtfBrand(response: IndexDtfBrandResponse): IndexDtfBrand
   };
 }
 
-export function mapIndexDtfPrice(response: ReserveApiIndexDtfPrice, params: DtfParams, timestamp: number): IndexDtfPrice {
+export function mapIndexDtfPrice(
+  response: ReserveApiIndexDtfPrice,
+  params: DtfParams,
+  timestamp: number,
+): IndexDtfPrice {
   return {
     address: getAddress(params.address),
     chainId: params.chainId,

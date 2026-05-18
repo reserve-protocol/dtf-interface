@@ -4,11 +4,11 @@ Index DTF governance controls basket changes, DTF settings, vote-lock settings, 
 
 ## Governance Domains
 
-| Domain | Typical Control |
-| --- | --- |
-| Owner/admin governance | DTF settings, fees, roles, ownership-level changes, proxy admin |
-| Trading/basket governance | Basket proposals, rebalances, rebalance-related settings |
-| DAO/vote-lock governance | Vote-lock reward tokens, staking-vault settings, DAO-level parameters |
+| Domain                    | Typical Control                                                       |
+| ------------------------- | --------------------------------------------------------------------- |
+| Owner/admin governance    | DTF settings, fees, roles, ownership-level changes, proxy admin       |
+| Trading/basket governance | Basket proposals, rebalances, rebalance-related settings              |
+| DAO/vote-lock governance  | Vote-lock reward tokens, staking-vault settings, DAO-level parameters |
 
 Some deployments share owner and trading governance. Historical governances can still matter for old proposals.
 
@@ -42,7 +42,7 @@ Proposal IDs are long decimal strings. They encode governor/targets/calldatas/de
 The SDK keeps proposal detail DTF-bound when it needs DTF context for calldata decoding:
 
 ```ts
-getProposal({ address, chainId, proposalId })
+getProposal({ address, chainId, proposalId });
 ```
 
 Do not switch to proposal-ID-only lookup unless the subgraph exposes direct proposal-to-DTF context sufficient for decoding.

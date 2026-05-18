@@ -6,11 +6,11 @@ RSR is Reserve Rights, the Reserve ecosystem governance token. Its exact role de
 
 Canonical RSR token addresses used by current Reserve integrations:
 
-| Chain | Chain ID | Address |
-| --- | ---: | --- |
-| Ethereum | 1 | `0x320623b8e4ff03373931769a31fc52a4e78b5d70` |
-| BSC | 56 | `0x23f72a3Db61D6CB8aBE5d9AF1Ac4B6c99327bFee` |
-| Base | 8453 | `0xaB36452DbAC151bE02b16Ca17d8919826072f64a` |
+| Chain    | Chain ID | Address                                      |
+| -------- | -------: | -------------------------------------------- |
+| Ethereum |        1 | `0x320623b8e4ff03373931769a31fc52a4e78b5d70` |
+| BSC      |       56 | `0x23f72a3Db61D6CB8aBE5d9AF1Ac4B6c99327bFee` |
+| Base     |     8453 | `0xaB36452DbAC151bE02b16Ca17d8919826072f64a` |
 
 Do not use deprecated BSC RSR address `0x8762db106b2c2a0bccb3a80d1ed41273552616e8`.
 

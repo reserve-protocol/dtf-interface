@@ -95,9 +95,7 @@ async function getLegacyVoteLockContext(
 }
 
 function isUnreadableLegacyGovernance(error: unknown): boolean {
-  const message = error instanceof Error
-    ? error.message.toLowerCase()
-    : String(error).toLowerCase();
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
 
   // Legacy subgraph rows can include stale governor addresses that no longer expose token().
   return message.includes("returned no data") || message.includes('function "token" reverted');

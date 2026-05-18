@@ -190,7 +190,10 @@ export async function getVoteLockState(
   if (maxWithdrawResult.status === "failure") throw maxWithdrawResult.error;
   if (unstakingDelayResult.status === "failure") throw unstakingDelayResult.error;
   if (unstakingManagerResult.status === "failure") throw unstakingManagerResult.error;
-  if (optimisticDelegateResult.status === "failure" && !isUnsupportedVoteLockOptimisticReadError(optimisticDelegateResult.error)) {
+  if (
+    optimisticDelegateResult.status === "failure" &&
+    !isUnsupportedVoteLockOptimisticReadError(optimisticDelegateResult.error)
+  ) {
     throw optimisticDelegateResult.error;
   }
   if (
@@ -213,8 +216,7 @@ export async function getVoteLockState(
     delegate: delegateResult.result,
     optimisticDelegate,
     maxWithdraw: mapAmount(maxWithdrawResult.result, underlying.decimals),
-    optimisticVotingPower:
-      optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower),
+    optimisticVotingPower: optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower),
     hasOptimisticVotingPower: (optimisticVotingPower ?? 0n) > 0n,
     unstakingDelay: unstakingDelayResult.result,
     unstakingManager: unstakingManagerResult.result,

@@ -4,9 +4,9 @@ import type { DtfClient } from "@/client";
 import type { SupportedChainId } from "@/config";
 import type { DtfParams } from "@/types/common";
 
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { prepareContractCall } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
-import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
 export type IndexDtfLatestAuction = {
   readonly auctionId: bigint;
@@ -45,10 +45,7 @@ export type PrepareIndexDtfBidParams = {
   readonly data?: Hex;
 };
 
-export async function getLatestAuction(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<IndexDtfLatestAuction | null> {
+export async function getLatestAuction(client: DtfClient, params: DtfParams): Promise<IndexDtfLatestAuction | null> {
   const address = getAddress(params.address);
   const nextAuctionId = await client.viem.readContract({
     chainId: params.chainId,
@@ -82,10 +79,7 @@ export async function getLatestAuction(
   };
 }
 
-export async function getActiveAuction(
-  client: DtfClient,
-  params: DtfParams,
-): Promise<IndexDtfActiveAuction | null> {
+export async function getActiveAuction(client: DtfClient, params: DtfParams): Promise<IndexDtfActiveAuction | null> {
   const auction = await getLatestAuction(client, params);
 
   return auction?.isActive ? { ...auction, isActive: true } : null;
@@ -107,21 +101,13 @@ async function getAuctionTimestamp(client: DtfClient, params: DtfParams): Promis
   return block.timestamp;
 }
 
-export async function getBidQuote(
-  client: DtfClient,
-  params: GetIndexDtfBidQuoteParams,
-): Promise<IndexDtfBidQuote> {
+export async function getBidQuote(client: DtfClient, params: GetIndexDtfBidQuoteParams): Promise<IndexDtfBidQuote> {
   const [sellAmount, bidAmount, price] = await client.viem.readContract({
     chainId: params.chainId,
     address: getAddress(params.address),
     abi: dtfIndexAbi,
     functionName: "getBid",
-    args: [
-      params.auctionId,
-      getAddress(params.sellToken),
-      getAddress(params.buyToken),
-      params.maxSellAmount,
-    ],
+    args: [params.auctionId, getAddress(params.sellToken), getAddress(params.buyToken), params.maxSellAmount],
     blockNumber: params.blockNumber,
   });
 
@@ -168,10 +154,7 @@ export function prepareIndexDtfCloseAuction(params: {
   });
 }
 
-export function prepareIndexDtfEndRebalance(params: {
-  readonly address: Address;
-  readonly chainId: SupportedChainId;
-}) {
+export function prepareIndexDtfEndRebalance(params: { readonly address: Address; readonly chainId: SupportedChainId }) {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,

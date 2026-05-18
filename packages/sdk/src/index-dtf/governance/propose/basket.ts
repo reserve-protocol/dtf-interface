@@ -5,8 +5,6 @@ import type { DtfParams } from "@/types/common";
 import type { IndexDtfCall } from "@/types/governance";
 import type { IndexDtf } from "@/types/index-dtf";
 
-import { prepareContractCall } from "@/lib/contract-call";
-import { SdkError } from "@/lib/errors";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import {
   DEFAULT_AUCTION_LAUNCHER_WINDOW,
@@ -24,6 +22,8 @@ import {
   type StartRebalanceArgsV5,
 } from "@/index-dtf/dtf/basket/index";
 import { getDtf } from "@/index-dtf/dtf/index";
+import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 
 const MAX_REBALANCE_TTL = 604_800n * 4n;
 

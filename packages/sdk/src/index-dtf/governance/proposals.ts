@@ -11,7 +11,6 @@ import type {
   ProposalState,
 } from "@/types/governance";
 
-import { SdkError } from "@/lib/errors";
 import { DEFAULT_PROPOSAL_LIMIT } from "@/index-dtf/governance/constants";
 import { buildProposalContractMap } from "@/index-dtf/governance/contract-map";
 import { decodeIndexDtfProposalCalldatas } from "@/index-dtf/governance/decoder";
@@ -39,6 +38,7 @@ import {
   GetIndexDtfProposalsDocument,
   type Proposal_Filter,
 } from "@/index-dtf/subgraph/dtf.generated";
+import { SdkError } from "@/lib/errors";
 import { getCurrentTime } from "@/lib/utils";
 
 export async function getProposals(
@@ -108,9 +108,7 @@ export async function getAllProposals(
 
   return finalizeProposalSummaries(
     client,
-    proposals.map((proposal) =>
-      mapIndexDtfProposalSummary(proposal, params.chainId),
-    ),
+    proposals.map((proposal) => mapIndexDtfProposalSummary(proposal, params.chainId)),
     params.includeOptimisticState ?? false,
   );
 }
@@ -196,12 +194,7 @@ async function getProposalsByGovernanceIds(
 
   const limitedProposals = proposals.slice(0, limit);
 
-  return finalizeProposalSummaries(
-    client,
-    limitedProposals,
-    includeOptimisticState,
-    timestamp,
-  );
+  return finalizeProposalSummaries(client, limitedProposals, includeOptimisticState, timestamp);
 }
 
 async function finalizeProposalSummaries(
@@ -221,9 +214,10 @@ async function finalizeProposalSummaries(
   return optimisticProposals.map((proposal) => withVoteState(proposal, timestamp));
 }
 
-async function withOptionalOptimisticProposalContext<
-  T extends ParsedIndexDtfProposal | ParsedIndexDtfProposalSummary,
->(client: DtfClient, proposal: T): Promise<T> {
+async function withOptionalOptimisticProposalContext<T extends ParsedIndexDtfProposal | ParsedIndexDtfProposalSummary>(
+  client: DtfClient,
+  proposal: T,
+): Promise<T> {
   if (proposal.isOptimistic === false) {
     return proposal;
   }
@@ -232,9 +226,7 @@ async function withOptionalOptimisticProposalContext<
     chainId: proposal.chainId,
     governance: proposal.governance,
     proposalId: proposal.id,
-    ...(proposal.isOptimistic === undefined
-      ? {}
-      : { isOptimistic: proposal.isOptimistic }),
+    ...(proposal.isOptimistic === undefined ? {} : { isOptimistic: proposal.isOptimistic }),
   };
 
   const optimistic = await getOptimisticProposalContext(client, contextParams);
@@ -251,9 +243,7 @@ async function withOptionalOptimisticProposalContext<
   };
 }
 
-function getProposalFilter(
-  states: readonly ProposalState[] | undefined,
-): Proposal_Filter | undefined {
+function getProposalFilter(states: readonly ProposalState[] | undefined): Proposal_Filter | undefined {
   if (!states || states.length === 0) {
     return undefined;
   }

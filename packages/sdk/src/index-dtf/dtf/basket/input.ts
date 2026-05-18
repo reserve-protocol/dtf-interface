@@ -3,7 +3,6 @@ import type { Decimal as DecimalType } from "decimal.js-light";
 import { Decimal } from "@reserve-protocol/dtf-rebalance-lib";
 import { getAddress, parseUnits, type Address } from "viem";
 
-import { SdkError } from "@/lib/errors";
 import {
   SHARE_DECIMALS,
   type IndexDtfBasketDefinition,
@@ -11,6 +10,7 @@ import {
   type IndexDtfBasketToken,
 } from "@/index-dtf/dtf/basket/types";
 import { validateShares } from "@/index-dtf/dtf/basket/validation";
+import { SdkError } from "@/lib/errors";
 
 export function getBasketFromInput(
   input: IndexDtfBasketInput,

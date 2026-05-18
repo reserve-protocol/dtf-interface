@@ -6,12 +6,12 @@ Index DTFs are Folio-based onchain index tokens. A user holds one ERC20 share to
 
 An Index DTF has four major layers:
 
-| Layer | What It Owns |
-| --- | --- |
-| Folio contract | Shares, basket assets, mint/redeem, fees, rebalances, auctions, roles |
-| Governance contracts | Proposal creation, voting, queueing, execution, timelock permissions |
-| Reserve API | Current prices, discovery, product analytics, vote-lock aggregates |
-| Index subgraph | Deployments, metadata, roles, governance history, transfers, holders, rebalance/auction history |
+| Layer                | What It Owns                                                                                    |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| Folio contract       | Shares, basket assets, mint/redeem, fees, rebalances, auctions, roles                           |
+| Governance contracts | Proposal creation, voting, queueing, execution, timelock permissions                            |
+| Reserve API          | Current prices, discovery, product analytics, vote-lock aggregates                              |
+| Index subgraph       | Deployments, metadata, roles, governance history, transfers, holders, rebalance/auction history |
 
 Do not collapse these into one source. The protocol is safer to reason about when each field has an owner.
 

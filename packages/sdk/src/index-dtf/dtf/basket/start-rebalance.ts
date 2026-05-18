@@ -3,7 +3,6 @@ import { getAddress } from "viem";
 import type { DtfClient } from "@/client";
 import type { BuildIndexDtfStartRebalanceParams, BuiltIndexDtfStartRebalance } from "@/index-dtf/dtf/basket/types";
 
-import { SdkError } from "@/lib/errors";
 import { getCurrentBalances, getDtfForWeightControl, getBasketTokenOrder } from "@/index-dtf/dtf/basket/current";
 import { getBasketFromInput } from "@/index-dtf/dtf/basket/input";
 import { getBasketShares } from "@/index-dtf/dtf/basket/math";
@@ -20,6 +19,7 @@ import {
   assertValidBasketAddresses,
 } from "@/index-dtf/dtf/basket/validation";
 import { getTotalSupply } from "@/index-dtf/dtf/index";
+import { SdkError } from "@/lib/errors";
 
 export async function buildIndexDtfStartRebalance(
   client: DtfClient,

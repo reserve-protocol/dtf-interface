@@ -93,8 +93,9 @@ export function createIndexDtfVoteLockRef(client: DtfClient, params: DtfParams) 
       readVoteLockConvertToShares(client, { ...call, chainId }),
     readVoteLockDelegates: (call: WithoutChainId<Parameters<typeof readVoteLockDelegates>[1]>) =>
       readVoteLockDelegates(client, { ...call, chainId }),
-    readVoteLockDisallowedRewardToken: (call: WithoutChainId<Parameters<typeof readVoteLockDisallowedRewardToken>[1]>) =>
-      readVoteLockDisallowedRewardToken(client, { ...call, chainId }),
+    readVoteLockDisallowedRewardToken: (
+      call: WithoutChainId<Parameters<typeof readVoteLockDisallowedRewardToken>[1]>,
+    ) => readVoteLockDisallowedRewardToken(client, { ...call, chainId }),
     readVoteLockGetPastTotalSupply: (call: WithoutChainId<Parameters<typeof readVoteLockGetPastTotalSupply>[1]>) =>
       readVoteLockGetPastTotalSupply(client, { ...call, chainId }),
     readVoteLockGetPastVotes: (call: WithoutChainId<Parameters<typeof readVoteLockGetPastVotes>[1]>) =>
@@ -152,14 +153,10 @@ export function createIndexDtfVoteLockRef(client: DtfClient, params: DtfParams) 
     prepareVoteLockDeposit: (call: VoteLockDepositRefParams) => prepareVoteLockDeposit({ ...call, chainId }),
     prepareVoteLockDepositPlan: (call: VoteLockDepositPlanRefParams) =>
       prepareVoteLockDepositPlan({ ...call, chainId }),
-    prepareVoteLockDelegate: (
-      call: Omit<Parameters<typeof prepareVoteLockDelegate>[0], "chainId">,
-    ) => prepareVoteLockDelegate({ ...call, chainId }),
+    prepareVoteLockDelegate: (call: Omit<Parameters<typeof prepareVoteLockDelegate>[0], "chainId">) =>
+      prepareVoteLockDelegate({ ...call, chainId }),
     prepareVoteLockDelegateOptimistic: (
-      call: Omit<
-        Parameters<typeof prepareVoteLockDelegateOptimistic>[0],
-        "chainId"
-      >,
+      call: Omit<Parameters<typeof prepareVoteLockDelegateOptimistic>[0], "chainId">,
     ) => prepareVoteLockDelegateOptimistic({ ...call, chainId }),
     prepareVoteLockPoke: (call: Omit<Parameters<typeof prepareVoteLockPoke>[0], "chainId">) =>
       prepareVoteLockPoke({ ...call, chainId }),
@@ -169,14 +166,11 @@ export function createIndexDtfVoteLockRef(client: DtfClient, params: DtfParams) 
       prepareVoteLockSetRewardRatio({ ...call, chainId }),
     prepareVoteLockSetUnstakingDelay: (call: Omit<Parameters<typeof prepareVoteLockSetUnstakingDelay>[0], "chainId">) =>
       prepareVoteLockSetUnstakingDelay({ ...call, chainId }),
-    prepareVoteLockWithdraw: (
-      call: Omit<Parameters<typeof prepareVoteLockWithdraw>[0], "chainId">,
-    ) => prepareVoteLockWithdraw({ ...call, chainId }),
-    prepareVoteLockClaimRewards: (
-      call: Omit<Parameters<typeof prepareVoteLockClaimRewards>[0], "chainId">,
-    ) => prepareVoteLockClaimRewards({ ...call, chainId }),
-    prepareVoteLockClaimLock: (
-      call: Omit<Parameters<typeof prepareVoteLockClaimLock>[0], "chainId">,
-    ) => prepareVoteLockClaimLock({ ...call, chainId }),
+    prepareVoteLockWithdraw: (call: Omit<Parameters<typeof prepareVoteLockWithdraw>[0], "chainId">) =>
+      prepareVoteLockWithdraw({ ...call, chainId }),
+    prepareVoteLockClaimRewards: (call: Omit<Parameters<typeof prepareVoteLockClaimRewards>[0], "chainId">) =>
+      prepareVoteLockClaimRewards({ ...call, chainId }),
+    prepareVoteLockClaimLock: (call: Omit<Parameters<typeof prepareVoteLockClaimLock>[0], "chainId">) =>
+      prepareVoteLockClaimLock({ ...call, chainId }),
   };
 }

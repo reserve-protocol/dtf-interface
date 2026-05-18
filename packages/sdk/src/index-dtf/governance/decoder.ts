@@ -57,11 +57,7 @@ export function decodeIndexDtfProposalCalldatas({
     const contractDecoder = contractMap.get(targetKey);
 
     if (!contractDecoder) {
-      const fallbackDecoded = decodeFallbackProposalCalldata(
-        i,
-        targetAddress,
-        callData,
-      );
+      const fallbackDecoded = decodeFallbackProposalCalldata(i, targetAddress, callData);
 
       if (fallbackDecoded) {
         calls.push(fallbackDecoded);
@@ -166,12 +162,7 @@ function decodeFallbackProposalCalldata(
   callData: `0x${string}`,
 ): IndexDtfDecodedCalldata | undefined {
   for (const fallbackDecoder of FALLBACK_DECODERS) {
-    const decoded = decodeProposalCalldata(
-      { ...fallbackDecoder, target },
-      index,
-      target,
-      callData,
-    );
+    const decoded = decodeProposalCalldata({ ...fallbackDecoder, target }, index, target, callData);
 
     if (decoded) {
       return decoded;

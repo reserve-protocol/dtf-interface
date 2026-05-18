@@ -14,10 +14,7 @@ export type DiscoverIndexDtfsParams = {
   readonly sort?: string;
 };
 
-export type DiscoverIndexDtfsByChainParams = Omit<
-  DiscoverIndexDtfsParams,
-  "chainId"
-> & {
+export type DiscoverIndexDtfsByChainParams = Omit<DiscoverIndexDtfsParams, "chainId"> & {
   readonly chainId: SupportedChainId;
 };
 
@@ -152,9 +149,7 @@ export async function getIndexDtfStatus(
       limit,
       offset,
     });
-    const item = items.find(
-      (dtf) => isIndexDiscoveryItem(dtf) && dtf.address.toLowerCase() === address.toLowerCase(),
-    );
+    const item = items.find((dtf) => isIndexDiscoveryItem(dtf) && dtf.address.toLowerCase() === address.toLowerCase());
 
     if (item) {
       return item.status ?? "active";
@@ -220,7 +215,9 @@ function mapSubgraphDiscoveryItem(
       symbol: asset.symbol ?? asset.name ?? getAddress(asset.address),
       weight: asset.weight,
     })),
-    ...(item.timestamp && current.price ? { performance: [{ timestamp: Number(item.timestamp), value: current.price }] } : {}),
+    ...(item.timestamp && current.price
+      ? { performance: [{ timestamp: Number(item.timestamp), value: current.price }] }
+      : {}),
   };
 }
 

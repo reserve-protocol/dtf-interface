@@ -3,9 +3,9 @@ import type { Address } from "viem";
 import type { SupportedChainId } from "@/config";
 import type { ContractCallPlan } from "@/lib/contract-call";
 
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
-import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
 type MintArgs = readonly [bigint, Address, bigint];
 type RedeemArgs = readonly [bigint, Address, readonly Address[], readonly bigint[]];

@@ -3,9 +3,9 @@ import { getAddress, type Address, type Hex } from "viem";
 import type { DtfClient } from "@/client";
 import type { SupportedChainId } from "@/config";
 
+import { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
 import { prepareContractCall } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
-import { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
 
 export type IndexDtfSelectorData = {
   readonly target: Address;
@@ -69,9 +69,7 @@ export async function getSelectorRegistryIsAllowed(
   });
 }
 
-export function prepareSelectorRegistryRegisterSelectors(
-  params: PrepareSelectorRegistrySelectorsParams,
-) {
+export function prepareSelectorRegistryRegisterSelectors(params: PrepareSelectorRegistrySelectorsParams) {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.registry,
@@ -81,9 +79,7 @@ export function prepareSelectorRegistryRegisterSelectors(
   });
 }
 
-export function prepareSelectorRegistryUnregisterSelectors(
-  params: PrepareSelectorRegistrySelectorsParams,
-) {
+export function prepareSelectorRegistryUnregisterSelectors(params: PrepareSelectorRegistrySelectorsParams) {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.registry,

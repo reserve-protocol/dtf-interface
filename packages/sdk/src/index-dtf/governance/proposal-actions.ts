@@ -22,12 +22,12 @@ import type {
   VoteIndexDtfProposalParams,
 } from "@/types/governance";
 
-import { prepareContractCall } from "@/lib/contract-call";
-import { SdkError } from "@/lib/errors";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { getZeroValues } from "@/index-dtf/governance/utils";
+import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 
 const TIMELOCK_OPERATION_PARAMS = parseAbiParameters("address[], uint256[], bytes[], bytes32, bytes32");
 
@@ -130,9 +130,7 @@ export function prepareIndexDtfSubmitProposal(params: ProposeIndexDtfProposalPar
   });
 }
 
-export function prepareIndexDtfSubmitOptimisticProposal(
-  params: SubmitOptimisticIndexDtfProposalParams,
-) {
+export function prepareIndexDtfSubmitOptimisticProposal(params: SubmitOptimisticIndexDtfProposalParams) {
   const targets = params.proposal.targets;
   const calldatas = [...params.proposal.calldatas];
   const values = getZeroValues(targets.length);
@@ -151,7 +149,12 @@ function getProposalTxArgs(
 ): [readonly Address[], readonly bigint[], readonly Hex[], Hex] {
   const targets = proposal.targets;
 
-  return [targets, getZeroValues(targets.length), [...proposal.calldatas], hashIndexDtfProposalDescription(proposal.description)];
+  return [
+    targets,
+    getZeroValues(targets.length),
+    [...proposal.calldatas],
+    hashIndexDtfProposalDescription(proposal.description),
+  ];
 }
 
 export function hashIndexDtfProposalDescription(description: string): Hex {

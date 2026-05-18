@@ -79,22 +79,22 @@ Other entities track reward token changes, claims, delegation, locks, and stToke
 
 Most IDs are lowercase hex strings or deterministic composite strings.
 
-| Entity | ID Shape |
-| --- | --- |
-| `DTF` | `{dtfAddress}` |
-| `Token` | `{tokenAddress}` |
-| `Account` | `{accountAddress}` |
-| `AccountBalance` | `{accountAddress}-{tokenAddress}` |
-| `Rebalance` | `{dtfAddress}-{nonceHex}` |
-| `Auction` | `{dtfAddress}-{auctionId}` |
-| `RebalanceAuctionBid` | `{dtfAddress}-{auctionId}-{bidder}-{blockNumber}-{logIndex}` |
-| `Proposal` | `{proposalId}` decimal string |
-| `Vote` | `{voterAddress}-{proposalId}` |
-| `Delegate` | `{stTokenAddress}-{delegateAddress}` |
-| `Lock` | `{unstakingManagerAddress}-{lockId}` |
-| `RewardClaim` | `{stakingTokenAddress}-{txHash}-{logIndex}` |
-| `TimelockOperation` | `{operationId}` |
-| `TimelockOperationByTx` | `{txHash}` |
+| Entity                  | ID Shape                                                     |
+| ----------------------- | ------------------------------------------------------------ |
+| `DTF`                   | `{dtfAddress}`                                               |
+| `Token`                 | `{tokenAddress}`                                             |
+| `Account`               | `{accountAddress}`                                           |
+| `AccountBalance`        | `{accountAddress}-{tokenAddress}`                            |
+| `Rebalance`             | `{dtfAddress}-{nonceHex}`                                    |
+| `Auction`               | `{dtfAddress}-{auctionId}`                                   |
+| `RebalanceAuctionBid`   | `{dtfAddress}-{auctionId}-{bidder}-{blockNumber}-{logIndex}` |
+| `Proposal`              | `{proposalId}` decimal string                                |
+| `Vote`                  | `{voterAddress}-{proposalId}`                                |
+| `Delegate`              | `{stTokenAddress}-{delegateAddress}`                         |
+| `Lock`                  | `{unstakingManagerAddress}-{lockId}`                         |
+| `RewardClaim`           | `{stakingTokenAddress}-{txHash}-{logIndex}`                  |
+| `TimelockOperation`     | `{operationId}`                                              |
+| `TimelockOperationByTx` | `{txHash}`                                                   |
 
 Verify IDs in mappings when adding queries. Schema comments can be stale.
 

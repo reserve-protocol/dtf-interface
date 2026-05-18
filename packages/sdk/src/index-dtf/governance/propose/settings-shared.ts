@@ -8,9 +8,9 @@ import type {
 import type { Authority, DtfParams, Governance } from "@/types/common";
 import type { IndexDtf, PriceControl } from "@/types/index-dtf";
 
-import { SdkError } from "@/lib/errors";
 import { getDtf, getVersion } from "@/index-dtf/dtf/index";
 import { assertNumberRange } from "@/index-dtf/governance/propose/settings-governance";
+import { SdkError } from "@/lib/errors";
 
 const MAX_TOKEN_NAME_LENGTH = 32;
 const MAX_MINT_FEE = 5;

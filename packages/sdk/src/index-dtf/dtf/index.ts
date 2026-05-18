@@ -23,7 +23,6 @@ import type {
   IndexDtfTotalAssets,
 } from "@/types/index-dtf";
 
-import { SdkError } from "@/lib/errors";
 import dtfAbi from "@/index-dtf/abis/dtf-index-abi-v6";
 import {
   mapIndexDtf,
@@ -34,8 +33,9 @@ import {
   type IndexDtfBrandResponse,
 } from "@/index-dtf/dtf/mappers";
 import { GetIndexDtfDocument } from "@/index-dtf/subgraph/dtf.generated";
-import { mapAmount } from "@/lib/utils";
+import { SdkError } from "@/lib/errors";
 import { getTokensData } from "@/lib/tokens";
+import { mapAmount } from "@/lib/utils";
 
 export async function getDtf(client: DtfClient, params: DtfParams): Promise<IndexDtf> {
   const { dtf } = await client.subgraph.queryIndex({

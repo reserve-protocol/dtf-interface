@@ -4,14 +4,14 @@ Yield DTFs are the legacy Reserve product line, historically called RTokens. The
 
 ## How Yield DTFs Differ From Index DTFs
 
-| Area | Yield DTF | Index DTF |
-| --- | --- | --- |
-| Legacy name | RToken | Folio |
-| Backing model | Collateral basket managed by protocol components | Basket of ERC20s held directly by Folio |
-| Rebalancing | Protocol-managed through backing/collateral mechanisms | Governance starts rebalances and auctions |
-| Staking | RSR staked as stRSR | vote-lock vault can use different underlying tokens |
-| Data source | Subgraph + RPC | RPC + Reserve API + Index subgraph |
-| Product priority | Legacy/support | Primary current product |
+| Area             | Yield DTF                                              | Index DTF                                           |
+| ---------------- | ------------------------------------------------------ | --------------------------------------------------- |
+| Legacy name      | RToken                                                 | Folio                                               |
+| Backing model    | Collateral basket managed by protocol components       | Basket of ERC20s held directly by Folio             |
+| Rebalancing      | Protocol-managed through backing/collateral mechanisms | Governance starts rebalances and auctions           |
+| Staking          | RSR staked as stRSR                                    | vote-lock vault can use different underlying tokens |
+| Data source      | Subgraph + RPC                                         | RPC + Reserve API + Index subgraph                  |
+| Product priority | Legacy/support                                         | Primary current product                             |
 
 ## Core Components
 

@@ -1,10 +1,11 @@
 import { getAddress, type PublicClient } from "viem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { GetIndexDtfQuery } from "@/index-dtf/subgraph/dtf.generated";
+
 import { createDtfClient, type DtfClient } from "@/client";
 import { getDtf, getBasket, getBasketSnapshot, getBrand, getPrice, getPriceHistory } from "@/index-dtf/dtf/index";
 import { mapIndexDtf } from "@/index-dtf/dtf/mappers";
-import type { GetIndexDtfQuery } from "@/index-dtf/subgraph/dtf.generated";
 
 describe("Index DTF getters", () => {
   afterEach(() => {

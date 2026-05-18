@@ -9,9 +9,9 @@ import type {
   OpenAuctionArgs,
 } from "@/index-dtf/rebalance/types";
 
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { prepareContractCall } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
-import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 
 /**
  * Builds the v5 launcher `openAuction` args with `dtf-rebalance-lib`.

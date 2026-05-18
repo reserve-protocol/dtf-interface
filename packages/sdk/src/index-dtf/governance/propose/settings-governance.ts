@@ -4,11 +4,11 @@ import type { SupportedChainId } from "@/config";
 import type { IndexDtfGovernanceChanges } from "@/index-dtf/governance/propose/settings-types";
 import type { IndexDtfCall } from "@/types/governance";
 
-import { prepareContractCall } from "@/lib/contract-call";
-import { SdkError } from "@/lib/errors";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
+import { prepareContractCall } from "@/lib/contract-call";
 import { Decimal } from "@/lib/decimal";
+import { SdkError } from "@/lib/errors";
 
 export function buildGovernanceCalls({
   changes,

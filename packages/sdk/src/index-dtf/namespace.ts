@@ -96,8 +96,7 @@ import { createIndexDtfVoteLockNamespace } from "@/index-dtf/vote-lock/namespace
 export function createIndexDtfNamespace(client: DtfClient) {
   return {
     ref: (params: DtfParams) => createIndexDtfRef(client, params),
-    discover: (params?: Parameters<typeof discoverIndexDtfs>[1]) =>
-      discoverIndexDtfs(client, params),
+    discover: (params?: Parameters<typeof discoverIndexDtfs>[1]) => discoverIndexDtfs(client, params),
     discoverByChain: (params: Parameters<typeof discoverIndexDtfsByChain>[1]) =>
       discoverIndexDtfsByChain(client, params),
     discoverFromSubgraph: (params: Parameters<typeof discoverIndexDtfsFromSubgraph>[1]) =>
@@ -105,8 +104,7 @@ export function createIndexDtfNamespace(client: DtfClient) {
     list: (params?: ListIndexDtfsParams) => listIndexDtfs(client, params),
     getCatalogEntries: getIndexDtfCatalogEntries,
     resolveAlias: resolveIndexDtfAlias,
-    getAssetList: (params: Parameters<typeof getAssetList>[1]) =>
-      getAssetList(client, params),
+    getAssetList: (params: Parameters<typeof getAssetList>[1]) => getAssetList(client, params),
     get: (params: GetIndexDtfParams) => getFull(client, params),
     getDtf: (params: DtfParams) => getDtf(client, params),
     getFull: (params: GetFullIndexDtfParams) => getFull(client, params),
@@ -118,38 +116,24 @@ export function createIndexDtfNamespace(client: DtfClient) {
     getBrand: (params: DtfParams) => getBrand(client, params),
     getMandate: (params: DtfParams) => getMandate(client, params),
     getPrice: (params: GetIndexDtfPriceParams) => getPrice(client, params),
-    getPrices: (params: Parameters<typeof getPrices>[1]) =>
-      getPrices(client, params),
-    getPriceHistory: (params: GetIndexDtfPriceHistoryParams) =>
-      getPriceHistory(client, params),
-    getStatus: (params: Parameters<typeof getIndexDtfStatus>[1]) =>
-      getIndexDtfStatus(client, params),
-    getStatuses: (params?: Parameters<typeof getIndexDtfStatuses>[1]) =>
-      getIndexDtfStatuses(client, params),
-    getExposure: (params: Parameters<typeof getIndexDtfExposure>[1]) =>
-      getIndexDtfExposure(client, params),
-    getHolders: (params: Parameters<typeof getIndexDtfHolders>[1]) =>
-      getIndexDtfHolders(client, params),
-    getTransactions: (params: Parameters<typeof getIndexDtfTransactions>[1]) =>
-      getIndexDtfTransactions(client, params),
-    getBidsEnabled: (params: Parameters<typeof getIndexDtfBidsEnabled>[1]) =>
-      getIndexDtfBidsEnabled(client, params),
-    getRebalanceControl: (
-      params: Parameters<typeof getIndexDtfRebalanceControl>[1],
-    ) => getIndexDtfRebalanceControl(client, params),
-    getPendingFeeShares: (
-      params: Parameters<typeof getIndexDtfPendingFeeShares>[1],
-    ) => getIndexDtfPendingFeeShares(client, params),
-    getApprovedRevenueTokens: (
-      params: Parameters<typeof getIndexDtfApprovedRevenueTokens>[1],
-    ) => getIndexDtfApprovedRevenueTokens(client, params),
-    getPlatformFee: (params: Parameters<typeof getIndexDtfPlatformFee>[1]) =>
-      getIndexDtfPlatformFee(client, params),
-    getRevenue: (params: Parameters<typeof getIndexDtfRevenue>[1]) =>
-      getIndexDtfRevenue(client, params),
-    getIssuanceState: (
-      params: Parameters<typeof getIndexDtfIssuanceState>[1],
-    ) => getIndexDtfIssuanceState(client, params),
+    getPrices: (params: Parameters<typeof getPrices>[1]) => getPrices(client, params),
+    getPriceHistory: (params: GetIndexDtfPriceHistoryParams) => getPriceHistory(client, params),
+    getStatus: (params: Parameters<typeof getIndexDtfStatus>[1]) => getIndexDtfStatus(client, params),
+    getStatuses: (params?: Parameters<typeof getIndexDtfStatuses>[1]) => getIndexDtfStatuses(client, params),
+    getExposure: (params: Parameters<typeof getIndexDtfExposure>[1]) => getIndexDtfExposure(client, params),
+    getHolders: (params: Parameters<typeof getIndexDtfHolders>[1]) => getIndexDtfHolders(client, params),
+    getTransactions: (params: Parameters<typeof getIndexDtfTransactions>[1]) => getIndexDtfTransactions(client, params),
+    getBidsEnabled: (params: Parameters<typeof getIndexDtfBidsEnabled>[1]) => getIndexDtfBidsEnabled(client, params),
+    getRebalanceControl: (params: Parameters<typeof getIndexDtfRebalanceControl>[1]) =>
+      getIndexDtfRebalanceControl(client, params),
+    getPendingFeeShares: (params: Parameters<typeof getIndexDtfPendingFeeShares>[1]) =>
+      getIndexDtfPendingFeeShares(client, params),
+    getApprovedRevenueTokens: (params: Parameters<typeof getIndexDtfApprovedRevenueTokens>[1]) =>
+      getIndexDtfApprovedRevenueTokens(client, params),
+    getPlatformFee: (params: Parameters<typeof getIndexDtfPlatformFee>[1]) => getIndexDtfPlatformFee(client, params),
+    getRevenue: (params: Parameters<typeof getIndexDtfRevenue>[1]) => getIndexDtfRevenue(client, params),
+    getIssuanceState: (params: Parameters<typeof getIndexDtfIssuanceState>[1]) =>
+      getIndexDtfIssuanceState(client, params),
     prepareMint: prepareIndexDtfMint,
     prepareMintPlan: prepareIndexDtfMintPlan,
     prepareRedeem: prepareIndexDtfRedeem,
@@ -166,26 +150,16 @@ export function createIndexDtfNamespace(client: DtfClient) {
     prepareDeployAssetApproval: prepareIndexDtfDeployAssetApproval,
     prepareDeployAssetApprovals: prepareIndexDtfDeployAssetApprovals,
     ...createIndexDtfGovernanceNamespace(client),
-    getRebalances: (params: GetIndexDtfRebalancesParams) =>
-      getRebalances(client, params),
-    getRebalance: (params: GetIndexDtfRebalanceParams) =>
-      getRebalance(client, params),
-    getCompletedRebalances: (params: GetIndexDtfCompletedRebalancesParams) =>
-      getCompletedRebalances(client, params),
-    getCompletedRebalance: (params: GetIndexDtfCompletedRebalanceParams) =>
-      getCompletedRebalance(client, params),
-    getRebalanceAuctions: (
-      params: Parameters<typeof getRebalanceAuctions>[1],
-    ) => getRebalanceAuctions(client, params),
-    getCurrentRebalance: (
-      params: Parameters<typeof getIndexDtfCurrentRebalance>[1],
-    ) => getIndexDtfCurrentRebalance(client, params),
-    getActiveAuction: (params: Parameters<typeof getActiveAuction>[1]) =>
-      getActiveAuction(client, params),
-    getLatestAuction: (params: Parameters<typeof getLatestAuction>[1]) =>
-      getLatestAuction(client, params),
-    getBidQuote: (params: Parameters<typeof getBidQuote>[1]) =>
-      getBidQuote(client, params),
+    getRebalances: (params: GetIndexDtfRebalancesParams) => getRebalances(client, params),
+    getRebalance: (params: GetIndexDtfRebalanceParams) => getRebalance(client, params),
+    getCompletedRebalances: (params: GetIndexDtfCompletedRebalancesParams) => getCompletedRebalances(client, params),
+    getCompletedRebalance: (params: GetIndexDtfCompletedRebalanceParams) => getCompletedRebalance(client, params),
+    getRebalanceAuctions: (params: Parameters<typeof getRebalanceAuctions>[1]) => getRebalanceAuctions(client, params),
+    getCurrentRebalance: (params: Parameters<typeof getIndexDtfCurrentRebalance>[1]) =>
+      getIndexDtfCurrentRebalance(client, params),
+    getActiveAuction: (params: Parameters<typeof getActiveAuction>[1]) => getActiveAuction(client, params),
+    getLatestAuction: (params: Parameters<typeof getLatestAuction>[1]) => getLatestAuction(client, params),
+    getBidQuote: (params: Parameters<typeof getBidQuote>[1]) => getBidQuote(client, params),
     prepareBid: prepareIndexDtfBid,
     prepareCloseAuction: prepareIndexDtfCloseAuction,
     prepareEndRebalance: prepareIndexDtfEndRebalance,

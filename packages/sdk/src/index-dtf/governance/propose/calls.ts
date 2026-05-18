@@ -4,15 +4,15 @@ import type { SupportedChainId } from "@/config";
 import type { IndexDtfCall } from "@/types/governance";
 import type { PriceControl } from "@/types/index-dtf";
 
-import { prepareContractCall } from "@/lib/contract-call";
-import { SdkError } from "@/lib/errors";
+import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { folioArtifactAbi as indexDtfV6Abi } from "@/index-dtf/abis/folio-artifact";
-import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
+import { prepareContractCall } from "@/lib/contract-call";
 import { Decimal } from "@/lib/decimal";
+import { SdkError } from "@/lib/errors";
 import { toUint, toUintNumber } from "@/lib/utils";
 
 export const indexDtfV5WriteAbi = indexDtfV5Abi;
@@ -53,12 +53,11 @@ export type PrepareIndexDtfOptimisticGovernanceCallParams = {
   readonly chainId: SupportedChainId;
 };
 
-export type PrepareIndexDtfSetOptimisticParamsParams =
-  PrepareIndexDtfOptimisticGovernanceCallParams & {
-    readonly vetoDelay: number | bigint;
-    readonly vetoPeriod: number | bigint;
-    readonly vetoThreshold: bigint;
-  };
+export type PrepareIndexDtfSetOptimisticParamsParams = PrepareIndexDtfOptimisticGovernanceCallParams & {
+  readonly vetoDelay: number | bigint;
+  readonly vetoPeriod: number | bigint;
+  readonly vetoThreshold: bigint;
+};
 
 export type PrepareIndexDtfGovernorCallParams = {
   readonly governance: Address;
@@ -301,9 +300,7 @@ export function prepareIndexDtfDeprecate(params: PrepareIndexDtfCallParams): Ind
   });
 }
 
-export function prepareIndexDtfSetOptimisticParams(
-  params: PrepareIndexDtfSetOptimisticParamsParams,
-): IndexDtfCall {
+export function prepareIndexDtfSetOptimisticParams(params: PrepareIndexDtfSetOptimisticParamsParams): IndexDtfCall {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.governance,
@@ -450,7 +447,13 @@ export function prepareIndexDtfTimelockExecuteBatch(
     address: params.timelock,
     abi: timelockAbi,
     functionName: "executeBatch",
-    args: [targets, [...values], [...params.calldatas], params.predecessor ?? zeroHash, params.salt ?? zeroHash] as const,
+    args: [
+      targets,
+      [...values],
+      [...params.calldatas],
+      params.predecessor ?? zeroHash,
+      params.salt ?? zeroHash,
+    ] as const,
     ...(params.value === undefined ? {} : { value: params.value }),
   });
 }

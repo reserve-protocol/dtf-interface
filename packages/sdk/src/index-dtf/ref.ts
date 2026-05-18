@@ -150,38 +150,23 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
         address,
         chainId,
       }),
-    prepareDistributeFees: () =>
-      prepareIndexDtfDistributeFees({ address, chainId }),
+    prepareDistributeFees: () => prepareIndexDtfDistributeFees({ address, chainId }),
     ...createIndexDtfGovernanceRef(client, { address, chainId }),
-    getRebalances: (
-      options: Omit<
-        Parameters<typeof getRebalances>[1],
-        "address" | "chainId"
-      > = {},
-    ) => getRebalances(client, { ...options, address, chainId }),
-    getRebalance: (
-      rebalance:
-        | string
-        | bigint
-        | Omit<GetIndexDtfRebalanceParams, "address" | "chainId">,
-    ) =>
+    getRebalances: (options: Omit<Parameters<typeof getRebalances>[1], "address" | "chainId"> = {}) =>
+      getRebalances(client, { ...options, address, chainId }),
+    getRebalance: (rebalance: string | bigint | Omit<GetIndexDtfRebalanceParams, "address" | "chainId">) =>
       typeof rebalance === "object"
         ? getRebalance(client, { ...rebalance, address, chainId })
         : getRebalance(client, { address, chainId, nonce: rebalance }),
     getCompletedRebalances: (options: GetIndexDtfCompletedRebalancesOptions = {}) =>
       getCompletedRebalances(client, { ...options, address, chainId }),
     getCompletedRebalance: (
-      rebalance:
-        | number
-        | string
-        | bigint
-        | Omit<GetIndexDtfCompletedRebalanceParams, "address" | "chainId">,
+      rebalance: number | string | bigint | Omit<GetIndexDtfCompletedRebalanceParams, "address" | "chainId">,
     ) =>
       typeof rebalance === "object"
         ? getCompletedRebalance(client, { ...rebalance, address, chainId })
         : getCompletedRebalance(client, { address, chainId, nonce: rebalance }),
-    getRebalanceAuctions: (rebalanceId: string) =>
-      getRebalanceAuctions(client, { chainId, rebalanceId }),
+    getRebalanceAuctions: (rebalanceId: string) => getRebalanceAuctions(client, { chainId, rebalanceId }),
     getCurrentRebalance: (options?: BlockNumberOption | BlockNumber) =>
       getIndexDtfCurrentRebalance(client, {
         address,
@@ -192,17 +177,13 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
       getActiveAuction(client, { address, chainId, ...blockParams(options) }),
     getLatestAuction: (options?: BlockNumberOption | BlockNumber) =>
       getLatestAuction(client, { address, chainId, ...blockParams(options) }),
-    getBidQuote: (
-      quote: Omit<Parameters<typeof getBidQuote>[1], "address" | "chainId">,
-    ) => getBidQuote(client, { ...quote, address, chainId }),
-    prepareBid: (
-      call: Omit<Parameters<typeof prepareIndexDtfBid>[0], "address" | "chainId">,
-    ) => prepareIndexDtfBid({ ...call, address, chainId }),
-    prepareCloseAuction: (
-      call: Omit<Parameters<typeof prepareIndexDtfCloseAuction>[0], "address" | "chainId">,
-    ) => prepareIndexDtfCloseAuction({ ...call, address, chainId }),
-    prepareEndRebalance: () =>
-      prepareIndexDtfEndRebalance({ address, chainId }),
+    getBidQuote: (quote: Omit<Parameters<typeof getBidQuote>[1], "address" | "chainId">) =>
+      getBidQuote(client, { ...quote, address, chainId }),
+    prepareBid: (call: Omit<Parameters<typeof prepareIndexDtfBid>[0], "address" | "chainId">) =>
+      prepareIndexDtfBid({ ...call, address, chainId }),
+    prepareCloseAuction: (call: Omit<Parameters<typeof prepareIndexDtfCloseAuction>[0], "address" | "chainId">) =>
+      prepareIndexDtfCloseAuction({ ...call, address, chainId }),
+    prepareEndRebalance: () => prepareIndexDtfEndRebalance({ address, chainId }),
     prepareOpenAuctionArgs: prepareIndexDtfOpenAuctionArgs,
     prepareOpenAuction: (call: Omit<Parameters<typeof prepareIndexDtfOpenAuction>[0], "address" | "chainId">) =>
       prepareIndexDtfOpenAuction({ ...call, address, chainId }),

@@ -6,8 +6,8 @@ import type { Amount, Token } from "@/types/common";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { getTotalAssets, getTotalSupply } from "@/index-dtf/dtf/index";
-import { mapAmount } from "@/lib/utils";
 import { getTokensData } from "@/lib/tokens";
+import { mapAmount } from "@/lib/utils";
 
 export {
   getIndexDtfRedeemMinAmounts,

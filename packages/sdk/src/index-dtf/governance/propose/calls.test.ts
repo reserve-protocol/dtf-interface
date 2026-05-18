@@ -1,6 +1,9 @@
 import { decodeFunctionData } from "viem";
 import { describe, expect, it } from "vitest";
 
+import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
+import { timelockAbi } from "@/index-dtf/abis/timelock";
+import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
 import {
   indexDtfV5WriteAbi,
   indexDtfV6WriteAbi,
@@ -18,9 +21,6 @@ import {
   prepareIndexDtfTimelockGrantRole,
   prepareIndexDtfUpdateTimelock,
 } from "@/index-dtf/governance/propose/calls";
-import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
-import { timelockAbi } from "@/index-dtf/abis/timelock";
-import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const ACCOUNT = "0x0000000000000000000000000000000000000002";
@@ -71,7 +71,9 @@ describe("Index DTF call builders", () => {
       version: "6.0.0",
     });
 
-    expect(decodeFunctionData({ abi: indexDtfV6WriteAbi, data: newCall.data }).functionName).toBe("setMaxAuctionLength");
+    expect(decodeFunctionData({ abi: indexDtfV6WriteAbi, data: newCall.data }).functionName).toBe(
+      "setMaxAuctionLength",
+    );
   });
 
   it("keeps unchanged no-arg calls available on older versions", () => {

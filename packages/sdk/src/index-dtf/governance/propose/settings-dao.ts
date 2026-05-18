@@ -8,8 +8,6 @@ import type {
 } from "@/index-dtf/governance/propose/settings-types";
 import type { IndexDtfCall } from "@/types/governance";
 
-import { prepareContractCall } from "@/lib/contract-call";
-import { SdkError } from "@/lib/errors";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { buildGovernanceCalls } from "@/index-dtf/governance/propose/settings-governance";
@@ -19,6 +17,8 @@ import {
   buildSettingsProposal,
   getDtfIfNeeded,
 } from "@/index-dtf/governance/propose/settings-shared";
+import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 
 /** Builds a proposal that changes vote-lock DAO settings and rewards. */
 export async function buildIndexDtfDaoSettingsProposal(

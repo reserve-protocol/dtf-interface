@@ -38,7 +38,9 @@ describe("Index DTF discovery", () => {
   });
 
   it("returns API status for a known Index DTF", async () => {
-    const fetch = vi.fn(async () => Response.json([{ type: "index", address: DTF, chainId: 8453, status: "deprecated" }]));
+    const fetch = vi.fn(async () =>
+      Response.json([{ type: "index", address: DTF, chainId: 8453, status: "deprecated" }]),
+    );
     vi.stubGlobal("fetch", fetch);
     const client = createDtfClient({ apiBaseUrl: "https://api.example" });
 
@@ -139,11 +141,7 @@ describe("Index DTF discovery", () => {
       if (url === "https://example.com/index") {
         return Response.json({
           data: {
-            dtfs: [
-              subgraphDtf(DTF, "DTF"),
-              subgraphDtf(DTF_B, "DTFB"),
-              subgraphDtf(DTF_C, "DTFC"),
-            ],
+            dtfs: [subgraphDtf(DTF, "DTF"), subgraphDtf(DTF_B, "DTFB"), subgraphDtf(DTF_C, "DTFC")],
           },
         });
       }
@@ -203,7 +201,10 @@ describe("Index DTF discovery", () => {
   });
 
   it("treats missing discovery status as active like Register", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => Response.json([])));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json([])),
+    );
     const client = createDtfClient({ apiBaseUrl: "https://api.example" });
 
     await expect(getIndexDtfStatus(client, { address: DTF, chainId: 8453 })).resolves.toBe("active");

@@ -3,7 +3,6 @@ import { getAddress, type Address } from "viem";
 import type { DtfClient } from "@/client";
 import type { TokenVolatility } from "@/types/common";
 
-import { SdkError } from "@/lib/errors";
 import {
   DEFAULT_MAX_AUCTION_SIZE_USD,
   PRICE_ERROR_BY_VOLATILITY,
@@ -12,6 +11,7 @@ import {
   type IndexDtfBasketTokenInput,
 } from "@/index-dtf/dtf/basket/types";
 import { assertPositiveNumber } from "@/index-dtf/dtf/basket/validation";
+import { SdkError } from "@/lib/errors";
 import { getTokensData } from "@/lib/tokens";
 import { getTokenPrices, getTokenVolatilities } from "@/lib/tokens/prices";
 

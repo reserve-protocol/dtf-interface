@@ -8,12 +8,12 @@ Staked RSR gives governance power for a specific Yield DTF. Governance can contr
 
 ## Difference From Index Governance
 
-| Area | Yield DTF | Index DTF |
-| --- | --- | --- |
-| Governance token | stRSR for that Yield DTF | vote-lock vault token/underlying for that Index DTF |
-| Backstop role | yes, RSR staking participates in overcollateralization | not the same mechanism |
-| Proposal targets | Yield protocol components | Folio, governors, timelocks, staking vaults |
-| Data | Yield subgraph/RPC | Index subgraph/RPC/API |
+| Area             | Yield DTF                                              | Index DTF                                           |
+| ---------------- | ------------------------------------------------------ | --------------------------------------------------- |
+| Governance token | stRSR for that Yield DTF                               | vote-lock vault token/underlying for that Index DTF |
+| Backstop role    | yes, RSR staking participates in overcollateralization | not the same mechanism                              |
+| Proposal targets | Yield protocol components                              | Folio, governors, timelocks, staking vaults         |
+| Data             | Yield subgraph/RPC                                     | Index subgraph/RPC/API                              |
 
 ## SDK Implications
 

@@ -3,9 +3,9 @@ import type { Address } from "viem";
 import type { SupportedChainId } from "@/config";
 
 import { createDtfClient, type DtfClient, type DtfClientConfig } from "@/client";
-import { SdkError } from "@/lib/errors";
-import { createIndexDtfNamespace } from "@/index-dtf/index";
 import { createPortfolioNamespace } from "@/client/api/portfolio";
+import { createIndexDtfNamespace } from "@/index-dtf/index";
+import { SdkError } from "@/lib/errors";
 
 export type DtfSdkConfig = DtfClientConfig & {
   readonly client?: DtfClient;

@@ -1,6 +1,6 @@
 {
   "name": "@dtf-interface/react-sdk",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "React Query hooks for DTF interface integrations.",
   "keywords": [
     "dtf",

@@ -35,9 +35,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown --no-config ./src/index.ts --dts --format esm",
     "clean": "rm -rf dist *.tsbuildinfo",
-    "dev": "tsdown --watch",
+    "dev": "tsdown --no-config ./src/index.ts --dts --format esm --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

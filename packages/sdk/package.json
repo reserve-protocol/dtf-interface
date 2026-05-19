@@ -1,6 +1,6 @@
 {
   "name": "@reserve-protocol/sdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Core TypeScript SDK for DTF interface integrations.",
   "keywords": [
     "dtf",
@@ -28,9 +28,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown --no-config ./src/index.ts --dts --format esm --deps.never-bundle @reserve-protocol/dtf-catalog --deps.never-bundle @reserve-protocol/dtf-rebalance-lib --deps.never-bundle decimal.js-light --deps.never-bundle graphql --deps.never-bundle graphql-request --deps.never-bundle viem --deps.never-bundle zod",
     "clean": "rm -rf dist *.tsbuildinfo",
-    "dev": "tsdown --watch",
+    "dev": "tsdown --no-config ./src/index.ts --dts --format esm --deps.never-bundle @reserve-protocol/dtf-catalog --deps.never-bundle @reserve-protocol/dtf-rebalance-lib --deps.never-bundle decimal.js-light --deps.never-bundle graphql --deps.never-bundle graphql-request --deps.never-bundle viem --deps.never-bundle zod --watch",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "playground:index": "tsx playground/index-dtf.ts",
     "test": "vitest run --passWithNoTests",

@@ -21,3 +21,4 @@ overrides:
   "@types/react": "catalog:"
   react: "catalog:"
   typescript: "catalog:"
+  unrun: 0.2.37

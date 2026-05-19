@@ -28,9 +28,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown --no-config ./src/index.ts --dts --format esm --deps.never-bundle @reserve-protocol/dtf-catalog --deps.never-bundle @reserve-protocol/dtf-rebalance-lib --deps.never-bundle decimal.js-light --deps.never-bundle graphql --deps.never-bundle graphql-request --deps.never-bundle viem --deps.never-bundle zod",
+    "build": "tsdown",
     "clean": "rm -rf dist *.tsbuildinfo",
-    "dev": "tsdown --no-config ./src/index.ts --dts --format esm --deps.never-bundle @reserve-protocol/dtf-catalog --deps.never-bundle @reserve-protocol/dtf-rebalance-lib --deps.never-bundle decimal.js-light --deps.never-bundle graphql --deps.never-bundle graphql-request --deps.never-bundle viem --deps.never-bundle zod --watch",
+    "dev": "tsdown --watch",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "playground:index": "tsx playground/index-dtf.ts",
     "test": "vitest run --passWithNoTests",

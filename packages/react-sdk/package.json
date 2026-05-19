@@ -28,9 +28,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown --no-config ./src/index.ts --dts --format esm --deps.never-bundle @reserve-protocol/sdk --deps.never-bundle @tanstack/react-query --deps.never-bundle react --deps.never-bundle viem",
+    "build": "tsdown",
     "clean": "rm -rf dist *.tsbuildinfo",
-    "dev": "tsdown --no-config ./src/index.ts --dts --format esm --deps.never-bundle @reserve-protocol/sdk --deps.never-bundle @tanstack/react-query --deps.never-bundle react --deps.never-bundle viem --watch",
+    "dev": "tsdown --watch",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

@@ -9,6 +9,11 @@
     "yield-dtf"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reserve-protocol/dtf-interface",
+    "directory": "packages/dtf-catalog"
+  },
   "files": [
     "dist",
     "index-dtf",

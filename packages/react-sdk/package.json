@@ -8,6 +8,11 @@
     "sdk"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reserve-protocol/dtf-interface",
+    "directory": "packages/react-sdk"
+  },
   "files": [
     "dist"
   ],

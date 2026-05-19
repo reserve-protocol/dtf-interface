@@ -4,6 +4,10 @@
   "private": true,
   "description": "TypeScript interface SDK for DTF integrations.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reserve-protocol/dtf-interface"
+  },
   "scripts": {
     "build": "turbo run build",
     "clean": "turbo run clean",

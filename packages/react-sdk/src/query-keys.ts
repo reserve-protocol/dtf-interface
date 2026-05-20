@@ -13,6 +13,7 @@ import type {
   GetIndexDtfParams,
   GetIndexDtfPriceHistoryParams,
   GetIndexDtfPriceParams,
+  GetIndexDtfVersionParams,
   GetIndexDtfOptimisticProposalVoterStateParams,
   GetIndexDtfProposalParams,
   GetIndexDtfProposalVoterStateParams,
@@ -180,6 +181,7 @@ export const dtfQueryKeys = {
     dtf: (params?: GetIndexDtfParams) => [...dtfQueryKeys.index.all(), "dtf", keyParams(params)] as const,
     full: (params?: GetFullIndexDtfParams) => [...dtfQueryKeys.index.all(), "full", keyParams(params)] as const,
     basket: (params?: GetIndexDtfBasketParams) => [...dtfQueryKeys.index.all(), "basket", keyParams(params)] as const,
+    version: (params?: GetIndexDtfVersionParams) => [...dtfQueryKeys.index.all(), "version", keyParams(params)] as const,
     brand: (params?: DtfParams) => [...dtfQueryKeys.index.all(), "brand", keyParams(params)] as const,
     price: (params?: GetIndexDtfPriceParams) => [...dtfQueryKeys.index.all(), "price", keyParams(params)] as const,
     priceHistory: (params?: GetIndexDtfPriceHistoryParams) =>
@@ -188,6 +190,8 @@ export const dtfQueryKeys = {
       all: () => [...dtfQueryKeys.index.all(), "governance"] as const,
       proposals: (params?: GetIndexDtfProposalsParams) =>
         [...dtfQueryKeys.index.governance.all(), "proposals", keyParams(indexDtfProposalsKeyParams(params))] as const,
+      proposalList: (params?: GetIndexDtfProposalsParams) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-list", keyParams(indexDtfProposalsKeyParams(params))] as const,
       proposal: (params?: GetIndexDtfProposalParams) =>
         [...dtfQueryKeys.index.governance.all(), "proposal", keyParams(params)] as const,
       optimisticGovernance: (params?: IndexMethodParams<"getOptimisticGovernance">) =>

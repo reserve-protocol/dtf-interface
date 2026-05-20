@@ -118,6 +118,7 @@ export {
 export {
   getAllProposals as getAllIndexDtfProposals,
   getProposal as getIndexDtfProposal,
+  getProposalList as getIndexDtfProposalList,
   getProposals as getIndexDtfProposals,
 } from "@/index-dtf/governance/proposals";
 export {

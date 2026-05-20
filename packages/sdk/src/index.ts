@@ -135,6 +135,7 @@ export {
   getIndexDtfPrices,
   getIndexDtfProposal,
   getIndexDtfProposalGovernanceAddresses,
+  getIndexDtfProposalList,
   getIndexDtfProposalThrottleCharges,
   getIndexDtfProposalVoterState,
   getIndexDtfProposalVotes,

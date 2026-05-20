@@ -53,11 +53,15 @@ function createChainConfig(
               }
             : {}),
           ...override,
-          rpcUrls: [...(override?.rpcUrls ?? []), ...DEFAULT_RPC_URLS[chainId]],
+          rpcUrls: dedupeRpcUrls([...(override?.rpcUrls ?? []), ...DEFAULT_RPC_URLS[chainId]]),
         },
       ];
     }),
   ) as Partial<Record<SupportedChainId, DtfChainConfig>>;
+}
+
+function dedupeRpcUrls(rpcUrls: readonly string[]): readonly string[] {
+  return [...new Set(rpcUrls)];
 }
 
 function trimTrailingSlash(value: string): string {

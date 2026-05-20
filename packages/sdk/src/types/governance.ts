@@ -10,7 +10,6 @@ export type IndexDtfGovernanceInput = Address | readonly Address[];
 
 export type GetIndexDtfProposalsOptions = {
   readonly limit?: number;
-  readonly includeOptimisticState?: boolean;
 };
 
 type GetIndexDtfProposalsByAddressParams = DtfParams & {
@@ -40,7 +39,6 @@ export type GetAllIndexDtfProposalsParams = {
   readonly limit?: number;
   readonly offset?: number;
   readonly states?: readonly ProposalState[];
-  readonly includeOptimisticState?: boolean;
 };
 
 export type GetIndexDtfProposalParams = {
@@ -196,10 +194,17 @@ export type IndexDtfProposalSummary = {
   readonly againstWeightedVotes: Amount;
   readonly abstainWeightedVotes: Amount;
   readonly isOptimistic?: boolean;
+  readonly wasChallenged?: boolean;
+  readonly challengedProposalId?: string;
   readonly vetoThreshold?: bigint;
   readonly voteToken?: Address;
   readonly optimistic?: IndexDtfOptimisticProposalContext;
   readonly votingState: ProposalVotingState;
+};
+
+export type IndexDtfProposalList = {
+  readonly proposals: readonly IndexDtfProposalSummary[];
+  readonly proposalCount: number;
 };
 
 export type IndexDtfProposalVote = {

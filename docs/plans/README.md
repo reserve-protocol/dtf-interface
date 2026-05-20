@@ -13,8 +13,8 @@ Do not use `plans/` as proof that an API exists. Check `sdk/api-surface.md` and 
 ## Current Plans
 
 - `zapper-integration.md`: pending Zapper SDK integration work for quote/deploy/zap transaction surfaces.
+- `register-index-dtf-react-sdk-migration.md`: pending Register migration plan for replacing direct Index DTF data/action sources with SDK/react-sdk surfaces.
 
-No other active implementation plans are tracked here.
 
 ## Plan File Rules
 

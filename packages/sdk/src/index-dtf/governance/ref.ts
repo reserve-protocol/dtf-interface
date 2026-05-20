@@ -27,6 +27,7 @@ import {
   getOptimisticProposalContext,
   getOptimisticProposalVoterState,
   getProposal,
+  getProposalList,
   getProposalThrottleCharges,
   getProposalVoterState,
   getProposalVotes,
@@ -54,6 +55,8 @@ export function createIndexDtfGovernanceRef(client: DtfClient, params: DtfParams
 
   return {
     getProposals: (options: GetIndexDtfProposalsOptions = {}) => getProposals(client, { ...options, address, chainId }),
+    getProposalList: (options: GetIndexDtfProposalsOptions = {}) =>
+      getProposalList(client, { ...options, address, chainId }),
     getProposal: (proposalId: string) => getProposal(client, { proposalId, address, chainId }),
     getDelegates: (options: Pick<GetIndexDtfDelegatesParams, "stToken" | "limit">) =>
       getDelegates(client, { ...options, chainId }),

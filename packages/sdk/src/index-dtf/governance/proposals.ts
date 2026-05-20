@@ -5,6 +5,7 @@ import type { DtfParams } from "@/types/common";
 import type {
   GetAllIndexDtfProposalsParams,
   GetIndexDtfProposalParams,
+  IndexDtfProposalList,
   GetIndexDtfProposalsParams,
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
@@ -19,11 +20,9 @@ import {
   mapIndexDtfProposal,
   mapIndexDtfProposalSummary,
   mapProposalGovernanceContractContext,
-  type ParsedIndexDtfProposal,
   type ParsedIndexDtfProposalSummary,
   type SubgraphGovernedIndexDtfProposalDtf,
 } from "@/index-dtf/governance/mapper";
-import { getOptimisticProposalContext } from "@/index-dtf/governance/optimistic";
 import {
   getDtfProposalGovernanceIds,
   getProposalGovernanceAddresses,
@@ -41,22 +40,32 @@ import {
 import { SdkError } from "@/lib/errors";
 import { getCurrentTime } from "@/lib/utils";
 
+const CHALLENGE_DESCRIPTION_PREFIX = "Confirmation For:";
+
 export async function getProposals(
   client: DtfClient,
   params: GetIndexDtfProposalsParams,
 ): Promise<readonly IndexDtfProposalSummary[]> {
+  const proposalList = await getProposalList(client, params);
+
+  return proposalList.proposals;
+}
+
+export async function getProposalList(
+  client: DtfClient,
+  params: GetIndexDtfProposalsParams,
+): Promise<IndexDtfProposalList> {
   const limit = params.limit ?? DEFAULT_PROPOSAL_LIMIT;
 
   if (params.governanceAddresses) {
     const governanceIds = normalizeGovernanceIds(params.governanceAddresses);
     const dtf = params.address ? { address: getAddress(params.address), chainId: params.chainId } : undefined;
 
-    return getProposalsByGovernanceIds(
+    return getProposalListByGovernanceIds(
       client,
       params.chainId,
       governanceIds,
       limit,
-      params.includeOptimisticState ?? false,
       dtf,
     );
   }
@@ -68,12 +77,11 @@ export async function getProposals(
     };
     const governanceIds = normalizeGovernanceIds(getProposalGovernanceAddresses(params.dtf));
 
-    return getProposalsByGovernanceIds(
+    return getProposalListByGovernanceIds(
       client,
       dtf.chainId,
       governanceIds,
       limit,
-      params.includeOptimisticState ?? false,
       dtf,
     );
   }
@@ -81,12 +89,11 @@ export async function getProposals(
   const dtf = { address: getAddress(params.address), chainId: params.chainId };
   const governanceIds = await fetchDtfProposalGovernanceIds(client, dtf);
 
-  return getProposalsByGovernanceIds(
+  return getProposalListByGovernanceIds(
     client,
     dtf.chainId,
     governanceIds,
     limit,
-    params.includeOptimisticState ?? false,
     dtf,
   );
 }
@@ -95,21 +102,20 @@ export async function getAllProposals(
   client: DtfClient,
   params: GetAllIndexDtfProposalsParams,
 ): Promise<readonly IndexDtfProposalSummary[]> {
+  const limit = params.limit ?? DEFAULT_PROPOSAL_LIMIT;
   const where = getProposalFilter(params.states);
   const { proposals } = await client.subgraph.queryIndex({
     chainId: params.chainId,
     query: GetAllIndexDtfProposalsDocument,
     variables: {
-      limit: params.limit ?? DEFAULT_PROPOSAL_LIMIT,
+      limit,
       offset: params.offset ?? 0,
       ...(where ? { where } : {}),
     },
   });
 
-  return finalizeProposalSummaries(
-    client,
+  return withProposalSummaryState(
     proposals.map((proposal) => mapIndexDtfProposalSummary(proposal, params.chainId)),
-    params.includeOptimisticState ?? false,
   );
 }
 
@@ -143,11 +149,9 @@ export async function getProposal(
 
   const governedDtf = dtf as SubgraphGovernedIndexDtfProposalDtf;
 
-  const parsedProposal = await withOptionalOptimisticProposalContext(
-    client,
-    mapIndexDtfProposal(proposal, governedDtf, chainId),
-  );
+  const parsedProposal = mapIndexDtfProposal(proposal, governedDtf, chainId);
   const proposalWithVoteState = withVoteState(parsedProposal, getCurrentTime());
+  const proposalWithChallengeState = withChallengeState([proposalWithVoteState])[0]!;
   const contractMap = buildProposalContractMap({
     chainId,
     dtf: mapDtfProposalContractContext(governedDtf),
@@ -160,21 +164,20 @@ export async function getProposal(
   });
 
   return {
-    ...proposalWithVoteState,
+    ...proposalWithChallengeState,
     decoded: decodedData,
   };
 }
 
-async function getProposalsByGovernanceIds(
+async function getProposalListByGovernanceIds(
   client: DtfClient,
   chainId: DtfParams["chainId"],
   governanceIds: readonly string[],
   limit: number,
-  includeOptimisticState: boolean,
   dtf?: DtfParams,
-): Promise<readonly IndexDtfProposalSummary[]> {
+): Promise<IndexDtfProposalList> {
   if (governanceIds.length === 0) {
-    return [];
+    return { proposals: [], proposalCount: 0 };
   }
 
   const { governances } = await client.subgraph.queryIndex({
@@ -185,62 +188,80 @@ async function getProposalsByGovernanceIds(
       limit,
     },
   });
+  const proposalCount = getProposalCount(governances);
 
-  const timestamp = getCurrentTime();
   const proposals = governances
     .flatMap((governance) => governance.proposals)
     .map((proposal) => mapIndexDtfProposalSummary(proposal, chainId, dtf))
     .sort((a, b) => b.creationTime - a.creationTime);
-
   const limitedProposals = proposals.slice(0, limit);
 
-  return finalizeProposalSummaries(client, limitedProposals, includeOptimisticState, timestamp);
-}
-
-async function finalizeProposalSummaries(
-  client: DtfClient,
-  proposals: readonly ParsedIndexDtfProposalSummary[],
-  includeOptimisticState: boolean,
-  timestamp = getCurrentTime(),
-): Promise<readonly IndexDtfProposalSummary[]> {
-  if (!includeOptimisticState) {
-    return proposals.map((proposal) => withVoteState(proposal, timestamp));
-  }
-
-  const optimisticProposals = await Promise.all(
-    proposals.map((proposal) => withOptionalOptimisticProposalContext(client, proposal)),
-  );
-
-  return optimisticProposals.map((proposal) => withVoteState(proposal, timestamp));
-}
-
-async function withOptionalOptimisticProposalContext<T extends ParsedIndexDtfProposal | ParsedIndexDtfProposalSummary>(
-  client: DtfClient,
-  proposal: T,
-): Promise<T> {
-  if (proposal.isOptimistic === false) {
-    return proposal;
-  }
-
-  const contextParams = {
-    chainId: proposal.chainId,
-    governance: proposal.governance,
-    proposalId: proposal.id,
-    ...(proposal.isOptimistic === undefined ? {} : { isOptimistic: proposal.isOptimistic }),
-  };
-
-  const optimistic = await getOptimisticProposalContext(client, contextParams);
-
-  if (!optimistic) {
-    return proposal;
-  }
-
   return {
-    ...proposal,
-    isOptimistic: true,
-    voteToken: optimistic.voteToken,
-    optimistic,
+    proposals: withProposalSummaryState(limitedProposals),
+    proposalCount,
   };
+}
+
+function getProposalCount(governances: readonly { readonly proposalCount: string }[]): number {
+  return governances.reduce((count, governance) => count + Number(governance.proposalCount), 0);
+}
+
+function withProposalSummaryState(
+  proposals: readonly ParsedIndexDtfProposalSummary[],
+  timestamp = getCurrentTime(),
+): readonly IndexDtfProposalSummary[] {
+  const proposalsWithVoteState = proposals.map((proposal) => withVoteState(proposal, timestamp));
+  const proposalsWithChallengeState = withChallengeState(proposalsWithVoteState);
+
+  return proposalsWithChallengeState;
+}
+
+function withChallengeState<T extends ParsedIndexDtfProposalSummary>(proposals: readonly T[]): readonly T[] {
+  const optimisticProposals: T[] = [];
+  const challengeMatches = new Map<string, string | undefined>();
+  const chronological = [...proposals].sort((a, b) => a.creationTime - b.creationTime);
+
+  for (const proposal of chronological) {
+    if (proposal.isOptimistic === true) {
+      optimisticProposals.push(proposal);
+      continue;
+    }
+
+    if (!proposal.description.startsWith(CHALLENGE_DESCRIPTION_PREFIX)) {
+      continue;
+    }
+
+    const confirmationDescription = proposal.description.slice(CHALLENGE_DESCRIPTION_PREFIX.length).trim();
+    let challengedProposalId: string | undefined;
+    for (let index = optimisticProposals.length - 1; index >= 0; index--) {
+      const optimisticProposal = optimisticProposals[index]!;
+
+      if (optimisticProposal.governance.toLowerCase() !== proposal.governance.toLowerCase()) {
+        continue;
+      }
+
+      if (confirmationDescription === optimisticProposal.description) {
+        challengedProposalId = optimisticProposal.id;
+        break;
+      }
+    }
+
+    challengeMatches.set(proposal.id, challengedProposalId);
+  }
+
+  return proposals.map((proposal) => {
+    if (!challengeMatches.has(proposal.id)) {
+      return proposal;
+    }
+
+    const challengedProposalId = challengeMatches.get(proposal.id);
+
+    return {
+      ...proposal,
+      wasChallenged: true,
+      ...(challengedProposalId ? { challengedProposalId } : {}),
+    };
+  });
 }
 
 function getProposalFilter(states: readonly ProposalState[] | undefined): Proposal_Filter | undefined {

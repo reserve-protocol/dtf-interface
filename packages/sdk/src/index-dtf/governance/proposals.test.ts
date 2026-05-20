@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DtfClient } from "@/client";
 
 import { dtfIndexProposalAbi } from "@/index-dtf/abis/proposal-decoder";
-import { getAllProposals, getProposal, getProposals } from "@/index-dtf/governance/index";
+import { getAllProposals, getProposal, getProposalList, getProposals } from "@/index-dtf/governance/index";
 
 describe("Index DTF governance proposals", () => {
   afterEach(() => {
@@ -429,12 +429,128 @@ describe("Index DTF governance proposals", () => {
     });
   });
 
+  it("returns total proposal count separately from the limited proposal list", async () => {
+    const queryIndex = vi.fn(async () => ({
+      governances: [
+        {
+          id: "0x0000000000000000000000000000000000000001",
+          proposalCount: "123",
+          proposals: [],
+        },
+      ],
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposalList = await getProposalList(client, {
+      chainId: 1,
+      governanceAddresses: ["0x0000000000000000000000000000000000000001"],
+      limit: 10,
+    });
+
+    expect(proposalList).toEqual({
+      proposals: [],
+      proposalCount: 123,
+    });
+  });
+
+  it("marks normal proposals created after a challenged optimistic proposal", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      governances: [
+        {
+          id: "0x0000000000000000000000000000000000000001",
+          proposalCount: "3",
+          proposals: [
+            createProposalSummary({
+              id: "100000000000000000000000000000000000000000000000000000000000000000000000000002",
+              description: "Confirmation For: Same proposal",
+              creationTime: "999100",
+              state: "ACTIVE",
+              forWeightedVotes: "0",
+              abstainWeightedVotes: "0",
+              againstWeightedVotes: "0",
+              quorumVotes: "1000000000000000000",
+              voteStart: "999000",
+              voteEnd: "1000100",
+              creationBlock: "11",
+              proposer: "0x0000000000000000000000000000000000000002",
+              governance: "0x0000000000000000000000000000000000000001",
+              timelock: "0x0000000000000000000000000000000000000008",
+              isOptimistic: false,
+            }),
+            createProposalSummary({
+              id: "100000000000000000000000000000000000000000000000000000000000000000000000000001",
+              description: "Same proposal",
+              creationTime: "999000",
+              state: "ACTIVE",
+              forWeightedVotes: "0",
+              abstainWeightedVotes: "0",
+              againstWeightedVotes: "100000000000000000000",
+              quorumVotes: "1000000000000000000",
+              voteStart: "998900",
+              voteEnd: "1000000",
+              creationBlock: "10",
+              proposer: "0x0000000000000000000000000000000000000002",
+              governance: "0x0000000000000000000000000000000000000001",
+              timelock: "0x0000000000000000000000000000000000000008",
+              isOptimistic: true,
+              vetoThreshold: "1000000000000000000",
+            }),
+            createProposalSummary({
+              id: "100000000000000000000000000000000000000000000000000000000000000000000000000003",
+              description: "Same",
+              creationTime: "998900",
+              state: "ACTIVE",
+              forWeightedVotes: "0",
+              abstainWeightedVotes: "0",
+              againstWeightedVotes: "100000000000000000000",
+              quorumVotes: "1000000000000000000",
+              voteStart: "998800",
+              voteEnd: "1000000",
+              creationBlock: "9",
+              proposer: "0x0000000000000000000000000000000000000002",
+              governance: "0x0000000000000000000000000000000000000001",
+              timelock: "0x0000000000000000000000000000000000000008",
+              isOptimistic: true,
+              vetoThreshold: "1000000000000000000",
+            }),
+          ],
+        },
+      ],
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposals = await getProposals(client, {
+      chainId: 1,
+      governanceAddresses: "0x0000000000000000000000000000000000000001",
+    });
+
+    expect(proposals[0]).toMatchObject({
+      id: "100000000000000000000000000000000000000000000000000000000000000000000000000002",
+      isOptimistic: false,
+      wasChallenged: true,
+      challengedProposalId: "100000000000000000000000000000000000000000000000000000000000000000000000000001",
+    });
+    expect(proposals[1]).toMatchObject({
+      id: "100000000000000000000000000000000000000000000000000000000000000000000000000001",
+      isOptimistic: true,
+    });
+  });
+
   it("lists all chain proposals with state filters", async () => {
     vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
     const queryIndex = vi.fn(async () => ({
       proposals: [
         createProposalSummary({
-          id: "global-proposal",
+          id: "100000000000000000000000000000000000000000000000000000000000000000000000000001",
           creationTime: "999000",
           state: "QUEUED",
           forWeightedVotes: "2000000000000000000",
@@ -475,7 +591,7 @@ describe("Index DTF governance proposals", () => {
       },
     });
     expect(proposals[0]).toMatchObject({
-      id: "global-proposal",
+      id: "100000000000000000000000000000000000000000000000000000000000000000000000000001",
       governance: "0x0000000000000000000000000000000000000001",
       timelock: "0x0000000000000000000000000000000000000008",
       state: "QUEUED",

@@ -49,6 +49,13 @@ describe("dtfQueryKeys", () => {
     });
   });
 
+  it("uses the same DTF identity params for proposal counts", () => {
+    const proposalsKey = dtfQueryKeys.index.governance.proposals({ dtf: createDtfKeyFixture() });
+    const proposalListKey = dtfQueryKeys.index.governance.proposalList({ dtf: createDtfKeyFixture() });
+
+    expect(proposalListKey).toEqual(["dtf", "index", "governance", "proposal-list", proposalsKey[4]]);
+  });
+
   it("keys guardians by DTF identity instead of the full DTF object", () => {
     const key = dtfQueryKeys.index.governance.guardians({
       dtf: createDtfKeyFixture(),

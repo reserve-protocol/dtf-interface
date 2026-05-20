@@ -34,6 +34,7 @@ import {
   getOptimisticVotes,
   getPastOptimisticVotes,
   getProposal,
+  getProposalList,
   getProposalThrottleCharges,
   getProposalVoterState,
   getProposalVotes,
@@ -74,6 +75,7 @@ import {
 export function createIndexDtfGovernanceNamespace(client: DtfClient) {
   return {
     getProposals: (params: GetIndexDtfProposalsParams) => getProposals(client, params),
+    getProposalList: (params: GetIndexDtfProposalsParams) => getProposalList(client, params),
     getProposal: (params: GetIndexDtfProposalParams) => getProposal(client, params),
     getAllProposals: (params: GetAllIndexDtfProposalsParams) => getAllProposals(client, params),
     getDelegates: (params: GetIndexDtfDelegatesParams) => getDelegates(client, params),

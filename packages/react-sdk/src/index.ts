@@ -1,6 +1,12 @@
 export * from "@reserve-protocol/sdk";
 export { useDtfSdk, DtfSdkProvider } from "@/provider";
 export type { DtfSdkProviderProps } from "@/provider";
+export { IndexDtfProvider, useIndexDtfIdentity } from "@/index-dtf/index-dtf-provider";
+export type { IndexDtfIdentity, IndexDtfProviderProps } from "@/index-dtf/index-dtf-provider";
+export { useCurrentIndexDtf } from "@/index-dtf/use-current-index-dtf";
+export { useCurrentIndexDtfBasket } from "@/index-dtf/use-current-index-dtf-basket";
+export { mapIndexDtfData } from "@/index-dtf/index-dtf-data";
+export type { IndexDtfData } from "@/index-dtf/index-dtf-data";
 export { normalizeQueryKeyValue } from "@/normalize-query-key";
 export { dtfQueryKeys } from "@/query-keys";
 export {
@@ -27,15 +33,36 @@ export {
   indexDtfProposalThrottleChargesQueryOptions,
   indexDtfProposalVoterStateQueryOptions,
   indexDtfProposalVotesQueryOptions,
+  indexDtfProposalListQueryOptions,
   indexDtfProposalsQueryOptions,
   indexDtfProposerStateQueryOptions,
   indexDtfQueryOptions,
   indexDtfSelectorRegistryAllowedSelectorsQueryOptions,
   indexDtfSelectorRegistryIsAllowedQueryOptions,
   indexDtfSelectorRegistryTargetsQueryOptions,
+  indexDtfVersionQueryOptions,
   indexDtfVoterStateQueryOptions,
 } from "@/query-options";
 export type { DtfQueryOptions, DtfQueryOptionsResult, IndexDtfPastOptimisticVotesQueryParams } from "@/query-options";
+export { useIndexDtfDelegates } from "@/index-dtf/use-index-dtf-delegates";
+export { useIndexDtfGuardians } from "@/index-dtf/use-index-dtf-guardians";
+export { useIndexDtfOptimisticGovernance } from "@/index-dtf/use-index-dtf-optimistic-governance";
+export { useIndexDtfOptimisticProposalContext } from "@/index-dtf/use-index-dtf-optimistic-proposal-context";
+export { useIndexDtfOptimisticProposalVoterState } from "@/index-dtf/use-index-dtf-optimistic-proposal-voter-state";
+export { useIndexDtfOptimisticTimelockRoles } from "@/index-dtf/use-index-dtf-optimistic-timelock-roles";
+export { useIndexDtfOptimisticVotes } from "@/index-dtf/use-index-dtf-optimistic-votes";
+export { useIndexDtfPastOptimisticVotes } from "@/index-dtf/use-index-dtf-past-optimistic-votes";
+export { useIndexDtfProposal } from "@/index-dtf/use-index-dtf-proposal";
+export { useIndexDtfProposalThrottleCharges } from "@/index-dtf/use-index-dtf-proposal-throttle-charges";
+export { useIndexDtfProposalVoterState } from "@/index-dtf/use-index-dtf-proposal-voter-state";
+export { useIndexDtfProposalVotes } from "@/index-dtf/use-index-dtf-proposal-votes";
+export { useIndexDtfProposalList } from "@/index-dtf/use-index-dtf-proposals";
+export { useIndexDtfProposals } from "@/index-dtf/use-index-dtf-proposals";
+export { useIndexDtfProposerState } from "@/index-dtf/use-index-dtf-proposer-state";
+export { useIndexDtfSelectorRegistryAllowedSelectors } from "@/index-dtf/use-index-dtf-selector-registry-allowed-selectors";
+export { useIndexDtfSelectorRegistryIsAllowed } from "@/index-dtf/use-index-dtf-selector-registry-is-allowed";
+export { useIndexDtfSelectorRegistryTargets } from "@/index-dtf/use-index-dtf-selector-registry-targets";
+export { useIndexDtfVoterState } from "@/index-dtf/use-index-dtf-voter-state";
 export {
   useBuildIndexDtfBasketProposal,
   useBuildIndexDtfBasketSettingsProposal,
@@ -46,27 +73,10 @@ export {
   useIndexDtf,
   useIndexDtfBasket,
   useIndexDtfBrand,
-  useIndexDtfDelegates,
-  useIndexDtfGuardians,
   useIndexDtfList,
-  useIndexDtfOptimisticGovernance,
-  useIndexDtfOptimisticProposalContext,
-  useIndexDtfOptimisticProposalVoterState,
-  useIndexDtfOptimisticTimelockRoles,
-  useIndexDtfOptimisticVotes,
-  useIndexDtfPastOptimisticVotes,
   useIndexDtfPrice,
   useIndexDtfPriceHistory,
-  useIndexDtfProposal,
-  useIndexDtfProposalThrottleCharges,
-  useIndexDtfProposalVoterState,
-  useIndexDtfProposalVotes,
-  useIndexDtfProposals,
-  useIndexDtfProposerState,
-  useIndexDtfSelectorRegistryAllowedSelectors,
-  useIndexDtfSelectorRegistryIsAllowed,
-  useIndexDtfSelectorRegistryTargets,
-  useIndexDtfVoterState,
+  useIndexDtfVersion,
 } from "@/hooks";
 export {
   accountPortfolioQueryOptions,

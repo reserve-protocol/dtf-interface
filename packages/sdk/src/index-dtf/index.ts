@@ -80,9 +80,12 @@ export {
 export { getDelegates as getIndexDtfDelegates } from "@/index-dtf/governance/delegates";
 export { getGuardians as getIndexDtfGuardians } from "@/index-dtf/governance/guardians";
 export { getLegacyVoteLocks as getIndexDtfLegacyVoteLocks } from "@/index-dtf/governance/legacy-vote-lock";
+export { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 export { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 export { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 export { dtfIndexGovernanceProposalAbi } from "@/index-dtf/abis/dtf-index-governance-proposal";
+export { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+export { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
 export {
   getOptimisticGovernance as getIndexDtfOptimisticGovernance,
   getOptimisticProposalContext as getIndexDtfOptimisticProposalContext,

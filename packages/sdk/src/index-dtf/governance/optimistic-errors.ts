@@ -15,7 +15,7 @@ export function isUnsupportedVoteLockOptimisticReadError(error: unknown): boolea
   // Older staking vaults do not implement optimistic delegation/vote reads and revert via fallback.
   return (
     isUnsupportedOptimisticContractError(error) ||
-    (message.includes("execution reverted") &&
+    ((message.includes("execution reverted") || message.includes("reverted")) &&
       (message.includes("optimisticdelegates") ||
         message.includes("getoptimisticvotes") ||
         message.includes("getpastoptimisticvotes")))

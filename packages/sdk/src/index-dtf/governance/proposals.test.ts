@@ -85,6 +85,9 @@ describe("Index DTF governance proposals", () => {
         governance: {
           id: "0x0000000000000000000000000000000000000001",
           optimisticSelectorRegistry: null,
+          token: {
+            id: "0x0000000000000000000000000000000000000007",
+          },
           timelock: {
             id: "0x0000000000000000000000000000000000000006",
             type: "OWNER",
@@ -122,6 +125,7 @@ describe("Index DTF governance proposals", () => {
       id: "42",
       chainId: 1,
       governance: "0x0000000000000000000000000000000000000001",
+      voteToken: "0x0000000000000000000000000000000000000007",
       dtf: {
         address: "0x0000000000000000000000000000000000000003",
         chainId: 1,
@@ -233,6 +237,92 @@ describe("Index DTF governance proposals", () => {
         id: "missing",
       },
     });
+  });
+
+  it("does not run hidden challenge lookups for proposal detail confirmations", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      dtf: {
+        id: "0x0000000000000000000000000000000000000003",
+        proxyAdmin: "0x0000000000000000000000000000000000000008",
+        legacyAdmins: [],
+        legacyAuctionApprovers: [],
+        ownerGovernance: {
+          id: "0x0000000000000000000000000000000000000001",
+          optimisticSelectorRegistry: null,
+          timelock: {
+            id: "0x0000000000000000000000000000000000000006",
+          },
+        },
+        tradingGovernance: null,
+        stToken: {
+          id: "0x0000000000000000000000000000000000000007",
+          legacyGovernance: [],
+          governance: null,
+        },
+      },
+      proposal: {
+        id: "confirmation",
+        timelockId: null,
+        description: "Confirmation For: Same proposal",
+        creationTime: "999100",
+        voteStart: "999000",
+        voteEnd: "1000100",
+        queueBlock: null,
+        queueTime: null,
+        state: "ACTIVE",
+        isOptimistic: false,
+        vetoThreshold: null,
+        executionETA: null,
+        executionTime: null,
+        executionBlock: null,
+        creationBlock: "124",
+        cancellationTime: null,
+        calldatas: [],
+        targets: [],
+        proposer: {
+          address: "0x0000000000000000000000000000000000000002",
+        },
+        votes: [],
+        forWeightedVotes: "0",
+        againstWeightedVotes: "0",
+        abstainWeightedVotes: "0",
+        quorumVotes: "1000000000000000000",
+        forDelegateVotes: "0",
+        abstainDelegateVotes: "0",
+        againstDelegateVotes: "0",
+        executionTxnHash: null,
+        governance: {
+          id: "0x0000000000000000000000000000000000000001",
+          optimisticSelectorRegistry: null,
+          token: {
+            id: "0x0000000000000000000000000000000000000007",
+          },
+          timelock: {
+            id: "0x0000000000000000000000000000000000000006",
+            type: "OWNER",
+          },
+        },
+      },
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposal = await getProposal(client, {
+      proposalId: "confirmation",
+      address: "0x0000000000000000000000000000000000000003",
+      chainId: 1,
+    });
+
+    expect(queryIndex).toHaveBeenCalledTimes(1);
+    expect(proposal).toMatchObject({
+      id: "confirmation",
+    });
+    expect(proposal.wasChallenged).toBeUndefined();
+    expect(proposal.challengedProposalId).toBeUndefined();
   });
 
   it("lists proposals from DTF governances and derives vote state", async () => {
@@ -457,6 +547,112 @@ describe("Index DTF governance proposals", () => {
     });
   });
 
+  it("uses indexed quorumVotes as optimistic veto threshold votes", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      governances: [
+        {
+          id: "0x0000000000000000000000000000000000000001",
+          proposalCount: "1",
+          proposals: [
+            createProposalSummary({
+              id: "optimistic-ended",
+              creationTime: "998000",
+              state: "ACTIVE",
+              forWeightedVotes: "0",
+              abstainWeightedVotes: "0",
+              againstWeightedVotes: "100000000000000000000",
+              quorumVotes: "1000000000000000000",
+              voteStart: "998000",
+              voteEnd: "999000",
+              creationBlock: "10",
+              proposer: "0x0000000000000000000000000000000000000002",
+              governance: "0x0000000000000000000000000000000000000001",
+              timelock: "0x0000000000000000000000000000000000000008",
+              isOptimistic: true,
+              vetoThreshold: "500000000000000000",
+            }),
+          ],
+        },
+      ],
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposals = await getProposals(client, {
+      chainId: 1,
+      governanceAddresses: "0x0000000000000000000000000000000000000001",
+    });
+
+    expect(proposals[0]).toMatchObject({
+      id: "optimistic-ended",
+      isOptimistic: true,
+      vetoThreshold: 500000000000000000n,
+      state: "DEFEATED",
+      votingState: {
+        state: "DEFEATED",
+        quorum: true,
+        vetoReached: true,
+        against: 10000,
+      },
+    });
+  });
+
+  it("shows ended optimistic proposals with no veto votes as succeeded before queue", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      governances: [
+        {
+          id: "0x0000000000000000000000000000000000000001",
+          proposalCount: "1",
+          proposals: [
+            createProposalSummary({
+              id: "optimistic-ended-no-veto",
+              creationTime: "998000",
+              state: "ACTIVE",
+              forWeightedVotes: "0",
+              abstainWeightedVotes: "0",
+              againstWeightedVotes: "0",
+              quorumVotes: "1000000000000000000",
+              voteStart: "998000",
+              voteEnd: "999000",
+              creationBlock: "10",
+              proposer: "0x0000000000000000000000000000000000000002",
+              governance: "0x0000000000000000000000000000000000000001",
+              timelock: "0x0000000000000000000000000000000000000008",
+              isOptimistic: true,
+              vetoThreshold: "500000000000000000",
+            }),
+          ],
+        },
+      ],
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposals = await getProposals(client, {
+      chainId: 1,
+      governanceAddresses: "0x0000000000000000000000000000000000000001",
+    });
+
+    expect(proposals[0]).toMatchObject({
+      id: "optimistic-ended-no-veto",
+      isOptimistic: true,
+      state: "SUCCEEDED",
+      votingState: {
+        state: "SUCCEEDED",
+        quorum: false,
+        vetoReached: false,
+      },
+    });
+  });
+
   it("marks normal proposals created after a challenged optimistic proposal", async () => {
     vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
     const queryIndex = vi.fn(async () => ({
@@ -543,6 +739,54 @@ describe("Index DTF governance proposals", () => {
       id: "100000000000000000000000000000000000000000000000000000000000000000000000000001",
       isOptimistic: true,
     });
+  });
+
+  it("does not mark challenge confirmations without a matching optimistic proposal id", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      governances: [
+        {
+          id: "0x0000000000000000000000000000000000000001",
+          proposalCount: "1",
+          proposals: [
+            createProposalSummary({
+              id: "100000000000000000000000000000000000000000000000000000000000000000000000000002",
+              description: "Confirmation For: Missing optimistic proposal",
+              creationTime: "999100",
+              state: "ACTIVE",
+              forWeightedVotes: "0",
+              abstainWeightedVotes: "0",
+              againstWeightedVotes: "0",
+              quorumVotes: "1000000000000000000",
+              voteStart: "999000",
+              voteEnd: "1000100",
+              creationBlock: "11",
+              proposer: "0x0000000000000000000000000000000000000002",
+              governance: "0x0000000000000000000000000000000000000001",
+              timelock: "0x0000000000000000000000000000000000000008",
+              isOptimistic: false,
+            }),
+          ],
+        },
+      ],
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposals = await getProposals(client, {
+      chainId: 1,
+      governanceAddresses: "0x0000000000000000000000000000000000000001",
+    });
+
+    expect(proposals[0]).toMatchObject({
+      id: "100000000000000000000000000000000000000000000000000000000000000000000000000002",
+      isOptimistic: false,
+    });
+    expect(proposals[0]?.wasChallenged).toBeUndefined();
+    expect(proposals[0]?.challengedProposalId).toBeUndefined();
   });
 
   it("lists all chain proposals with state filters", async () => {
@@ -658,6 +902,9 @@ function createProposalSummary({
     },
     governance: {
       id: governance,
+      token: {
+        id: governance,
+      },
       timelock: {
         id: timelock,
       },

@@ -13,7 +13,7 @@ describe("dtfQueryKeys", () => {
       "dtf",
       "index",
       "governance",
-      "proposals",
+      "proposal-list",
       {
         dtf: {
           address: "0x000000000000000000000000000000000000000a",
@@ -53,7 +53,7 @@ describe("dtfQueryKeys", () => {
     const proposalsKey = dtfQueryKeys.index.governance.proposals({ dtf: createDtfKeyFixture() });
     const proposalListKey = dtfQueryKeys.index.governance.proposalList({ dtf: createDtfKeyFixture() });
 
-    expect(proposalListKey).toEqual(["dtf", "index", "governance", "proposal-list", proposalsKey[4]]);
+    expect(proposalsKey).toEqual(proposalListKey);
   });
 
   it("keys guardians by DTF identity instead of the full DTF object", () => {
@@ -94,6 +94,7 @@ describe("dtfQueryKeys", () => {
       proposal: {
         id: "42",
         voteStart: 100,
+        voteToken: "0x000000000000000000000000000000000000000C",
         votes: [
           {
             voter: "0x000000000000000000000000000000000000000B",
@@ -120,28 +121,58 @@ describe("dtfQueryKeys", () => {
         governance: "0x0000000000000000000000000000000000000001",
         proposal: {
           id: "42",
+          isOptimistic: false,
+          optimisticSnapshot: null,
           vote: "FOR",
           voteStart: 100,
+          voteToken: "0x000000000000000000000000000000000000000c",
         },
       },
     ]);
   });
 
-  it("keys optimistic proposal voter state by snapshot, token, and account vote", () => {
+  it("keys unified optimistic proposal voter state by token", () => {
+    const key = dtfQueryKeys.index.governance.proposalVoterState({
+      account: "0x000000000000000000000000000000000000000A",
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposal: {
+        id: "42",
+        isOptimistic: true,
+        voteStart: 100,
+        voteToken: "0x000000000000000000000000000000000000000B",
+        votes: [],
+      },
+    });
+
+    expect(key).toEqual([
+      "dtf",
+      "index",
+      "governance",
+      "proposal-voter-state",
+      {
+        account: "0x000000000000000000000000000000000000000a",
+        chainId: 1,
+        governance: "0x0000000000000000000000000000000000000001",
+        proposal: {
+          id: "42",
+          isOptimistic: true,
+          optimisticSnapshot: null,
+          vote: null,
+          voteStart: 100,
+          voteToken: "0x000000000000000000000000000000000000000b",
+        },
+      },
+    ]);
+  });
+
+  it("keys optimistic proposal voter state by token and account vote", () => {
     const key = dtfQueryKeys.index.governance.optimisticProposalVoterState({
       account: "0x000000000000000000000000000000000000000A",
       chainId: 1,
       governance: "0x0000000000000000000000000000000000000001",
       proposal: {
         id: "42",
-        optimistic: {
-          proposalId: "42",
-          snapshot: 123n,
-          snapshotSupply: { raw: 1n, formatted: "1" },
-          vetoThreshold: 1n,
-          vetoThresholdVotes: { raw: 1n, formatted: "1" },
-          voteToken: "0x000000000000000000000000000000000000000B",
-        },
         voteStart: 100,
         voteToken: "0x000000000000000000000000000000000000000B",
         votes: [
@@ -170,7 +201,7 @@ describe("dtfQueryKeys", () => {
         governance: "0x0000000000000000000000000000000000000001",
         proposal: {
           id: "42",
-          optimisticSnapshot: "123",
+          optimisticSnapshot: null,
           vote: "AGAINST",
           voteStart: 100,
           voteToken: "0x000000000000000000000000000000000000000b",

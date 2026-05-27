@@ -6316,7 +6316,7 @@ export type GetIndexDtfProposalsQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalsQuery = { governances: Array<{ id: string, proposalCount: string, proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, timelock: { id: string } } }> }> };
+export type GetIndexDtfProposalsQuery = { governances: Array<{ id: string, proposalCount: string, proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, token: { id: string }, timelock: { id: string } } }> }> };
 
 export type GetAllIndexDtfProposalsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -6325,7 +6325,7 @@ export type GetAllIndexDtfProposalsQueryVariables = Exact<{
 }>;
 
 
-export type GetAllIndexDtfProposalsQuery = { proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, timelock: { id: string } } }> };
+export type GetAllIndexDtfProposalsQuery = { proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, token: { id: string }, timelock: { id: string } } }> };
 
 export type GetIndexDtfProposalGovernanceAddressesQueryVariables = Exact<{
   dtfId: Scalars['ID']['input'];
@@ -6342,7 +6342,7 @@ export type GetIndexDtfProposalQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null } | null, proposal?: { id: string, timelockId?: string | null, description: string, creationTime: string, voteStart: string, voteEnd: string, queueBlock?: string | null, queueTime?: string | null, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, executionETA?: string | null, executionTime?: string | null, executionBlock?: string | null, creationBlock: string, cancellationTime?: string | null, calldatas?: Array<string> | null, targets?: Array<string> | null, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, abstainDelegateVotes: string, againstDelegateVotes: string, executionTxnHash?: string | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governance: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string, type: string } } } | null };
+export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null } | null, proposal?: { id: string, timelockId?: string | null, description: string, creationTime: string, voteStart: string, voteEnd: string, queueBlock?: string | null, queueTime?: string | null, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, executionETA?: string | null, executionTime?: string | null, executionBlock?: string | null, creationBlock: string, cancellationTime?: string | null, calldatas?: Array<string> | null, targets?: Array<string> | null, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, abstainDelegateVotes: string, againstDelegateVotes: string, executionTxnHash?: string | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governance: { id: string, optimisticSelectorRegistry?: string | null, token: { id: string }, timelock: { id: string, type: string } } } | null };
 
 export type GetIndexDtfDelegatesQueryVariables = Exact<{
   stToken: Scalars['ID']['input'];
@@ -6350,7 +6350,7 @@ export type GetIndexDtfDelegatesQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfDelegatesQuery = { stakingToken?: { id: string, totalDelegates: string, token: { totalSupply: string }, delegates: Array<{ address: string, delegatedVotesRaw: string, optimisticDelegatedVotesRaw: string, numberVotes: number, numberOptimisticVotes: number, hasBeenStandardDelegate: boolean, hasBeenOptimisticDelegate: boolean, tokenHoldersRepresentedAmount: number, optimisticTokenHoldersRepresentedAmount: number }> } | null };
+export type GetIndexDtfDelegatesQuery = { stakingToken?: { id: string, totalDelegates: string, currentDelegates: string, totalOptimisticDelegates: string, currentOptimisticDelegates: string, token: { totalSupply: string }, delegates: Array<{ address: string, delegatedVotesRaw: string, optimisticDelegatedVotesRaw: string, numberVotes: number, numberOptimisticVotes: number, hasBeenStandardDelegate: boolean, hasBeenOptimisticDelegate: boolean, tokenHoldersRepresentedAmount: number, optimisticTokenHoldersRepresentedAmount: number }> } | null };
 
 export type GetIndexDtfRebalancesQueryVariables = Exact<{
   dtf: Scalars['String']['input'];
@@ -6631,6 +6631,9 @@ export const GetIndexDtfProposalsDocument = new TypedDocumentString(`
       }
       governance {
         id
+        token {
+          id
+        }
         timelock {
           id
         }
@@ -6670,6 +6673,9 @@ export const GetAllIndexDtfProposalsDocument = new TypedDocumentString(`
     }
     governance {
       id
+      token {
+        id
+      }
       timelock {
         id
       }
@@ -6742,6 +6748,9 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
     governance {
       id
       optimisticSelectorRegistry
+      token {
+        id
+      }
       timelock {
         id
         type
@@ -6785,6 +6794,9 @@ export const GetIndexDtfDelegatesDocument = new TypedDocumentString(`
   stakingToken(id: $stToken) {
     id
     totalDelegates
+    currentDelegates
+    totalOptimisticDelegates
+    currentOptimisticDelegates
     token {
       totalSupply
     }
@@ -6792,7 +6804,7 @@ export const GetIndexDtfDelegatesDocument = new TypedDocumentString(`
       first: $limit
       orderBy: delegatedVotes
       orderDirection: desc
-      where: {address_not: "0x0000000000000000000000000000000000000000"}
+      where: {or: [{address_not: "0x0000000000000000000000000000000000000000", delegatedVotesRaw_gt: "0"}, {address_not: "0x0000000000000000000000000000000000000000", optimisticDelegatedVotesRaw_gt: "0"}]}
     ) {
       address
       delegatedVotesRaw

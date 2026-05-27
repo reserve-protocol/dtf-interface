@@ -32,14 +32,15 @@ Proposal list behavior:
 
 ## Proposal State Derivation
 
-Register does not blindly show raw subgraph state. It derives state from timestamps and votes:
+Register does not blindly show raw subgraph state. Proposal display state can be time-derived from timestamps and votes:
 
 - pending becomes active when current timestamp is inside the vote window.
-- active can become defeated, quorum-not-reached, or succeeded after vote end.
+- standard active proposals can become defeated, quorum-not-reached, or succeeded after vote end.
+- optimistic active proposals pass after the veto window unless the veto threshold was reached; exact veto-threshold context is needed when there are veto votes to determine pass/fail locally.
 - queued uses execution ETA for countdown.
-- quorum display uses for-weighted votes against quorum, not total votes.
+- standard quorum display uses for-weighted votes against quorum, not total votes.
 
-SDK consumers should know whether they need Register-style display state or onchain governor state.
+Current Index DTF detail pages consume SDK `proposal.votingState` from `useIndexDtfProposal`. Overview/list surfaces can still adapt the same display-state rules locally while migration is in progress.
 
 ## Proposal Detail
 
@@ -55,7 +56,16 @@ Proposal detail reads:
 - execution tx hash.
 - governance address.
 
-The detail updater refreshes local voting state every minute until finalized and exposes refresh hooks for post-action behavior.
+The detail updater stores SDK-backed detail data in local atoms and exposes refresh hooks for post-action behavior.
+
+Current SDK-backed detail behavior:
+
+- proposal detail uses `useIndexDtfProposal` with DTF-bound `{ address, chainId, proposalId }` params.
+- account voter state uses unified `useIndexDtfProposalVoterState` for standard and optimistic proposals.
+- optimistic proposal detail explicitly reads `getOptimisticProposalContext` and passes that context into proposal/voter-state derivation when available.
+- vote weights flow through as SDK `Amount` values instead of Register reparsing raw bigint strings.
+- proposal detail and account voter state refetch periodically so pending proposals and post-vote state do not stay stale.
+- Register clears account vote state when wallet/proposal/DTF data is unavailable.
 
 ## Proposal Actions
 

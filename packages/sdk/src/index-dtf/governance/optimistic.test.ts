@@ -108,6 +108,7 @@ describe("Index DTF optimistic governance", () => {
   it("computes optimistic proposals as succeeded unless veto threshold is reached", () => {
     const proposal = {
       state: "ACTIVE",
+      isOptimistic: true,
       voteStart: 100,
       voteEnd: 200,
       forWeightedVotes: { raw: 0n, formatted: "0" },
@@ -123,6 +124,7 @@ describe("Index DTF optimistic governance", () => {
     expect(getVoteState(proposal, 201)).toMatchObject({
       state: "SUCCEEDED",
       vetoReached: false,
+      against: 95,
     });
     expect(
       getVoteState(
@@ -135,15 +137,110 @@ describe("Index DTF optimistic governance", () => {
     ).toMatchObject({
       state: "DEFEATED",
       vetoReached: true,
-      quorum: false,
+      quorum: true,
+      against: 100,
     });
   });
 
-  it("treats zero snapshot supply optimistic proposals as canceled", () => {
+  it("does not use quorum votes as optimistic veto threshold without an indexed veto threshold", () => {
     expect(
       getVoteState(
         {
           state: "ACTIVE",
+          isOptimistic: true,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 100n, formatted: "100" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 1n, formatted: "1" },
+        },
+        201,
+      ),
+    ).toMatchObject({
+      state: "ACTIVE",
+      quorum: false,
+      vetoReached: false,
+    });
+  });
+
+  it("uses indexed quorum votes as optimistic veto threshold votes", () => {
+    const proposal = {
+      state: "ACTIVE",
+      isOptimistic: true,
+      vetoThreshold: 20000000000000000n,
+      voteStart: 100,
+      voteEnd: 200,
+      forWeightedVotes: { raw: 0n, formatted: "0" },
+      againstWeightedVotes: { raw: 500000000000000000n, formatted: "0.5" },
+      abstainWeightedVotes: { raw: 0n, formatted: "0" },
+      quorumVotes: { raw: 100000000000000000n, formatted: "0.1" },
+    } as const;
+
+    expect(getVoteState(proposal, 150)).toMatchObject({
+      state: "ACTIVE",
+      quorum: true,
+      vetoReached: true,
+      against: 500,
+    });
+    expect(getVoteState(proposal, 201)).toMatchObject({
+      state: "DEFEATED",
+      quorum: true,
+      vetoReached: true,
+      against: 500,
+    });
+  });
+
+  it("shows optimistic challenge progress toward the veto threshold", () => {
+    expect(
+      getVoteState(
+        {
+          state: "ACTIVE",
+          isOptimistic: true,
+          vetoThreshold: 100000000000000000n,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 5n, formatted: "5" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 10n, formatted: "10" },
+        },
+        150,
+      ),
+    ).toMatchObject({
+      against: 50,
+      vetoReached: false,
+    });
+  });
+
+  it("treats ended optimistic proposals with no veto votes as succeeded without exact context", () => {
+    expect(
+      getVoteState(
+        {
+          state: "ACTIVE",
+          isOptimistic: true,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 0n, formatted: "0" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 100n, formatted: "100" },
+        },
+        201,
+      ),
+    ).toMatchObject({
+      state: "SUCCEEDED",
+      quorum: false,
+      vetoReached: false,
+    });
+  });
+
+  it("treats zero computed veto threshold optimistic proposals as canceled", () => {
+    expect(
+      getVoteState(
+        {
+          state: "ACTIVE",
+          isOptimistic: true,
           voteStart: 100,
           voteEnd: 200,
           forWeightedVotes: { raw: 0n, formatted: "0" },
@@ -151,8 +248,8 @@ describe("Index DTF optimistic governance", () => {
           abstainWeightedVotes: { raw: 0n, formatted: "0" },
           quorumVotes: { raw: 100n, formatted: "100" },
           optimistic: {
-            snapshotSupply: { raw: 0n, formatted: "0" },
-            vetoThreshold: 200000000000000000n,
+            snapshotSupply: { raw: 1n, formatted: "0.000000000000000001" },
+            vetoThreshold: 1n,
           },
         },
         201,

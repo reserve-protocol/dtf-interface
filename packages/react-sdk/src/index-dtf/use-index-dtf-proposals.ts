@@ -10,17 +10,21 @@ import { dtfQueryKeys } from "@/query-keys";
 import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
 import { useDtfSdk } from "@/provider";
 
+type IndexDtfProposalsQueryOptions<TData> = Omit<DtfQueryOptions<IndexDtfProposalList, TData>, "select"> & {
+  readonly select?: (data: readonly IndexDtfProposalSummary[]) => TData;
+};
+
 export function indexDtfProposalsQueryOptions<TData = readonly IndexDtfProposalSummary[]>(
   sdk: DtfSdk,
   params: GetIndexDtfProposalsParams | undefined,
-  options?: DtfQueryOptions<readonly IndexDtfProposalSummary[], TData>,
+  options?: IndexDtfProposalsQueryOptions<TData>,
 ) {
-  return createDtfQueryOptions(
-    dtfQueryKeys.index.governance.proposals(params),
-    () => sdk.index.getProposals(requireParams(params, "indexDtfProposalsQueryOptions")),
-    params !== undefined,
-    options,
-  );
+  const { select, ...queryOptions } = options ?? {};
+
+  return indexDtfProposalListQueryOptions(sdk, params, {
+    ...queryOptions,
+    select: (data) => (select ? select(data.proposals) : (data.proposals as TData)),
+  });
 }
 
 export function indexDtfProposalListQueryOptions<TData = IndexDtfProposalList>(
@@ -38,7 +42,7 @@ export function indexDtfProposalListQueryOptions<TData = IndexDtfProposalList>(
 
 export function useIndexDtfProposals<TData = readonly IndexDtfProposalSummary[]>(
   params: GetIndexDtfProposalsParams | undefined,
-  options?: DtfQueryOptions<readonly IndexDtfProposalSummary[], TData>,
+  options?: IndexDtfProposalsQueryOptions<TData>,
 ) {
   const sdk = useDtfSdk();
 

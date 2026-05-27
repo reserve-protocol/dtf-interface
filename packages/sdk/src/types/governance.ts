@@ -111,7 +111,7 @@ export type GetIndexDtfProposalVoterStateParams = {
   readonly chainId: SupportedChainId;
   readonly governance: Address;
   readonly account: Address;
-  readonly proposal: Pick<IndexDtfProposalDetail, "id" | "voteStart" | "votes">;
+  readonly proposal: Pick<IndexDtfProposalDetail, "id" | "isOptimistic" | "optimistic" | "voteStart" | "voteToken" | "votes">;
 };
 
 export type GetIndexDtfOptimisticProposalVoterStateParams = {
@@ -178,8 +178,9 @@ export type IndexDtfProposalSummary = {
   readonly chainId: SupportedChainId;
   readonly governance: Address;
   readonly timelock: Address;
+  readonly voteToken: Address;
   readonly dtf?: DtfParams;
-  readonly proposer?: Address;
+  readonly proposer: Address;
   readonly description: string;
   readonly state: ProposalState;
   readonly creationTime: number;
@@ -197,7 +198,6 @@ export type IndexDtfProposalSummary = {
   readonly wasChallenged?: boolean;
   readonly challengedProposalId?: string;
   readonly vetoThreshold?: bigint;
-  readonly voteToken?: Address;
   readonly optimistic?: IndexDtfOptimisticProposalContext;
   readonly votingState: ProposalVotingState;
 };
@@ -270,12 +270,27 @@ export type IndexDtfDelegate = {
   readonly address: Address;
   readonly delegatedVotes: Amount;
   readonly optimisticDelegatedVotes: Amount;
+  readonly weightedVotes: number;
+  readonly optimisticWeightedVotes: number;
   readonly numberVotes: number;
   readonly numberOptimisticVotes: number;
   readonly hasBeenStandardDelegate: boolean;
   readonly hasBeenOptimisticDelegate: boolean;
   readonly tokenHoldersRepresentedAmount: number;
   readonly optimisticTokenHoldersRepresentedAmount: number;
+};
+
+export type IndexDtfDelegates = {
+  readonly delegates: readonly IndexDtfDelegate[];
+  readonly normalDelegates: readonly IndexDtfDelegate[];
+  readonly optimisticDelegates: readonly IndexDtfDelegate[];
+  readonly totalDelegates: number;
+  readonly currentDelegates: number;
+  readonly totalNormalDelegates: number;
+  readonly currentNormalDelegates: number;
+  readonly totalOptimisticDelegates: number;
+  readonly currentOptimisticDelegates: number;
+  readonly voteSupply: Amount;
 };
 
 export type IndexDtfGuardianGroup =

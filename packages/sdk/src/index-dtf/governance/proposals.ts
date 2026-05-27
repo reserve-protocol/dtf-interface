@@ -42,6 +42,11 @@ import { getCurrentTime } from "@/lib/utils";
 
 const CHALLENGE_DESCRIPTION_PREFIX = "Confirmation For:";
 
+type ChallengeProposal = Pick<
+  ParsedIndexDtfProposalSummary,
+  "id" | "description" | "creationTime" | "governance" | "isOptimistic"
+>;
+
 export async function getProposals(
   client: DtfClient,
   params: GetIndexDtfProposalsParams,
@@ -151,7 +156,6 @@ export async function getProposal(
 
   const parsedProposal = mapIndexDtfProposal(proposal, governedDtf, chainId);
   const proposalWithVoteState = withVoteState(parsedProposal, getCurrentTime());
-  const proposalWithChallengeState = withChallengeState([proposalWithVoteState])[0]!;
   const contractMap = buildProposalContractMap({
     chainId,
     dtf: mapDtfProposalContractContext(governedDtf),
@@ -164,7 +168,7 @@ export async function getProposal(
   });
 
   return {
-    ...proposalWithChallengeState,
+    ...proposalWithVoteState,
     decoded: decodedData,
   };
 }
@@ -216,9 +220,11 @@ function withProposalSummaryState(
   return proposalsWithChallengeState;
 }
 
-function withChallengeState<T extends ParsedIndexDtfProposalSummary>(proposals: readonly T[]): readonly T[] {
-  const optimisticProposals: T[] = [];
-  const challengeMatches = new Map<string, string | undefined>();
+function withChallengeState<T extends ParsedIndexDtfProposalSummary>(
+  proposals: readonly T[],
+): readonly T[] {
+  const optimisticProposals: ChallengeProposal[] = [];
+  const challengeMatches = new Map<string, string>();
   const chronological = [...proposals].sort((a, b) => a.creationTime - b.creationTime);
 
   for (const proposal of chronological) {
@@ -227,11 +233,11 @@ function withChallengeState<T extends ParsedIndexDtfProposalSummary>(proposals: 
       continue;
     }
 
-    if (!proposal.description.startsWith(CHALLENGE_DESCRIPTION_PREFIX)) {
+    const confirmationDescription = getChallengeDescription(proposal.description);
+    if (!confirmationDescription) {
       continue;
     }
 
-    const confirmationDescription = proposal.description.slice(CHALLENGE_DESCRIPTION_PREFIX.length).trim();
     let challengedProposalId: string | undefined;
     for (let index = optimisticProposals.length - 1; index >= 0; index--) {
       const optimisticProposal = optimisticProposals[index]!;
@@ -246,7 +252,9 @@ function withChallengeState<T extends ParsedIndexDtfProposalSummary>(proposals: 
       }
     }
 
-    challengeMatches.set(proposal.id, challengedProposalId);
+    if (challengedProposalId) {
+      challengeMatches.set(proposal.id, challengedProposalId);
+    }
   }
 
   return proposals.map((proposal) => {
@@ -254,14 +262,22 @@ function withChallengeState<T extends ParsedIndexDtfProposalSummary>(proposals: 
       return proposal;
     }
 
-    const challengedProposalId = challengeMatches.get(proposal.id);
-
     return {
       ...proposal,
       wasChallenged: true,
-      ...(challengedProposalId ? { challengedProposalId } : {}),
+      challengedProposalId: challengeMatches.get(proposal.id)!,
     };
   });
+}
+
+function getChallengeDescription(description: string): string | undefined {
+  if (!description.startsWith(CHALLENGE_DESCRIPTION_PREFIX)) {
+    return undefined;
+  }
+
+  const challengeDescription = description.slice(CHALLENGE_DESCRIPTION_PREFIX.length).trim();
+
+  return challengeDescription.length > 0 ? challengeDescription : undefined;
 }
 
 function getProposalFilter(states: readonly ProposalState[] | undefined): Proposal_Filter | undefined {

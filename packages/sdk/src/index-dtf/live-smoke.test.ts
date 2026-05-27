@@ -124,7 +124,7 @@ smokeDescribe("Index DTF live smoke", () => {
 
       expect(proposals.length).toBeGreaterThan(0);
       expect(allProposals.length).toBeGreaterThan(0);
-      expect(delegates.length).toBeGreaterThan(0);
+      expect(delegates.delegates.length).toBeGreaterThan(0);
       expect(Array.isArray(guardians.all)).toBe(true);
       expect(Array.isArray(legacyVoteLocks)).toBe(true);
       expect(voterState.account).toBe(SMOKE_ACCOUNT);

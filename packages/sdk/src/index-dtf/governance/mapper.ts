@@ -35,6 +35,7 @@ type SubgraphIndexDtfProposalSummary = {
   };
   readonly governance: {
     readonly id: string;
+    readonly token: { readonly id: string };
     readonly timelock: { readonly id: string };
   };
 };
@@ -55,18 +56,16 @@ export function mapIndexDtfProposalSummary(
   const executionETA = toOptionalNumber(proposal.executionETA);
   const executionTime = toOptionalNumber(proposal.executionTime);
   const executionBlock = toOptionalNumber(proposal.executionBlock);
-
   return {
     id: proposal.id,
     chainId,
     governance: getAddress(proposal.governance.id),
     timelock: getAddress(proposal.governance.timelock.id),
+    voteToken: getAddress(proposal.governance.token.id),
     proposer: getAddress(proposal.proposer.address),
     description: proposal.description,
     state: proposal.state,
-    ...(proposal.isOptimistic === null || proposal.isOptimistic === undefined
-      ? {}
-      : { isOptimistic: proposal.isOptimistic }),
+    ...(proposal.isOptimistic === null || proposal.isOptimistic === undefined ? {} : { isOptimistic: proposal.isOptimistic }),
     ...(proposal.vetoThreshold ? { vetoThreshold: BigInt(proposal.vetoThreshold) } : {}),
     creationTime: Number(proposal.creationTime),
     creationBlock: Number(proposal.creationBlock),

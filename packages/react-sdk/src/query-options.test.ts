@@ -10,9 +10,11 @@ import {
   indexDtfOptimisticTimelockRolesQueryOptions,
   indexDtfOptimisticVotesQueryOptions,
   indexDtfPastOptimisticVotesQueryOptions,
+  indexDtfProposalListQueryOptions,
   indexDtfProposalQueryOptions,
   indexDtfProposalThrottleChargesQueryOptions,
   indexDtfQueryOptions,
+  indexDtfProposalsQueryOptions,
   indexDtfSelectorRegistryAllowedSelectorsQueryOptions,
   indexDtfSelectorRegistryIsAllowedQueryOptions,
   indexDtfSelectorRegistryTargetsQueryOptions,
@@ -68,14 +70,6 @@ const newReadQueryOptions: readonly QueryOptionCase[] = [
       governance: GOVERNANCE,
       proposal: {
         id: "42",
-        optimistic: {
-          proposalId: "42",
-          snapshot: 123n,
-          snapshotSupply: { raw: 1n, formatted: "1" },
-          vetoThreshold: 1n,
-          vetoThresholdVotes: { raw: 1n, formatted: "1" },
-          voteToken: VOTE_TOKEN,
-        },
         voteStart: 100,
         voteToken: VOTE_TOKEN,
         votes: [],
@@ -106,6 +100,14 @@ const newReadQueryOptions: readonly QueryOptionCase[] = [
     key: dtfQueryKeys.index.governance.pastOptimisticVotes,
     params: { account: ACCOUNT, chainId: 1, timepoint: 123n, voteToken: VOTE_TOKEN },
     result: { raw: 2n, formatted: "2" },
+  },
+  {
+    name: "proposal list",
+    method: "getProposalList",
+    build: indexDtfProposalListQueryOptions,
+    key: dtfQueryKeys.index.governance.proposalList,
+    params: { chainId: 1, governanceAddresses: GOVERNANCE },
+    result: { proposals: [], proposalCount: 0 },
   },
   {
     name: "proposal throttle charges",
@@ -166,6 +168,38 @@ describe("react SDK query options", () => {
 
     await expect(options.queryFn()).resolves.toBe(proposal);
     expect(sdk.index.getProposal).toHaveBeenCalledWith(params);
+  });
+
+  it("reuses proposal list query data for proposal arrays", async () => {
+    const proposals: readonly never[] = [];
+    const proposalList = { proposals, proposalCount: 1 };
+    const sdk = {
+      index: {
+        getProposalList: vi.fn(async () => proposalList),
+      },
+    } as unknown as DtfSdk;
+    const params = { chainId: 1, governanceAddresses: GOVERNANCE } as const;
+    const options = indexDtfProposalsQueryOptions(sdk, params);
+
+    expect(options.queryKey).toEqual(dtfQueryKeys.index.governance.proposalList(params));
+    await expect(options.queryFn()).resolves.toBe(proposalList);
+    expect(options.select?.(proposalList)).toBe(proposals);
+    expect(sdk.index.getProposalList).toHaveBeenCalledWith(params);
+  });
+
+  it("keeps proposal array select semantics while sharing proposal list cache", () => {
+    const sdk = {
+      index: {
+        getProposalList: vi.fn(),
+      },
+    } as unknown as DtfSdk;
+    const params = { chainId: 1, governanceAddresses: GOVERNANCE } as const;
+    const options = indexDtfProposalsQueryOptions(sdk, params, {
+      select: (proposals) => proposals.length,
+    });
+
+    expect(options.queryKey).toEqual(dtfQueryKeys.index.governance.proposalList(params));
+    expect(options.select?.({ proposals: [], proposalCount: 10 })).toBe(0);
   });
 
   for (const queryOption of newReadQueryOptions) {

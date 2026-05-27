@@ -102,8 +102,11 @@ function proposalVoterStateKeyParams(params: GetIndexDtfProposalVoterStateParams
     governance: params.governance,
     proposal: {
       id: params.proposal.id,
+      isOptimistic: params.proposal.isOptimistic === true,
+      optimisticSnapshot: params.proposal.optimistic?.snapshot ?? null,
       vote: vote?.choice ?? null,
       voteStart: params.proposal.voteStart,
+      voteToken: params.proposal.optimistic?.voteToken ?? params.proposal.voteToken,
     },
   };
 }
@@ -125,10 +128,10 @@ function optimisticProposalVoterStateKeyParams(
     governance: params.governance,
     proposal: {
       id: params.proposal.id,
-      optimisticSnapshot: params.proposal.optimistic?.snapshot,
+      optimisticSnapshot: params.proposal.optimistic?.snapshot ?? null,
       vote: vote?.choice ?? null,
       voteStart: params.proposal.voteStart,
-      voteToken: params.proposal.voteToken,
+      voteToken: params.proposal.optimistic?.voteToken ?? params.proposal.voteToken,
     },
   };
 }
@@ -188,10 +191,9 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "price-history", keyParams(params)] as const,
     governance: {
       all: () => [...dtfQueryKeys.index.all(), "governance"] as const,
-      proposals: (params?: GetIndexDtfProposalsParams) =>
-        [...dtfQueryKeys.index.governance.all(), "proposals", keyParams(indexDtfProposalsKeyParams(params))] as const,
       proposalList: (params?: GetIndexDtfProposalsParams) =>
         [...dtfQueryKeys.index.governance.all(), "proposal-list", keyParams(indexDtfProposalsKeyParams(params))] as const,
+      proposals: (params?: GetIndexDtfProposalsParams) => dtfQueryKeys.index.governance.proposalList(params),
       proposal: (params?: GetIndexDtfProposalParams) =>
         [...dtfQueryKeys.index.governance.all(), "proposal", keyParams(params)] as const,
       optimisticGovernance: (params?: IndexMethodParams<"getOptimisticGovernance">) =>

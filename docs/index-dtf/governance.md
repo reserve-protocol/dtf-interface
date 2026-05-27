@@ -106,6 +106,29 @@ Optimistic proposal behavior:
 - Against votes count toward veto threshold.
 - If veto threshold is not reached, proposal can execute through optimistic path.
 
+Proposal data shape:
+
+- SDK proposal list/detail reads expose normal and optimistic proposals through one proposal shape.
+- Optimistic proposals include `isOptimistic`, `vetoThreshold`, and `voteToken` when those fields are indexed by the subgraph.
+- `quorumVotes` remains the standard governor quorum value. It is not optimistic veto-threshold votes.
+- `getProposalVoterState` handles both standard and optimistic proposals. Register should not branch into separate normal/optimistic voter-state reads for mixed proposal pages.
+- `getOptimisticProposalContext` is the explicit exact context read when a consumer needs optimistic snapshot, snapshot supply, or veto-threshold votes.
+
+Optimistic voter-state fallback:
+
+- The exact optimistic snapshot is `proposalSnapshot(proposalId)` from the optimistic governor.
+- Proposal list/detail reads should not automatically hydrate every optimistic proposal with extra RPC context.
+- `getProposalVoterState` uses `proposal.voteStart` as the optimistic voter-state timepoint and `proposal.voteToken` as the optimistic vote token unless explicit `proposal.optimistic.snapshot` context is passed.
+- Call `getOptimisticProposalContext` when exact optimistic snapshot/supply/veto-threshold context is required, then pass that context into the voter-state read.
+- Without that context, SDK proposal state still treats an ended zero-veto optimistic proposal as `SUCCEEDED`; otherwise it keeps the indexed optimistic state and does not mark veto/quorum reached from `quorumVotes`.
+
+Challenge confirmations:
+
+- Challenge confirmation proposals use descriptions starting with `Confirmation For:`.
+- The stripped description is matched exactly to a prior optimistic proposal description in the same governance.
+- Optimistic proposals are expected to run for about one day, and challenged confirmations are created soon after, so a recent same-governance lookup is enough for product behavior.
+- The SDK only sets `wasChallenged` when it can also resolve `challengedProposalId` from proposals already present in a proposal list response.
+
 ## Proposal Builders
 
 SDK proposal builders should stay product-shaped:
@@ -133,3 +156,4 @@ Avoid generic arbitrary proposal frameworks unless a product consumer needs it.
 - Do not rely on subgraph proposal state alone for terminal/current state.
 - Do not merge standard and optimistic voting power.
 - Do not derive DTF membership from proposal ID unless the data model changes.
+- Do not add broad historical challenge scans unless proposal volume or subgraph semantics change.

@@ -1,14 +1,14 @@
-import type { DtfSdk, GetIndexDtfDelegatesParams, IndexDtfDelegate } from "@reserve-protocol/sdk";
+import type { DtfSdk, GetIndexDtfDelegatesParams, IndexDtfDelegates } from "@reserve-protocol/sdk";
 import { useQuery } from "@tanstack/react-query";
 
 import { dtfQueryKeys } from "@/query-keys";
 import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
 import { useDtfSdk } from "@/provider";
 
-export function indexDtfDelegatesQueryOptions<TData = readonly IndexDtfDelegate[]>(
+export function indexDtfDelegatesQueryOptions<TData = IndexDtfDelegates>(
   sdk: DtfSdk,
   params: GetIndexDtfDelegatesParams | undefined,
-  options?: DtfQueryOptions<readonly IndexDtfDelegate[], TData>,
+  options?: DtfQueryOptions<IndexDtfDelegates, TData>,
 ) {
   return createDtfQueryOptions(
     dtfQueryKeys.index.governance.delegates(params),
@@ -18,9 +18,9 @@ export function indexDtfDelegatesQueryOptions<TData = readonly IndexDtfDelegate[
   );
 }
 
-export function useIndexDtfDelegates<TData = readonly IndexDtfDelegate[]>(
+export function useIndexDtfDelegates<TData = IndexDtfDelegates>(
   params: GetIndexDtfDelegatesParams | undefined,
-  options?: DtfQueryOptions<readonly IndexDtfDelegate[], TData>,
+  options?: DtfQueryOptions<IndexDtfDelegates, TData>,
 ) {
   const sdk = useDtfSdk();
 

@@ -184,6 +184,9 @@ query GetIndexDtfProposals($governanceIds: [ID!]!, $limit: Int = 100) {
       }
       governance {
         id
+        token {
+          id
+        }
         timelock {
           id
         }
@@ -216,6 +219,9 @@ query GetAllIndexDtfProposals($limit: Int = 100, $offset: Int = 0, $where: Propo
     }
     governance {
       id
+      token {
+        id
+      }
       timelock {
         id
       }
@@ -318,6 +324,9 @@ query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
     governance {
       id
       optimisticSelectorRegistry
+      token {
+        id
+      }
       timelock {
         id
         type
@@ -330,6 +339,9 @@ query GetIndexDtfDelegates($stToken: ID!, $limit: Int = 10) {
   stakingToken(id: $stToken) {
     id
     totalDelegates
+    currentDelegates
+    totalOptimisticDelegates
+    currentOptimisticDelegates
     token {
       totalSupply
     }
@@ -337,7 +349,12 @@ query GetIndexDtfDelegates($stToken: ID!, $limit: Int = 10) {
       first: $limit
       orderBy: delegatedVotes
       orderDirection: desc
-      where: { address_not: "0x0000000000000000000000000000000000000000" }
+      where: {
+        or: [
+          { address_not: "0x0000000000000000000000000000000000000000", delegatedVotesRaw_gt: "0" }
+          { address_not: "0x0000000000000000000000000000000000000000", optimisticDelegatedVotesRaw_gt: "0" }
+        ]
+      }
     ) {
       address
       delegatedVotesRaw

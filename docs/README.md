@@ -11,6 +11,7 @@ This directory is the shared source-of-truth context for Reserve Protocol work i
 - Start with `index-dtf/governance.md` for proposal, voting, timelock, or optimistic governance work.
 - Start with `subgraphs/index-dtf.md` for indexing, GraphQL, or missed-event questions.
 - Start with `register/interface.md` when matching Register product behavior.
+- Start with `decisions.md` when checking recent cross-cutting SDK/Register implementation decisions.
 - Start with `plans/README.md` for pending implementation tracks that are not canonical SDK behavior yet.
 
 ## Source Hierarchy

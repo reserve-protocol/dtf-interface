@@ -1,7 +1,7 @@
 import { getAddress } from "viem";
 
 import type { DtfClient } from "@/client";
-import type { GetIndexDtfDelegatesParams, IndexDtfDelegate } from "@/types/governance";
+import type { GetIndexDtfDelegatesParams, IndexDtfDelegate, IndexDtfDelegates } from "@/types/governance";
 
 import { DEFAULT_DELEGATE_LIMIT } from "@/index-dtf/governance/constants";
 import { GetIndexDtfDelegatesDocument } from "@/index-dtf/subgraph/dtf.generated";
@@ -11,7 +11,7 @@ import { mapAmount } from "@/lib/utils";
 export async function getDelegates(
   client: DtfClient,
   params: GetIndexDtfDelegatesParams,
-): Promise<readonly IndexDtfDelegate[]> {
+): Promise<IndexDtfDelegates> {
   const stToken = getAddress(params.stToken);
   const { stakingToken } = await client.subgraph.queryIndex({
     chainId: params.chainId,
@@ -34,15 +34,55 @@ export async function getDelegates(
     });
   }
 
-  return stakingToken.delegates.map((delegate) => ({
-    address: getAddress(delegate.address),
-    delegatedVotes: mapAmount(delegate.delegatedVotesRaw),
-    optimisticDelegatedVotes: mapAmount(delegate.optimisticDelegatedVotesRaw),
-    numberVotes: Number(delegate.numberVotes),
-    numberOptimisticVotes: Number(delegate.numberOptimisticVotes),
-    hasBeenStandardDelegate: delegate.hasBeenStandardDelegate,
-    hasBeenOptimisticDelegate: delegate.hasBeenOptimisticDelegate,
-    tokenHoldersRepresentedAmount: Number(delegate.tokenHoldersRepresentedAmount),
-    optimisticTokenHoldersRepresentedAmount: Number(delegate.optimisticTokenHoldersRepresentedAmount),
-  }));
+  const voteSupply = BigInt(stakingToken.token.totalSupply);
+  const delegates: IndexDtfDelegate[] = [];
+  const normalDelegates: IndexDtfDelegate[] = [];
+  const optimisticDelegates: IndexDtfDelegate[] = [];
+
+  for (const delegate of stakingToken.delegates) {
+    const delegatedVotes = mapAmount(delegate.delegatedVotesRaw);
+    const optimisticDelegatedVotes = mapAmount(delegate.optimisticDelegatedVotesRaw);
+    const mappedDelegate = {
+      address: getAddress(delegate.address),
+      delegatedVotes,
+      optimisticDelegatedVotes,
+      weightedVotes: getWeightedVotes(delegatedVotes.raw, voteSupply),
+      optimisticWeightedVotes: getWeightedVotes(optimisticDelegatedVotes.raw, voteSupply),
+      numberVotes: Number(delegate.numberVotes),
+      numberOptimisticVotes: Number(delegate.numberOptimisticVotes),
+      hasBeenStandardDelegate: delegate.hasBeenStandardDelegate,
+      hasBeenOptimisticDelegate: delegate.hasBeenOptimisticDelegate,
+      tokenHoldersRepresentedAmount: Number(delegate.tokenHoldersRepresentedAmount),
+      optimisticTokenHoldersRepresentedAmount: Number(delegate.optimisticTokenHoldersRepresentedAmount),
+    };
+
+    delegates.push(mappedDelegate);
+
+    if (delegatedVotes.raw > 0n) {
+      normalDelegates.push(mappedDelegate);
+    }
+
+    if (optimisticDelegatedVotes.raw > 0n) {
+      optimisticDelegates.push(mappedDelegate);
+    }
+  }
+
+  return {
+    delegates,
+    normalDelegates,
+    optimisticDelegates,
+    totalDelegates: Number(stakingToken.totalDelegates),
+    currentDelegates: Number(stakingToken.currentDelegates),
+    totalNormalDelegates: Number(stakingToken.totalDelegates),
+    currentNormalDelegates: Number(stakingToken.currentDelegates),
+    totalOptimisticDelegates: Number(stakingToken.totalOptimisticDelegates),
+    currentOptimisticDelegates: Number(stakingToken.currentOptimisticDelegates),
+    voteSupply: mapAmount(voteSupply),
+  };
+}
+
+function getWeightedVotes(votes: bigint, voteSupply: bigint): number {
+  if (voteSupply === 0n) return 0;
+
+  return (Number(votes) / Number(voteSupply)) * 100;
 }

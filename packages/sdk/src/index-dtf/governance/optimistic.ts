@@ -18,8 +18,9 @@ import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vaul
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
 import { optimisticTimelockAbi } from "@/index-dtf/abis/optimistic-timelock";
 import { isUnsupportedOptimisticContractError } from "@/index-dtf/governance/optimistic-errors";
-import { getOptimisticVetoThresholdVotes } from "@/index-dtf/governance/utils";
 import { mapAmount } from "@/lib/utils";
+
+const D18 = 10n ** 18n;
 
 export const OPTIMISTIC_PROPOSER_ROLE = "0x26f49d08685d9cdd4951a7470bc8fbe9dd0f00419c1a44c1b89f845867ae12e0" as Hex;
 
@@ -85,10 +86,7 @@ export async function getOptimisticProposalContext(
     args: [snapshot],
   });
   const mappedSnapshotSupply = mapAmount(snapshotSupply);
-  const vetoThresholdVotes = getOptimisticVetoThresholdVotes({
-    snapshotSupply: mappedSnapshotSupply,
-    vetoThreshold,
-  });
+  const vetoThresholdVotes = (vetoThreshold * mappedSnapshotSupply.raw) / D18;
 
   return {
     proposalId: String(proposalId),

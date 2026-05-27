@@ -70,6 +70,9 @@ type VoteLockStateMulticallResults = readonly [
   VoteLockMulticallResult<bigint>,
   VoteLockMulticallResult<bigint>,
   VoteLockMulticallResult<Address>,
+];
+
+type OptionalOptimisticVoteLockStateResults = readonly [
   VoteLockMulticallResult<Address>,
   VoteLockMulticallResult<bigint>,
 ];
@@ -130,8 +133,6 @@ export async function getVoteLockState(
     maxWithdrawResult,
     unstakingDelayResult,
     unstakingManagerResult,
-    optimisticDelegateResult,
-    optimisticVotingPowerResult,
   ] = (await client.viem.getPublicClient(params.chainId).multicall({
     allowFailure: true,
     contracts: [
@@ -169,20 +170,14 @@ export async function getVoteLockState(
         abi: dtfIndexStakingVaultAbi,
         functionName: "unstakingManager",
       },
-      {
-        address: stToken,
-        abi: dtfIndexStakingVaultOptimisticAbi,
-        functionName: "optimisticDelegates",
-        args: [account],
-      },
-      {
-        address: stToken,
-        abi: dtfIndexStakingVaultOptimisticAbi,
-        functionName: "getOptimisticVotes",
-        args: [account],
-      },
     ],
   })) as VoteLockStateMulticallResults;
+  const [optimisticDelegate, optimisticVotingPower] = await readOptionalOptimisticVoteLockState(
+    client,
+    params.chainId,
+    stToken,
+    account,
+  );
 
   if (balanceResult.status === "failure") throw balanceResult.error;
   if (allowanceResult.status === "failure") throw allowanceResult.error;
@@ -190,22 +185,6 @@ export async function getVoteLockState(
   if (maxWithdrawResult.status === "failure") throw maxWithdrawResult.error;
   if (unstakingDelayResult.status === "failure") throw unstakingDelayResult.error;
   if (unstakingManagerResult.status === "failure") throw unstakingManagerResult.error;
-  if (
-    optimisticDelegateResult.status === "failure" &&
-    !isUnsupportedVoteLockOptimisticReadError(optimisticDelegateResult.error)
-  ) {
-    throw optimisticDelegateResult.error;
-  }
-  if (
-    optimisticVotingPowerResult.status === "failure" &&
-    !isUnsupportedVoteLockOptimisticReadError(optimisticVotingPowerResult.error)
-  ) {
-    throw optimisticVotingPowerResult.error;
-  }
-
-  const optimisticDelegate = optimisticDelegateResult.status === "success" ? optimisticDelegateResult.result : null;
-  const optimisticVotingPower =
-    optimisticVotingPowerResult.status === "success" ? optimisticVotingPowerResult.result : null;
 
   return {
     stToken,
@@ -222,6 +201,53 @@ export async function getVoteLockState(
     unstakingManager: unstakingManagerResult.result,
     ...(prices[0] ? { underlyingPrice: prices[0].price } : {}),
   };
+}
+
+async function readOptionalOptimisticVoteLockState(
+  client: DtfClient,
+  chainId: IndexDtf["chainId"],
+  stToken: Address,
+  account: Address,
+): Promise<readonly [Address | null, bigint | null]> {
+  try {
+    const [delegateResult, votingPowerResult] = (await client.viem.getPublicClient(chainId).multicall({
+      allowFailure: true,
+      contracts: [
+        {
+          address: stToken,
+          abi: dtfIndexStakingVaultOptimisticAbi,
+          functionName: "optimisticDelegates",
+          args: [account],
+        },
+        {
+          address: stToken,
+          abi: dtfIndexStakingVaultOptimisticAbi,
+          functionName: "getOptimisticVotes",
+          args: [account],
+        },
+      ],
+    })) as OptionalOptimisticVoteLockStateResults;
+
+    return [readOptionalOptimisticVoteLockResult(delegateResult), readOptionalOptimisticVoteLockResult(votingPowerResult)];
+  } catch (error) {
+    if (isUnsupportedVoteLockOptimisticReadError(error)) {
+      return [null, null];
+    }
+
+    throw error;
+  }
+}
+
+function readOptionalOptimisticVoteLockResult<T>(result: VoteLockMulticallResult<T>): T | null {
+  if (result.status === "success") {
+    return result.result;
+  }
+
+  if (isUnsupportedVoteLockOptimisticReadError(result.error)) {
+    return null;
+  }
+
+  throw result.error;
 }
 
 function mapVoteLockDao(dao: RawVoteLockDao): VoteLockDao {

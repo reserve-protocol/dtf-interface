@@ -165,7 +165,11 @@ export {
   prepareIndexDtfTimelockRevokeRole,
   prepareIndexDtfUpdateTimelock,
 } from "@/index-dtf/governance/propose/calls";
-export { getProposalGovernanceAddresses as getIndexDtfProposalGovernanceAddresses } from "@/index-dtf/governance/utils";
+export {
+  getProposalGovernanceAddresses as getIndexDtfProposalGovernanceAddresses,
+  getProposalState,
+  getProposalState as getIndexDtfProposalState,
+} from "@/index-dtf/governance/utils";
 export {
   getOptimisticProposalVoterState as getIndexDtfOptimisticProposalVoterState,
   getProposalVoterState as getIndexDtfProposalVoterState,

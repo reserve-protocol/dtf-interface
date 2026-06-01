@@ -19,7 +19,7 @@ import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
 import { isUnsupportedVoteLockOptimisticReadError } from "@/index-dtf/governance/optimistic-errors";
-import { getCurrentTime, mapAmount } from "@/lib/utils";
+import { mapAmount } from "@/lib/utils";
 
 type VotingMulticallResult<T> =
   | { readonly status: "success"; readonly result: T }
@@ -76,6 +76,7 @@ export async function getVoterState(
     optimisticDelegate,
     balance: mapAmount(balance),
     votingPower: mapAmount(votingPower),
+    votingWeight: voteSupply === 0n ? 0 : (Number(votingPower) / Number(voteSupply)) * 100,
     optimisticVotingPower: mappedOptimisticVotingPower,
     voteSupply: mapAmount(voteSupply),
     isSelfDelegated: delegate.toLowerCase() === account.toLowerCase(),
@@ -97,9 +98,47 @@ export async function getProposerState(
     abi: dtfIndexGovernanceAbi,
   } as const;
 
-  const timepoint = params.timepoint || BigInt(getCurrentTime() - 12);
+  if (params.timepoint !== undefined) {
+    const [votingPower, proposalThreshold] = (await publicClient.multicall({
+      allowFailure: false,
+      contracts: [
+        {
+          ...baseCall,
+          functionName: "getVotes",
+          args: [account, params.timepoint],
+        },
+        {
+          ...baseCall,
+          functionName: "proposalThreshold",
+        },
+      ],
+    })) as readonly [bigint, bigint];
 
-  const [votingPower, proposalThreshold] = (await publicClient.multicall({
+    return {
+      account,
+      governance,
+      votingPower: mapAmount(votingPower),
+      proposalThreshold: mapAmount(proposalThreshold),
+      canPropose: votingPower >= proposalThreshold,
+    };
+  }
+
+  const [clock, proposalThreshold] = (await publicClient.multicall({
+    allowFailure: false,
+    contracts: [
+      {
+        ...baseCall,
+        functionName: "clock",
+      },
+      {
+        ...baseCall,
+        functionName: "proposalThreshold",
+      },
+    ],
+  })) as readonly [number | bigint, bigint];
+  const clockTimepoint = typeof clock === "bigint" ? clock : BigInt(clock);
+  const timepoint = clockTimepoint > 0n ? clockTimepoint - 1n : 0n;
+  const [votingPower] = (await publicClient.multicall({
     allowFailure: false,
     contracts: [
       {
@@ -107,12 +146,8 @@ export async function getProposerState(
         functionName: "getVotes",
         args: [account, timepoint],
       },
-      {
-        ...baseCall,
-        functionName: "proposalThreshold",
-      },
     ],
-  })) as readonly [bigint, bigint];
+  })) as readonly [bigint];
 
   return {
     account,

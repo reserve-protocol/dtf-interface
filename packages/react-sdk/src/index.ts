@@ -29,9 +29,11 @@ export {
   indexDtfPastOptimisticVotesQueryOptions,
   indexDtfPriceHistoryQueryOptions,
   indexDtfPriceQueryOptions,
+  indexDtfProposalDecodeQueryOptions,
   indexDtfProposalQueryOptions,
   indexDtfProposalThrottleChargesQueryOptions,
   indexDtfProposalVoterStateQueryOptions,
+  indexDtfProposalVotingSnapshotQueryOptions,
   indexDtfProposalVotesQueryOptions,
   indexDtfProposalListQueryOptions,
   indexDtfProposalsQueryOptions,
@@ -53,8 +55,16 @@ export { useIndexDtfOptimisticTimelockRoles } from "@/index-dtf/use-index-dtf-op
 export { useIndexDtfOptimisticVotes } from "@/index-dtf/use-index-dtf-optimistic-votes";
 export { useIndexDtfPastOptimisticVotes } from "@/index-dtf/use-index-dtf-past-optimistic-votes";
 export { useIndexDtfProposal } from "@/index-dtf/use-index-dtf-proposal";
+export {
+  useIndexDtfCancelProposalCall,
+  useIndexDtfExecuteProposalCall,
+  useIndexDtfQueueProposalCall,
+  useIndexDtfVoteCall,
+} from "@/index-dtf/use-index-dtf-proposal-actions";
+export { useIndexDtfProposalDecode } from "@/index-dtf/use-index-dtf-proposal-decode";
 export { useIndexDtfProposalThrottleCharges } from "@/index-dtf/use-index-dtf-proposal-throttle-charges";
 export { useIndexDtfProposalVoterState } from "@/index-dtf/use-index-dtf-proposal-voter-state";
+export { useIndexDtfProposalVotingSnapshot } from "@/index-dtf/use-index-dtf-proposal-voting-snapshot";
 export { useIndexDtfProposalVotes } from "@/index-dtf/use-index-dtf-proposal-votes";
 export { useIndexDtfProposalList } from "@/index-dtf/use-index-dtf-proposals";
 export { useIndexDtfProposals } from "@/index-dtf/use-index-dtf-proposals";

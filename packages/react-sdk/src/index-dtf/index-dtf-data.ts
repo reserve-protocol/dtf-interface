@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import type { Authority, Governance, IndexDtfFull, Timelock, Token, TokenWithSnapshot } from "@reserve-protocol/sdk";
+import type { Amount, Authority, Governance, IndexDtfFull, Timelock, Token, TokenWithSnapshot } from "@reserve-protocol/sdk";
 
 type IndexDtfGovernanceData = Omit<Governance, "timelock"> & {
   readonly id: Address;
@@ -13,7 +13,7 @@ type IndexDtfGovernanceData = Omit<Governance, "timelock"> & {
 
 type IndexDtfTokenData = TokenWithSnapshot & {
   readonly id: Address;
-  readonly totalSupply: string;
+  readonly totalSupply: Amount;
   readonly currentHolderCount: number;
 };
 
@@ -26,7 +26,7 @@ type IndexDtfVoteLockData = {
     readonly symbol: string;
     readonly name: string;
     readonly decimals: number;
-    readonly totalSupply: string;
+    readonly totalSupply: Amount;
     readonly currentHolderCount?: number;
     readonly snapshot?: TokenWithSnapshot["snapshot"];
   };
@@ -34,6 +34,10 @@ type IndexDtfVoteLockData = {
   readonly governance?: IndexDtfGovernanceData;
   readonly legacyGovernance: Address[];
   readonly rewardTokens: Token[];
+  readonly totalDelegates: number;
+  readonly currentDelegates: number;
+  readonly totalOptimisticDelegates: number;
+  readonly currentOptimisticDelegates: number;
 };
 
 export type IndexDtfData = Omit<IndexDtfFull, "token"> & {
@@ -71,7 +75,7 @@ export function mapIndexDtfData(dtf: IndexDtfFull): IndexDtfData {
     token: {
       ...dtf.token,
       id: dtf.token.address,
-      totalSupply: dtf.token.snapshot.totalSupply.raw.toString(),
+      totalSupply: dtf.token.snapshot.totalSupply,
       currentHolderCount: dtf.token.snapshot.currentHolderCount,
     },
     proxyAdmin: dtf.roles.deployment.proxyAdmin,
@@ -99,12 +103,16 @@ export function mapIndexDtfData(dtf: IndexDtfFull): IndexDtfData {
             token: {
               ...dtf.voteLockVault.token,
               id: dtf.voteLockVault.token.address,
-              totalSupply: dtf.voteLockVault.token.snapshot.totalSupply.raw.toString(),
+              totalSupply: dtf.voteLockVault.token.snapshot.totalSupply,
             },
             underlying: dtf.voteLockVault.underlying,
             ...(dtf.voteLockVault.governance ? { governance: mapGovernanceData(dtf.voteLockVault.governance) } : {}),
             legacyGovernance: [...dtf.voteLockVault.legacyGovernance],
             rewardTokens: [...dtf.voteLockVault.rewardTokens],
+            totalDelegates: dtf.voteLockVault.delegation.totalDelegates,
+            currentDelegates: dtf.voteLockVault.delegation.currentDelegates,
+            totalOptimisticDelegates: dtf.voteLockVault.delegation.totalOptimisticDelegates,
+            currentOptimisticDelegates: dtf.voteLockVault.delegation.currentOptimisticDelegates,
           },
         }
       : {}),

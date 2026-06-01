@@ -45,6 +45,11 @@ export type GetIndexDtfProposalParams = {
   readonly proposalId: string;
 } & DtfParams;
 
+export type GetIndexDtfProposalVotingSnapshotParams = {
+  readonly chainId: SupportedChainId;
+  readonly proposalId: string;
+};
+
 export type GetIndexDtfDelegatesParams = {
   readonly chainId: SupportedChainId;
   readonly stToken: Address;
@@ -74,6 +79,9 @@ export type GetIndexDtfOptimisticProposalContextParams = {
   readonly governance: Address;
   readonly proposalId: string | bigint;
   readonly isOptimistic?: boolean;
+  readonly voteToken?: Address;
+  readonly snapshot?: bigint;
+  readonly vetoThreshold?: bigint;
 };
 
 export type GetIndexDtfLegacyVoteLocksParams =
@@ -141,9 +149,18 @@ export type ProposalVotingState = {
   readonly forVotesReachedQuorum: boolean;
   readonly participationQuorumReached: boolean;
   readonly vetoReached: boolean;
+  readonly threshold: ProposalVotingThreshold;
   readonly for: number;
   readonly against: number;
   readonly abstain: number;
+};
+
+export type ProposalVotingThreshold = {
+  readonly currentVotes: Amount;
+  readonly targetVotes?: Amount;
+  readonly progress: number;
+  readonly reached: boolean;
+  readonly hasTarget: boolean;
 };
 
 export type IndexDtfOptimisticGovernanceParams = {
@@ -211,6 +228,24 @@ export type IndexDtfProposalVote = {
   readonly voter: Address;
   readonly choice: string;
   readonly weight: Amount;
+};
+
+export type IndexDtfProposalVotingSnapshot = {
+  readonly id: string;
+  readonly governance: Address;
+  readonly voteToken: Address;
+  readonly state: ProposalState;
+  readonly voteStart: number;
+  readonly voteEnd: number;
+  readonly quorumVotes: Amount;
+  readonly forWeightedVotes: Amount;
+  readonly againstWeightedVotes: Amount;
+  readonly abstainWeightedVotes: Amount;
+  readonly isOptimistic?: boolean;
+  readonly vetoThreshold?: bigint;
+  readonly optimistic?: IndexDtfOptimisticProposalContext;
+  readonly votes: readonly IndexDtfProposalVote[];
+  readonly votingState: ProposalVotingState;
 };
 
 export type IndexDtfDecodedCalldata = {
@@ -318,6 +353,7 @@ export type IndexDtfVoterState = {
   readonly optimisticDelegate: Address | null;
   readonly balance: Amount;
   readonly votingPower: Amount;
+  readonly votingWeight: number;
   readonly optimisticVotingPower: Amount | null;
   readonly voteSupply: Amount;
   readonly isSelfDelegated: boolean;

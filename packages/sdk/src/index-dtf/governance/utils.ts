@@ -10,9 +10,10 @@ import type {
 } from "@/types/governance";
 import type { IndexDtf } from "@/types/index-dtf";
 
-import { dedupeAddresses, getCurrentTime } from "@/lib/utils";
+import { dedupeAddresses, getCurrentTime, mapAmount } from "@/lib/utils";
 
 const D18 = 10n ** 18n;
+const MAX_UINT256 = (1n << 256n) - 1n;
 
 export type DtfGovernanceAddressContext = {
   readonly ownerGovernance?: { readonly id: string } | null;
@@ -38,8 +39,9 @@ type ProposalVoteStateInput = Pick<
   | "voteEnd"
   | "voteStart"
 > & {
-  readonly optimistic?: Pick<IndexDtfOptimisticProposalContext, "snapshotSupply" | "vetoThreshold"> &
-    Partial<Pick<IndexDtfOptimisticProposalContext, "vetoThresholdVotes">>;
+  readonly optimistic?: Partial<
+    Pick<IndexDtfOptimisticProposalContext, "snapshotSupply" | "vetoThreshold" | "vetoThresholdVotes">
+  >;
 };
 
 type MutableProposalVotingState = {
@@ -49,6 +51,7 @@ type MutableProposalVotingState = {
   forVotesReachedQuorum: boolean;
   participationQuorumReached: boolean;
   vetoReached: boolean;
+  threshold: ProposalVotingState["threshold"];
   for: number;
   against: number;
   abstain: number;
@@ -147,6 +150,13 @@ export function getProposalState(proposal: ProposalVoteStateInput, timestamp = g
     ? state.quorum
     : proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw >= quorumVotes;
   state.vetoReached = isOptimistic ? state.quorum : false;
+  state.threshold = getVotingThresholdState({
+    currentVotes: isOptimistic
+      ? proposal.againstWeightedVotes.raw
+      : proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw,
+    targetVotes: isOptimistic ? optimisticVetoThresholdVotes : quorumVotes,
+    reached: isOptimistic ? state.vetoReached : state.participationQuorumReached,
+  });
 
   if (totalVotes > 0n) {
     state.for = getVotePercentage(proposal.forWeightedVotes.raw, totalVotes);
@@ -186,16 +196,51 @@ function createInitialVotingState(state: ProposalState): MutableProposalVotingSt
     forVotesReachedQuorum: false,
     participationQuorumReached: false,
     vetoReached: false,
+    threshold: {
+      currentVotes: mapAmount(0n),
+      progress: 0,
+      reached: false,
+      hasTarget: false,
+    },
     for: 0,
     against: 0,
     abstain: 0,
   };
 }
 
+function getVotingThresholdState({
+  currentVotes,
+  targetVotes,
+  reached,
+}: {
+  readonly currentVotes: bigint;
+  readonly targetVotes: bigint | undefined;
+  readonly reached: boolean;
+}): ProposalVotingState["threshold"] {
+  if (targetVotes === undefined || targetVotes === MAX_UINT256) {
+    return {
+      currentVotes: mapAmount(currentVotes),
+      progress: 0,
+      reached: false,
+      hasTarget: false,
+    };
+  }
+
+  return {
+    currentVotes: mapAmount(currentVotes),
+    targetVotes: mapAmount(targetVotes),
+    progress: targetVotes > 0n ? getVotePercentage(currentVotes, targetVotes) : reached ? 100 : 0,
+    reached,
+    hasTarget: true,
+  };
+}
+
 export function getOptimisticVetoThresholdVotes(
   optimistic: Pick<IndexDtfOptimisticProposalContext, "snapshotSupply" | "vetoThreshold">,
 ): bigint {
-  return (optimistic.vetoThreshold * optimistic.snapshotSupply.raw) / D18;
+  const vetoThresholdVotes = (optimistic.vetoThreshold * optimistic.snapshotSupply.raw) / D18;
+
+  return vetoThresholdVotes === 0n ? 1n : vetoThresholdVotes;
 }
 
 function getOptimisticFinalState(
@@ -215,10 +260,21 @@ function getOptimisticFinalState(
 
 function getOptimisticVetoVotes(proposal: ProposalVoteStateInput): bigint | undefined {
   if (!proposal.optimistic) {
-    return proposal.vetoThreshold === undefined ? undefined : proposal.quorumVotes.raw;
+    return undefined;
   }
 
-  return proposal.optimistic.vetoThresholdVotes?.raw ?? getOptimisticVetoThresholdVotes(proposal.optimistic);
+  if (proposal.optimistic.vetoThresholdVotes) {
+    return proposal.optimistic.vetoThresholdVotes.raw;
+  }
+
+  if (proposal.optimistic.snapshotSupply === undefined || proposal.optimistic.vetoThreshold === undefined) {
+    return undefined;
+  }
+
+  return getOptimisticVetoThresholdVotes({
+    snapshotSupply: proposal.optimistic.snapshotSupply,
+    vetoThreshold: proposal.optimistic.vetoThreshold,
+  });
 }
 
 function getVotePercentage(votes: bigint, totalVotes: bigint): number {

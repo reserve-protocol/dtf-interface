@@ -44,8 +44,10 @@ export {
   type IndexDtfPastOptimisticVotesQueryParams,
 } from "@/index-dtf/use-index-dtf-past-optimistic-votes";
 export { indexDtfProposalQueryOptions } from "@/index-dtf/use-index-dtf-proposal";
+export { indexDtfProposalDecodeQueryOptions } from "@/index-dtf/use-index-dtf-proposal-decode";
 export { indexDtfProposalThrottleChargesQueryOptions } from "@/index-dtf/use-index-dtf-proposal-throttle-charges";
 export { indexDtfProposalVoterStateQueryOptions } from "@/index-dtf/use-index-dtf-proposal-voter-state";
+export { indexDtfProposalVotingSnapshotQueryOptions } from "@/index-dtf/use-index-dtf-proposal-voting-snapshot";
 export { indexDtfProposalVotesQueryOptions } from "@/index-dtf/use-index-dtf-proposal-votes";
 export { indexDtfProposalListQueryOptions, indexDtfProposalsQueryOptions } from "@/index-dtf/use-index-dtf-proposals";
 export { indexDtfProposerStateQueryOptions } from "@/index-dtf/use-index-dtf-proposer-state";

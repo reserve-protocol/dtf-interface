@@ -16,6 +16,7 @@ import type {
   GetIndexDtfProposalParams,
   GetIndexDtfProposalThrottleChargesParams,
   GetIndexDtfProposalVoterStateParams,
+  GetIndexDtfProposalVotingSnapshotParams,
   GetIndexDtfProposalVotesParams,
   GetIndexDtfProposalsParams,
   GetIndexDtfProposerStateParams,
@@ -23,6 +24,7 @@ import type {
 } from "@/types/governance";
 
 import {
+  decodeIndexDtfProposal,
   getAllProposals,
   getDelegates,
   getGuardians,
@@ -37,6 +39,7 @@ import {
   getProposalList,
   getProposalThrottleCharges,
   getProposalVoterState,
+  getProposalVotingSnapshot,
   getProposalVotes,
   getProposals,
   getProposerState,
@@ -77,6 +80,10 @@ export function createIndexDtfGovernanceNamespace(client: DtfClient) {
     getProposals: (params: GetIndexDtfProposalsParams) => getProposals(client, params),
     getProposalList: (params: GetIndexDtfProposalsParams) => getProposalList(client, params),
     getProposal: (params: GetIndexDtfProposalParams) => getProposal(client, params),
+    decodeProposalCalldatas: (params: Parameters<typeof decodeIndexDtfProposal>[1]) =>
+      decodeIndexDtfProposal(client, params),
+    getProposalVotingSnapshot: (params: GetIndexDtfProposalVotingSnapshotParams) =>
+      getProposalVotingSnapshot(client, params),
     getAllProposals: (params: GetAllIndexDtfProposalsParams) => getAllProposals(client, params),
     getDelegates: (params: GetIndexDtfDelegatesParams) => getDelegates(client, params),
     getGuardians: (params: GetIndexDtfGuardiansParams) => getGuardians(client, params),

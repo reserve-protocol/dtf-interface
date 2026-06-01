@@ -12,7 +12,10 @@ import { getVoteState } from "@/index-dtf/governance/utils";
 
 describe("Index DTF optimistic governance", () => {
   it("reads optimistic proposal veto context", async () => {
-    const multicall = vi.fn(async () => [200000000000000000n, 100n, "0x0000000000000000000000000000000000000002"]);
+    const multicall = vi.fn(async () => [
+      100n,
+      "0x0000000000000000000000000000000000000002",
+    ]);
     const readContract = vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(100000000000000000000n);
     const client = {
       viem: {
@@ -25,6 +28,7 @@ describe("Index DTF optimistic governance", () => {
       chainId: 1,
       governance: "0x0000000000000000000000000000000000000001",
       proposalId: "42",
+      vetoThreshold: 200000000000000000n,
     });
 
     expect(context).toEqual({
@@ -51,13 +55,67 @@ describe("Index DTF optimistic governance", () => {
     expect(multicall).toHaveBeenCalledWith(
       expect.objectContaining({
         allowFailure: false,
-        contracts: expect.arrayContaining([
-          expect.objectContaining({ functionName: "vetoThreshold" }),
+        contracts: [
           expect.objectContaining({ functionName: "proposalSnapshot" }),
           expect.objectContaining({ functionName: "token" }),
-        ]),
+        ],
       }),
     );
+  });
+
+  it("does not infer proposal-specific veto threshold from current governor params", async () => {
+    const getPublicClient = vi.fn();
+    const readContract = vi.fn().mockResolvedValueOnce(true);
+    const client = {
+      viem: {
+        getPublicClient,
+        readContract,
+      },
+    } as unknown as DtfClient;
+
+    const context = await getOptimisticProposalContext(client, {
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId: "42",
+    });
+
+    expect(context).toBeNull();
+    expect(getPublicClient).not.toHaveBeenCalled();
+  });
+
+  it("uses provided optimistic proposal metadata without extra governor calls", async () => {
+    const readContract = vi.fn().mockResolvedValueOnce(100000000000000000000n);
+    const getPublicClient = vi.fn();
+    const client = {
+      viem: {
+        getPublicClient,
+        readContract,
+      },
+    } as unknown as DtfClient;
+
+    const context = await getOptimisticProposalContext(client, {
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId: "42",
+      isOptimistic: true,
+      voteToken: "0x0000000000000000000000000000000000000002",
+      snapshot: 100n,
+      vetoThreshold: 200000000000000000n,
+    });
+
+    expect(getPublicClient).not.toHaveBeenCalled();
+    expect(readContract).toHaveBeenCalledTimes(1);
+    expect(readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: "0x0000000000000000000000000000000000000002",
+        functionName: "getPastTotalSupply",
+        args: [100n],
+      }),
+    );
+    expect(context?.vetoThresholdVotes).toEqual({
+      raw: 20000000000000000000n,
+      formatted: "20",
+    });
   });
 
   it("returns null when a governor does not expose optimistic reads", async () => {
@@ -116,8 +174,7 @@ describe("Index DTF optimistic governance", () => {
       abstainWeightedVotes: { raw: 0n, formatted: "0" },
       quorumVotes: { raw: 100n, formatted: "100" },
       optimistic: {
-        snapshotSupply: { raw: 100n, formatted: "100" },
-        vetoThreshold: 200000000000000000n,
+        vetoThresholdVotes: { raw: 20n, formatted: "20" },
       },
     } as const;
 
@@ -164,17 +221,19 @@ describe("Index DTF optimistic governance", () => {
     });
   });
 
-  it("uses indexed quorum votes as optimistic veto threshold votes", () => {
+  it("uses indexed optimistic veto threshold votes", () => {
     const proposal = {
       state: "ACTIVE",
       isOptimistic: true,
-      vetoThreshold: 20000000000000000n,
       voteStart: 100,
       voteEnd: 200,
       forWeightedVotes: { raw: 0n, formatted: "0" },
       againstWeightedVotes: { raw: 500000000000000000n, formatted: "0.5" },
       abstainWeightedVotes: { raw: 0n, formatted: "0" },
       quorumVotes: { raw: 100000000000000000n, formatted: "0.1" },
+      optimistic: {
+        vetoThresholdVotes: { raw: 100000000000000000n, formatted: "0.1" },
+      },
     } as const;
 
     expect(getVoteState(proposal, 150)).toMatchObject({
@@ -204,6 +263,9 @@ describe("Index DTF optimistic governance", () => {
           againstWeightedVotes: { raw: 5n, formatted: "5" },
           abstainWeightedVotes: { raw: 0n, formatted: "0" },
           quorumVotes: { raw: 10n, formatted: "10" },
+          optimistic: {
+            vetoThresholdVotes: { raw: 10n, formatted: "10" },
+          },
         },
         150,
       ),
@@ -235,7 +297,7 @@ describe("Index DTF optimistic governance", () => {
     });
   });
 
-  it("treats zero computed veto threshold optimistic proposals as canceled", () => {
+  it("uses indexed one-vote optimistic thresholds", () => {
     expect(
       getVoteState(
         {
@@ -248,13 +310,36 @@ describe("Index DTF optimistic governance", () => {
           abstainWeightedVotes: { raw: 0n, formatted: "0" },
           quorumVotes: { raw: 100n, formatted: "100" },
           optimistic: {
-            snapshotSupply: { raw: 1n, formatted: "0.000000000000000001" },
-            vetoThreshold: 1n,
+            vetoThresholdVotes: { raw: 1n, formatted: "0.000000000000000001" },
           },
         },
         201,
       ),
-    ).toMatchObject({ state: "CANCELED" });
+    ).toMatchObject({
+      state: "SUCCEEDED",
+      vetoReached: false,
+    });
+    expect(
+      getVoteState(
+        {
+          state: "ACTIVE",
+          isOptimistic: true,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 1n, formatted: "0.000000000000000001" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 100n, formatted: "100" },
+          optimistic: {
+            vetoThresholdVotes: { raw: 1n, formatted: "0.000000000000000001" },
+          },
+        },
+        201,
+      ),
+    ).toMatchObject({
+      state: "DEFEATED",
+      vetoReached: true,
+    });
   });
 
   it("reads optimistic governance settings", async () => {

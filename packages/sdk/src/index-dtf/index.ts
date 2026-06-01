@@ -119,6 +119,7 @@ export {
   getAllProposals as getAllIndexDtfProposals,
   getProposal as getIndexDtfProposal,
   getProposalList as getIndexDtfProposalList,
+  getProposalVotingSnapshot as getIndexDtfProposalVotingSnapshot,
   getProposals as getIndexDtfProposals,
 } from "@/index-dtf/governance/proposals";
 export {
@@ -170,6 +171,17 @@ export {
   getProposalState,
   getProposalState as getIndexDtfProposalState,
 } from "@/index-dtf/governance/utils";
+export {
+  decodeIndexDtfProposal,
+  decodeIndexDtfProposalCalldatas,
+} from "@/index-dtf/governance/decoder";
+export type {
+  DecodeIndexDtfProposalParams,
+} from "@/index-dtf/governance/decoder";
+export type {
+  IndexDtfProposalDtfContractContext,
+  IndexDtfProposalGovernanceContractContext,
+} from "@/index-dtf/governance/contract-map";
 export {
   getOptimisticProposalVoterState as getIndexDtfOptimisticProposalVoterState,
   getProposalVoterState as getIndexDtfProposalVoterState,

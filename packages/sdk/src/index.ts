@@ -38,6 +38,10 @@ export type {
   PortfolioVoteLock,
 } from "@/types/api";
 export type {
+  DtfClientExplorer,
+  DtfClientExplorerContractMetadata,
+} from "@/client/explorer";
+export type {
   DtfClientReadContractParameters,
   DtfClientViem,
   DtfClientViemChainConfig,
@@ -79,6 +83,8 @@ export {
   buildIndexDtfStartRebalanceArgs,
   createIndexDtfNamespace,
   createIndexDtfRef,
+  decodeIndexDtfProposal,
+  decodeIndexDtfProposalCalldatas,
   discoverIndexDtfs,
   discoverIndexDtfsByChain,
   discoverIndexDtfsFromSubgraph,
@@ -138,6 +144,7 @@ export {
   getIndexDtfProposalList,
   getIndexDtfProposalState,
   getIndexDtfProposalThrottleCharges,
+  getIndexDtfProposalVotingSnapshot,
   getIndexDtfProposalVoterState,
   getIndexDtfProposalVotes,
   getIndexDtfProposals,

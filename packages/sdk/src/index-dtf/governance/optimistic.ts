@@ -21,6 +21,7 @@ import { isUnsupportedOptimisticContractError } from "@/index-dtf/governance/opt
 import { mapAmount } from "@/lib/utils";
 
 const D18 = 10n ** 18n;
+const MAX_UINT256 = (1n << 256n) - 1n;
 
 export const OPTIMISTIC_PROPOSER_ROLE = "0x26f49d08685d9cdd4951a7470bc8fbe9dd0f00419c1a44c1b89f845867ae12e0" as Hex;
 
@@ -56,28 +57,42 @@ export async function getOptimisticProposalContext(
     return null;
   }
 
-  const [vetoThreshold, snapshot, token] = (await client.viem.getPublicClient(params.chainId).multicall({
-    allowFailure: false,
-    contracts: [
-      {
-        address: governance,
-        abi: dtfIndexGovernanceOptimisticAbi,
-        functionName: "vetoThreshold",
-        args: [proposalId],
-      },
-      {
-        address: governance,
-        abi: dtfIndexGovernanceOptimisticAbi,
-        functionName: "proposalSnapshot",
-        args: [proposalId],
-      },
-      {
-        address: governance,
-        abi: dtfIndexGovernanceOptimisticAbi,
-        functionName: "token",
-      },
-    ],
-  })) as readonly [bigint, bigint, Address];
+  const vetoThreshold = params.vetoThreshold;
+  let snapshot = params.snapshot;
+  let token = params.voteToken ? getAddress(params.voteToken) : undefined;
+
+  if (vetoThreshold === undefined || vetoThreshold === MAX_UINT256) {
+    return null;
+  }
+
+  if (snapshot === undefined || token === undefined) {
+    const [contractSnapshot, contractToken] = (await client.viem
+      .getPublicClient(params.chainId)
+      .multicall({
+        allowFailure: false,
+        contracts: [
+          {
+            address: governance,
+            abi: dtfIndexGovernanceOptimisticAbi,
+            functionName: "proposalSnapshot",
+            args: [proposalId],
+          },
+          {
+            address: governance,
+            abi: dtfIndexGovernanceOptimisticAbi,
+            functionName: "token",
+          },
+        ],
+      })) as readonly [bigint, Address];
+
+    snapshot = snapshot ?? contractSnapshot;
+    token = token ?? contractToken;
+  }
+
+  if (vetoThreshold === undefined || snapshot === undefined || token === undefined) {
+    throw new Error("Missing optimistic proposal context values");
+  }
+
   const snapshotSupply = await client.viem.readContract({
     chainId: params.chainId,
     address: token,
@@ -86,7 +101,11 @@ export async function getOptimisticProposalContext(
     args: [snapshot],
   });
   const mappedSnapshotSupply = mapAmount(snapshotSupply);
-  const vetoThresholdVotes = (vetoThreshold * mappedSnapshotSupply.raw) / D18;
+  let vetoThresholdVotes = (vetoThreshold * mappedSnapshotSupply.raw) / D18;
+
+  if (vetoThresholdVotes === 0n) {
+    vetoThresholdVotes = 1n;
+  }
 
   return {
     proposalId: String(proposalId),

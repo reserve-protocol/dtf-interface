@@ -1,4 +1,5 @@
 import { createDtfClientApi, type DtfClientApi } from "@/client/api";
+import { createDtfClientExplorer, type DtfClientExplorer } from "@/client/explorer";
 import { createDtfClientSubgraph, type DtfClientSubgraph, type DtfClientSubgraphChainConfig } from "@/client/subgraph";
 import { createDtfClientViem, type DtfClientViem, type DtfClientViemChainConfig } from "@/client/viem";
 import {
@@ -16,10 +17,12 @@ export type DtfChainConfig = DtfClientSubgraphChainConfig & DtfClientViemChainCo
 export type DtfClientConfig = {
   readonly apiBaseUrl?: string;
   readonly chains?: Partial<Record<SupportedChainId, DtfChainConfig>>;
+  readonly etherscanApiKey?: string;
 };
 
 export type DtfClient = {
   readonly api: DtfClientApi;
+  readonly explorer: DtfClientExplorer;
   readonly subgraph: DtfClientSubgraph;
   readonly viem: DtfClientViem;
 };
@@ -30,6 +33,9 @@ export function createDtfClient(config: DtfClientConfig = {}): DtfClient {
 
   return {
     api: createDtfClientApi({ baseUrl: apiBaseUrl }),
+    explorer: createDtfClientExplorer({
+      ...(config.etherscanApiKey ? { etherscanApiKey: config.etherscanApiKey } : {}),
+    }),
     subgraph: createDtfClientSubgraph({ chains }),
     viem: createDtfClientViem({ chains }),
   };

@@ -169,6 +169,9 @@ query GetIndexDtfProposals($governanceIds: [ID!]!, $limit: Int = 100) {
       state
       isOptimistic
       vetoThreshold
+      vetoThresholdVotes
+      optimisticSnapshot
+      optimisticSnapshotSupply
       forWeightedVotes
       abstainWeightedVotes
       againstWeightedVotes
@@ -204,6 +207,9 @@ query GetAllIndexDtfProposals($limit: Int = 100, $offset: Int = 0, $where: Propo
     state
     isOptimistic
     vetoThreshold
+    vetoThresholdVotes
+    optimisticSnapshot
+    optimisticSnapshotSupply
     forWeightedVotes
     abstainWeightedVotes
     againstWeightedVotes
@@ -296,6 +302,9 @@ query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
     state
     isOptimistic
     vetoThreshold
+    vetoThresholdVotes
+    optimisticSnapshot
+    optimisticSnapshotSupply
     executionETA
     executionTime
     executionBlock
@@ -331,6 +340,37 @@ query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
         id
         type
       }
+    }
+  }
+}
+
+query GetIndexDtfProposalVotingSnapshot($proposalId: ID!) {
+  proposal(id: $proposalId) {
+    id
+    state
+    isOptimistic
+    vetoThreshold
+    vetoThresholdVotes
+    optimisticSnapshot
+    optimisticSnapshotSupply
+    voteStart
+    voteEnd
+    forWeightedVotes
+    againstWeightedVotes
+    abstainWeightedVotes
+    quorumVotes
+    governance {
+      id
+      token {
+        id
+      }
+    }
+    votes {
+      choice
+      voter {
+        address
+      }
+      weight
     }
   }
 }

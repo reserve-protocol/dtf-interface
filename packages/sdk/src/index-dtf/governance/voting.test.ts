@@ -68,6 +68,7 @@ describe("Index DTF governance voting", () => {
       optimisticDelegate: "0x0000000000000000000000000000000000000003",
       balance: { raw: 5000000000000000000n, formatted: "5" },
       votingPower: { raw: 3000000000000000000n, formatted: "3" },
+      votingWeight: 30,
       optimisticVotingPower: { raw: 2000000000000000000n, formatted: "2" },
       voteSupply: { raw: 10000000000000000000n, formatted: "10" },
       isSelfDelegated: true,

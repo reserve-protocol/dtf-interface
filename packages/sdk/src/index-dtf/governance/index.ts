@@ -1,4 +1,5 @@
 export * from "@/index-dtf/governance/delegates";
+export * from "@/index-dtf/governance/decoder";
 export * from "@/index-dtf/governance/guardians";
 export * from "@/index-dtf/governance/legacy-vote-lock";
 export * from "@/index-dtf/governance/optimistic";

@@ -17,6 +17,7 @@ import {
   prepareIndexDtfQueueProposal,
   prepareIndexDtfSubmitOptimisticProposal,
   prepareIndexDtfSubmitProposal,
+  prepareIndexDtfVote,
   prepareIndexDtfVoteWithReason,
   prepareIndexDtfVoteWithReasonAndParams,
 } from "@/index-dtf/governance/proposal-actions";
@@ -90,6 +91,18 @@ describe("Index DTF proposal actions", () => {
     expect(reasonCall.contract.args).toEqual([42n, 1, "Looks good"]);
     expect(paramsCall.contract.functionName).toBe("castVoteWithReasonAndParams");
     expect(paramsCall.contract.args).toEqual([42n, 0, "No", "0x1234"]);
+  });
+
+  it("prepares vote calls for very large proposal id strings without precision loss", () => {
+    const proposalId = "114143694312255605278636846982278574633125503103201258989783472858643695239364";
+    const call = prepareIndexDtfVote({
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId,
+      support: 1,
+    });
+
+    expect(call.contract.args).toEqual([BigInt(proposalId), 1]);
   });
 
   it("prepares proposal queue and cancel calls with required timelock", () => {

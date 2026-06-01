@@ -2776,6 +2776,22 @@ export type Proposal_Filter = {
   isOptimistic_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   isOptimistic_not?: InputMaybe<Scalars['Boolean']['input']>;
   isOptimistic_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  optimisticSnapshot?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshotSupply?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshotSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshotSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshotSupply_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticSnapshotSupply_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshotSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshotSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshotSupply_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticSnapshot_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshot_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshot_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  optimisticSnapshot_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshot_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshot_not?: InputMaybe<Scalars['BigInt']['input']>;
+  optimisticSnapshot_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   or?: InputMaybe<Array<InputMaybe<Proposal_Filter>>>;
   proposer?: InputMaybe<Scalars['String']['input']>;
   proposer_?: InputMaybe<Delegate_Filter>;
@@ -2948,6 +2964,14 @@ export type Proposal_Filter = {
   values_not?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   values_not_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   vetoThreshold?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThresholdVotes?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThresholdVotes_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThresholdVotes_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThresholdVotes_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  vetoThresholdVotes_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThresholdVotes_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThresholdVotes_not?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThresholdVotes_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   vetoThreshold_gt?: InputMaybe<Scalars['BigInt']['input']>;
   vetoThreshold_gte?: InputMaybe<Scalars['BigInt']['input']>;
   vetoThreshold_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
@@ -3019,6 +3043,8 @@ export type Proposal_OrderBy =
   | 'governance__votingPeriod'
   | 'id'
   | 'isOptimistic'
+  | 'optimisticSnapshot'
+  | 'optimisticSnapshotSupply'
   | 'proposer'
   | 'proposer__address'
   | 'proposer__delegatedVotes'
@@ -3048,6 +3074,7 @@ export type Proposal_OrderBy =
   | 'txnHash'
   | 'values'
   | 'vetoThreshold'
+  | 'vetoThresholdVotes'
   | 'voteEnd'
   | 'voteStart'
   | 'votes';
@@ -4388,6 +4415,8 @@ export type TimelockOperation_OrderBy =
   | 'proposal__forWeightedVotes'
   | 'proposal__id'
   | 'proposal__isOptimistic'
+  | 'proposal__optimisticSnapshot'
+  | 'proposal__optimisticSnapshotSupply'
   | 'proposal__queueBlock'
   | 'proposal__queueTime'
   | 'proposal__queueTxnHash'
@@ -4399,6 +4428,7 @@ export type TimelockOperation_OrderBy =
   | 'proposal__totalWeightedVotes'
   | 'proposal__txnHash'
   | 'proposal__vetoThreshold'
+  | 'proposal__vetoThresholdVotes'
   | 'proposal__voteEnd'
   | 'proposal__voteStart'
   | 'timestamp'
@@ -6070,6 +6100,8 @@ export type VoteDailySnapshot_OrderBy =
   | 'proposal__forWeightedVotes'
   | 'proposal__id'
   | 'proposal__isOptimistic'
+  | 'proposal__optimisticSnapshot'
+  | 'proposal__optimisticSnapshotSupply'
   | 'proposal__queueBlock'
   | 'proposal__queueTime'
   | 'proposal__queueTxnHash'
@@ -6081,6 +6113,7 @@ export type VoteDailySnapshot_OrderBy =
   | 'proposal__totalWeightedVotes'
   | 'proposal__txnHash'
   | 'proposal__vetoThreshold'
+  | 'proposal__vetoThresholdVotes'
   | 'proposal__voteEnd'
   | 'proposal__voteStart'
   | 'timestamp'
@@ -6266,6 +6299,8 @@ export type Vote_OrderBy =
   | 'proposal__forWeightedVotes'
   | 'proposal__id'
   | 'proposal__isOptimistic'
+  | 'proposal__optimisticSnapshot'
+  | 'proposal__optimisticSnapshotSupply'
   | 'proposal__queueBlock'
   | 'proposal__queueTime'
   | 'proposal__queueTxnHash'
@@ -6277,6 +6312,7 @@ export type Vote_OrderBy =
   | 'proposal__totalWeightedVotes'
   | 'proposal__txnHash'
   | 'proposal__vetoThreshold'
+  | 'proposal__vetoThresholdVotes'
   | 'proposal__voteEnd'
   | 'proposal__voteStart'
   | 'reason'
@@ -6316,7 +6352,7 @@ export type GetIndexDtfProposalsQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalsQuery = { governances: Array<{ id: string, proposalCount: string, proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, token: { id: string }, timelock: { id: string } } }> }> };
+export type GetIndexDtfProposalsQuery = { governances: Array<{ id: string, proposalCount: string, proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, vetoThresholdVotes?: string | null, optimisticSnapshot?: string | null, optimisticSnapshotSupply?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, token: { id: string }, timelock: { id: string } } }> }> };
 
 export type GetAllIndexDtfProposalsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -6325,7 +6361,7 @@ export type GetAllIndexDtfProposalsQueryVariables = Exact<{
 }>;
 
 
-export type GetAllIndexDtfProposalsQuery = { proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, token: { id: string }, timelock: { id: string } } }> };
+export type GetAllIndexDtfProposalsQuery = { proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, vetoThresholdVotes?: string | null, optimisticSnapshot?: string | null, optimisticSnapshotSupply?: string | null, forWeightedVotes: string, abstainWeightedVotes: string, againstWeightedVotes: string, executionETA?: string | null, executionTime?: string | null, quorumVotes: string, voteStart: string, voteEnd: string, executionBlock?: string | null, creationBlock: string, proposer: { address: string }, governance: { id: string, token: { id: string }, timelock: { id: string } } }> };
 
 export type GetIndexDtfProposalGovernanceAddressesQueryVariables = Exact<{
   dtfId: Scalars['ID']['input'];
@@ -6342,7 +6378,14 @@ export type GetIndexDtfProposalQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null } | null, proposal?: { id: string, timelockId?: string | null, description: string, creationTime: string, voteStart: string, voteEnd: string, queueBlock?: string | null, queueTime?: string | null, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, executionETA?: string | null, executionTime?: string | null, executionBlock?: string | null, creationBlock: string, cancellationTime?: string | null, calldatas?: Array<string> | null, targets?: Array<string> | null, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, abstainDelegateVotes: string, againstDelegateVotes: string, executionTxnHash?: string | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governance: { id: string, optimisticSelectorRegistry?: string | null, token: { id: string }, timelock: { id: string, type: string } } } | null };
+export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null } | null, proposal?: { id: string, timelockId?: string | null, description: string, creationTime: string, voteStart: string, voteEnd: string, queueBlock?: string | null, queueTime?: string | null, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, vetoThresholdVotes?: string | null, optimisticSnapshot?: string | null, optimisticSnapshotSupply?: string | null, executionETA?: string | null, executionTime?: string | null, executionBlock?: string | null, creationBlock: string, cancellationTime?: string | null, calldatas?: Array<string> | null, targets?: Array<string> | null, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, abstainDelegateVotes: string, againstDelegateVotes: string, executionTxnHash?: string | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governance: { id: string, optimisticSelectorRegistry?: string | null, token: { id: string }, timelock: { id: string, type: string } } } | null };
+
+export type GetIndexDtfProposalVotingSnapshotQueryVariables = Exact<{
+  proposalId: Scalars['ID']['input'];
+}>;
+
+
+export type GetIndexDtfProposalVotingSnapshotQuery = { proposal?: { id: string, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, vetoThresholdVotes?: string | null, optimisticSnapshot?: string | null, optimisticSnapshotSupply?: string | null, voteStart: string, voteEnd: string, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, governance: { id: string, token: { id: string } }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }> } | null };
 
 export type GetIndexDtfDelegatesQueryVariables = Exact<{
   stToken: Scalars['ID']['input'];
@@ -6616,6 +6659,9 @@ export const GetIndexDtfProposalsDocument = new TypedDocumentString(`
       state
       isOptimistic
       vetoThreshold
+      vetoThresholdVotes
+      optimisticSnapshot
+      optimisticSnapshotSupply
       forWeightedVotes
       abstainWeightedVotes
       againstWeightedVotes
@@ -6658,6 +6704,9 @@ export const GetAllIndexDtfProposalsDocument = new TypedDocumentString(`
     state
     isOptimistic
     vetoThreshold
+    vetoThresholdVotes
+    optimisticSnapshot
+    optimisticSnapshotSupply
     forWeightedVotes
     abstainWeightedVotes
     againstWeightedVotes
@@ -6720,6 +6769,9 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
     state
     isOptimistic
     vetoThreshold
+    vetoThresholdVotes
+    optimisticSnapshot
+    optimisticSnapshotSupply
     executionETA
     executionTime
     executionBlock
@@ -6789,6 +6841,38 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
     }
   }
 }`) as unknown as TypedDocumentString<GetIndexDtfProposalQuery, GetIndexDtfProposalQueryVariables>;
+export const GetIndexDtfProposalVotingSnapshotDocument = new TypedDocumentString(`
+    query GetIndexDtfProposalVotingSnapshot($proposalId: ID!) {
+  proposal(id: $proposalId) {
+    id
+    state
+    isOptimistic
+    vetoThreshold
+    vetoThresholdVotes
+    optimisticSnapshot
+    optimisticSnapshotSupply
+    voteStart
+    voteEnd
+    forWeightedVotes
+    againstWeightedVotes
+    abstainWeightedVotes
+    quorumVotes
+    governance {
+      id
+      token {
+        id
+      }
+    }
+    votes {
+      choice
+      voter {
+        address
+      }
+      weight
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetIndexDtfProposalVotingSnapshotQuery, GetIndexDtfProposalVotingSnapshotQueryVariables>;
 export const GetIndexDtfDelegatesDocument = new TypedDocumentString(`
     query GetIndexDtfDelegates($stToken: ID!, $limit: Int = 10) {
   stakingToken(id: $stToken) {

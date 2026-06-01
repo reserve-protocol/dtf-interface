@@ -254,6 +254,46 @@ describe("dtfQueryKeys", () => {
       target: "0x000000000000000000000000000000000000000b",
     });
   });
+
+  it("normalizes proposal decode keys", () => {
+    const key = dtfQueryKeys.index.governance.proposalDecode({
+      chainId: 1,
+      targets: ["0x000000000000000000000000000000000000000A"],
+      calldatas: ["0xABCDEF12"],
+      dtf: {
+        address: "0x000000000000000000000000000000000000000B",
+        proxyAdmin: "0x000000000000000000000000000000000000000C",
+        legacyAdminGovernance: [],
+        legacyTradingGovernance: [],
+        stakingToken: {
+          address: "0x000000000000000000000000000000000000000D",
+          legacyGovernance: [],
+        },
+      },
+    });
+
+    expect(key).toEqual([
+      "dtf",
+      "index",
+      "governance",
+      "proposal-decode",
+      {
+        calldatas: ["0xABCDEF12"],
+        chainId: 1,
+        dtf: {
+          address: "0x000000000000000000000000000000000000000b",
+          legacyAdminGovernance: [],
+          legacyTradingGovernance: [],
+          proxyAdmin: "0x000000000000000000000000000000000000000c",
+          stakingToken: {
+            address: "0x000000000000000000000000000000000000000d",
+            legacyGovernance: [],
+          },
+        },
+        targets: ["0x000000000000000000000000000000000000000a"],
+      },
+    ]);
+  });
 });
 
 function createDtfKeyFixture() {

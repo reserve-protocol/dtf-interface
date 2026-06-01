@@ -5,21 +5,26 @@ import type { DtfParams } from "@/types/common";
 import type {
   GetAllIndexDtfProposalsParams,
   GetIndexDtfProposalParams,
+  GetIndexDtfProposalVotingSnapshotParams,
   IndexDtfProposalList,
   GetIndexDtfProposalsParams,
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
+  IndexDtfProposalVotingSnapshot,
   ProposalState,
 } from "@/types/governance";
 
 import { DEFAULT_PROPOSAL_LIMIT } from "@/index-dtf/governance/constants";
 import { buildProposalContractMap } from "@/index-dtf/governance/contract-map";
 import { decodeIndexDtfProposalCalldatas } from "@/index-dtf/governance/decoder";
+import { getOptimisticProposalContext } from "@/index-dtf/governance/optimistic";
 import {
   mapDtfProposalContractContext,
   mapIndexDtfProposal,
+  mapIndexDtfProposalVotingSnapshot,
   mapIndexDtfProposalSummary,
   mapProposalGovernanceContractContext,
+  type ParsedIndexDtfProposal,
   type ParsedIndexDtfProposalSummary,
   type SubgraphGovernedIndexDtfProposalDtf,
 } from "@/index-dtf/governance/mapper";
@@ -34,6 +39,7 @@ import {
   GetAllIndexDtfProposalsDocument,
   GetIndexDtfProposalDocument,
   GetIndexDtfProposalGovernanceAddressesDocument,
+  GetIndexDtfProposalVotingSnapshotDocument,
   GetIndexDtfProposalsDocument,
   type Proposal_Filter,
 } from "@/index-dtf/subgraph/dtf.generated";
@@ -154,23 +160,96 @@ export async function getProposal(
 
   const governedDtf = dtf as SubgraphGovernedIndexDtfProposalDtf;
 
+  const timestamp = getCurrentTime();
   const parsedProposal = mapIndexDtfProposal(proposal, governedDtf, chainId);
-  const proposalWithVoteState = withVoteState(parsedProposal, getCurrentTime());
-  const contractMap = buildProposalContractMap({
-    chainId,
-    dtf: mapDtfProposalContractContext(governedDtf),
-    proposalGovernance: mapProposalGovernanceContractContext(proposal.governance),
-  });
+  const proposalWithOptimisticContext = await withOptimisticContext(client, parsedProposal, timestamp);
+  const proposalWithVoteState = withVoteState(proposalWithOptimisticContext, timestamp);
   const decodedData = decodeIndexDtfProposalCalldatas({
     targets: parsedProposal.targets,
     calldatas: parsedProposal.calldatas,
-    contractMap,
+    contractMap: buildProposalContractMap({
+      chainId,
+      dtf: mapDtfProposalContractContext(governedDtf),
+      proposalGovernance: mapProposalGovernanceContractContext(proposal.governance),
+    }),
   });
 
   return {
     ...proposalWithVoteState,
     decoded: decodedData,
   };
+}
+
+async function withOptimisticContext<T extends ParsedIndexDtfProposal>(
+  client: DtfClient,
+  proposal: T,
+  timestamp: number,
+): Promise<T> {
+  const hasVotes = proposal.votes.length > 0;
+
+  if (
+    !proposal.isOptimistic ||
+    proposal.vetoThreshold === undefined ||
+    timestamp <= proposal.voteStart ||
+    timestamp >= proposal.voteEnd ||
+    hasVotes
+  ) {
+    return proposal;
+  }
+
+  try {
+    const optimistic = await getOptimisticProposalContext(client, {
+      chainId: proposal.chainId,
+      governance: proposal.governance,
+      proposalId: proposal.id,
+      isOptimistic: true,
+      voteToken: proposal.voteToken,
+      snapshot: BigInt(proposal.voteStart),
+      vetoThreshold: proposal.vetoThreshold,
+    });
+
+    if (!optimistic) {
+      return proposal;
+    }
+
+    return {
+      ...proposal,
+      vetoThreshold: optimistic.vetoThreshold,
+      optimistic,
+    };
+  } catch {
+    return proposal;
+  }
+}
+
+export async function getProposalVotingSnapshot(
+  client: DtfClient,
+  params: GetIndexDtfProposalVotingSnapshotParams,
+): Promise<IndexDtfProposalVotingSnapshot> {
+  const { proposal } = await client.subgraph.queryIndex({
+    chainId: params.chainId,
+    query: GetIndexDtfProposalVotingSnapshotDocument,
+    variables: {
+      proposalId: params.proposalId,
+    },
+  });
+
+  if (!proposal) {
+    throw new SdkError({
+      code: "RECORD_NOT_FOUND",
+      message: `Index DTF proposal not found: ${params.proposalId} on chain ${params.chainId}`,
+      meta: {
+        chainId: params.chainId,
+        entity: "indexDtfProposal",
+        id: params.proposalId,
+      },
+    });
+  }
+
+  const timestamp = getCurrentTime();
+  const parsedProposal = mapIndexDtfProposalVotingSnapshot(proposal);
+
+  return withVoteState(parsedProposal, timestamp);
 }
 
 async function getProposalListByGovernanceIds(

@@ -4,7 +4,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DtfClient } from "@/client";
 
 import { dtfIndexProposalAbi } from "@/index-dtf/abis/proposal-decoder";
-import { getAllProposals, getProposal, getProposalList, getProposals } from "@/index-dtf/governance/index";
+import {
+  getAllProposals,
+  getProposal,
+  getProposalList,
+  getProposalVotingSnapshot,
+  getProposals,
+} from "@/index-dtf/governance/index";
 
 describe("Index DTF governance proposals", () => {
   afterEach(() => {
@@ -150,6 +156,8 @@ describe("Index DTF governance proposals", () => {
         abstain: 40,
       },
     });
+    expect(proposal.optimistic).toBeUndefined();
+    expect(proposal.vetoThreshold).toBeUndefined();
     expect(proposal.forWeightedVotes).toEqual({
       raw: 2000000000000000000n,
       formatted: "2",
@@ -213,6 +221,441 @@ describe("Index DTF governance proposals", () => {
         calls: [proposal.decoded.unknownCalls[1]],
       },
     ]);
+  });
+
+  it("maps optimistic proposal threshold from indexed snapshot values", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      dtf: {
+        id: "0x0000000000000000000000000000000000000003",
+        proxyAdmin: "0x0000000000000000000000000000000000000008",
+        legacyAdmins: [],
+        legacyAuctionApprovers: [],
+        ownerGovernance: null,
+        tradingGovernance: null,
+        stToken: {
+          id: "0x0000000000000000000000000000000000000007",
+          legacyGovernance: [],
+          governance: {
+            id: "0x0000000000000000000000000000000000000001",
+            optimisticSelectorRegistry: null,
+            timelock: {
+              id: "0x0000000000000000000000000000000000000006",
+            },
+          },
+        },
+      },
+      proposal: {
+        id: "42",
+        timelockId: null,
+        description: "Optimistic proposal",
+        creationTime: "999000",
+        voteStart: "999900",
+        voteEnd: "1000100",
+        queueBlock: null,
+        queueTime: null,
+        state: "PENDING",
+        isOptimistic: true,
+        vetoThreshold: "200000000000000000",
+        vetoThresholdVotes: "20000000000000000000",
+        optimisticSnapshot: "999900",
+        optimisticSnapshotSupply: "100000000000000000000",
+        executionETA: null,
+        executionTime: null,
+        executionBlock: null,
+        creationBlock: "123",
+        cancellationTime: null,
+        calldatas: [],
+        targets: [],
+        proposer: {
+          address: "0x0000000000000000000000000000000000000002",
+        },
+        votes: [],
+        forWeightedVotes: "0",
+        againstWeightedVotes: "0",
+        abstainWeightedVotes: "0",
+        quorumVotes: "999000000000000000000",
+        forDelegateVotes: "0",
+        abstainDelegateVotes: "0",
+        againstDelegateVotes: "0",
+        executionTxnHash: null,
+        governance: {
+          id: "0x0000000000000000000000000000000000000001",
+          optimisticSelectorRegistry: null,
+          token: {
+            id: "0x0000000000000000000000000000000000000007",
+          },
+          timelock: {
+            id: "0x0000000000000000000000000000000000000006",
+            type: "GOVERNANCE",
+          },
+        },
+      },
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposal = await getProposal(client, {
+      proposalId: "42",
+      address: "0x0000000000000000000000000000000000000003",
+      chainId: 1,
+    });
+
+    expect(proposal.quorumVotes).toEqual({
+      raw: 999000000000000000000n,
+      formatted: "999",
+    });
+    expect(proposal.optimistic?.vetoThresholdVotes).toEqual({
+      raw: 20000000000000000000n,
+      formatted: "20",
+    });
+    expect(proposal.optimistic).toMatchObject({
+      proposalId: "42",
+      voteToken: "0x0000000000000000000000000000000000000007",
+      snapshot: 999900n,
+      snapshotSupply: {
+        raw: 100000000000000000000n,
+        formatted: "100",
+      },
+      vetoThreshold: 200000000000000000n,
+    });
+    expect(proposal.votingState).toMatchObject({
+      state: "ACTIVE",
+      vetoReached: false,
+    });
+  });
+
+  it("hydrates active optimistic detail threshold before the first vote", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      dtf: {
+        id: "0x0000000000000000000000000000000000000003",
+        proxyAdmin: "0x0000000000000000000000000000000000000008",
+        legacyAdmins: [],
+        legacyAuctionApprovers: [],
+        ownerGovernance: null,
+        tradingGovernance: null,
+        stToken: {
+          id: "0x0000000000000000000000000000000000000007",
+          legacyGovernance: [],
+          governance: {
+            id: "0x0000000000000000000000000000000000000001",
+            optimisticSelectorRegistry: null,
+            timelock: {
+              id: "0x0000000000000000000000000000000000000006",
+            },
+          },
+        },
+      },
+      proposal: {
+        id: "42",
+        timelockId: null,
+        description: "Optimistic proposal",
+        creationTime: "999000",
+        voteStart: "999900",
+        voteEnd: "1000100",
+        queueBlock: null,
+        queueTime: null,
+        state: "ACTIVE",
+        isOptimistic: true,
+        vetoThreshold: "20000000000000000",
+        vetoThresholdVotes: "1",
+        optimisticSnapshot: "999900",
+        optimisticSnapshotSupply: "50",
+        executionETA: null,
+        executionTime: null,
+        executionBlock: null,
+        creationBlock: "123",
+        cancellationTime: null,
+        calldatas: [],
+        targets: [],
+        proposer: {
+          address: "0x0000000000000000000000000000000000000002",
+        },
+        votes: [],
+        forWeightedVotes: "0",
+        againstWeightedVotes: "0",
+        abstainWeightedVotes: "0",
+        quorumVotes: "1",
+        forDelegateVotes: "0",
+        abstainDelegateVotes: "0",
+        againstDelegateVotes: "0",
+        executionTxnHash: null,
+        governance: {
+          id: "0x0000000000000000000000000000000000000001",
+          optimisticSelectorRegistry: null,
+          token: {
+            id: "0x0000000000000000000000000000000000000007",
+          },
+          timelock: {
+            id: "0x0000000000000000000000000000000000000006",
+            type: "GOVERNANCE",
+          },
+        },
+      },
+    }));
+    const getPublicClient = vi.fn();
+    const readContract = vi.fn(async () => 1000000000000000000n);
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+      viem: {
+        getPublicClient,
+        readContract,
+      },
+    } as unknown as DtfClient;
+
+    const proposal = await getProposal(client, {
+      proposalId: "42",
+      address: "0x0000000000000000000000000000000000000003",
+      chainId: 1,
+    });
+
+    expect(getPublicClient).not.toHaveBeenCalled();
+    expect(readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: "0x0000000000000000000000000000000000000007",
+        functionName: "getPastTotalSupply",
+        args: [999900n],
+      }),
+    );
+    expect(proposal.optimistic?.vetoThresholdVotes).toEqual({
+      raw: 20000000000000000n,
+      formatted: "0.02",
+    });
+    expect(proposal.votingState.threshold).toMatchObject({
+      targetVotes: {
+        raw: 20000000000000000n,
+        formatted: "0.02",
+      },
+      hasTarget: true,
+    });
+  });
+
+  it("maps optimistic proposal voting snapshots from indexed threshold values", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      proposal: {
+        id: "42",
+        state: "ACTIVE",
+        isOptimistic: true,
+        vetoThreshold: "20000000000000000",
+        vetoThresholdVotes: "20000000000000000",
+        optimisticSnapshot: "999900",
+        optimisticSnapshotSupply: "1000000000000000000",
+        voteStart: "999900",
+        voteEnd: "999950",
+        forWeightedVotes: "0",
+        againstWeightedVotes: "1000000000000000000",
+        abstainWeightedVotes: "0",
+        quorumVotes: "999000000000000000000",
+        governance: {
+          id: "0x0000000000000000000000000000000000000001",
+          token: {
+            id: "0x0000000000000000000000000000000000000007",
+          },
+        },
+        votes: [
+          {
+            choice: "AGAINST",
+            voter: {
+              address: "0x0000000000000000000000000000000000000004",
+            },
+            weight: "1000000000000000000",
+          },
+        ],
+      },
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposal = await getProposalVotingSnapshot(client, {
+      proposalId: "42",
+      chainId: 1,
+    });
+
+    expect(proposal.quorumVotes).toEqual({
+      raw: 999000000000000000000n,
+      formatted: "999",
+    });
+    expect(proposal.optimistic?.vetoThresholdVotes).toEqual({
+      raw: 20000000000000000n,
+      formatted: "0.02",
+    });
+    expect(proposal.votingState).toMatchObject({
+      state: "DEFEATED",
+      quorum: true,
+      vetoReached: true,
+    });
+  });
+
+  it("uses indexed optimistic threshold values when veto votes exist", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      dtf: {
+        id: "0x0000000000000000000000000000000000000003",
+        proxyAdmin: "0x0000000000000000000000000000000000000008",
+        legacyAdmins: [],
+        legacyAuctionApprovers: [],
+        ownerGovernance: null,
+        tradingGovernance: null,
+        stToken: {
+          id: "0x0000000000000000000000000000000000000007",
+          legacyGovernance: [],
+          governance: {
+            id: "0x0000000000000000000000000000000000000001",
+            optimisticSelectorRegistry: null,
+            timelock: {
+              id: "0x0000000000000000000000000000000000000006",
+            },
+          },
+        },
+      },
+      proposal: {
+        id: "42",
+        timelockId: null,
+        description: "Vetoed optimistic proposal",
+        creationTime: "999000",
+        voteStart: "999900",
+        voteEnd: "999950",
+        queueBlock: null,
+        queueTime: null,
+        state: "ACTIVE",
+        isOptimistic: true,
+        vetoThreshold: "20000000000000000",
+        vetoThresholdVotes: "20000000000000000",
+        optimisticSnapshot: "999900",
+        optimisticSnapshotSupply: "1000000000000000000",
+        executionETA: null,
+        executionTime: null,
+        executionBlock: null,
+        creationBlock: "123",
+        cancellationTime: null,
+        calldatas: [],
+        targets: [],
+        proposer: {
+          address: "0x0000000000000000000000000000000000000002",
+        },
+        votes: [
+          {
+            choice: "AGAINST",
+            voter: {
+              address: "0x0000000000000000000000000000000000000004",
+            },
+            weight: "1000000000000000000",
+          },
+        ],
+        forWeightedVotes: "0",
+        againstWeightedVotes: "1000000000000000000",
+        abstainWeightedVotes: "0",
+        quorumVotes: "20000000000000000",
+        forDelegateVotes: "0",
+        abstainDelegateVotes: "0",
+        againstDelegateVotes: "1",
+        executionTxnHash: null,
+        governance: {
+          id: "0x0000000000000000000000000000000000000001",
+          optimisticSelectorRegistry: null,
+          token: {
+            id: "0x0000000000000000000000000000000000000007",
+          },
+          timelock: {
+            id: "0x0000000000000000000000000000000000000006",
+            type: "GOVERNANCE",
+          },
+        },
+      },
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposal = await getProposal(client, {
+      proposalId: "42",
+      address: "0x0000000000000000000000000000000000000003",
+      chainId: 1,
+    });
+
+    expect(proposal.quorumVotes).toEqual({
+      raw: 20000000000000000n,
+      formatted: "0.02",
+    });
+    expect(proposal.optimistic?.vetoThresholdVotes).toEqual({
+      raw: 20000000000000000n,
+      formatted: "0.02",
+    });
+    expect(proposal.votingState).toMatchObject({
+      state: "DEFEATED",
+      quorum: true,
+      vetoReached: true,
+    });
+  });
+
+  it("does not fail proposal lists when optimistic threshold fields are incomplete", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi.fn(async () => ({
+      governances: [
+        {
+          id: "0x0000000000000000000000000000000000000001",
+          proposalCount: "1",
+          proposals: [
+            createProposalSummary({
+              id: "optimistic-incomplete",
+              creationTime: "999000",
+              state: "ACTIVE",
+              forWeightedVotes: "0",
+              abstainWeightedVotes: "0",
+              againstWeightedVotes: "1000000000000000000",
+              quorumVotes: "1000000000000000000",
+              voteStart: "999900",
+              voteEnd: "1000100",
+              creationBlock: "10",
+              proposer: "0x0000000000000000000000000000000000000002",
+              governance: "0x0000000000000000000000000000000000000001",
+              timelock: "0x0000000000000000000000000000000000000008",
+              isOptimistic: true,
+              vetoThreshold: "20000000000000000",
+              optimisticSnapshot: "999900",
+            }),
+          ],
+        },
+      ],
+    }));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposals = await getProposals(client, {
+      chainId: 1,
+      governanceAddresses: "0x0000000000000000000000000000000000000001",
+    });
+
+    expect(proposals[0]).toMatchObject({
+      id: "optimistic-incomplete",
+      isOptimistic: true,
+    });
+    expect(proposals[0]?.optimistic).toBeUndefined();
+    expect(proposals[0]?.vetoThreshold).toBe(20000000000000000n);
+    expect(proposals[0]?.votingState).toMatchObject({
+      state: "ACTIVE",
+      quorum: false,
+      vetoReached: false,
+      against: 100,
+      threshold: {
+        hasTarget: false,
+      },
+    });
   });
 
   it("throws generic record-not-found when proposal is missing", async () => {
@@ -547,7 +990,7 @@ describe("Index DTF governance proposals", () => {
     });
   });
 
-  it("uses indexed quorumVotes as optimistic veto threshold votes", async () => {
+  it("uses indexed optimistic veto threshold votes", async () => {
     vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
     const queryIndex = vi.fn(async () => ({
       governances: [
@@ -571,6 +1014,9 @@ describe("Index DTF governance proposals", () => {
               timelock: "0x0000000000000000000000000000000000000008",
               isOptimistic: true,
               vetoThreshold: "500000000000000000",
+              vetoThresholdVotes: "1000000000000000000",
+              optimisticSnapshot: "998000",
+              optimisticSnapshotSupply: "2000000000000000000",
             }),
           ],
         },
@@ -625,6 +1071,9 @@ describe("Index DTF governance proposals", () => {
               timelock: "0x0000000000000000000000000000000000000008",
               isOptimistic: true,
               vetoThreshold: "500000000000000000",
+              vetoThresholdVotes: "1000000000000000000",
+              optimisticSnapshot: "998000",
+              optimisticSnapshotSupply: "2000000000000000000",
             }),
           ],
         },
@@ -695,6 +1144,9 @@ describe("Index DTF governance proposals", () => {
               timelock: "0x0000000000000000000000000000000000000008",
               isOptimistic: true,
               vetoThreshold: "1000000000000000000",
+              vetoThresholdVotes: "1000000000000000000",
+              optimisticSnapshot: "998900",
+              optimisticSnapshotSupply: "1000000000000000000",
             }),
             createProposalSummary({
               id: "100000000000000000000000000000000000000000000000000000000000000000000000000003",
@@ -713,6 +1165,9 @@ describe("Index DTF governance proposals", () => {
               timelock: "0x0000000000000000000000000000000000000008",
               isOptimistic: true,
               vetoThreshold: "1000000000000000000",
+              vetoThresholdVotes: "1000000000000000000",
+              optimisticSnapshot: "998800",
+              optimisticSnapshotSupply: "1000000000000000000",
             }),
           ],
         },
@@ -809,6 +1264,9 @@ describe("Index DTF governance proposals", () => {
           timelock: "0x0000000000000000000000000000000000000008",
           isOptimistic: true,
           vetoThreshold: "1000000000000000000",
+          vetoThresholdVotes: "2000000000000000000",
+          optimisticSnapshot: "998000",
+          optimisticSnapshotSupply: "2000000000000000000",
         }),
       ],
     }));
@@ -862,6 +1320,9 @@ function createProposalSummary({
   timelock,
   isOptimistic,
   vetoThreshold,
+  vetoThresholdVotes,
+  optimisticSnapshot,
+  optimisticSnapshotSupply,
 }: {
   readonly id: string;
   readonly description?: string;
@@ -879,6 +1340,9 @@ function createProposalSummary({
   readonly timelock: string;
   readonly isOptimistic?: boolean;
   readonly vetoThreshold?: string;
+  readonly vetoThresholdVotes?: string;
+  readonly optimisticSnapshot?: string;
+  readonly optimisticSnapshotSupply?: string;
 }) {
   return {
     id,
@@ -892,6 +1356,9 @@ function createProposalSummary({
     executionTime: null,
     isOptimistic,
     vetoThreshold,
+    vetoThresholdVotes,
+    optimisticSnapshot,
+    optimisticSnapshotSupply,
     quorumVotes,
     voteStart,
     voteEnd,

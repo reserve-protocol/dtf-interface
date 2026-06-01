@@ -86,6 +86,15 @@ const EXTRA_PROPOSAL_CONTRACTS: readonly {
       56: "0xe8e67a366e5166c442B6D376ADc772b93CdE7825",
     },
   },
+  {
+    contract: "Reserve Optimistic Governance Spell",
+    abi: upgradeSpellProposalAbi,
+    addresses: {
+      1: "0x082E701456cd702fBE5797Ab515e6B00580E5a14",
+      8453: "0x0aDc69041a2B086f8772aCcE2A754f410F211bed",
+      56: "0x02Ee6862cF431D7CEaa78112D635D2Be7DdFC178",
+    },
+  },
 ];
 
 export function buildProposalContractMap({

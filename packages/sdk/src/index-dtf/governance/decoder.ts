@@ -1,9 +1,18 @@
 import { decodeFunctionData, getAbiItem, getAddress, type Abi, type Address } from "viem";
 
+import type { DtfClient } from "@/client";
+import type { DtfClientExplorer } from "@/client/explorer";
+import type { SupportedChainId } from "@/config";
 import type { IndexDtfDecodedCalldata, IndexDtfProposalDecoded, IndexDtfUnknownCalldata } from "@/types/governance";
 
 import { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
-import { getContractAliases, type ProposalContractDecoder } from "@/index-dtf/governance/contract-map";
+import {
+  buildProposalContractMap,
+  getContractAliases,
+  type IndexDtfProposalDtfContractContext,
+  type IndexDtfProposalGovernanceContractContext,
+  type ProposalContractDecoder,
+} from "@/index-dtf/governance/contract-map";
 
 const UNKNOWN_CONTRACT = "Unknown";
 const FALLBACK_DECODERS: readonly Omit<ProposalContractDecoder, "target">[] = [
@@ -17,6 +26,14 @@ type DecodeIndexDtfProposalCalldatasParams = {
   readonly targets: readonly Address[];
   readonly calldatas: readonly `0x${string}`[];
   readonly contractMap: Map<string, ProposalContractDecoder>;
+};
+
+export type DecodeIndexDtfProposalParams = {
+  readonly chainId: SupportedChainId;
+  readonly targets: readonly Address[];
+  readonly calldatas: readonly `0x${string}`[];
+  readonly dtf: IndexDtfProposalDtfContractContext;
+  readonly proposalGovernance?: IndexDtfProposalGovernanceContractContext;
 };
 
 type AbiInput = {
@@ -41,6 +58,10 @@ export function decodeIndexDtfProposalCalldatas({
   calldatas,
   contractMap,
 }: DecodeIndexDtfProposalCalldatasParams): IndexDtfProposalDecoded {
+  if (targets.length !== calldatas.length) {
+    throw new Error("Index DTF proposal targets and calldatas length mismatch");
+  }
+
   const calls: IndexDtfDecodedCalldata[] = [];
   const unknownCalls: IndexDtfUnknownCalldata[] = [];
   const dataByContract: MutableDecodedContractGroup[] = [];
@@ -102,6 +123,77 @@ export function decodeIndexDtfProposalCalldatas({
     calls,
     unknownCalls,
   };
+}
+
+export async function decodeIndexDtfProposal(
+  client: DtfClient,
+  params: DecodeIndexDtfProposalParams,
+): Promise<IndexDtfProposalDecoded> {
+  const contractMap = buildProposalContractMap({
+    chainId: params.chainId,
+    dtf: params.dtf,
+    ...(params.proposalGovernance ? { proposalGovernance: params.proposalGovernance } : {}),
+  });
+  const decoded = decodeIndexDtfProposalCalldatas({
+    targets: params.targets,
+    calldatas: params.calldatas,
+    contractMap,
+  });
+
+  if (decoded.unknownCalls.length === 0) {
+    return decoded;
+  }
+
+  const explorer = client.explorer;
+  if (!explorer) {
+    return decoded;
+  }
+
+  const externalContractMap = await getExternalAbiContractMap(explorer, params.chainId, decoded.unknownCalls, contractMap);
+  if (!externalContractMap) {
+    return decoded;
+  }
+
+  return decodeIndexDtfProposalCalldatas({
+    targets: params.targets,
+    calldatas: params.calldatas,
+    contractMap: externalContractMap,
+  });
+}
+
+async function getExternalAbiContractMap(
+  explorer: DtfClientExplorer,
+  chainId: SupportedChainId,
+  unknownCalls: readonly IndexDtfUnknownCalldata[],
+  contractMap: Map<string, ProposalContractDecoder>,
+): Promise<Map<string, ProposalContractDecoder> | null> {
+  const targets = [...new Set(unknownCalls.map((call) => getAddress(call.target)))] as Address[];
+  const metadata = await Promise.all(
+    targets.map(async (target) => ({
+      target,
+      metadata: await explorer.getContractMetadata({ chainId, address: target }),
+    })),
+  );
+  const withMetadata = metadata.filter((entry) => entry.metadata !== null);
+
+  if (withMetadata.length === 0) {
+    return null;
+  }
+
+  const externalContractMap = new Map(contractMap);
+
+  for (const { target, metadata } of withMetadata) {
+    const key = target.toLowerCase();
+    const existing = externalContractMap.get(key);
+
+    externalContractMap.set(key, {
+      target,
+      contract: existing?.contract ?? metadata!.contractName,
+      abi: existing ? ([...existing.abi, ...metadata!.abi] as Abi) : metadata!.abi,
+    });
+  }
+
+  return externalContractMap;
 }
 
 function decodeProposalCalldata(

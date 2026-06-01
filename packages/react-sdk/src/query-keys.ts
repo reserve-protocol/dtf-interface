@@ -8,6 +8,7 @@ import type {
   GetDiscoverDtfsOptions,
   GetFullIndexDtfParams,
   GetIndexDtfBasketParams,
+  DecodeIndexDtfProposalParams,
   GetIndexDtfDelegatesParams,
   GetIndexDtfGuardiansParams,
   GetIndexDtfParams,
@@ -17,6 +18,7 @@ import type {
   GetIndexDtfOptimisticProposalVoterStateParams,
   GetIndexDtfProposalParams,
   GetIndexDtfProposalVoterStateParams,
+  GetIndexDtfProposalVotingSnapshotParams,
   GetIndexDtfProposalVotesParams,
   GetIndexDtfProposalsParams,
   GetIndexDtfProposerStateParams,
@@ -196,6 +198,10 @@ export const dtfQueryKeys = {
       proposals: (params?: GetIndexDtfProposalsParams) => dtfQueryKeys.index.governance.proposalList(params),
       proposal: (params?: GetIndexDtfProposalParams) =>
         [...dtfQueryKeys.index.governance.all(), "proposal", keyParams(params)] as const,
+      proposalDecode: (params?: DecodeIndexDtfProposalParams) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-decode", keyParams(params)] as const,
+      proposalVotingSnapshot: (params?: GetIndexDtfProposalVotingSnapshotParams) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-voting-snapshot", keyParams(params)] as const,
       optimisticGovernance: (params?: IndexMethodParams<"getOptimisticGovernance">) =>
         [...dtfQueryKeys.index.governance.all(), "optimistic-governance", keyParams(params)] as const,
       optimisticProposalContext: (params?: IndexMethodParams<"getOptimisticProposalContext">) =>

@@ -10,7 +10,7 @@ export type DtfSdkProviderProps = PropsWithChildren<
 
 const DtfSdkContext = createContext<DtfSdk | undefined>(undefined);
 
-export function DtfSdkProvider({ apiBaseUrl, chains, children, client, sdk }: DtfSdkProviderProps) {
+export function DtfSdkProvider({ apiBaseUrl, chains, children, client, etherscanApiKey, sdk }: DtfSdkProviderProps) {
   const value = useMemo(() => {
     if (sdk) {
       return sdk;
@@ -20,8 +20,9 @@ export function DtfSdkProvider({ apiBaseUrl, chains, children, client, sdk }: Dt
       ...(apiBaseUrl ? { apiBaseUrl } : {}),
       ...(chains ? { chains } : {}),
       ...(client ? { client } : {}),
+      ...(etherscanApiKey ? { etherscanApiKey } : {}),
     });
-  }, [apiBaseUrl, chains, client, sdk]);
+  }, [apiBaseUrl, chains, client, etherscanApiKey, sdk]);
 
   return createElement(DtfSdkContext.Provider, { value }, children);
 }

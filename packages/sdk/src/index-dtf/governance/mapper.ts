@@ -1,18 +1,26 @@
 import { getAddress, type Address } from "viem";
 
 import type { IndexDtfProposalDtfContractContext } from "@/index-dtf/governance/contract-map";
-import type { GetIndexDtfProposalQuery } from "@/index-dtf/subgraph/dtf.generated";
+import type {
+  GetIndexDtfProposalQuery,
+  GetIndexDtfProposalVotingSnapshotQuery,
+} from "@/index-dtf/subgraph/dtf.generated";
 import type { DtfParams } from "@/types/common";
 import type {
   GetIndexDtfProposalParams,
+  IndexDtfOptimisticProposalContext,
   IndexDtfProposalDetail,
   IndexDtfProposalSummary,
+  IndexDtfProposalVotingSnapshot,
   ProposalState,
 } from "@/types/governance";
 
 import { mapAmount } from "@/lib/utils";
 
+const MAX_UINT256 = (1n << 256n) - 1n;
+
 type SubgraphIndexDtfProposal = NonNullable<GetIndexDtfProposalQuery["proposal"]>;
+type SubgraphIndexDtfProposalVotingSnapshot = NonNullable<GetIndexDtfProposalVotingSnapshotQuery["proposal"]>;
 type SubgraphIndexDtfProposalSummary = {
   readonly id: string;
   readonly description: string;
@@ -20,6 +28,9 @@ type SubgraphIndexDtfProposalSummary = {
   readonly state: ProposalState;
   readonly isOptimistic?: boolean | null;
   readonly vetoThreshold?: string | null;
+  readonly vetoThresholdVotes?: string | null;
+  readonly optimisticSnapshot?: string | null;
+  readonly optimisticSnapshotSupply?: string | null;
   readonly forWeightedVotes: string;
   readonly abstainWeightedVotes: string;
   readonly againstWeightedVotes: string;
@@ -39,6 +50,17 @@ type SubgraphIndexDtfProposalSummary = {
     readonly timelock: { readonly id: string };
   };
 };
+type SubgraphIndexDtfOptimisticProposal = {
+  readonly id: string;
+  readonly isOptimistic?: boolean | null;
+  readonly vetoThreshold?: string | null;
+  readonly vetoThresholdVotes?: string | null;
+  readonly optimisticSnapshot?: string | null;
+  readonly optimisticSnapshotSupply?: string | null;
+  readonly governance: {
+    readonly token: { readonly id: string };
+  };
+};
 type SubgraphIndexDtfProposalDtf = NonNullable<GetIndexDtfProposalQuery["dtf"]>;
 export type SubgraphGovernedIndexDtfProposalDtf = SubgraphIndexDtfProposalDtf & {
   readonly stToken: NonNullable<SubgraphIndexDtfProposalDtf["stToken"]>;
@@ -47,6 +69,7 @@ type SubgraphIndexDtfProposalGovernance = SubgraphIndexDtfProposal["governance"]
 
 export type ParsedIndexDtfProposalSummary = Omit<IndexDtfProposalSummary, "votingState">;
 export type ParsedIndexDtfProposal = Omit<IndexDtfProposalDetail, "decoded" | "votingState">;
+export type ParsedIndexDtfProposalVotingSnapshot = Omit<IndexDtfProposalVotingSnapshot, "votingState">;
 
 export function mapIndexDtfProposalSummary(
   proposal: SubgraphIndexDtfProposalSummary,
@@ -56,6 +79,9 @@ export function mapIndexDtfProposalSummary(
   const executionETA = toOptionalNumber(proposal.executionETA);
   const executionTime = toOptionalNumber(proposal.executionTime);
   const executionBlock = toOptionalNumber(proposal.executionBlock);
+  const isOptimistic = !!proposal.isOptimistic;
+  const optimistic = mapOptimisticProposalContext(proposal);
+  const vetoThreshold = optimistic?.vetoThreshold ?? mapVetoThreshold(proposal.vetoThreshold);
   return {
     id: proposal.id,
     chainId,
@@ -65,8 +91,9 @@ export function mapIndexDtfProposalSummary(
     proposer: getAddress(proposal.proposer.address),
     description: proposal.description,
     state: proposal.state,
-    ...(proposal.isOptimistic === null || proposal.isOptimistic === undefined ? {} : { isOptimistic: proposal.isOptimistic }),
-    ...(proposal.vetoThreshold ? { vetoThreshold: BigInt(proposal.vetoThreshold) } : {}),
+    isOptimistic,
+    ...(vetoThreshold === undefined ? {} : { vetoThreshold }),
+    ...(optimistic === undefined ? {} : { optimistic }),
     creationTime: Number(proposal.creationTime),
     creationBlock: Number(proposal.creationBlock),
     voteStart: Number(proposal.voteStart),
@@ -115,6 +142,76 @@ export function mapIndexDtfProposal(
     ...(cancellationTime === undefined ? {} : { cancellationTime }),
     ...(executionTxnHash === undefined ? {} : { executionTxnHash }),
   };
+}
+
+export function mapIndexDtfProposalVotingSnapshot(
+  proposal: SubgraphIndexDtfProposalVotingSnapshot,
+): ParsedIndexDtfProposalVotingSnapshot {
+  const isOptimistic = !!proposal.isOptimistic;
+  const optimistic = mapOptimisticProposalContext(proposal);
+  const vetoThreshold = optimistic?.vetoThreshold ?? mapVetoThreshold(proposal.vetoThreshold);
+
+  return {
+    id: proposal.id,
+    governance: getAddress(proposal.governance.id),
+    voteToken: getAddress(proposal.governance.token.id),
+    state: proposal.state,
+    isOptimistic,
+    ...(vetoThreshold === undefined ? {} : { vetoThreshold }),
+    ...(optimistic === undefined ? {} : { optimistic }),
+    voteStart: Number(proposal.voteStart),
+    voteEnd: Number(proposal.voteEnd),
+    quorumVotes: mapAmount(proposal.quorumVotes),
+    forWeightedVotes: mapAmount(proposal.forWeightedVotes),
+    againstWeightedVotes: mapAmount(proposal.againstWeightedVotes),
+    abstainWeightedVotes: mapAmount(proposal.abstainWeightedVotes),
+    votes: proposal.votes.map((vote) => ({
+      voter: getAddress(vote.voter.address),
+      choice: vote.choice,
+      weight: mapAmount(vote.weight),
+    })),
+  };
+}
+
+function mapOptimisticProposalContext(
+  proposal: SubgraphIndexDtfOptimisticProposal,
+): IndexDtfOptimisticProposalContext | undefined {
+  if (!proposal.isOptimistic) {
+    return undefined;
+  }
+
+  const vetoThreshold = mapVetoThreshold(proposal.vetoThreshold);
+  const vetoThresholdVotes = mapVetoThreshold(proposal.vetoThresholdVotes);
+
+  if (
+    proposal.optimisticSnapshot === null ||
+    proposal.optimisticSnapshot === undefined ||
+    proposal.optimisticSnapshotSupply === null ||
+    proposal.optimisticSnapshotSupply === undefined ||
+    vetoThreshold === undefined ||
+    vetoThresholdVotes === undefined
+  ) {
+    return undefined;
+  }
+
+  return {
+    proposalId: proposal.id,
+    voteToken: getAddress(proposal.governance.token.id),
+    snapshot: BigInt(proposal.optimisticSnapshot),
+    snapshotSupply: mapAmount(proposal.optimisticSnapshotSupply),
+    vetoThreshold,
+    vetoThresholdVotes: mapAmount(vetoThresholdVotes),
+  };
+}
+
+function mapVetoThreshold(value: string | null | undefined): bigint | undefined {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  const vetoThreshold = BigInt(value);
+
+  return vetoThreshold === MAX_UINT256 ? undefined : vetoThreshold;
 }
 
 export function mapDtfProposalContractContext(

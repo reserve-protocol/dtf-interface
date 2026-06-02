@@ -114,7 +114,9 @@ export function mapIndexDtfProposal(
   dtf: SubgraphGovernedIndexDtfProposalDtf,
   chainId: GetIndexDtfProposalParams["chainId"],
 ): ParsedIndexDtfProposal {
+  const txnHash = toHex(proposal.txnHash);
   const queueBlock = toOptionalNumber(proposal.queueBlock);
+  const queueTxnHash = proposal.queueTxnHash ? toHex(proposal.queueTxnHash) : undefined;
   const queueTime = toOptionalNumber(proposal.queueTime);
   const cancellationTime = toOptionalNumber(proposal.cancellationTime);
   const executionTxnHash = proposal.executionTxnHash ? toHex(proposal.executionTxnHash) : undefined;
@@ -136,8 +138,10 @@ export function mapIndexDtfProposal(
     forDelegateVotes: Number(proposal.forDelegateVotes),
     againstDelegateVotes: Number(proposal.againstDelegateVotes),
     abstainDelegateVotes: Number(proposal.abstainDelegateVotes),
+    txnHash,
     ...(proposal.timelockId ? { timelockId: toHex(proposal.timelockId) } : {}),
     ...(queueBlock === undefined ? {} : { queueBlock }),
+    ...(queueTxnHash === undefined ? {} : { queueTxnHash }),
     ...(queueTime === undefined ? {} : { queueTime }),
     ...(cancellationTime === undefined ? {} : { cancellationTime }),
     ...(executionTxnHash === undefined ? {} : { executionTxnHash }),

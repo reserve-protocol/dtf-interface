@@ -12,6 +12,11 @@ export type IndexDtfSelectorData = {
   readonly selectors: readonly Hex[];
 };
 
+export type IndexDtfOptimisticSelector = {
+  readonly target: Address;
+  readonly selector: Hex;
+};
+
 export type GetSelectorRegistryParams = {
   readonly chainId: SupportedChainId;
   readonly registry: Address;
@@ -67,6 +72,31 @@ export async function getSelectorRegistryIsAllowed(
     functionName: "isAllowed",
     args: [getAddress(params.target), normalizeSelector(params.selector)],
   });
+}
+
+export async function getOptimisticSelectors(
+  client: DtfClient,
+  params: GetSelectorRegistryParams,
+): Promise<readonly IndexDtfOptimisticSelector[]> {
+  const targets = await getSelectorRegistryTargets(client, params);
+  const optimisticSelectors: IndexDtfOptimisticSelector[] = [];
+
+  for (const target of targets) {
+    const normalizedTarget = getAddress(target);
+    const selectors = await getSelectorRegistryAllowedSelectors(client, {
+      ...params,
+      target: normalizedTarget,
+    });
+
+    for (const selector of selectors) {
+      optimisticSelectors.push({
+        target: normalizedTarget,
+        selector: normalizeSelector(selector),
+      });
+    }
+  }
+
+  return optimisticSelectors;
 }
 
 export function prepareSelectorRegistryRegisterSelectors(params: PrepareSelectorRegistrySelectorsParams) {

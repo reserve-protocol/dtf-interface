@@ -287,8 +287,10 @@ export type IndexDtfProposalDecoded = {
 };
 
 export type IndexDtfProposalDetail = IndexDtfProposalSummary & {
+  readonly txnHash: Hex;
   readonly timelockId?: Hex;
   readonly queueBlock?: number;
+  readonly queueTxnHash?: Hex;
   readonly queueTime?: number;
   readonly cancellationTime?: number;
   readonly targets: readonly Address[];

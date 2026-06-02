@@ -2505,6 +2505,131 @@ export type Minting_OrderBy =
   | 'token__transferCount'
   | 'token__type';
 
+export type OptimisticProposalMetadata_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<OptimisticProposalMetadata_Filter>>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  governance?: InputMaybe<Scalars['String']['input']>;
+  governance_?: InputMaybe<Governance_Filter>;
+  governance_contains?: InputMaybe<Scalars['String']['input']>;
+  governance_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  governance_ends_with?: InputMaybe<Scalars['String']['input']>;
+  governance_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  governance_gt?: InputMaybe<Scalars['String']['input']>;
+  governance_gte?: InputMaybe<Scalars['String']['input']>;
+  governance_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  governance_lt?: InputMaybe<Scalars['String']['input']>;
+  governance_lte?: InputMaybe<Scalars['String']['input']>;
+  governance_not?: InputMaybe<Scalars['String']['input']>;
+  governance_not_contains?: InputMaybe<Scalars['String']['input']>;
+  governance_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  governance_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  governance_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  governance_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  governance_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  governance_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  governance_starts_with?: InputMaybe<Scalars['String']['input']>;
+  governance_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<OptimisticProposalMetadata_Filter>>>;
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  txnHash?: InputMaybe<Scalars['String']['input']>;
+  txnHash_contains?: InputMaybe<Scalars['String']['input']>;
+  txnHash_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  txnHash_ends_with?: InputMaybe<Scalars['String']['input']>;
+  txnHash_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  txnHash_gt?: InputMaybe<Scalars['String']['input']>;
+  txnHash_gte?: InputMaybe<Scalars['String']['input']>;
+  txnHash_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  txnHash_lt?: InputMaybe<Scalars['String']['input']>;
+  txnHash_lte?: InputMaybe<Scalars['String']['input']>;
+  txnHash_not?: InputMaybe<Scalars['String']['input']>;
+  txnHash_not_contains?: InputMaybe<Scalars['String']['input']>;
+  txnHash_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  txnHash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  txnHash_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  txnHash_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  txnHash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  txnHash_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  txnHash_starts_with?: InputMaybe<Scalars['String']['input']>;
+  txnHash_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  vetoDelay?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoDelay_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoDelay_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoDelay_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  vetoDelay_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoDelay_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoDelay_not?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoDelay_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  vetoPeriod?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoPeriod_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoPeriod_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoPeriod_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  vetoPeriod_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoPeriod_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoPeriod_not?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoPeriod_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  vetoThreshold?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  vetoThreshold_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_not?: InputMaybe<Scalars['BigInt']['input']>;
+  vetoThreshold_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+};
+
+export type OptimisticProposalMetadata_OrderBy =
+  | 'blockNumber'
+  | 'governance'
+  | 'governance__id'
+  | 'governance__isOptimistic'
+  | 'governance__name'
+  | 'governance__optimisticProposalThrottleCapacity'
+  | 'governance__optimisticSelectorRegistry'
+  | 'governance__optimisticVetoDelay'
+  | 'governance__optimisticVetoPeriod'
+  | 'governance__optimisticVetoThreshold'
+  | 'governance__proposalCount'
+  | 'governance__proposalThreshold'
+  | 'governance__proposalsCanceled'
+  | 'governance__proposalsExecuted'
+  | 'governance__proposalsQueued'
+  | 'governance__quorumDenominator'
+  | 'governance__quorumNumerator'
+  | 'governance__quorumVotes'
+  | 'governance__version'
+  | 'governance__votingDelay'
+  | 'governance__votingPeriod'
+  | 'id'
+  | 'timestamp'
+  | 'txnHash'
+  | 'vetoDelay'
+  | 'vetoPeriod'
+  | 'vetoThreshold';
+
 /** Defines the order direction, either ascending or descending */
 export type OrderDirection =
   | 'asc'
@@ -6378,7 +6503,7 @@ export type GetIndexDtfProposalQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null } | null, proposal?: { id: string, timelockId?: string | null, description: string, creationTime: string, voteStart: string, voteEnd: string, queueBlock?: string | null, queueTime?: string | null, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, vetoThresholdVotes?: string | null, optimisticSnapshot?: string | null, optimisticSnapshotSupply?: string | null, executionETA?: string | null, executionTime?: string | null, executionBlock?: string | null, creationBlock: string, cancellationTime?: string | null, calldatas?: Array<string> | null, targets?: Array<string> | null, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, abstainDelegateVotes: string, againstDelegateVotes: string, executionTxnHash?: string | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governance: { id: string, optimisticSelectorRegistry?: string | null, token: { id: string }, timelock: { id: string, type: string } } } | null };
+export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null } | null, proposal?: { id: string, txnHash: string, timelockId?: string | null, description: string, creationTime: string, voteStart: string, voteEnd: string, queueBlock?: string | null, queueTxnHash?: string | null, queueTime?: string | null, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, vetoThresholdVotes?: string | null, optimisticSnapshot?: string | null, optimisticSnapshotSupply?: string | null, executionETA?: string | null, executionTime?: string | null, executionBlock?: string | null, creationBlock: string, cancellationTime?: string | null, calldatas?: Array<string> | null, targets?: Array<string> | null, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, abstainDelegateVotes: string, againstDelegateVotes: string, executionTxnHash?: string | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governance: { id: string, optimisticSelectorRegistry?: string | null, token: { id: string }, timelock: { id: string, type: string } } } | null };
 
 export type GetIndexDtfProposalVotingSnapshotQueryVariables = Exact<{
   proposalId: Scalars['ID']['input'];
@@ -6759,12 +6884,14 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
   }
   proposal(id: $proposalId) {
     id
+    txnHash
     timelockId
     description
     creationTime
     voteStart
     voteEnd
     queueBlock
+    queueTxnHash
     queueTime
     state
     isOptimistic

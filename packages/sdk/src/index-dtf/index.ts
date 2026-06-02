@@ -109,6 +109,7 @@ export {
   hashIndexDtfProposalDescription,
 } from "@/index-dtf/governance/proposal-actions";
 export {
+  getOptimisticSelectors as getIndexDtfOptimisticSelectors,
   getSelectorRegistryAllowedSelectors as getIndexDtfSelectorRegistryAllowedSelectors,
   getSelectorRegistryIsAllowed as getIndexDtfSelectorRegistryIsAllowed,
   getSelectorRegistryTargets as getIndexDtfSelectorRegistryTargets,

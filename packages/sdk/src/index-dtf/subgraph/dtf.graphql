@@ -292,12 +292,14 @@ query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
   }
   proposal(id: $proposalId) {
     id
+    txnHash
     timelockId
     description
     creationTime
     voteStart
     voteEnd
     queueBlock
+    queueTxnHash
     queueTime
     state
     isOptimistic

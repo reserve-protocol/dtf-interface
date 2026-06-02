@@ -130,6 +130,7 @@ export {
   getIndexDtfOptimisticGovernance,
   getIndexDtfOptimisticProposalContext,
   getIndexDtfOptimisticProposalVoterState,
+  getIndexDtfOptimisticSelectors,
   getIndexDtfOptimisticTimelockRoles,
   getIndexDtfOptimisticVotes,
   getIndexDtfPastOptimisticVotes,

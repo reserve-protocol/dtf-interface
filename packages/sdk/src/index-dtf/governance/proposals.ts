@@ -396,9 +396,15 @@ function getChallengeDescription(description: string): string | undefined {
     return undefined;
   }
 
-  const challengeDescription = description.slice(CHALLENGE_DESCRIPTION_PREFIX.length).trim();
+  // WHY: strip the prefix and its single separator space, but keep the remainder
+  // verbatim. The subgraph stores descriptions untrimmed and the challenge lookup
+  // matches `description` exactly, so trimming here breaks matching whenever the
+  // original optimistic proposal description has trailing whitespace/newlines.
+  const challengeDescription = description
+    .slice(CHALLENGE_DESCRIPTION_PREFIX.length)
+    .replace(/^ /, "");
 
-  return challengeDescription.length > 0 ? challengeDescription : undefined;
+  return challengeDescription.trim().length > 0 ? challengeDescription : undefined;
 }
 
 function getProposalFilter(states: readonly ProposalState[] | undefined): Proposal_Filter | undefined {

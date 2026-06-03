@@ -833,6 +833,43 @@ describe("Index DTF governance proposals", () => {
     });
   });
 
+  it("matches challenged confirmations whose description has trailing whitespace", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const response = createChallengedConfirmationResponse();
+    // On-chain the original optimistic description keeps trailing whitespace, and
+    // the confirmation prepends "Confirmation For: " to it verbatim.
+    response.proposal.description = "Confirmation For: # test \n []() \n ";
+    const queryIndex = vi
+      .fn()
+      .mockResolvedValueOnce(response)
+      .mockResolvedValueOnce({
+        proposals: [{ id: "optimistic" }],
+      });
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposal = await getProposal(client, {
+      proposalId: "confirmation",
+      address: "0x0000000000000000000000000000000000000003",
+      chainId: 1,
+    });
+
+    // The challenge lookup must query the untrimmed description so it matches the
+    // exact value stored in the subgraph.
+    expect(queryIndex.mock.calls[1]?.[0]).toMatchObject({
+      variables: {
+        description: "# test \n []() \n ",
+      },
+    });
+    expect(proposal).toMatchObject({
+      wasChallenged: true,
+      challengedProposalId: "optimistic",
+    });
+  });
+
   it("keeps proposal detail when challenged lookup fails", async () => {
     vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
     const queryIndex = vi

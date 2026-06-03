@@ -1,5 +1,14 @@
 # @reserve-protocol/react-sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- Fix `wasChallenged` detection for confirmation proposals whose original optimistic description has trailing whitespace. `getChallengeDescription` no longer trims the extracted description, so the subgraph challenge lookup matches the exact stored value instead of failing on a trailing newline/space.
+
+- Updated dependencies []:
+  - @reserve-protocol/sdk@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes

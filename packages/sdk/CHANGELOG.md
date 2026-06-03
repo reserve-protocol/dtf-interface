@@ -1,5 +1,13 @@
 # @reserve-protocol/sdk
 
+## 0.1.0
+
+### Minor Changes
+
+- Add Index DTF proposal decoding and proposal action support.
+
+  The SDK now supports explorer-backed proposal calldata enrichment, optimistic governance spell decoding, voting snapshot/proposer state fixes, and proposal action call builders used by React SDK integrations.
+
 ## 0.0.1
 
 ### Patch Changes

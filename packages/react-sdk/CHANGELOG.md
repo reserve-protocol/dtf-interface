@@ -1,5 +1,18 @@
 # @reserve-protocol/react-sdk
 
+## 0.1.0
+
+### Minor Changes
+
+- Add Index DTF proposal decoding and proposal action hooks.
+
+  The React SDK now exposes proposal decode, voting snapshot, and proposal action call hooks, and the provider accepts an Etherscan API key for ABI enrichment.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @reserve-protocol/sdk@0.1.0
+
 ## 0.0.1
 
 ### Patch Changes

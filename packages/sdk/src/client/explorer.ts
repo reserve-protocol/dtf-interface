@@ -27,7 +27,7 @@ type EtherscanSourceCodeResponse = {
     | string;
 };
 
-export function createDtfClientExplorer({ etherscanApiKey }: { readonly etherscanApiKey?: string }): DtfClientExplorer {
+export function createDtfClientExplorer({ etherscanApiKey }: { readonly etherscanApiKey?: string | undefined }): DtfClientExplorer {
   const metadataCache = new Map<string, DtfClientExplorerContractMetadata>();
   const requestCache = new Map<string, Promise<DtfClientExplorerContractMetadata | null>>();
 

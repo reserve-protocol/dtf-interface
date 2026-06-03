@@ -17,7 +17,7 @@ export type DtfChainConfig = DtfClientSubgraphChainConfig & DtfClientViemChainCo
 export type DtfClientConfig = {
   readonly apiBaseUrl?: string;
   readonly chains?: Partial<Record<SupportedChainId, DtfChainConfig>>;
-  readonly etherscanApiKey?: string;
+  readonly etherscanApiKey?: string | undefined;
 };
 
 export type DtfClient = {
@@ -33,9 +33,7 @@ export function createDtfClient(config: DtfClientConfig = {}): DtfClient {
 
   return {
     api: createDtfClientApi({ baseUrl: apiBaseUrl }),
-    explorer: createDtfClientExplorer({
-      ...(config.etherscanApiKey ? { etherscanApiKey: config.etherscanApiKey } : {}),
-    }),
+    explorer: createDtfClientExplorer({ etherscanApiKey: config.etherscanApiKey }),
     subgraph: createDtfClientSubgraph({ chains }),
     viem: createDtfClientViem({ chains }),
   };

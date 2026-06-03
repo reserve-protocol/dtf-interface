@@ -1,0 +1,64 @@
+# React SDK Overview
+
+`@reserve-protocol/react-sdk` wraps the core SDK with React and TanStack Query.
+
+It re-exports `@reserve-protocol/sdk`, so React apps can import core SDK types and helpers from the React package when useful.
+
+```tsx
+import { DtfSdkProvider, useIndexDtf, useIndexDtfProposal, type IndexDtfFull } from "@reserve-protocol/react-sdk";
+```
+
+## What It Provides
+
+- `DtfSdkProvider` for SDK config/context.
+- `IndexDtfProvider` for route-scoped `{ address, chainId }` identity.
+- Query hooks for discovery, DTF detail, basket, price, governance, rebalances, revenue, issuance state, vote-lock, and portfolio.
+- Query option builders for prefetching, SSR-style wiring, custom query clients, and cache access.
+- Stable `dtfQueryKeys` for many core invalidation flows.
+- Proposal action hooks that prepare transaction calls.
+
+## What It Does Not Provide
+
+- Wallet connection.
+- Wagmi setup.
+- Chain switching.
+- Transaction mutation hooks.
+- Toasts or confirmations.
+- Automatic post-transaction invalidation.
+
+The React SDK keeps the same boundary as the core SDK: it prepares data and calls; your app owns transaction UX.
+
+## Basic Hook
+
+```tsx
+function DtfName({ address, chainId }: { address: `0x${string}`; chainId: 8453 }) {
+  const dtf = useIndexDtf({ address, chainId, brand: true });
+
+  if (dtf.isLoading) return <div>Loading...</div>;
+  if (!dtf.data) return null;
+
+  return <div>{dtf.data.token.symbol}</div>;
+}
+```
+
+All query hooks accept normal TanStack Query options except `queryKey` and `queryFn`, which are owned by the SDK.
+
+```tsx
+const basket = useIndexDtfBasket(
+  { address, chainId },
+  {
+    refetchInterval: 12_000,
+    select: (basket) => Object.values(basket).map((asset) => asset.token.symbol),
+  },
+);
+```
+
+## Disabled Queries
+
+Hooks with required params accept `undefined` so apps can wait for route params or wallet state.
+
+```tsx
+const proposal = useIndexDtfProposal(proposalId ? { address, chainId, proposalId } : undefined);
+```
+
+Passing `options.enabled: false` also disables the query.

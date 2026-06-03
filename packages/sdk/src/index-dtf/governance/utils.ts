@@ -105,23 +105,42 @@ export function getProposalState(proposal: ProposalVoteStateInput, timestamp = g
 
   const isOptimistic = proposal.isOptimistic === true;
   const optimisticVetoThresholdVotes = isOptimistic ? getOptimisticVetoVotes(proposal) : undefined;
+  const optimisticTransitioned = isOptimistic && proposal.vetoThreshold === MAX_UINT256;
+  const optimisticZeroSnapshotSupply = isOptimistic && proposal.optimistic?.snapshotSupply?.raw === 0n;
+  const optimisticVetoReached =
+    isOptimistic &&
+    optimisticVetoThresholdVotes !== undefined &&
+    optimisticVetoThresholdVotes > 0n &&
+    proposal.againstWeightedVotes.raw >= optimisticVetoThresholdVotes;
   const quorumVotes = proposal.quorumVotes.raw;
 
   if (proposal.state === "QUEUED" && proposal.executionETA) {
     state.deadline = proposal.executionETA - timestamp;
   } else if (proposal.state === "PENDING") {
-    if (timestamp >= proposal.voteEnd && isOptimistic) {
+    if (timestamp <= proposal.voteStart) {
+      state.deadline = proposal.voteStart - timestamp;
+    } else if (optimisticTransitioned) {
+      state.state = "DEFEATED";
+    } else if (optimisticZeroSnapshotSupply) {
+      state.state = "CANCELED";
+    } else if (optimisticVetoReached) {
+      state.state = "DEFEATED";
+    } else if (timestamp > proposal.voteEnd && isOptimistic) {
       state.state = getOptimisticFinalState(proposal, optimisticVetoThresholdVotes);
-    } else if (timestamp >= proposal.voteStart && timestamp < proposal.voteEnd) {
+    } else if (timestamp <= proposal.voteEnd) {
       state.state = "ACTIVE";
       state.deadline = proposal.voteEnd - timestamp;
-    } else if (timestamp < proposal.voteStart) {
-      state.deadline = proposal.voteStart - timestamp;
     } else {
       state.state = "EXPIRED";
     }
   } else if (proposal.state === "ACTIVE") {
-    if (timestamp >= proposal.voteEnd) {
+    if (optimisticTransitioned) {
+      state.state = "DEFEATED";
+    } else if (optimisticZeroSnapshotSupply) {
+      state.state = "CANCELED";
+    } else if (optimisticVetoReached) {
+      state.state = "DEFEATED";
+    } else if (timestamp > proposal.voteEnd) {
       if (isOptimistic) {
         state.state = getOptimisticFinalState(proposal, optimisticVetoThresholdVotes);
       } else if (
@@ -143,7 +162,9 @@ export function getProposalState(proposal: ProposalVoteStateInput, timestamp = g
     proposal.forWeightedVotes.raw + proposal.againstWeightedVotes.raw + proposal.abstainWeightedVotes.raw;
 
   state.quorum = isOptimistic
-    ? optimisticVetoThresholdVotes !== undefined && proposal.againstWeightedVotes.raw >= optimisticVetoThresholdVotes
+    ? optimisticVetoThresholdVotes !== undefined &&
+      optimisticVetoThresholdVotes > 0n &&
+      proposal.againstWeightedVotes.raw >= optimisticVetoThresholdVotes
     : proposal.forWeightedVotes.raw > 0n && proposal.forWeightedVotes.raw >= quorumVotes;
   state.forVotesReachedQuorum = isOptimistic ? false : state.quorum;
   state.participationQuorumReached = isOptimistic
@@ -238,6 +259,10 @@ function getVotingThresholdState({
 export function getOptimisticVetoThresholdVotes(
   optimistic: Pick<IndexDtfOptimisticProposalContext, "snapshotSupply" | "vetoThreshold">,
 ): bigint {
+  if (optimistic.vetoThreshold === 0n || optimistic.snapshotSupply.raw === 0n) {
+    return 0n;
+  }
+
   const vetoThresholdVotes = (optimistic.vetoThreshold * optimistic.snapshotSupply.raw) / D18;
 
   return vetoThresholdVotes === 0n ? 1n : vetoThresholdVotes;
@@ -252,7 +277,7 @@ function getOptimisticFinalState(
   }
 
   if (vetoThresholdVotes === 0n) {
-    return "CANCELED";
+    return proposal.againstWeightedVotes.raw === 0n ? "SUCCEEDED" : proposal.state;
   }
 
   return proposal.againstWeightedVotes.raw >= vetoThresholdVotes ? "DEFEATED" : "SUCCEEDED";
@@ -264,17 +289,21 @@ function getOptimisticVetoVotes(proposal: ProposalVoteStateInput): bigint | unde
   }
 
   if (proposal.optimistic.vetoThresholdVotes) {
-    return proposal.optimistic.vetoThresholdVotes.raw;
+    const vetoThresholdVotes = proposal.optimistic.vetoThresholdVotes.raw;
+
+    return vetoThresholdVotes > 0n ? vetoThresholdVotes : undefined;
   }
 
   if (proposal.optimistic.snapshotSupply === undefined || proposal.optimistic.vetoThreshold === undefined) {
     return undefined;
   }
 
-  return getOptimisticVetoThresholdVotes({
+  const vetoThresholdVotes = getOptimisticVetoThresholdVotes({
     snapshotSupply: proposal.optimistic.snapshotSupply,
     vetoThreshold: proposal.optimistic.vetoThreshold,
   });
+
+  return vetoThresholdVotes > 0n ? vetoThresholdVotes : undefined;
 }
 
 function getVotePercentage(votes: bigint, totalVotes: bigint): number {

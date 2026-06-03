@@ -16,11 +16,11 @@ import { getLatestBlockTimepoint } from "@/client/viem";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
+import { getOptimisticVetoThresholdVotes } from "@/index-dtf/governance/utils";
 import { optimisticTimelockAbi } from "@/index-dtf/abis/optimistic-timelock";
 import { isUnsupportedOptimisticContractError } from "@/index-dtf/governance/optimistic-errors";
 import { mapAmount } from "@/lib/utils";
 
-const D18 = 10n ** 18n;
 const MAX_UINT256 = (1n << 256n) - 1n;
 
 export const OPTIMISTIC_PROPOSER_ROLE = "0x26f49d08685d9cdd4951a7470bc8fbe9dd0f00419c1a44c1b89f845867ae12e0" as Hex;
@@ -61,7 +61,7 @@ export async function getOptimisticProposalContext(
   let snapshot = params.snapshot;
   let token = params.voteToken ? getAddress(params.voteToken) : undefined;
 
-  if (vetoThreshold === undefined || vetoThreshold === MAX_UINT256) {
+  if (vetoThreshold === undefined || vetoThreshold === 0n || vetoThreshold === MAX_UINT256) {
     return null;
   }
 
@@ -101,11 +101,10 @@ export async function getOptimisticProposalContext(
     args: [snapshot],
   });
   const mappedSnapshotSupply = mapAmount(snapshotSupply);
-  let vetoThresholdVotes = (vetoThreshold * mappedSnapshotSupply.raw) / D18;
-
-  if (vetoThresholdVotes === 0n) {
-    vetoThresholdVotes = 1n;
-  }
+  const vetoThresholdVotes = getOptimisticVetoThresholdVotes({
+    snapshotSupply: mappedSnapshotSupply,
+    vetoThreshold,
+  });
 
   return {
     proposalId: String(proposalId),

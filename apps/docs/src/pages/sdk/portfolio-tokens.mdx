@@ -1,0 +1,60 @@
+# Portfolio & Tokens
+
+The SDK includes account portfolio helpers and token utilities.
+
+## Portfolio Namespace
+
+```ts
+const portfolio = await sdk.portfolio.get({ account });
+```
+
+| Method                                          | Use                                             |
+| ----------------------------------------------- | ----------------------------------------------- |
+| `sdk.portfolio.get({ account })`                | Account portfolio view across Reserve products. |
+| `sdk.portfolio.getHistory({ account, period })` | API-owned historical portfolio response.        |
+| `sdk.portfolio.getTransactions({ account })`    | Account transaction history.                    |
+
+Supported history periods are:
+
+```ts
+type PortfolioPeriod = "24h" | "7d" | "1m" | "3m" | "1y" | "all";
+```
+
+## Token Helpers
+
+Token helpers are exported from the core package.
+
+```ts
+import { getTokenData, getTokenPrices, getTokenVolatilities, getTokensData } from "@reserve-protocol/sdk";
+```
+
+| Helper                                                 | Use                                             |
+| ------------------------------------------------------ | ----------------------------------------------- |
+| `getTokenData(publicClient, address)`                  | Read token metadata for one token.              |
+| `getTokensData(publicClient, addresses)`               | Read token metadata for many tokens.            |
+| `getTokenPrices(client, { chainId, addresses })`       | Read current token prices from Reserve API.     |
+| `getTokenVolatilities(client, { chainId, addresses })` | Read token volatility ratings from Reserve API. |
+
+```ts
+const client = sdk.client;
+const publicClient = client.viem.getPublicClient(8453);
+
+const token = await getTokenData(publicClient, tokenAddress);
+const prices = await getTokenPrices(client, {
+  chainId: 8453,
+  addresses: [tokenAddress],
+});
+```
+
+## Asset List
+
+Index DTF deploy and proposal UIs can use the Index asset list.
+
+```ts
+const assets = await sdk.index.getAssetList({
+  chainId: 8453,
+  unfiltered: false,
+});
+```
+
+`unfiltered` is required. Pass `false` for the normal product-approved list.

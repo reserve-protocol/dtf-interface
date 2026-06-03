@@ -1,0 +1,78 @@
+# Rebalances & Auctions
+
+Rebalance APIs split live RPC state from historical API/subgraph state.
+
+## Live State
+
+Use live methods for automation and UI state that must reflect the chain now.
+
+| Method                | Use                                        |
+| --------------------- | ------------------------------------------ |
+| `getCurrentRebalance` | Current rebalance state from RPC.          |
+| `getActiveAuction`    | Active auction, if one exists.             |
+| `getLatestAuction`    | Latest auction state.                      |
+| `getBidQuote`         | Quote a bid against current auction state. |
+
+```ts
+const activeAuction = await sdk.index.getActiveAuction({
+  address,
+  chainId,
+});
+```
+
+## Historical State
+
+Use historical methods for analytics and completed lifecycle views.
+
+| Method                   | Use                               |
+| ------------------------ | --------------------------------- |
+| `getRebalances`          | Rebalance history.                |
+| `getRebalance`           | One rebalance by ID or nonce.     |
+| `getRebalanceAuctions`   | Auctions attached to a rebalance. |
+| `getCompletedRebalances` | Completed rebalance history.      |
+| `getCompletedRebalance`  | One completed rebalance.          |
+
+## Auction Builders
+
+| Method                           | Use                                                |
+| -------------------------------- | -------------------------------------------------- |
+| `prepareOpenAuctionArgs`         | Build version-aware open-auction args.             |
+| `prepareOpenAuction`             | Open an auction.                                   |
+| `prepareOpenAuctionUnrestricted` | Open an auction after the community window starts. |
+| `prepareBid`                     | Bid on an auction.                                 |
+| `prepareCloseAuction`            | Close an auction.                                  |
+| `prepareEndRebalance`            | End the active rebalance.                          |
+
+```ts
+const quote = await sdk.index.getBidQuote({
+  address,
+  chainId,
+  auctionId: 1n,
+  sellToken,
+  buyToken,
+  maxSellAmount: 1000000000000000000n,
+});
+
+const call = sdk.index.prepareBid({
+  address,
+  chainId,
+  auctionId: 1n,
+  sellToken,
+  buyToken,
+  sellAmount: quote.sellAmount,
+  maxBuyAmount: quote.bidAmount,
+});
+```
+
+## Bidding Mode
+
+`bidsEnabled` is a DTF deployment/settings flag, not a per-rebalance flag.
+
+- `true`: permissionless bidding.
+- `false`: trusted-filler flow.
+
+Read it with `sdk.index.getBidsEnabled({ address, chainId })`.
+
+## Version Notes
+
+Auction and rebalance contract signatures changed across Index DTF versions. Use SDK builders instead of hand-encoding ABI calls unless you are intentionally bypassing SDK behavior.

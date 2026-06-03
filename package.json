@@ -12,6 +12,8 @@
     "build": "turbo run build",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
+    "docs:build": "pnpm --filter @reserve-protocol/docs build",
+    "docs:dev": "pnpm --filter @reserve-protocol/docs dev",
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
     "graphql:codegen": "pnpm --filter @reserve-protocol/sdk graphql:codegen",

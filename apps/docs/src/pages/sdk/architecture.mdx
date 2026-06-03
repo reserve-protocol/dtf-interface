@@ -1,0 +1,84 @@
+# SDK Architecture
+
+The SDK is intentionally product-shaped. It is not a generic blockchain abstraction.
+
+```text
+namespace methods -> client -> transports -> mappers/helpers
+```
+
+## Responsibilities
+
+| Layer             | Responsibility                                                               |
+| ----------------- | ---------------------------------------------------------------------------- |
+| Namespace methods | Public product actions like `sdk.index.getBasket` or `sdk.index.prepareMint` |
+| Refs              | Bind `{ address, chainId }` for repeated calls                               |
+| Client            | Runtime configuration and source clients                                     |
+| Transports        | Reserve API, subgraph, viem/RPC, explorer metadata                           |
+| Mappers           | Raw shape conversion only                                                    |
+| Builders          | Prepare `ContractCall` objects                                               |
+
+## Design Rules
+
+- Keep methods product-shaped.
+- Prefer explicit names over generic source resolvers.
+- Use `bigint` for onchain amounts.
+- Keep mappers deterministic.
+- Do not fetch from mappers.
+- Do not hide whether data came from RPC, API, subgraph, or explorer metadata.
+- Do not add fallback behavior unless a real product flow needs it.
+
+## Wallet Boundary
+
+The core SDK prepares contract calls. It does not send them.
+
+```ts
+const call = sdk.index.prepareVote({
+  chainId: 8453,
+  governance,
+  proposalId: "114143694312255605278636846982278574633125503103201258989783472858643695239364",
+  support: 1,
+});
+```
+
+Apps own:
+
+- wallet connection
+- account state
+- chain switching
+- simulation
+- transaction submission
+- confirmation handling
+- query invalidation and refresh
+
+## Ref Rules
+
+Refs bind DTF identity but stay flat.
+
+```ts
+const dtf = sdk.index.ref({ address, chainId });
+
+await dtf.get();
+await dtf.getBasket();
+dtf.prepareMint({ shares, receiver, minSharesOut });
+```
+
+Use direct namespace methods when the call is not naturally bound to one DTF.
+
+```ts
+await sdk.index.getDelegates({ chainId, stToken });
+```
+
+## Source Boundaries
+
+The same page can use multiple sources.
+
+```ts
+const [dtf, basket, price, proposal] = await Promise.all([
+  sdk.index.get({ address, chainId, brand: true }),
+  sdk.index.getBasket({ address, chainId }),
+  sdk.index.getPrice({ address, chainId }),
+  sdk.index.getProposal({ address, chainId, proposalId }),
+]);
+```
+
+That is intentional. Product correctness matters more than hiding the source split.

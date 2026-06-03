@@ -1,0 +1,108 @@
+# SDK Overview
+
+`@reserve-protocol/sdk` is the core TypeScript package for DTF integrations.
+
+Use it from:
+
+- Node scripts
+- bots
+- backend services
+- CLIs
+- frontend apps that do not want React Query hooks
+
+```ts
+import { createDtfSdk } from "@reserve-protocol/sdk";
+
+const sdk = createDtfSdk();
+```
+
+## Shape
+
+`createDtfSdk()` returns namespaces.
+
+```ts
+const sdk = createDtfSdk();
+
+sdk.client;
+sdk.index;
+sdk.portfolio;
+sdk.yield;
+```
+
+| Namespace       | Status      | Use                                                                                                         |
+| --------------- | ----------- | ----------------------------------------------------------------------------------------------------------- |
+| `sdk.index`     | implemented | Index DTF reads, proposal builders, deployment builders, transaction calls, vote-lock, rebalances, auctions |
+| `sdk.portfolio` | implemented | Account-level portfolio, history, and transaction views                                                     |
+| `sdk.yield`     | placeholder | Boundary only. Methods throw `NOT_IMPLEMENTED`.                                                             |
+| `sdk.client`    | implemented | Low-level Reserve API, viem, subgraph, and explorer clients                                                 |
+
+## Direct Namespace
+
+Use direct namespace methods when each call naturally carries `{ address, chainId }`.
+
+```ts
+const basket = await sdk.index.getBasket({
+  address: "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8",
+  chainId: 8453,
+});
+```
+
+## Refs
+
+Use `sdk.index.ref` when multiple calls share one DTF identity.
+
+```ts
+const dtf = sdk.index.ref({
+  address: "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8",
+  chainId: 8453,
+});
+
+const proposal = await dtf.getProposal(
+  "114143694312255605278636846982278574633125503103201258989783472858643695239364",
+);
+```
+
+Refs are convenience handles only. They do not fetch, cache, or subscribe on creation.
+
+## Top-Level Exports
+
+The package also exports helpers directly for advanced use.
+
+```ts
+import { createDtfClient, createDtfSdk, createWalletClient } from "@reserve-protocol/sdk";
+```
+
+Most apps should start with `createDtfSdk()`.
+
+## Common Workflows
+
+| Workflow                   | Start with                                                                                                                       |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Discover Index DTFs        | `sdk.index.discover`, `sdk.index.discoverByChain`, `sdk.index.list`                                                              |
+| Read DTF page data         | `sdk.index.get`, `sdk.index.getBasket`, `sdk.index.getPrice`, `sdk.index.getCurrentRebalance`                                    |
+| Manual mint/redeem         | `sdk.index.getIssuanceState`, `sdk.index.prepareMintPlan`, `sdk.index.prepareRedeem`                                             |
+| Governance proposal detail | `sdk.index.getProposal`, `sdk.index.getProposalVotes`, `sdk.index.getProposalVoterState`                                         |
+| Governance actions         | `sdk.index.prepareVote`, `sdk.index.prepareQueueProposal`, `sdk.index.prepareExecuteProposal`, `sdk.index.prepareCancelProposal` |
+| Basket proposal creation   | `sdk.index.buildBasketProposal`                                                                                                  |
+| Rebalance automation       | `sdk.index.getCurrentRebalance`, `sdk.index.getActiveAuction`, `sdk.index.prepareBid`                                            |
+| Deploy DTFs                | `sdk.index.prepareDeployPlan`, `sdk.index.prepareDeployGovernedPlan`                                                             |
+| Vote-lock                  | `sdk.index.getVoteLockState`, `sdk.index.prepareVoteLockDepositPlan`, `sdk.index.prepareVoteLockClaimRewards`                    |
+| Portfolio                  | `sdk.portfolio.get`, `sdk.portfolio.getHistory`, `sdk.portfolio.getTransactions`                                                 |
+
+## Error Model
+
+The SDK exports `SdkError` and `isSdkError`.
+
+```ts
+import { isSdkError } from "@reserve-protocol/sdk";
+
+try {
+  await sdk.yield.list();
+} catch (error) {
+  if (isSdkError(error)) {
+    console.log(error.code, error.message, error.meta);
+  }
+}
+```
+
+Known `SdkError` codes are exported as types. Treat them as structured product errors, not user-facing copy.

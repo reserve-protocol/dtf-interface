@@ -1,0 +1,89 @@
+# Governance Hooks
+
+Governance hooks cover proposal lists, proposal details, voting state, optimistic governance, and selector registry reads.
+
+## Proposal Hooks
+
+| Hook                                 | Use                                        |
+| ------------------------------------ | ------------------------------------------ |
+| `useIndexDtfProposalList`            | Proposal list response.                    |
+| `useIndexDtfProposals`               | Proposal array from the same list cache.   |
+| `useIndexDtfProposal`                | Proposal detail.                           |
+| `useIndexDtfProposalDecode`          | Async proposal calldata decode/enrichment. |
+| `useIndexDtfProposalVotes`           | Current proposal vote totals.              |
+| `useIndexDtfProposalVotingSnapshot`  | Snapshot/totals used by active voting UIs. |
+| `useIndexDtfProposalVoterState`      | Account state for one proposal.            |
+| `useIndexDtfProposalThrottleCharges` | Optimistic proposal throttle charges.      |
+
+```tsx
+const proposal = useIndexDtfProposal({
+  address,
+  chainId,
+  proposalId,
+});
+
+const voterState = useIndexDtfProposalVoterState(
+  account && proposal.data
+    ? {
+        chainId,
+        governance: proposal.data.governance,
+        proposal: proposal.data,
+        account,
+      }
+    : undefined,
+);
+```
+
+## Voter And Proposer Hooks
+
+| Hook                       | Use                                 |
+| -------------------------- | ----------------------------------- |
+| `useIndexDtfDelegates`     | Delegate list.                      |
+| `useIndexDtfGuardians`     | Governance guardians.               |
+| `useIndexDtfVoterState`    | Account vote-lock state.            |
+| `useIndexDtfProposerState` | Account proposer eligibility state. |
+
+## Optimistic Governance Hooks
+
+| Hook                                      | Use                                   |
+| ----------------------------------------- | ------------------------------------- |
+| `useIndexDtfOptimisticGovernance`         | Optimistic governance settings.       |
+| `useIndexDtfOptimisticProposalContext`    | Proposal-specific optimistic context. |
+| `useIndexDtfOptimisticProposalVoterState` | Account optimistic voter state.       |
+| `useIndexDtfOptimisticTimelockRoles`      | Timelock role data.                   |
+| `useIndexDtfOptimisticVotes`              | Current optimistic votes.             |
+| `useIndexDtfPastOptimisticVotes`          | Historical optimistic votes.          |
+
+## Selector Registry Hooks
+
+| Hook                                          | Use                             |
+| --------------------------------------------- | ------------------------------- |
+| `useIndexDtfSelectorRegistryTargets`          | Registered target contracts.    |
+| `useIndexDtfSelectorRegistryAllowedSelectors` | Allowed selectors for a target. |
+| `useIndexDtfSelectorRegistryIsAllowed`        | Boolean selector check.         |
+
+## Proposal Action Hooks
+
+These hooks prepare calls. They do not send transactions.
+
+| Hook                             | Prepares                                                               |
+| -------------------------------- | ---------------------------------------------------------------------- |
+| `useIndexDtfVoteCall`            | Governor vote call.                                                    |
+| `useIndexDtfQueueProposalCall`   | Governor queue call.                                                   |
+| `useIndexDtfExecuteProposalCall` | Governor execute call.                                                 |
+| `useIndexDtfCancelProposalCall`  | Timelock cancel call. Returns `undefined` without `proposal.timelock`. |
+
+```tsx
+const call = useIndexDtfVoteCall(
+  proposal && vote !== undefined
+    ? {
+        chainId: proposal.chainId,
+        governance: proposal.governance,
+        proposalId: proposal.id,
+        support: vote,
+      }
+    : undefined,
+);
+```
+
+Pass `call.chainId` into your simulation/write layer when supported.

@@ -1,0 +1,88 @@
+# Transactions
+
+The React SDK does not send transactions.
+
+It prepares calls through hooks. Your app wires those calls into wagmi, viem, or another wallet layer.
+
+## Vote Example
+
+```tsx
+import { useIndexDtfVoteCall } from "@reserve-protocol/react-sdk";
+import { useSimulateContract, useWriteContract } from "wagmi";
+
+function VoteButton({ proposal, support }) {
+  const call = useIndexDtfVoteCall(
+    proposal
+      ? {
+          chainId: proposal.chainId,
+          governance: proposal.governance,
+          proposalId: proposal.id,
+          support,
+        }
+      : undefined,
+  );
+
+  const simulation = useSimulateContract(
+    call
+      ? {
+          chainId: call.chainId,
+          address: call.contract.address,
+          abi: call.contract.abi,
+          functionName: call.contract.functionName,
+          args: call.contract.args,
+          value: call.value,
+        }
+      : undefined,
+  );
+
+  const write = useWriteContract();
+
+  return (
+    <button
+      disabled={!simulation.data?.request}
+      onClick={() => {
+        if (simulation.data?.request) write.writeContract(simulation.data.request);
+      }}
+    >
+      Vote
+    </button>
+  );
+}
+```
+
+## Proposal Action Hooks
+
+| Hook                             | Use                                              |
+| -------------------------------- | ------------------------------------------------ |
+| `useIndexDtfVoteCall`            | Vote on a proposal.                              |
+| `useIndexDtfQueueProposalCall`   | Queue a successful proposal.                     |
+| `useIndexDtfExecuteProposalCall` | Execute a queued proposal.                       |
+| `useIndexDtfCancelProposalCall`  | Cancel via timelock. Requires proposal timelock. |
+
+## App Responsibilities
+
+Your app should handle:
+
+- wallet connection
+- chain validation/switching
+- simulation errors
+- write errors
+- pending and confirming states
+- success toasts
+- query invalidation after confirmation
+
+## Invalidation
+
+After a successful proposal transaction, invalidate the narrow queries that changed.
+
+```tsx
+queryClient.invalidateQueries({
+  queryKey: dtfQueryKeys.index.governance.proposal({ address, chainId, proposalId }),
+});
+
+queryClient.invalidateQueries({
+  queryKey: dtfQueryKeys.index.governance.proposalVotes({ chainId, governance, proposalId }),
+});
+```
+
+Avoid invalidating the whole governance tree unless a broad refresh is truly needed.

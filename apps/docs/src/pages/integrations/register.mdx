@@ -1,0 +1,35 @@
+# Register Integration Notes
+
+Register is Reserve's main frontend. It is a useful product behavior reference, but it is not protocol truth.
+
+## Useful Patterns
+
+- Components should consume React SDK hooks instead of direct SDK methods when possible.
+- Transaction components should pass prepared `call.chainId` into simulation/write layers.
+- React Query invalidation should be targeted after proposal actions.
+- Proposal detail UIs should merge subgraph data with RPC voting/state freshness where needed.
+
+## Proposal Flow
+
+Register proposal pages use React SDK hooks for:
+
+- proposal detail
+- proposal calldata decode/enrichment
+- proposal voting snapshot
+- proposal voter state
+- vote/queue/execute/cancel prepared calls
+
+The app still owns:
+
+- wallet validation
+- permission reads not exposed by the React SDK yet
+- transaction modal state
+- toasts
+- optimistic local UI state
+- post-transaction refresh
+
+## Product Routing
+
+Register route names can differ from user-visible slugs. For example, the factsheet route maps to the `performance` slug.
+
+Do not infer protocol behavior from route names.

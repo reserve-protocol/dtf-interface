@@ -37,6 +37,7 @@ import {
 } from "@/index-dtf/governance/utils";
 import {
   GetAllIndexDtfProposalsDocument,
+  GetIndexDtfProposalChallengeDocument,
   GetIndexDtfProposalDocument,
   GetIndexDtfProposalGovernanceAddressesDocument,
   GetIndexDtfProposalVotingSnapshotDocument,
@@ -50,7 +51,7 @@ const CHALLENGE_DESCRIPTION_PREFIX = "Confirmation For:";
 
 type ChallengeProposal = Pick<
   ParsedIndexDtfProposalSummary,
-  "id" | "description" | "creationTime" | "governance" | "isOptimistic"
+  "id" | "description" | "creationBlock" | "creationTime" | "governance" | "isOptimistic"
 >;
 
 export async function getProposals(
@@ -163,7 +164,15 @@ export async function getProposal(
   const timestamp = getCurrentTime();
   const parsedProposal = mapIndexDtfProposal(proposal, governedDtf, chainId);
   const proposalWithOptimisticContext = await withOptimisticContext(client, parsedProposal, timestamp);
-  const proposalWithVoteState = withVoteState(proposalWithOptimisticContext, timestamp);
+  const challengedProposalId = await getChallengedProposalId(client, proposalWithOptimisticContext);
+  const proposalWithChallengeState = challengedProposalId
+    ? {
+        ...proposalWithOptimisticContext,
+        wasChallenged: true,
+        challengedProposalId,
+      }
+    : proposalWithOptimisticContext;
+  const proposalWithVoteState = withVoteState(proposalWithChallengeState, timestamp);
   const decodedData = decodeIndexDtfProposalCalldatas({
     targets: parsedProposal.targets,
     calldatas: parsedProposal.calldatas,
@@ -178,6 +187,36 @@ export async function getProposal(
     ...proposalWithVoteState,
     decoded: decodedData,
   };
+}
+
+async function getChallengedProposalId(
+  client: DtfClient,
+  proposal: Pick<ParsedIndexDtfProposal, "chainId" | "creationBlock" | "description" | "governance" | "isOptimistic">,
+): Promise<string | undefined> {
+  if (proposal.isOptimistic) {
+    return undefined;
+  }
+
+  const challengeDescription = getChallengeDescription(proposal.description);
+  if (!challengeDescription) {
+    return undefined;
+  }
+
+  try {
+    const { proposals } = await client.subgraph.queryIndex({
+      chainId: proposal.chainId,
+      query: GetIndexDtfProposalChallengeDocument,
+      variables: {
+        governanceId: proposal.governance.toLowerCase(),
+        description: challengeDescription,
+        creationBlock: proposal.creationBlock.toString(),
+      },
+    });
+
+    return proposals[0]?.id;
+  } catch {
+    return undefined;
+  }
 }
 
 async function withOptimisticContext<T extends ParsedIndexDtfProposal>(
@@ -302,13 +341,11 @@ function withProposalSummaryState(
 function withChallengeState<T extends ParsedIndexDtfProposalSummary>(
   proposals: readonly T[],
 ): readonly T[] {
-  const optimisticProposals: ChallengeProposal[] = [];
+  const optimisticProposals = proposals.filter((proposal) => proposal.isOptimistic === true);
   const challengeMatches = new Map<string, string>();
-  const chronological = [...proposals].sort((a, b) => a.creationTime - b.creationTime);
 
-  for (const proposal of chronological) {
+  for (const proposal of proposals) {
     if (proposal.isOptimistic === true) {
-      optimisticProposals.push(proposal);
       continue;
     }
 
@@ -318,16 +355,21 @@ function withChallengeState<T extends ParsedIndexDtfProposalSummary>(
     }
 
     let challengedProposalId: string | undefined;
-    for (let index = optimisticProposals.length - 1; index >= 0; index--) {
-      const optimisticProposal = optimisticProposals[index]!;
+    let challengedProposal: ChallengeProposal | undefined;
+    for (const optimisticProposal of optimisticProposals) {
+      if (optimisticProposal.creationBlock > proposal.creationBlock) {
+        continue;
+      }
 
       if (optimisticProposal.governance.toLowerCase() !== proposal.governance.toLowerCase()) {
         continue;
       }
 
       if (confirmationDescription === optimisticProposal.description) {
-        challengedProposalId = optimisticProposal.id;
-        break;
+        if (!challengedProposal || optimisticProposal.creationBlock > challengedProposal.creationBlock) {
+          challengedProposal = optimisticProposal;
+          challengedProposalId = optimisticProposal.id;
+        }
       }
     }
 

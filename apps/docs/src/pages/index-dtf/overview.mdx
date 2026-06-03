@@ -1,0 +1,58 @@
+# Index DTF Overview
+
+Index DTFs are onchain index funds. They hold a basket of tokens with target weights and use governance to change basket strategy.
+
+## Core Concepts
+
+| Concept   | Meaning                                                             |
+| --------- | ------------------------------------------------------------------- |
+| DTF token | ERC20 share token for the index.                                    |
+| Basket    | Tokens held by the DTF and their target weights or units.           |
+| Mint      | Deposit basket tokens proportionally and receive DTF shares.        |
+| Redeem    | Burn DTF shares and receive basket tokens.                          |
+| Rebalance | Governance-approved target basket change executed through auctions. |
+| Vote-lock | Staking/voting vault used for governance and rewards.               |
+
+## Lifecycle
+
+```text
+PROPOSE -> VOTE -> QUEUE -> EXECUTE -> LAUNCHER WINDOW -> COMMUNITY WINDOW -> AUCTION -> BID -> REPEAT -> EXPIRE
+```
+
+Governance proposes basket or settings changes. Successful proposals are queued and executed. Basket changes start a rebalance. Auctions execute the trades needed to move from the current basket to the target basket.
+
+## Native And Tracking DTFs
+
+Native DTFs target percentage allocations.
+
+Tracking DTFs target fixed token units.
+
+The SDK supports both basket proposal modes:
+
+```ts
+const sharesBasket = {
+  type: "shares",
+  tokens: [
+    { address: tokenA, share: 50 },
+    { address: tokenB, share: 50 },
+  ],
+};
+
+const unitsBasket = {
+  type: "units",
+  tokens: [
+    { address: tokenA, units: "1.25" },
+    { address: tokenB, units: "0.5" },
+  ],
+};
+```
+
+## Data Routing
+
+Index DTF integrations usually need several sources.
+
+- RPC for live basket, supply, rebalance, auction, proposal, and vote-lock state.
+- Reserve API for discovery, prices, analytics, portfolio, and vote-lock DAO stats.
+- Index subgraph for indexed governance, holders, and historical metadata.
+
+Use SDK methods rather than stitching these sources manually unless you need a custom integration.

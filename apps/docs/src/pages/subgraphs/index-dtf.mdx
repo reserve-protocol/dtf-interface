@@ -1,0 +1,35 @@
+# Index DTF Subgraph
+
+The Index DTF subgraph tracks indexed metadata and history.
+
+## Good Uses
+
+- DTF metadata
+- proposal metadata
+- governance relationships
+- holder data
+- historical rebalance entities
+- transaction/event history
+
+## Bad Uses
+
+Do not use the subgraph as live truth for:
+
+- basket balances
+- active rebalance state
+- active auction state
+- final proposal terminal state
+
+Use RPC-backed SDK methods for those.
+
+## IDs
+
+Subgraph entity IDs are generally lowercase hex or product-specific composite IDs.
+
+Examples:
+
+- DTF IDs are lowercase addresses.
+- Rebalance IDs use DTF plus nonce.
+- Auction IDs use DTF plus auction ID.
+
+Verify entity ID behavior in subgraph mappings when adding new SDK code.

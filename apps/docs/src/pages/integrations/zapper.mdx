@@ -1,0 +1,25 @@
+# Zapper Integration
+
+Zap flows are separate from direct mint/redeem.
+
+Manual mint requires every basket token. A zap flow lets a user start from one token and route through swaps before minting.
+
+## Boundary
+
+The SDK currently documents and supports protocol mint/redeem builders.
+
+Zap-specific quote, swap, and payload routing should stay separate from direct Index DTF mint/redeem docs unless a concrete SDK API is added.
+
+## Integration Shape
+
+A zap integration usually needs:
+
+- source token
+- target DTF
+- quote provider
+- slippage settings
+- swap route
+- final mint transaction
+- approval flow for source token or router
+
+Do not present zap quote APIs as available SDK methods until they exist in source.

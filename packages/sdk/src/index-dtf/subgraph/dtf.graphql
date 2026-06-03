@@ -346,6 +346,22 @@ query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
   }
 }
 
+query GetIndexDtfProposalChallenge($governanceId: String!, $description: String!, $creationBlock: BigInt!) {
+  proposals(
+    first: 1
+    orderBy: creationBlock
+    orderDirection: desc
+    where: {
+      governance: $governanceId
+      description: $description
+      creationBlock_lte: $creationBlock
+      isOptimistic: true
+    }
+  ) {
+    id
+  }
+}
+
 query GetIndexDtfProposalVotingSnapshot($proposalId: ID!) {
   proposal(id: $proposalId) {
     id

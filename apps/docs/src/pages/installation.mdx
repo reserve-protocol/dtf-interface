@@ -1,0 +1,59 @@
+# Installation
+
+Install the core SDK for scripts, bots, servers, or non-React apps.
+
+```bash
+pnpm add @reserve-protocol/sdk viem
+```
+
+Install the React SDK for React apps.
+
+```bash
+pnpm add @reserve-protocol/react-sdk @tanstack/react-query react viem
+```
+
+## Packages
+
+| Package                         | Use                                                                           |
+| ------------------------------- | ----------------------------------------------------------------------------- |
+| `@reserve-protocol/sdk`         | Core SDK. Reads data and prepares contract calls.                             |
+| `@reserve-protocol/react-sdk`   | React Query hooks and providers around the core SDK. Re-exports the core SDK. |
+| `@reserve-protocol/dtf-catalog` | Curated static DTF catalog used by the SDK.                                   |
+
+## Requirements
+
+- Node `>=24` for this repository and package build tooling.
+- TypeScript with ESM-compatible module resolution.
+- `viem` for address types, public clients, wallet clients, and contract call integration.
+- TanStack Query only when using `@reserve-protocol/react-sdk`.
+
+## Import Style
+
+Use the package entrypoints.
+
+```ts
+import { createDtfSdk } from "@reserve-protocol/sdk";
+```
+
+```tsx
+import { DtfSdkProvider, useIndexDtf } from "@reserve-protocol/react-sdk";
+```
+
+Do not import from internal source paths. Public exports live at the package root.
+
+## Local Development
+
+From this monorepo:
+
+```bash
+pnpm install
+pnpm build
+pnpm typecheck
+pnpm test
+```
+
+Run this docs site locally:
+
+```bash
+pnpm docs:dev
+```

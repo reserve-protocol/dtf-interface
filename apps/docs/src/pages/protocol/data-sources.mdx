@@ -1,0 +1,29 @@
+# Protocol Data Sources
+
+Reserve integrations should use the right source for each kind of data.
+
+## Index DTFs
+
+| Data                            | Source                             | Why                                                    |
+| ------------------------------- | ---------------------------------- | ------------------------------------------------------ |
+| Basket composition and balances | RPC                                | Live contract state from `totalAssets()`.              |
+| Active rebalance                | RPC                                | Must be real-time for auction automation.              |
+| Active auction                  | RPC                                | Must be real-time for bidding.                         |
+| Proposal state                  | RPC plus subgraph                  | Subgraph indexes events; RPC owns live terminal state. |
+| Prices                          | Reserve API                        | Aggregated current and historical price data.          |
+| Discovery                       | Reserve API or catalog             | Product listing and curated status.                    |
+| Governance metadata             | Index subgraph                     | Historical proposal/config metadata.                   |
+| Holders and transactions        | Index subgraph/API-backed surfaces | Indexed history.                                       |
+| Vote-lock DAO stats             | Reserve API                        | Aggregated DAO/vote-lock position data.                |
+
+## Yield DTFs
+
+Yield DTF data is mostly subgraph and RPC driven. Do not assume Reserve API parity with Index DTFs.
+
+## Practical Rule
+
+If a value must be current at the block now, use an RPC-backed SDK method.
+
+If a value is product discovery, price, portfolio, or analytics, expect Reserve API.
+
+If a value is indexed history or metadata, expect subgraph.

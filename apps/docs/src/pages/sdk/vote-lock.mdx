@@ -1,0 +1,80 @@
+# Vote-Lock
+
+Index DTF vote-lock vaults are ERC4626/ERC20Votes-style staking vaults. They are not Yield DTF `stRSR`.
+
+## DAO And State Reads
+
+| Method             | Use                                          |
+| ------------------ | -------------------------------------------- |
+| `getVoteLockDaos`  | All vote-lock DAO aggregate entries.         |
+| `getVoteLockDao`   | One vote-lock DAO aggregate entry.           |
+| `getVoteLockState` | Account vote-lock state for a staking token. |
+
+```ts
+const state = await sdk.index.getVoteLockState({
+  stToken,
+  chainId,
+  account,
+});
+```
+
+## Raw Reads
+
+The SDK exposes raw read helpers for vote-lock contracts.
+
+| Group                 | Methods                                                                                                                                                                                                                                                                                |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ERC4626 and votes     | `readVoteLockAsset`, `readVoteLockBalanceOf`, `readVoteLockDelegates`, `readVoteLockGetVotes`, `readVoteLockGetPastVotes`, `readVoteLockTotalAssets`, `readVoteLockTotalSupply`                                                                                                        |
+| Conversion and limits | `readVoteLockConvertToAssets`, `readVoteLockConvertToShares`, `readVoteLockPreviewDeposit`, `readVoteLockPreviewMint`, `readVoteLockPreviewRedeem`, `readVoteLockPreviewWithdraw`, `readVoteLockMaxDeposit`, `readVoteLockMaxMint`, `readVoteLockMaxRedeem`, `readVoteLockMaxWithdraw` |
+| Rewards               | `readVoteLockAllRewardTokens`, `readVoteLockRewardRatio`, `readVoteLockRewardTracker`, `readVoteLockUserRewardTracker`, `readVoteLockDisallowedRewardToken`                                                                                                                            |
+| Optimistic voting     | `readVoteLockOptimisticDelegates`, `readVoteLockOptimisticVotes`, `readVoteLockPastOptimisticVotes`                                                                                                                                                                                    |
+| Unstaking             | `readVoteLockUnstakingDelay`, `readVoteLockUnstakingManager`, `readVoteLockLock`, `readVoteLockUnstakingTargetToken`, `readVoteLockUnstakingVault`                                                                                                                                     |
+
+## Builders
+
+| Method                              | Use                                                         |
+| ----------------------------------- | ----------------------------------------------------------- |
+| `prepareVoteLockDeposit`            | Deposit underlying into a vote-lock vault.                  |
+| `prepareVoteLockDepositPlan`        | Deposit plan with optional underlying approval.             |
+| `prepareVoteLockDelegate`           | Delegate normal voting power.                               |
+| `prepareVoteLockDelegateOptimistic` | Delegate optimistic voting power.                           |
+| `prepareVoteLockWithdraw`           | Start or execute withdraw flow depending on vault behavior. |
+| `prepareVoteLockClaimRewards`       | Claim reward tokens.                                        |
+| `prepareVoteLockClaimLock`          | Claim an unstaking lock.                                    |
+| `prepareVoteLockCancelLock`         | Cancel an unstaking lock.                                   |
+| `prepareVoteLockPoke`               | Poke reward/account accounting.                             |
+
+```ts
+const plan = sdk.index.prepareVoteLockDepositPlan({
+  stToken,
+  chainId,
+  amount: 1000000000000000000n,
+  receiver: account,
+  approval: {
+    underlying,
+    amount: 1000000000000000000n,
+  },
+});
+```
+
+For self-delegating deposits, use the builder mode that sets `delegateToSelf: true`.
+
+```ts
+const call = sdk.index.prepareVoteLockDeposit({
+  stToken,
+  chainId,
+  amount: 1000000000000000000n,
+  delegateToSelf: true,
+});
+```
+
+## Admin Builders
+
+| Method                             | Use                  |
+| ---------------------------------- | -------------------- |
+| `prepareVoteLockAddRewardToken`    | Add reward token.    |
+| `prepareVoteLockRemoveRewardToken` | Remove reward token. |
+| `prepareVoteLockSetRewardRatio`    | Set reward ratio.    |
+| `prepareVoteLockSetUnstakingDelay` | Set unstaking delay. |
+
+Do not assume the vote-lock underlying token is RSR.

@@ -1,0 +1,63 @@
+# Rebalances & Auctions
+
+Rebalances move a DTF from its current basket toward a new target basket through auctions.
+
+## Windows
+
+After a successful basket proposal executes:
+
+- launcher window: privileged auction launchers can open auctions
+- community window: anyone can open auctions after launcher exclusivity ends
+
+The default basket proposal launcher window is 72 hours.
+
+## Active State
+
+Use RPC-backed methods for active automation.
+
+```ts
+const rebalance = await sdk.index.getCurrentRebalance({ address, chainId });
+const auction = await sdk.index.getActiveAuction({ address, chainId });
+```
+
+## Historical State
+
+Use history methods for charts and completed rebalance pages.
+
+```ts
+const rebalances = await sdk.index.getRebalances({ address, chainId, limit: 20 });
+```
+
+## Bids
+
+```ts
+const quote = await sdk.index.getBidQuote({
+  address,
+  chainId,
+  auctionId,
+  sellToken,
+  buyToken,
+  maxSellAmount,
+});
+
+const bid = sdk.index.prepareBid({
+  address,
+  chainId,
+  auctionId,
+  sellToken,
+  buyToken,
+  sellAmount: quote.sellAmount,
+  maxBuyAmount: quote.bidAmount,
+});
+```
+
+`sellAmount` must be greater than `0n`.
+
+## Trusted Fillers
+
+`bidsEnabled` controls whether bidding is permissionless.
+
+- `true`: any bot can fill Dutch auctions.
+- `false`: trusted-filler flow.
+
+This is a DTF setting, not a per-rebalance flag.

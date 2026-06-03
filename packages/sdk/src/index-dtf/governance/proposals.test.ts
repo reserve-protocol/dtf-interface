@@ -11,10 +11,122 @@ import {
   getProposalVotingSnapshot,
   getProposals,
 } from "@/index-dtf/governance/index";
+import { mapIndexDtfProposalSummary } from "@/index-dtf/governance/mapper";
+
+const MAX_UINT256 = (1n << 256n) - 1n;
+
+const createChallengedConfirmationResponse = () => ({
+  dtf: {
+    id: "0x0000000000000000000000000000000000000003",
+    proxyAdmin: "0x0000000000000000000000000000000000000008",
+    legacyAdmins: [],
+    legacyAuctionApprovers: [],
+    ownerGovernance: {
+      id: "0x0000000000000000000000000000000000000001",
+      optimisticSelectorRegistry: null,
+      timelock: {
+        id: "0x0000000000000000000000000000000000000006",
+      },
+    },
+    tradingGovernance: null,
+    stToken: {
+      id: "0x0000000000000000000000000000000000000007",
+      legacyGovernance: [],
+      governance: null,
+    },
+  },
+  proposal: {
+    id: "confirmation",
+    txnHash: "0x0000000000000000000000000000000000000000000000000000000000000043",
+    timelockId: null,
+    description: "Confirmation For: Same proposal",
+    creationTime: "999100",
+    voteStart: "999000",
+    voteEnd: "1000100",
+    queueBlock: null,
+    queueTxnHash: null,
+    queueTime: null,
+    state: "ACTIVE",
+    isOptimistic: false,
+    vetoThreshold: null,
+    executionETA: null,
+    executionTime: null,
+    executionBlock: null,
+    creationBlock: "124",
+    cancellationTime: null,
+    calldatas: [],
+    targets: [],
+    proposer: {
+      address: "0x0000000000000000000000000000000000000002",
+    },
+    votes: [],
+    forWeightedVotes: "0",
+    againstWeightedVotes: "0",
+    abstainWeightedVotes: "0",
+    quorumVotes: "1000000000000000000",
+    forDelegateVotes: "0",
+    abstainDelegateVotes: "0",
+    againstDelegateVotes: "0",
+    executionTxnHash: null,
+    governance: {
+      id: "0x0000000000000000000000000000000000000001",
+      optimisticSelectorRegistry: null,
+      token: {
+        id: "0x0000000000000000000000000000000000000007",
+      },
+      timelock: {
+        id: "0x0000000000000000000000000000000000000006",
+        type: "OWNER",
+      },
+    },
+  },
+});
 
 describe("Index DTF governance proposals", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("preserves transitioned optimistic proposal veto threshold sentinel", () => {
+    const proposal = mapIndexDtfProposalSummary(
+      {
+        id: "42",
+        description: "Transitioned optimistic proposal",
+        creationTime: "999000",
+        state: "ACTIVE",
+        isOptimistic: true,
+        vetoThreshold: String(MAX_UINT256),
+        vetoThresholdVotes: null,
+        optimisticSnapshot: "999900",
+        optimisticSnapshotSupply: "100000000000000000000",
+        forWeightedVotes: "0",
+        againstWeightedVotes: "0",
+        abstainWeightedVotes: "0",
+        quorumVotes: "999000000000000000000",
+        voteStart: "999900",
+        voteEnd: "1000100",
+        executionETA: null,
+        executionTime: null,
+        executionBlock: null,
+        creationBlock: "123",
+        proposer: {
+          address: "0x0000000000000000000000000000000000000002",
+        },
+        governance: {
+          id: "0x0000000000000000000000000000000000000001",
+          token: {
+            id: "0x0000000000000000000000000000000000000007",
+          },
+          timelock: {
+            id: "0x0000000000000000000000000000000000000006",
+          },
+        },
+      },
+      1,
+    );
+
+    expect(proposal.vetoThreshold).toBe(MAX_UINT256);
+    expect(proposal.optimistic).toBeUndefined();
   });
 
   it("maps proposal detail and derives Register-compatible voting state", async () => {
@@ -47,12 +159,14 @@ describe("Index DTF governance proposals", () => {
       },
       proposal: {
         id: "42",
+        txnHash: "0x0000000000000000000000000000000000000000000000000000000000000042",
         timelockId: "0x0000000000000000000000000000000000000000000000000000000000000042",
         description: "Proposal description",
         creationTime: "999000",
         voteStart: "999900",
         voteEnd: "1000100",
         queueBlock: null,
+        queueTxnHash: null,
         queueTime: null,
         state: "PENDING",
         isOptimistic: false,
@@ -682,72 +796,14 @@ describe("Index DTF governance proposals", () => {
     });
   });
 
-  it("does not run hidden challenge lookups for proposal detail confirmations", async () => {
+  it("marks challenged proposal detail confirmations", async () => {
     vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
-    const queryIndex = vi.fn(async () => ({
-      dtf: {
-        id: "0x0000000000000000000000000000000000000003",
-        proxyAdmin: "0x0000000000000000000000000000000000000008",
-        legacyAdmins: [],
-        legacyAuctionApprovers: [],
-        ownerGovernance: {
-          id: "0x0000000000000000000000000000000000000001",
-          optimisticSelectorRegistry: null,
-          timelock: {
-            id: "0x0000000000000000000000000000000000000006",
-          },
-        },
-        tradingGovernance: null,
-        stToken: {
-          id: "0x0000000000000000000000000000000000000007",
-          legacyGovernance: [],
-          governance: null,
-        },
-      },
-      proposal: {
-        id: "confirmation",
-        timelockId: null,
-        description: "Confirmation For: Same proposal",
-        creationTime: "999100",
-        voteStart: "999000",
-        voteEnd: "1000100",
-        queueBlock: null,
-        queueTime: null,
-        state: "ACTIVE",
-        isOptimistic: false,
-        vetoThreshold: null,
-        executionETA: null,
-        executionTime: null,
-        executionBlock: null,
-        creationBlock: "124",
-        cancellationTime: null,
-        calldatas: [],
-        targets: [],
-        proposer: {
-          address: "0x0000000000000000000000000000000000000002",
-        },
-        votes: [],
-        forWeightedVotes: "0",
-        againstWeightedVotes: "0",
-        abstainWeightedVotes: "0",
-        quorumVotes: "1000000000000000000",
-        forDelegateVotes: "0",
-        abstainDelegateVotes: "0",
-        againstDelegateVotes: "0",
-        executionTxnHash: null,
-        governance: {
-          id: "0x0000000000000000000000000000000000000001",
-          optimisticSelectorRegistry: null,
-          token: {
-            id: "0x0000000000000000000000000000000000000007",
-          },
-          timelock: {
-            id: "0x0000000000000000000000000000000000000006",
-            type: "OWNER",
-          },
-        },
-      },
-    }));
+    const queryIndex = vi
+      .fn()
+      .mockResolvedValueOnce(createChallengedConfirmationResponse())
+      .mockResolvedValueOnce({
+        proposals: [{ id: "optimistic" }],
+      });
     const client = {
       subgraph: {
         queryIndex,
@@ -760,7 +816,42 @@ describe("Index DTF governance proposals", () => {
       chainId: 1,
     });
 
-    expect(queryIndex).toHaveBeenCalledTimes(1);
+    expect(queryIndex).toHaveBeenCalledTimes(2);
+    expect(queryIndex.mock.calls[1]?.[0]).toMatchObject({
+      chainId: 1,
+      variables: {
+        governanceId: "0x0000000000000000000000000000000000000001",
+        description: "Same proposal",
+        creationBlock: "124",
+      },
+    });
+    expect(queryIndex.mock.calls[1]?.[0].query.toString()).toContain("creationBlock_lte");
+    expect(proposal).toMatchObject({
+      id: "confirmation",
+      wasChallenged: true,
+      challengedProposalId: "optimistic",
+    });
+  });
+
+  it("keeps proposal detail when challenged lookup fails", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+    const queryIndex = vi
+      .fn()
+      .mockResolvedValueOnce(createChallengedConfirmationResponse())
+      .mockRejectedValueOnce(new Error("subgraph unavailable"));
+    const client = {
+      subgraph: {
+        queryIndex,
+      },
+    } as unknown as DtfClient;
+
+    const proposal = await getProposal(client, {
+      proposalId: "confirmation",
+      address: "0x0000000000000000000000000000000000000003",
+      chainId: 1,
+    });
+
+    expect(queryIndex).toHaveBeenCalledTimes(2);
     expect(proposal).toMatchObject({
       id: "confirmation",
     });

@@ -1,0 +1,34 @@
+# Docs Journal
+
+This journal records issues noticed while writing docs. It is intentionally not a code-change checklist for this PR.
+
+## API Shape Notes
+
+- `sdk.yield` exists but only throws `NOT_IMPLEMENTED`. Public docs should keep Yield DTF protocol context separate from implemented SDK APIs until real methods exist.
+- The SDK exports a very large top-level surface. The product-shaped namespace is easier to document and learn than raw export lists.
+- Some React SDK query options use `dtfQueryKeys`, while newer product/analytics options use local keys. This is fine internally, but public docs should recommend query option builders over hand-built keys for those surfaces.
+- `useIndexDtfProposals` and `useIndexDtfProposalList` share cache but return different shapes. This is useful, but easy to miss in docs and app code.
+- `useIndexDtfProposalVoterState` requires a proposal object, not just `proposalId`. This is key-stability driven but less obvious than other proposal hooks.
+- `useIndexDtfCancelProposalCall` returns `undefined` without `proposal.timelock`. That avoids render throws, but app UIs need explicit disabled/error copy if cancel is unavailable.
+
+## Documentation Gaps Found
+
+- The SDK needs source-checked copy-paste examples for deployment and basket proposal builders. The input types are rich enough that fake snippets become wrong quickly.
+- We should eventually generate a typed API reference from exported declarations, but hand-written workflow docs are more useful right now.
+- React transaction examples are app-specific because the React SDK intentionally does not depend on wagmi. Docs should keep these examples generic and boundary-focused.
+- Yield DTF docs need an explicit implemented/not-implemented marker everywhere to avoid false parity with Index DTFs.
+
+## Code Quality Notes To Revisit Later
+
+- The React SDK has two query option/key styles: shared `dtfQueryKeys` and local `['dtf', 'index', scope, params]` keys. A future cleanup could standardize this or document the split in source comments.
+- Proposal voter-state inputs are technically correct but a little non-obvious. A convenience hook that accepts proposal detail query output may reduce app boilerplate later.
+- Transaction action hooks are thin call builders. If more action hooks are added, keep them as prepared-call hooks and avoid adding wallet mutation abstractions until a real app needs them.
+- Explorer ABI enrichment is optional and best-effort. If docs become public-facing, we should clarify supported explorer chains and rate-limit/failure behavior.
+- Deployment builders expose many low-level fields. A future higher-level deploy recipe could live in docs or SDK once product requirements settle.
+
+## Accuracy Notes From This Pass
+
+- `getIssuanceState` returns asset balances/allowances and optional mint/redeem amounts. It does not return a precomputed `requiredApprovals` array.
+- SDK proposal detail uses `proposal.governance`; Register's local adapter may expose `governor`.
+- Basket proposal examples should show complete target baskets, not a single `share: 50` token.
+- Prepared calls include `chainId`; docs should consistently pass it to simulation/write examples.

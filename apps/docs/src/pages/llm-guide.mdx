@@ -1,0 +1,76 @@
+---
+title: LLM Guide
+description: High-signal SDK rules for AI agents and code generators.
+---
+
+# LLM Guide
+
+Use this page as the first stop when an AI agent is reading or generating code for the Reserve DTF SDK.
+
+## Package Boundary
+
+- Use `@reserve-protocol/sdk` for scripts, bots, servers, CLIs, and non-React apps.
+- Use `@reserve-protocol/react-sdk` for React apps that already use TanStack Query.
+- React apps should prefer React SDK hooks over direct `useDtfSdk()` calls for UI reads.
+- Both packages prepare transaction calls. They do not connect wallets, switch chains, send transactions, or own toast/confirmation UX.
+- `sdk.yield` is a placeholder boundary today. Its methods throw `NOT_IMPLEMENTED`.
+
+## Canonical Example DTF
+
+Use this real Base Index DTF in examples instead of the zero address:
+
+```ts
+const chainId = 8453;
+const address = "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8";
+```
+
+That address is LCAP from `indexDtfCatalog`.
+
+## API Shapes To Preserve
+
+- Direct SDK namespace methods use object params when multiple values are required: `sdk.index.get({ address, chainId })`.
+- DTF refs bind `{ address, chainId }` once: `const dtf = sdk.index.ref({ address, chainId })`.
+- Ref methods stay flat where possible: `dtf.get()`, `dtf.getProposal(proposalId)`, `dtf.prepareMint(params)`.
+- React hooks accept params first and TanStack Query options second: `useIndexDtfBasket({ address, chainId }, options)`.
+- Query options accept `sdk` first, params second, options third: `indexDtfBasketQueryOptions(sdk, params, options)`.
+- Hooks with required params accept `undefined` to disable the query while route params or wallet state load.
+
+## Data Shapes That Agents Often Get Wrong
+
+- Index DTF baskets are records: `Record<Address, IndexDtfBasketAsset>`, not `{ tokens: [...] }`.
+- Use `Object.values(basket)` for basket assets and `Object.keys(basket)` for asset addresses.
+- Proposal IDs are long decimal strings. Keep them as strings in routes and UI state.
+- `getProposalVoterState` takes a proposal detail object from `getProposal`, not a proposal ID string.
+- `getBidQuote` returns `{ sellAmount, bidAmount, price }`; pass `quote.bidAmount` into `prepareBid({ maxBuyAmount })`.
+- Onchain token amounts, shares, auction IDs, and raw balances are `bigint`. Do not cast money to `number`.
+- `getIssuanceState` does not return `requiredApprovals`; derive approvals from asset allowances and mint amounts.
+
+## Write And Transaction Rules
+
+- SDK write helpers return `ContractCall` objects.
+- Always pass `call.chainId` through to simulation and wallet layers when supported.
+- Use SDK builders for versioned writes instead of hand-encoding ABI calldata.
+- DTF settings builders often need `version: "5.0.0" | "6.0.0"`; read it with `sdk.index.getVersion({ address, chainId })`.
+- Proposal action builders prepare vote, queue, execute, and cancel calls. They do not invalidate queries after a transaction.
+
+## Public Surface Discovery
+
+Start from these source files when docs and types disagree:
+
+- `packages/sdk/src/index.ts` for exported SDK types, constants, builders, ABIs, and catalog exports.
+- `packages/sdk/src/create-dtf-sdk.ts` for the root namespace shape.
+- `packages/sdk/src/index-dtf/namespace.ts` and `packages/sdk/src/index-dtf/ref.ts` for Index DTF direct/ref APIs.
+- `packages/sdk/src/types/index-dtf.ts` and `packages/sdk/src/types/governance.ts` for data shapes.
+- `packages/react-sdk/src/index.ts` for exported React hooks and query options.
+- `packages/react-sdk/src/query-keys.ts` for shared query-key helpers.
+- `packages/dtf-catalog/src/index.ts` for raw catalog exports like `indexDtfs` and `yieldDtfs`; `packages/sdk/src/index.ts` re-exports them as `indexDtfCatalog` and `yieldDtfCatalog`.
+
+## High-Value Docs Links
+
+- [Quickstart](/quickstart)
+- [SDK Overview](/sdk/overview)
+- [React SDK Overview](/react-sdk/overview)
+- [Governance API](/sdk/governance)
+- [Contract Calls](/sdk/contract-calls)
+- [Gotchas](/gotchas)
+- [Data Sources](/data-sources)

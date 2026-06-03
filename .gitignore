@@ -5,6 +5,8 @@ dist/
 coverage/
 .turbo/
 .vite/
+.vocs/
+apps/docs/src/pages.gen.ts
 
 .env
 .env.*

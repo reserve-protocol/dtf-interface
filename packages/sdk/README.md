@@ -4,10 +4,12 @@ Core TypeScript SDK for DTF integrations.
 
 This package is environment-agnostic. It should work in modern Node, browser apps, React wrappers, scripts, and bots.
 
-Supported products and chains:
+Implemented SDK product surface:
 
 - Index DTFs: Ethereum mainnet, Base, BSC.
-- Yield DTFs: Ethereum mainnet, Base.
+- Account portfolio API reads: current portfolio, historical portfolio, and transactions.
+
+Yield DTF catalog entries and subgraph defaults exist for Ethereum mainnet and Base, but `sdk.yield.get` and `sdk.yield.list` are not implemented yet.
 
 ## Usage
 
@@ -21,15 +23,15 @@ const dtf = await sdk.index.get({
   chainId: 8453,
 });
 
-const cmc20 = sdk.index.ref({
+const indexDtf = sdk.index.ref({
   address: "0x...",
   chainId: 8453,
 });
 
-const proposals = await cmc20.proposals();
-const price = await cmc20.getPrice();
-const brand = await cmc20.getBrand();
-const basketAtBlock = await cmc20.basket(123n);
+const proposals = await indexDtf.getProposals();
+const price = await indexDtf.getPrice();
+const brand = await indexDtf.getBrand();
+const basketAtBlock = await indexDtf.getBasket(123n);
 ```
 
 With explicit configuration:
@@ -80,7 +82,11 @@ This is intentionally not part of the normal test suite or CI path.
 SDK errors use stable machine-readable codes:
 
 ```ts
-import { isSdkError } from "@reserve-protocol/sdk";
+import { createDtfSdk, isSdkError } from "@reserve-protocol/sdk";
+
+const sdk = createDtfSdk();
+const address = "0x...";
+const chainId = 8453;
 
 try {
   await sdk.index.get({ address, chainId });
@@ -103,4 +109,4 @@ The intended model:
 namespace methods -> client -> small transports -> mappers
 ```
 
-See [../../docs/sdk-architecture.md](../../docs/sdk-architecture.md).
+See [../../docs/sdk/architecture.md](../../docs/sdk/architecture.md).

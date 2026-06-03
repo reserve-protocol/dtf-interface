@@ -1,0 +1,53 @@
+# Deployment
+
+Index DTF deployment is a transaction-building workflow.
+
+The SDK prepares deployment calls and approval plans. Apps own wallet UX, transaction submission, log parsing, and route navigation after deployment.
+
+## Deployment Types
+
+| Type                    | Builder                                                |
+| ----------------------- | ------------------------------------------------------ |
+| Ungoverned DTF          | `prepareDeploy` or `prepareDeployPlan`                 |
+| Governed DTF            | `prepareDeployGoverned` or `prepareDeployGovernedPlan` |
+| Vote-lock staking token | `prepareDeployStakingToken`                            |
+
+## Initial Basket
+
+The deployment basket uses raw token amounts.
+
+```ts
+basicDetails: {
+  name: 'Example Index DTF',
+  symbol: 'eDTF',
+  assets: [tokenA, tokenB],
+  amounts: [1000000000000000000n, 2000000000000000000n],
+  initialShares: 1000000000000000000n,
+}
+```
+
+## Flags
+
+The SDK exports default deploy flags.
+
+```ts
+import { DEFAULT_INDEX_DTF_DEPLOY_FLAGS } from "@reserve-protocol/sdk";
+```
+
+Defaults:
+
+- trusted filler enabled
+- weight control enabled
+- price control set to `1`
+- bids enabled
+
+## Logs
+
+After sending the deployment transaction, parse logs with:
+
+```ts
+const address = extractIndexDtfDeployedAddress(receipt.logs);
+const stToken = extractIndexDtfDeployedStakingTokenAddress(receipt.logs);
+```
+
+Do this after confirmation, not before.

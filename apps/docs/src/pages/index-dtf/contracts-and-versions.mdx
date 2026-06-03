@@ -1,0 +1,44 @@
+# Contracts & Versions
+
+Index DTF contract signatures changed across deployed versions.
+
+Do not assume local protocol source, old docs, and SDK ABIs are interchangeable.
+
+## SDK Write Targets
+
+Current SDK write builders support `5.0.0` and `6.0.0` ABI targets where version-specific encoding matters.
+
+Version-specific areas include:
+
+- `startRebalance`
+- `openAuction`
+- `openAuctionUnrestricted`
+- `bid`
+- allowlist settings
+- self-fee settings
+
+## Why This Matters
+
+Old examples can show signatures like:
+
+```solidity
+startRebalance(address[] newTokens, BasketRange[] newLimits, Prices[] newPrices, ...)
+```
+
+SDK/Register ABIs can use newer signatures like:
+
+```solidity
+startRebalance(TokenRebalanceParams[] tokens, RebalanceLimits limits, ...)
+```
+
+Use SDK builders unless you have a specific reason to hand-encode a call.
+
+## Address Normalization
+
+The SDK normalizes many addresses with viem `getAddress`.
+
+Do not pass `getAddress` directly to `Array.map` in app code. `map` passes the index as a second argument, and viem treats that as an optional checksum-chain argument.
+
+```ts
+const normalized = addresses.map((address) => getAddress(address));
+```

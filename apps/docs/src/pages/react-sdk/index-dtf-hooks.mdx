@@ -1,0 +1,90 @@
+# Index DTF Hooks
+
+These hooks wrap common Index DTF reads.
+
+## Discovery And Lists
+
+| Hook              | Core SDK method                       |
+| ----------------- | ------------------------------------- |
+| `useDiscoverDtfs` | `getDiscoverDtfs` aggregate discovery |
+| `useIndexDtfList` | `sdk.index.list`                      |
+
+```tsx
+const dtfs = useDiscoverDtfs({
+  chainId: 8453,
+  brand: true,
+  performance: true,
+});
+```
+
+## DTF Detail
+
+| Hook                      | Core SDK method             |
+| ------------------------- | --------------------------- |
+| `useIndexDtf`             | `sdk.index.get`             |
+| `useFullIndexDtf`         | `sdk.index.getFull`         |
+| `useIndexDtfBasket`       | `sdk.index.getBasket`       |
+| `useIndexDtfVersion`      | `sdk.index.getVersion`      |
+| `useIndexDtfBrand`        | `sdk.index.getBrand`        |
+| `useIndexDtfPrice`        | `sdk.index.getPrice`        |
+| `useIndexDtfPriceHistory` | `sdk.index.getPriceHistory` |
+
+```tsx
+const basket = useIndexDtfBasket({ address, chainId });
+const price = useIndexDtfPrice({ address, chainId });
+```
+
+## Product And Analytics Reads
+
+| Hook                          | Core SDK method                 |
+| ----------------------------- | ------------------------------- |
+| `useIndexDtfStatus`           | `sdk.index.getStatus`           |
+| `useIndexDtfExposure`         | `sdk.index.getExposure`         |
+| `useIndexDtfTransactions`     | `sdk.index.getTransactions`     |
+| `useIndexDtfRevenue`          | `sdk.index.getRevenue`          |
+| `useIndexDtfIssuanceState`    | `sdk.index.getIssuanceState`    |
+| `useIndexDtfRebalances`       | `sdk.index.getRebalances`       |
+| `useIndexDtfCurrentRebalance` | `sdk.index.getCurrentRebalance` |
+| `useIndexDtfVoteLockState`    | `sdk.index.getVoteLockState`    |
+| `useAccountPortfolio`         | `sdk.portfolio.get`             |
+
+```tsx
+const issuance = useIndexDtfIssuanceState(
+  account
+    ? {
+        address,
+        chainId,
+        account,
+        shares: 1000000000000000000n,
+      }
+    : undefined,
+);
+```
+
+## Proposal Builders
+
+These are query hooks because building proposal payloads can require async SDK reads.
+
+| Hook                                     | Core SDK method                         |
+| ---------------------------------------- | --------------------------------------- |
+| `useBuildIndexDtfBasketProposal`         | `sdk.index.buildBasketProposal`         |
+| `useBuildIndexDtfBasketSettingsProposal` | `sdk.index.buildBasketSettingsProposal` |
+| `useBuildIndexDtfDaoSettingsProposal`    | `sdk.index.buildDaoSettingsProposal`    |
+| `useBuildIndexDtfSettingsProposal`       | `sdk.index.buildSettingsProposal`       |
+
+Use them for previewing proposal payloads before submit.
+
+## Select Option
+
+All hooks support `select`.
+
+```tsx
+const symbol = useIndexDtf(
+  { address, chainId },
+  {
+    select: (dtf) => dtf.token.symbol,
+  },
+);
+```
+
+Prefer `select` when UI only needs a small derived field.

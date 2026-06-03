@@ -1,0 +1,36 @@
+# Protocol Governance
+
+Reserve governance flows differ between product lines and contract domains.
+
+## Index DTF Governance
+
+Index DTFs can have multiple governance authorities:
+
+- owner/admin governance
+- trading/rebalance governance
+- DAO/vote-lock governance
+- optimistic governance
+- guardians and timelock roles
+
+The SDK exposes product-shaped methods so apps do not need to hand-assemble every governor/timelock call.
+
+## Proposal Lifecycle
+
+```text
+PENDING -> ACTIVE -> SUCCEEDED/DEFEATED -> QUEUED -> EXECUTED
+```
+
+Other terminal states include:
+
+- `CANCELED`
+- `EXPIRED`
+- `VETOED`
+- `QUORUM_NOT_REACHED`
+
+Apps should not blindly trust one indexed proposal state when freshness matters. Use SDK proposal detail and voting snapshot reads.
+
+## Optimistic Governance
+
+Optimistic governance is veto-oriented. It has separate voting power and threshold context.
+
+Use optimistic-specific SDK methods when rendering or acting on optimistic proposals.

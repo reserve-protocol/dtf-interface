@@ -1,0 +1,26 @@
+{
+  "name": "@reserve-protocol/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vocs build && node ./scripts/fix-docs-build-output.mjs",
+    "clean": "rm -rf dist .vocs",
+    "dev": "vocs dev",
+    "preview": "vocs preview"
+  },
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-server-dom-webpack": "^19.2.7",
+    "vite": "^8.0.16",
+    "vocs": "^2.0.10",
+    "waku": "^1.0.0-beta.1"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

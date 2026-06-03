@@ -1,0 +1,44 @@
+# Reserve Protocol Overview
+
+Reserve Protocol is a platform for creating asset-backed tokens.
+
+The current DTF SDK focuses on Index DTFs.
+
+## Product Types
+
+| Product   | Status           | Summary                                                                                        |
+| --------- | ---------------- | ---------------------------------------------------------------------------------------------- |
+| Index DTF | current flagship | Onchain index fund holding a basket of tokens. Governance changes basket targets and settings. |
+| Yield DTF | legacy/support   | Yield-bearing token backed by productive collateral. Historically called RToken.               |
+
+## Chain Scope
+
+| Product   | Chains                      |
+| --------- | --------------------------- |
+| Index DTF | Ethereum mainnet, Base, BSC |
+| Yield DTF | Ethereum mainnet, Base      |
+
+Arbitrum can appear in legacy Reserve repos and frontend constants. Do not treat that as active Index DTF SDK support.
+
+## Terminology
+
+- DTF means Decentralized Token Folio.
+- Index DTF means the Folio-style index product.
+- Yield DTF means the legacy RToken product.
+- RSR is Reserve Rights, used across Reserve governance/economic flows.
+- Vote-lock is the Index DTF staking/voting vault pattern.
+
+## SDK Scope
+
+The SDK implements Index DTF workflows first:
+
+- discovery
+- live basket and price reads
+- proposal and governance reads
+- proposal payload builders
+- mint/redeem builders
+- rebalance and auction builders
+- deploy builders
+- vote-lock reads and builders
+
+Yield DTF SDK methods are not implemented yet.

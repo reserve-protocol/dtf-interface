@@ -1,0 +1,62 @@
+# Vote-Lock
+
+Index DTF vote-lock vaults provide governance power and rewards.
+
+They are not Yield DTF `stRSR` vaults.
+
+## Account State
+
+```ts
+const state = await sdk.index.getVoteLockState({
+  stToken,
+  chainId,
+  account,
+});
+```
+
+Use this for UI-level account state. Use raw `readVoteLock*` methods when you need a specific contract field.
+
+## Deposit And Delegate
+
+```ts
+const plan = sdk.index.prepareVoteLockDepositPlan({
+  stToken,
+  chainId,
+  amount,
+  delegateToSelf: true,
+  approval: {
+    underlying,
+    amount,
+  },
+});
+```
+
+If `delegateToSelf: true`, the SDK prepares `depositAndDelegate`.
+
+If you pass `receiver`, the SDK prepares the normal `deposit` path.
+
+## Optimistic Voting
+
+Some vote-lock vaults support optimistic voting power used for veto flows.
+
+Use optimistic-specific reads and delegate builders:
+
+```ts
+const call = sdk.index.prepareVoteLockDelegateOptimistic({
+  stToken,
+  chainId,
+  delegatee,
+});
+```
+
+## Rewards
+
+```ts
+const call = sdk.index.prepareVoteLockClaimRewards({
+  stToken,
+  chainId,
+  rewardTokens,
+});
+```
+
+Reward tokens are not guaranteed to be RSR.

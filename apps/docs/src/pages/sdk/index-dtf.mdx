@@ -1,0 +1,118 @@
+# Index DTF API
+
+The Index DTF namespace is the main SDK surface.
+
+```ts
+const sdk = createDtfSdk();
+const dtf = sdk.index.ref({ address, chainId });
+```
+
+## Discovery
+
+| Method                                   | Source                               | Use                                        |
+| ---------------------------------------- | ------------------------------------ | ------------------------------------------ |
+| `sdk.index.discover(params?)`            | Reserve API aggregate discovery      | Cross-chain or filtered product discovery  |
+| `sdk.index.discoverByChain(params)`      | Reserve API chain endpoint           | Chain-scoped Index DTF discovery           |
+| `sdk.index.discoverFromSubgraph(params)` | Index subgraph plus price enrichment | Fresh deploy discovery or indexed DTF list |
+| `sdk.index.list(params?)`                | `@reserve-protocol/dtf-catalog`      | Curated static catalog                     |
+| `sdk.index.getCatalogEntries(params?)`   | catalog                              | Raw catalog entries                        |
+| `sdk.index.resolveAlias(params)`         | catalog                              | Resolve ticker/name/address-like aliases   |
+| `sdk.index.getStatus(params)`            | Reserve API discovery                | Product listing status                     |
+| `sdk.index.getStatuses(params?)`         | Reserve API discovery                | Bulk status map                            |
+
+```ts
+const dtfs = await sdk.index.discover({
+  chainId: 8453,
+  brand: true,
+  performance: true,
+});
+```
+
+## DTF Reads
+
+| Method              | Use                                                      |
+| ------------------- | -------------------------------------------------------- |
+| `get`               | Full product-shaped Index DTF view. Alias for `getFull`. |
+| `getFull`           | Full DTF view with market and basket data.               |
+| `getDtf`            | Subgraph DTF metadata.                                   |
+| `getBasket`         | Live RPC basket from `totalAssets()`.                    |
+| `getBasketSnapshot` | Reserve API current or block snapshot basket.            |
+| `getVersion`        | DTF version from contract.                               |
+| `getTotalSupply`    | Live total supply. Includes pending fee shares.          |
+| `getTotalAssets`    | Live total assets.                                       |
+| `getBrand`          | Product brand metadata.                                  |
+| `getMandate`        | DTF mandate string.                                      |
+| `getPrice`          | Current Reserve API price.                               |
+| `getPrices`         | Batch current prices.                                    |
+| `getPriceHistory`   | Historical Reserve API price points.                     |
+| `getExposure`       | Exposure/analytics data.                                 |
+| `getHolders`        | Holder data.                                             |
+| `getTransactions`   | Transaction history.                                     |
+
+```ts
+const [basket, price] = await Promise.all([
+  sdk.index.getBasket({ address, chainId }),
+  sdk.index.getPrice({ address, chainId }),
+]);
+```
+
+## Issuance And Redemption
+
+| Method                  | Use                                                                   |
+| ----------------------- | --------------------------------------------------------------------- |
+| `getIssuanceState`      | Wallet balances, allowances, and optional mint/redeem amount preview. |
+| `getRedeemMinAmounts`   | Apply slippage bps to expected redeem amounts.                        |
+| `prepareBasketApproval` | ERC20 approval for one basket token.                                  |
+| `prepareMint`           | Direct mint call.                                                     |
+| `prepareMintPlan`       | Mint plan with optional approvals.                                    |
+| `prepareRedeem`         | Redeem call.                                                          |
+
+```ts
+const state = await sdk.index.getIssuanceState({
+  address,
+  chainId,
+  account,
+  shares: 1000000000000000000n,
+});
+
+const approvals = [];
+for (const asset of state.assets) {
+  if (!asset.mintAmount) continue;
+  if (asset.allowance.raw >= asset.mintAmount.raw) continue;
+  approvals.push({ token: asset.token.address, amount: asset.mintAmount.raw });
+}
+
+const plan = sdk.index.prepareMintPlan({
+  address,
+  chainId,
+  shares: 1000000000000000000n,
+  receiver: account,
+  minSharesOut: 1000000000000000000n,
+  approvals,
+});
+```
+
+## Revenue And Fees
+
+| Method                     | Use                                                |
+| -------------------------- | -------------------------------------------------- |
+| `getBidsEnabled`           | Deployment/settings flag for auction bidding mode. |
+| `getRebalanceControl`      | Current rebalance weight/price control mode.       |
+| `getPendingFeeShares`      | Pending shares from accrued fees.                  |
+| `getApprovedRevenueTokens` | Tokens approved for revenue distribution.          |
+| `getPlatformFee`           | Platform fee configuration.                        |
+| `getRevenue`               | Revenue view.                                      |
+| `prepareDistributeFees`    | Materialize pending fee shares.                    |
+
+## Ref Equivalents
+
+Every common DTF read has a ref version.
+
+```ts
+const dtf = sdk.index.ref({ address, chainId });
+
+await dtf.get();
+await dtf.getBasket();
+await dtf.getIssuanceState({ account });
+dtf.prepareRedeem({ shares, receiver, assets, minAmountsOut });
+```

@@ -81,7 +81,7 @@ export function mapIndexDtfProposalSummary(
   const executionBlock = toOptionalNumber(proposal.executionBlock);
   const isOptimistic = !!proposal.isOptimistic;
   const optimistic = mapOptimisticProposalContext(proposal);
-  const vetoThreshold = optimistic?.vetoThreshold ?? mapVetoThreshold(proposal.vetoThreshold);
+  const vetoThreshold = optimistic?.vetoThreshold ?? mapOptionalBigInt(proposal.vetoThreshold);
   return {
     id: proposal.id,
     chainId,
@@ -153,7 +153,7 @@ export function mapIndexDtfProposalVotingSnapshot(
 ): ParsedIndexDtfProposalVotingSnapshot {
   const isOptimistic = !!proposal.isOptimistic;
   const optimistic = mapOptimisticProposalContext(proposal);
-  const vetoThreshold = optimistic?.vetoThreshold ?? mapVetoThreshold(proposal.vetoThreshold);
+  const vetoThreshold = optimistic?.vetoThreshold ?? mapOptionalBigInt(proposal.vetoThreshold);
 
   return {
     id: proposal.id,
@@ -184,7 +184,7 @@ function mapOptimisticProposalContext(
     return undefined;
   }
 
-  const vetoThreshold = mapVetoThreshold(proposal.vetoThreshold);
+  const vetoThreshold = mapOptimisticVetoThreshold(proposal.vetoThreshold);
   const vetoThresholdVotes = mapVetoThreshold(proposal.vetoThresholdVotes);
 
   if (
@@ -209,13 +209,23 @@ function mapOptimisticProposalContext(
 }
 
 function mapVetoThreshold(value: string | null | undefined): bigint | undefined {
+  const vetoThreshold = mapOptionalBigInt(value);
+
+  return vetoThreshold === MAX_UINT256 ? undefined : vetoThreshold;
+}
+
+function mapOptimisticVetoThreshold(value: string | null | undefined): bigint | undefined {
+  const vetoThreshold = mapVetoThreshold(value);
+
+  return vetoThreshold === 0n ? undefined : vetoThreshold;
+}
+
+function mapOptionalBigInt(value: string | null | undefined): bigint | undefined {
   if (value === null || value === undefined) {
     return undefined;
   }
 
-  const vetoThreshold = BigInt(value);
-
-  return vetoThreshold === MAX_UINT256 ? undefined : vetoThreshold;
+  return BigInt(value);
 }
 
 export function mapDtfProposalContractContext(

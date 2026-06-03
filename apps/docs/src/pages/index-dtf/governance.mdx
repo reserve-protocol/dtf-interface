@@ -1,0 +1,77 @@
+# Index DTF Governance
+
+Index DTF governance controls basket changes, DTF settings, vote-lock/DAO settings, and optimistic proposal paths.
+
+## Governance Domains
+
+An Index DTF can have separate authority domains:
+
+- basket/rebalance governance
+- owner/admin governance
+- vote-lock/DAO governance
+- optimistic proposal governance
+
+Do not assume one governor controls every action.
+
+## Proposal Detail
+
+```ts
+const proposal = await sdk.index.getProposal({
+  address,
+  chainId,
+  proposalId,
+});
+```
+
+Proposal detail includes decoded calldata for known Reserve contracts. Unknown calls can be enriched separately with explorer metadata when `etherscanApiKey` is configured.
+
+## Voting
+
+```ts
+const call = sdk.index.prepareVote({
+  chainId,
+  governance: proposal.governance,
+  proposalId: proposal.id,
+  support: 1,
+});
+```
+
+Support values are `0` against, `1` for, and `2` abstain.
+
+## Queue And Execute
+
+```ts
+const payload = {
+  governance: proposal.governance,
+  timelock: proposal.timelock,
+  timelockId: proposal.timelockId,
+  targets: proposal.targets,
+  calldatas: proposal.calldatas,
+  description: proposal.description,
+};
+
+const queueCall = sdk.index.prepareQueueProposal({ chainId, proposal: payload });
+const executeCall = sdk.index.prepareExecuteProposal({ chainId, proposal: payload });
+```
+
+Cancel through timelock requires `proposal.timelock`.
+
+```ts
+const cancelCall = sdk.index.prepareCancelProposal({ chainId, proposal: payload });
+```
+
+## Optimistic Governance
+
+Optimistic governance uses veto-oriented context. Use SDK optimistic methods instead of deriving veto state from normal proposal quorum fields.
+
+```ts
+const context = await sdk.index.getOptimisticProposalContext({
+  chainId,
+  governance: proposal.governance,
+  proposalId: proposal.id,
+});
+```
+
+## Proposal IDs
+
+Proposal IDs are long decimal strings. They are safe as strings.

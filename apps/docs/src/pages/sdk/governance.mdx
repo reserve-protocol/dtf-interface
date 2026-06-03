@@ -1,0 +1,174 @@
+# Governance API
+
+Index DTF governance is exposed from the flat `sdk.index` namespace and from DTF refs.
+
+```ts
+const proposal = await sdk.index.getProposal({
+  address,
+  chainId,
+  proposalId,
+});
+```
+
+## Proposal Reads
+
+| Method                      | Use                                                                |
+| --------------------------- | ------------------------------------------------------------------ |
+| `getProposals`              | Proposal list response for a DTF/governance context.               |
+| `getProposalList`           | Proposal list items only.                                          |
+| `getProposal`               | Proposal detail with local calldata decode and governance context. |
+| `decodeProposalCalldatas`   | Async proposal calldata decode/enrichment.                         |
+| `getAllProposals`           | Chain-level proposal query.                                        |
+| `getProposalVotingSnapshot` | Voting snapshot/totals from RPC-aware reads.                       |
+| `getProposalVotes`          | Current proposal vote totals.                                      |
+| `getProposalVoterState`     | Account state for a proposal.                                      |
+| `getProposalState`          | Exported helper for raw proposal state reads.                      |
+
+Proposal IDs can be extremely long decimal strings. Keep them as strings in routes and UI state.
+
+## Voting And Account State
+
+| Method               | Use                                                |
+| -------------------- | -------------------------------------------------- |
+| `getDelegates`       | Delegate list for a staking/vote-lock token.       |
+| `getGuardians`       | Guardian addresses for Index DTF governance.       |
+| `getLegacyVoteLocks` | Legacy vote-lock governance entries.               |
+| `getVoterState`      | Account voting state for a vote-lock token.        |
+| `getProposerState`   | Account proposal threshold and voting power state. |
+
+```ts
+const proposalDetail = await sdk.index.getProposal({
+  address,
+  chainId,
+  proposalId,
+});
+
+const voterState = await sdk.index.getProposalVoterState({
+  chainId,
+  governance,
+  proposal: proposalDetail,
+  account,
+});
+```
+
+`proposal` is the proposal detail object returned by `getProposal`, not a proposal ID string.
+
+## Proposal Actions
+
+These builders prepare calls. They do not submit transactions.
+
+| Method                            | Contract path                                   |
+| --------------------------------- | ----------------------------------------------- |
+| `prepareVote`                     | Governor `castVote`                             |
+| `prepareVoteWithReason`           | Governor `castVoteWithReason`                   |
+| `prepareVoteWithReasonAndParams`  | Governor `castVoteWithReasonAndParams`          |
+| `prepareQueueProposal`            | Governor `queue`                                |
+| `prepareExecuteProposal`          | Governor `execute`                              |
+| `prepareCancelProposal`           | Timelock `cancel`; requires `proposal.timelock` |
+| `prepareGovernorCancelProposal`   | Governor `cancel`                               |
+| `prepareSubmitProposal`           | Governor proposal submission                    |
+| `prepareSubmitOptimisticProposal` | Optimistic proposal submission                  |
+
+```ts
+const call = sdk.index.prepareVote({
+  chainId,
+  governance,
+  proposalId,
+  support: 1,
+});
+```
+
+Vote support values are:
+
+| Value | Meaning |
+| ----- | ------- |
+| `0`   | Against |
+| `1`   | For     |
+| `2`   | Abstain |
+
+## Proposal Payload Builders
+
+The SDK builds proposal payloads from product-shaped inputs.
+
+| Method                        | Use                                                 |
+| ----------------------------- | --------------------------------------------------- |
+| `buildBasketProposal`         | Build a basket/rebalance proposal.                  |
+| `buildBasketSettingsProposal` | Build basket settings changes.                      |
+| `buildDaoSettingsProposal`    | Build vote-lock/DAO settings changes.               |
+| `buildSettingsProposal`       | Build DTF, governance, and shared settings changes. |
+
+```ts
+const proposal = await sdk.index.buildBasketProposal({
+  address,
+  chainId,
+  governance,
+  basket: {
+    type: "shares",
+    tokens: [
+      {
+        address: tokenA,
+        share: 50,
+      },
+      {
+        address: tokenB,
+        share: 50,
+      },
+    ],
+  },
+});
+```
+
+`share: 50` means 50 percent. It is not a D18 value.
+
+## Admin And Settings Builders
+
+Most apps should use `buildSettingsProposal`, `buildBasketSettingsProposal`, or `buildDaoSettingsProposal`. The package also exports lower-level settings call builders for custom proposal assembly and admin tooling.
+
+These are direct package exports, not bound `sdk.index` methods:
+
+| Area                  | Builders                                                                                                                                                                                                   |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DTF metadata and fees | `prepareIndexDtfSetName`, `prepareIndexDtfSetMandate`, `prepareIndexDtfSetMintFee`, `prepareIndexDtfSetTvlFee`, `prepareIndexDtfSetSelfFee`, `prepareIndexDtfSetFeeRecipients`                             |
+| Basket and trading    | `prepareIndexDtfAddToBasket`, `prepareIndexDtfRemoveFromBasket`, `prepareIndexDtfSetAuctionLength`, `prepareIndexDtfSetBidsEnabled`, `prepareIndexDtfSetTrustedFillerRegistry`, `prepareIndexDtfDeprecate` |
+| V6 allowlist controls | `prepareIndexDtfSetTradeAllowlistEnabled`, `prepareIndexDtfAddToAllowlist`, `prepareIndexDtfRemoveFromAllowlist`, `prepareIndexDtfSetRebalanceControl`                                                     |
+| Optimistic governance | `prepareIndexDtfSetOptimisticParams`, `prepareIndexDtfSetProposalThrottle`, `prepareIndexDtfSetLateQuorumVoteExtension`, `prepareIndexDtfRevokeOptimisticProposer`                                         |
+
+Versioned DTF builders require `version: "5.0.0" | "6.0.0"`. Read the DTF version first with `sdk.index.getVersion({ address, chainId })`.
+
+## Optimistic Governance
+
+Optimistic governance has its own context and vote surfaces.
+
+| Method                            | Use                                          |
+| --------------------------------- | -------------------------------------------- |
+| `getOptimisticGovernance`         | Optimistic governance settings for a DTF.    |
+| `getOptimisticProposalContext`    | Snapshot context for an optimistic proposal. |
+| `getOptimisticTimelockRoles`      | Timelock role view.                          |
+| `getOptimisticSelectors`          | Allowed optimistic selectors.                |
+| `getOptimisticVotes`              | Current optimistic votes.                    |
+| `getPastOptimisticVotes`          | Historical optimistic vote power.            |
+| `getProposalThrottleCharges`      | Proposal throttle charges.                   |
+| `getOptimisticProposalVoterState` | Account optimistic voter state.              |
+
+Do not treat normal governor quorum as the optimistic veto threshold. Use the optimistic context methods.
+
+## Selector Registry
+
+| Method                                       | Use                             |
+| -------------------------------------------- | ------------------------------- |
+| `getSelectorRegistryTargets`                 | Registered target contracts.    |
+| `getSelectorRegistryAllowedSelectors`        | Allowed selectors for a target. |
+| `getSelectorRegistryIsAllowed`               | Boolean selector check.         |
+| `prepareSelectorRegistryRegisterSelectors`   | Register selectors.             |
+| `prepareSelectorRegistryUnregisterSelectors` | Unregister selectors.           |
+
+## Timelock And Relay Builders
+
+| Method                        | Use                       |
+| ----------------------------- | ------------------------- |
+| `prepareUpdateTimelock`       | Update governor timelock. |
+| `prepareRelay`                | Governor relay call.      |
+| `prepareTimelockDelay`        | Update timelock delay.    |
+| `prepareTimelockGrantRole`    | Grant timelock role.      |
+| `prepareTimelockRevokeRole`   | Revoke timelock role.     |
+| `prepareTimelockExecuteBatch` | Execute a timelock batch. |

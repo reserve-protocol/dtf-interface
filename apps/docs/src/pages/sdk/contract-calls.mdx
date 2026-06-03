@@ -1,0 +1,115 @@
+# Contract Calls
+
+Write builders return `ContractCall` or `ContractCallPlan` objects.
+
+They do not send transactions.
+
+## ContractCall
+
+```ts
+type ContractCall = {
+  chainId: 1 | 8453 | 56;
+  to: `0x${string}`;
+  data: `0x${string}`;
+  value: bigint;
+  contract: {
+    address: `0x${string}`;
+    abi: unknown[];
+    functionName: string;
+    args: readonly unknown[];
+  };
+};
+```
+
+Use `to`, `data`, and `value` for raw wallet clients.
+
+```ts
+if (chain.id !== call.chainId) throw new Error("Wrong chain");
+
+await walletClient.sendTransaction({
+  account,
+  chain,
+  to: call.to,
+  data: call.data,
+  value: call.value,
+});
+```
+
+Use `contract` metadata for viem or wagmi contract APIs.
+
+```ts
+if (chain.id !== call.chainId) throw new Error("Wrong chain");
+
+await walletClient.writeContract({
+  account,
+  chain,
+  address: call.contract.address,
+  abi: call.contract.abi,
+  functionName: call.contract.functionName,
+  args: call.contract.args,
+  value: call.value,
+});
+```
+
+Always preserve `call.chainId` in simulation and transaction flows.
+
+## ContractCallPlan
+
+Some workflows can require approvals before the final call.
+
+```ts
+type ContractCallPlan =
+  | { type: "call"; call: ContractCall }
+  | { type: "approval-required"; approvals: readonly ContractCall[]; call: ContractCall };
+```
+
+Example mint plan:
+
+```ts
+const plan = sdk.index.prepareMintPlan({
+  address,
+  chainId,
+  shares: 1000000000000000000n,
+  receiver,
+  minSharesOut: 1000000000000000000n,
+  approvals: [
+    {
+      token,
+      amount,
+    },
+  ],
+});
+
+if (plan.type === "approval-required") {
+  for (const approval of plan.approvals) {
+    await send(approval);
+  }
+}
+
+await send(plan.call);
+```
+
+## Common Builders
+
+| Builder                                | Returns            |
+| -------------------------------------- | ------------------ |
+| `sdk.index.prepareMint`                | `ContractCall`     |
+| `sdk.index.prepareMintPlan`            | `ContractCallPlan` |
+| `sdk.index.prepareRedeem`              | `ContractCall`     |
+| `sdk.index.prepareVote`                | `ContractCall`     |
+| `sdk.index.prepareQueueProposal`       | `ContractCall`     |
+| `sdk.index.prepareExecuteProposal`     | `ContractCall`     |
+| `sdk.index.prepareCancelProposal`      | `ContractCall`     |
+| `sdk.index.prepareDeployPlan`          | `ContractCallPlan` |
+| `sdk.index.prepareVoteLockDepositPlan` | `ContractCallPlan` |
+| `prepareErc20Approval`                 | `ContractCall`     |
+
+## Helper Builders
+
+The package exports generic helpers.
+
+```ts
+import { prepareContractCall, prepareErc20Approval } from "@reserve-protocol/sdk";
+```
+
+Use `prepareContractCall` for custom app-owned contracts when you want the same `ContractCall` shape.

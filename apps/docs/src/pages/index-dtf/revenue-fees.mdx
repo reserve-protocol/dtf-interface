@@ -1,0 +1,29 @@
+# Revenue & Fees
+
+Index DTF fees accrue as pending fee shares. Calling `distributeFees()` materializes those pending shares to recipients.
+
+## Reads
+
+```ts
+const [pendingFeeShares, platformFee, revenue] = await Promise.all([
+  sdk.index.getPendingFeeShares({ address, chainId }),
+  sdk.index.getPlatformFee({ address, chainId }),
+  sdk.index.getRevenue({ address, chainId }),
+]);
+```
+
+## Distribute Fees
+
+```ts
+const call = sdk.index.prepareDistributeFees({ address, chainId });
+```
+
+Apps decide when to expose this action.
+
+## Supply Gotcha
+
+`totalSupply()` includes pending fee shares. Do not use stale ERC20 supply assumptions for share-price math.
+
+## Revenue Recipients
+
+Fee-recipient portions are protocol values. Product UIs may adjust displayed percentages for platform fee. Use SDK builders when creating fee-recipient proposal or deployment payloads.

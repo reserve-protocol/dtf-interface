@@ -1,0 +1,92 @@
+# Client Configuration
+
+`createDtfSdk` accepts the same runtime configuration as `createDtfClient`.
+
+```ts
+import { createDtfSdk } from "@reserve-protocol/sdk";
+
+const sdk = createDtfSdk({
+  apiBaseUrl: "https://api.reserve.org",
+  etherscanApiKey: process.env.ETHERSCAN_API_KEY,
+  chains: {
+    8453: {
+      rpcUrls: ["https://base-mainnet.example"],
+    },
+  },
+});
+```
+
+## Config Fields
+
+| Field             | Use                                                                      |
+| ----------------- | ------------------------------------------------------------------------ |
+| `apiBaseUrl`      | Override Reserve API base URL. Defaults to `https://api.reserve.org`.    |
+| `chains`          | Override chain-specific RPC clients, RPC URLs, or subgraph URLs.         |
+| `etherscanApiKey` | Enable best-effort explorer ABI metadata for proposal decode enrichment. |
+| `client`          | Pass a prebuilt `DtfClient` into `createDtfSdk`.                         |
+
+## Chain Overrides
+
+Supported chain IDs are `1`, `8453`, and `56`.
+
+```ts
+const sdk = createDtfSdk({
+  chains: {
+    1: {
+      rpcUrls: ["https://eth-mainnet.example"],
+    },
+    8453: {
+      rpcUrls: ["https://base-mainnet.example"],
+    },
+    56: {
+      rpcUrls: ["https://bsc-mainnet.example"],
+    },
+  },
+});
+```
+
+Override RPC URLs are prepended before defaults and deduped.
+
+## Custom Public Clients
+
+You can pass a viem public client through chain config when you need full transport control.
+
+```ts
+import { createPublicClient, http } from "viem";
+import { base } from "viem/chains";
+
+const publicClient = createPublicClient({
+  chain: base,
+  transport: http("https://base-mainnet.example"),
+});
+
+const sdk = createDtfSdk({
+  chains: {
+    8453: {
+      publicClient,
+    },
+  },
+});
+```
+
+## Low-Level Client
+
+Use `createDtfClient` only when you need low-level access without namespaces.
+
+```ts
+import { createDtfClient } from "@reserve-protocol/sdk";
+
+const client = createDtfClient();
+
+const publicClient = client.viem.getPublicClient(8453);
+const metadata = await client.explorer.getContractMetadata({
+  chainId: 8453,
+  address: "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8",
+});
+```
+
+## Explorer Metadata
+
+Explorer metadata returns `null` when no API key is configured or when fetching/parsing fails.
+
+It is used as an enrichment source, not a required dependency for core proposal detail pages.

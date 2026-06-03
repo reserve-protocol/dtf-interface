@@ -1,0 +1,148 @@
+# Quickstart
+
+Create an SDK instance and read an Index DTF.
+
+```ts
+import { createDtfSdk } from "@reserve-protocol/sdk";
+
+const sdk = createDtfSdk();
+
+const dtf = await sdk.index.get({
+  address: "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8",
+  chainId: 8453,
+  brand: true,
+});
+
+console.log(
+  dtf.token.symbol,
+  Object.values(dtf.basket).map((asset) => asset.token.symbol),
+);
+```
+
+## Bind A DTF Ref
+
+Use `sdk.index.ref` when several calls share the same `{ address, chainId }`.
+
+```ts
+const dtf = sdk.index.ref({
+  address: "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8",
+  chainId: 8453,
+});
+
+const [metadata, basket, rebalance] = await Promise.all([
+  dtf.get({ brand: true }),
+  dtf.getBasket(),
+  dtf.getCurrentRebalance(),
+]);
+```
+
+Refs are zero-network handles. Creating a ref does not fetch, cache, or subscribe.
+
+## Configure RPCs
+
+The SDK ships with public RPC defaults. Production apps should pass their own RPC URLs.
+
+```ts
+const sdk = createDtfSdk({
+  chains: {
+    1: {
+      rpcUrls: ["https://eth-mainnet.example"],
+    },
+    8453: {
+      rpcUrls: ["https://base-mainnet.example"],
+    },
+    56: {
+      rpcUrls: ["https://bsc-mainnet.example"],
+    },
+  },
+});
+```
+
+Override RPC URLs are tried before SDK defaults.
+
+## Prepare A Transaction
+
+The SDK prepares transaction calls. Your app sends them.
+
+```ts
+const call = dtf.prepareMint({
+  shares: 1000000000000000000n,
+  receiver: account,
+  minSharesOut: 1000000000000000000n,
+});
+
+console.log(call.chainId, call.to, call.data, call.value);
+```
+
+`ContractCall` also includes ABI metadata for apps that prefer wagmi or viem contract APIs:
+
+```ts
+if (chain.id !== call.chainId) throw new Error("Wrong chain");
+
+await walletClient.writeContract({
+  account,
+  chain,
+  address: call.contract.address,
+  abi: call.contract.abi,
+  functionName: call.contract.functionName,
+  args: call.contract.args,
+  value: call.value,
+});
+```
+
+## React Quickstart
+
+Wrap your app with TanStack Query and `DtfSdkProvider`.
+
+```tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { DtfSdkProvider, useIndexDtf } from "@reserve-protocol/react-sdk";
+
+const queryClient = new QueryClient();
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <DtfSdkProvider>
+        <IndexDtfCard />
+      </DtfSdkProvider>
+    </QueryClientProvider>
+  );
+}
+
+function IndexDtfCard() {
+  const dtf = useIndexDtf({
+    address: "0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8",
+    chainId: 8453,
+    brand: true,
+  });
+
+  if (dtf.isLoading) return <div>Loading...</div>;
+  if (!dtf.data) return null;
+
+  return <div>{dtf.data.token.symbol}</div>;
+}
+```
+
+For route-scoped pages, use `IndexDtfProvider` and current-DTF hooks.
+
+```tsx
+import { IndexDtfProvider, useCurrentIndexDtf } from "@reserve-protocol/react-sdk";
+
+function IndexDtfRoute() {
+  return (
+    <IndexDtfProvider
+      address="0x4da9a0f397db1397902070f93a4d6ddbc0e0e6e8"
+      chainId={8453}
+      prefetch
+    >
+      <Overview />
+    </IndexDtfProvider>
+  );
+}
+
+function Overview() {
+  const dtf = useCurrentIndexDtf();
+  return <div>{dtf.data?.token.symbol}</div>;
+}
+```

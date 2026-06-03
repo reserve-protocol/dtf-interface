@@ -1,0 +1,64 @@
+# Data Sources
+
+The SDK is source-aware. It does not pretend all DTF data comes from one place.
+
+| Data                        | Source                  | Why                                                                 |
+| --------------------------- | ----------------------- | ------------------------------------------------------------------- |
+| Live Index basket balances  | RPC                     | The Index subgraph does not own live basket balances.               |
+| Active rebalance state      | RPC                     | Auction and rebalance state must be current.                        |
+| Proposal state freshness    | RPC                     | Subgraph proposal state is event-driven and can lag terminal state. |
+| Discovery                   | Reserve API or catalog  | Product listings are curated and API-backed.                        |
+| Prices                      | Reserve API             | Prices are aggregated and normalized by Reserve.                    |
+| Historical analytics        | Reserve API or subgraph | Depends on the query shape and data freshness needs.                |
+| Governance metadata         | Index subgraph plus RPC | Indexed history plus live contract reads.                           |
+| Vote-lock DAO stats         | Reserve API             | The API aggregates DAO/vote-lock position data.                     |
+| Unknown proposal call names | Explorer metadata       | Etherscan-style ABI fetch is optional and best-effort.              |
+
+## RPC
+
+RPC is used for live onchain truth:
+
+- basket assets from `totalAssets()`
+- total supply
+- active rebalance and auction state
+- bid quotes
+- proposal vote/state reads
+- vote-lock balances and votes
+
+Pass production RPC URLs through `createDtfSdk({ chains })`.
+
+## Reserve API
+
+Reserve API is used for product-shaped data:
+
+- discovery
+- current and historical prices
+- current basket snapshots
+- exposure and performance
+- revenue and portfolio data
+- vote-lock DAO aggregates
+
+The default base URL is `https://api.reserve.org`.
+
+## Subgraphs
+
+Subgraphs are used for indexed metadata and history:
+
+- DTF metadata
+- proposal metadata
+- holders
+- historical governance and rebalance entities
+
+Do not use the subgraph as live truth for basket balances, active auction status, or final proposal state.
+
+## Explorer Metadata
+
+Explorer metadata is optional. Configure it with `etherscanApiKey`.
+
+```ts
+const sdk = createDtfSdk({
+  etherscanApiKey: process.env.ETHERSCAN_API_KEY,
+});
+```
+
+Explorer metadata is used to enrich unknown proposal calldata. Known Reserve governance, timelock, DTF, vote-lock, and optimistic spell calls are decoded locally from SDK ABIs first.

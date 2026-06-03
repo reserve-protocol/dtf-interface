@@ -1,0 +1,79 @@
+# Query Options & Keys
+
+Every React SDK read hook is backed by a query options function.
+
+Use hooks for normal components. Use query options for prefetching, cache reads, custom query clients, and route loaders.
+
+## Query Options
+
+```tsx
+import { indexDtfProposalQueryOptions, useDtfSdk } from "@reserve-protocol/react-sdk";
+import { useQueryClient } from "@tanstack/react-query";
+
+function PrefetchButton({ address, chainId, proposalId }) {
+  const sdk = useDtfSdk();
+  const queryClient = useQueryClient();
+
+  async function prefetch() {
+    await queryClient.prefetchQuery(indexDtfProposalQueryOptions(sdk, { address, chainId, proposalId }));
+  }
+}
+```
+
+Query options accept the SDK instance first, then params, then optional TanStack Query options.
+
+```ts
+indexDtfBasketQueryOptions(sdk, { address, chainId }, { staleTime: 30_000 });
+```
+
+## Disabled Params
+
+When a hook requires params and receives `undefined`, the query is disabled.
+
+```tsx
+const query = useIndexDtfProposal(proposalId ? { address, chainId, proposalId } : undefined);
+```
+
+The matching query options functions use the same rule.
+
+## Query Keys
+
+`dtfQueryKeys` is exported for cache reads and invalidation.
+
+```tsx
+import { dtfQueryKeys } from "@reserve-protocol/react-sdk";
+
+queryClient.invalidateQueries({
+  queryKey: dtfQueryKeys.index.governance.proposal({
+    address,
+    chainId,
+    proposalId,
+  }),
+});
+```
+
+Keys normalize values:
+
+- addresses are lowercased
+- `bigint` values become strings
+- object keys are sorted
+- `undefined` object fields are omitted
+
+This keeps cache keys stable across equivalent inputs.
+
+## Exported Query Options
+
+Common exported options include:
+
+| Area                  | Query options                                                                                                                                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Discovery/detail      | `discoverDtfsQueryOptions`, `indexDtfListQueryOptions`, `indexDtfQueryOptions`, `fullIndexDtfQueryOptions`                                                                                     |
+| Basket/price          | `indexDtfBasketQueryOptions`, `indexDtfPriceQueryOptions`, `indexDtfPriceHistoryQueryOptions`, `indexDtfVersionQueryOptions`, `indexDtfBrandQueryOptions`                                      |
+| Product state         | `indexDtfStatusQueryOptions`, `indexDtfExposureQueryOptions`, `indexDtfTransactionsQueryOptions`, `indexDtfRevenueQueryOptions`, `indexDtfIssuanceStateQueryOptions`                           |
+| Rebalances            | `indexDtfRebalancesQueryOptions`, `indexDtfCurrentRebalanceQueryOptions`                                                                                                                       |
+| Governance            | `indexDtfProposalListQueryOptions`, `indexDtfProposalsQueryOptions`, `indexDtfProposalQueryOptions`, `indexDtfProposalVotesQueryOptions`, `indexDtfProposalVoterStateQueryOptions`             |
+| Optimistic governance | `indexDtfOptimisticGovernanceQueryOptions`, `indexDtfOptimisticProposalContextQueryOptions`, `indexDtfOptimisticProposalVoterStateQueryOptions`, `indexDtfOptimisticTimelockRolesQueryOptions` |
+| Selector registry     | `indexDtfSelectorRegistryTargetsQueryOptions`, `indexDtfSelectorRegistryAllowedSelectorsQueryOptions`, `indexDtfSelectorRegistryIsAllowedQueryOptions`                                         |
+| Vote-lock/portfolio   | `indexDtfVoteLockStateQueryOptions`, `accountPortfolioQueryOptions`                                                                                                                            |
+
+Some newer product/analytics query options use local keys instead of `dtfQueryKeys` helpers. Prefer exported query options when you are not sure about the exact key shape.

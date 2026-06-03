@@ -1,0 +1,82 @@
+# Gotchas
+
+These are the mistakes most likely to cause wrong integrations.
+
+## Amounts
+
+Use `bigint` for onchain amounts.
+
+```ts
+const shares = 1000000000000000000n;
+```
+
+Do not use `number` for token amounts, shares, proposal IDs, or auction IDs.
+
+## Proposal IDs
+
+Index DTF proposal IDs are very long decimal strings.
+
+```ts
+const proposalId = "114143694312255605278636846982278574633125503103201258989783472858643695239364";
+```
+
+The SDK accepts `string | bigint` for proposal IDs where relevant. Keep them as strings in UI routes and URL params.
+
+## Basket Proposal Units
+
+Basket proposal inputs are human-oriented.
+
+- `share: 50` means 50 percent, not `0.5e18`.
+- `units: '1'` USDC means one human USDC unit, not `1000000n`.
+
+The SDK handles protocol encoding.
+
+## Versioned Writes
+
+Some Index DTF write builders need a contract version.
+
+The current write builders support `5.0.0` and `6.0.0` targets. Version-specific builders matter for DTF settings, allowlists, auction functions, and rebalance encoding.
+
+See [Contracts & Versions](/index-dtf/contracts-and-versions) before hand-encoding writes.
+
+## Contract Calls Are Not Transactions
+
+SDK write helpers return `ContractCall` objects. They do not connect wallets or send transactions.
+
+Apps own:
+
+- wallet connection
+- chain switching
+- simulation
+- transaction submission
+- confirmation UI
+- post-transaction refresh
+
+## `chainId` Matters
+
+Every prepared call includes `chainId`. Pass it through to your wallet/simulation layer when the library supports it.
+
+Dropping `chainId` can simulate or send a transaction on the user's current chain instead of the proposal or DTF chain.
+
+## Yield Namespace
+
+`sdk.yield.get` and `sdk.yield.list` exist as a boundary but are not implemented yet. They throw `NOT_IMPLEMENTED`.
+
+Do not build product flows that assume Yield DTF parity with Index DTF SDK methods.
+
+## RSR And Vote-Lock
+
+Index DTF vote-lock vaults are not Yield DTF `stRSR`.
+
+Index vote-lock vaults can use different underlying assets. Do not assume every Index vote-lock uses RSR.
+
+## Subgraph Freshness
+
+The subgraph is useful for indexed metadata and history. It is not live truth for:
+
+- basket balances
+- active auctions
+- active rebalance state
+- final proposal terminal state
+
+Use RPC-backed SDK methods when freshness matters.

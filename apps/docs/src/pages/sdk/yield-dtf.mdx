@@ -1,0 +1,30 @@
+# Yield DTF Boundary
+
+Yield DTFs are part of the Reserve protocol, but the current SDK yield namespace is not implemented.
+
+```ts
+const sdk = createDtfSdk();
+
+await sdk.yield.list(); // throws NOT_IMPLEMENTED
+await sdk.yield.get({ address, chainId }); // throws NOT_IMPLEMENTED
+```
+
+## What Exists Today
+
+- Product and protocol docs for Yield DTFs.
+- Chain context: Ethereum mainnet and Base.
+- A placeholder `sdk.yield` namespace so the SDK shape has a future boundary.
+
+## What Does Not Exist Yet
+
+- Yield DTF discovery methods.
+- Yield DTF basket reads.
+- Yield DTF governance reads.
+- Yield DTF staking or revenue builders.
+- React SDK Yield DTF hooks.
+
+## Integration Guidance
+
+Do not assume Index DTF and Yield DTF APIs are symmetrical.
+
+Index DTFs use Reserve API, RPC, and the Index DTF subgraph. Yield DTFs historically use subgraph plus RPC and have different contracts, lifecycle, and staking mechanics.

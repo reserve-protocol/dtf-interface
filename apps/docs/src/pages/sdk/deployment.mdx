@@ -1,0 +1,99 @@
+# Deployment
+
+The SDK exposes Index DTF deployment builders. They prepare calls and approval plans; they do not send transactions.
+
+## Constants
+
+```ts
+import {
+  DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+  INDEX_DTF_DEPLOYER_ADDRESS,
+  INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
+} from "@reserve-protocol/sdk";
+```
+
+## Helpers
+
+| Helper                                       | Use                                                  |
+| -------------------------------------------- | ---------------------------------------------------- |
+| `generateIndexDtfDeploymentNonce`            | Generate a deployment nonce.                         |
+| `sdk.index.buildDeployFeeRecipients`         | Build deploy fee-recipient config.                   |
+| `sdk.index.getDeployApprovalAmount`          | Apply an approval buffer to an initial asset amount. |
+| `extractIndexDtfDeployedAddress`             | Extract DTF address from deployment logs.            |
+| `extractIndexDtfDeployedStakingTokenAddress` | Extract staking token address from deployment logs.  |
+
+## Builders
+
+| Method                        | Use                                                |
+| ----------------------------- | -------------------------------------------------- |
+| `prepareDeploy`               | Prepare an ungoverned DTF deployment call.         |
+| `prepareDeployGoverned`       | Prepare a governed DTF deployment call.            |
+| `prepareDeployStakingToken`   | Prepare a vote-lock staking token deployment call. |
+| `prepareDeployPlan`           | Deployment plan with optional approvals.           |
+| `prepareDeployGovernedPlan`   | Governed deployment plan with optional approvals.  |
+| `prepareDeployAssetApproval`  | Approval for one deploy asset.                     |
+| `prepareDeployAssetApprovals` | Approval calls for deploy assets.                  |
+
+## Basic Shape
+
+```ts
+const plan = sdk.index.prepareDeployPlan({
+  chainId: 8453,
+  basicDetails: {
+    name: "Example Index DTF",
+    symbol: "eDTF",
+    assets: [tokenA, tokenB],
+    amounts: [1000000000000000000n, 2000000000000000000n],
+    initialShares: 1000000000000000000n,
+  },
+  additionalDetails: {
+    auctionLength: 900n,
+    feeRecipients,
+    tvlFee: 0n,
+    mintFee: 0n,
+    mandate: "Example mandate",
+  },
+  flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+  owner,
+  approvals: [
+    { token: tokenA, amount: 1000000000000000000n },
+    { token: tokenB, amount: 2000000000000000000n },
+  ],
+});
+```
+
+## Governed Deployment
+
+Governed deployments include an existing vote-lock token plus owner and trading governance settings.
+
+```ts
+const call = sdk.index.prepareDeployGoverned({
+  chainId,
+  stToken,
+  basicDetails,
+  additionalDetails,
+  flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+  ownerGovernance: {
+    votingDelay: 1n,
+    votingPeriod: 1209600n,
+    proposalThreshold: 1000000000000000000n,
+    quorumThreshold: 1000000000000000000n,
+    timelockDelay: 86400n,
+    guardians: [],
+  },
+  tradingGovernance: {
+    votingDelay: 1n,
+    votingPeriod: 604800n,
+    proposalThreshold: 1000000000000000000n,
+    quorumThreshold: 1000000000000000000n,
+    timelockDelay: 86400n,
+    guardians: [],
+  },
+});
+```
+
+## Approval Buffer
+
+`getDeployApprovalAmount(amount)` defaults to an `approvalBufferBps` of `20000`, which is 2x the input amount.
+
+Use explicit values if your deploy UI needs a smaller approval.

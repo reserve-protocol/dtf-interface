@@ -1,0 +1,73 @@
+# Issuance & Redemption
+
+Manual issuance means depositing every basket token proportionally and receiving DTF shares.
+
+Manual redemption means burning DTF shares and receiving basket tokens.
+
+## Read Issuance State
+
+```ts
+const state = await sdk.index.getIssuanceState({
+  address,
+  chainId,
+  account,
+  shares: 1000000000000000000n,
+});
+```
+
+The result includes:
+
+- DTF balance.
+- max mint shares.
+- max redeem shares.
+- basket token wallet balances.
+- basket token allowances.
+- amount per DTF.
+- optional mint/redeem amounts for the requested shares.
+
+## Mint Plan
+
+```ts
+const approvals = [];
+for (const asset of state.assets) {
+  if (!asset.mintAmount) continue;
+  if (asset.allowance.raw >= asset.mintAmount.raw) continue;
+  approvals.push({ token: asset.token.address, amount: asset.mintAmount.raw });
+}
+
+const plan = sdk.index.prepareMintPlan({
+  address,
+  chainId,
+  shares: 1000000000000000000n,
+  receiver: account,
+  minSharesOut: 1000000000000000000n,
+  approvals,
+});
+```
+
+Execute approvals first when `plan.type === 'approval-required'`, then execute `plan.call`.
+
+## Redeem
+
+```ts
+const assets = state.assets.map((asset) => asset.token.address);
+const expectedAmounts = state.assets.map((asset) => asset.redeemAmount?.raw ?? 0n);
+const minAmountsOut = sdk.index.getRedeemMinAmounts(expectedAmounts, 50);
+
+const call = sdk.index.prepareRedeem({
+  address,
+  chainId,
+  shares: 1000000000000000000n,
+  receiver: account,
+  assets,
+  minAmountsOut,
+});
+```
+
+`50` slippage bps means 0.5 percent.
+
+## Zap Boundary
+
+Zap flows are not manual mint/redeem. They involve quote, swap, and mint routing. Keep zap integration separate from protocol mint/redeem builders.
+
+See [Zapper Integration](/integrations/zapper) for the current integration boundary.

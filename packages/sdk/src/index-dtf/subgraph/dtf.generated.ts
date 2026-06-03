@@ -6505,6 +6505,15 @@ export type GetIndexDtfProposalQueryVariables = Exact<{
 
 export type GetIndexDtfProposalQuery = { dtf?: { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null } | null, proposal?: { id: string, txnHash: string, timelockId?: string | null, description: string, creationTime: string, voteStart: string, voteEnd: string, queueBlock?: string | null, queueTxnHash?: string | null, queueTime?: string | null, state: ProposalState, isOptimistic?: boolean | null, vetoThreshold?: string | null, vetoThresholdVotes?: string | null, optimisticSnapshot?: string | null, optimisticSnapshotSupply?: string | null, executionETA?: string | null, executionTime?: string | null, executionBlock?: string | null, creationBlock: string, cancellationTime?: string | null, calldatas?: Array<string> | null, targets?: Array<string> | null, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, abstainDelegateVotes: string, againstDelegateVotes: string, executionTxnHash?: string | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governance: { id: string, optimisticSelectorRegistry?: string | null, token: { id: string }, timelock: { id: string, type: string } } } | null };
 
+export type GetIndexDtfProposalChallengeQueryVariables = Exact<{
+  governanceId: Scalars['String']['input'];
+  description: Scalars['String']['input'];
+  creationBlock: Scalars['BigInt']['input'];
+}>;
+
+
+export type GetIndexDtfProposalChallengeQuery = { proposals: Array<{ id: string }> };
+
 export type GetIndexDtfProposalVotingSnapshotQueryVariables = Exact<{
   proposalId: Scalars['ID']['input'];
 }>;
@@ -6968,6 +6977,18 @@ export const GetIndexDtfProposalDocument = new TypedDocumentString(`
     }
   }
 }`) as unknown as TypedDocumentString<GetIndexDtfProposalQuery, GetIndexDtfProposalQueryVariables>;
+export const GetIndexDtfProposalChallengeDocument = new TypedDocumentString(`
+    query GetIndexDtfProposalChallenge($governanceId: String!, $description: String!, $creationBlock: BigInt!) {
+  proposals(
+    first: 1
+    orderBy: creationBlock
+    orderDirection: desc
+    where: {governance: $governanceId, description: $description, creationBlock_lte: $creationBlock, isOptimistic: true}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<GetIndexDtfProposalChallengeQuery, GetIndexDtfProposalChallengeQueryVariables>;
 export const GetIndexDtfProposalVotingSnapshotDocument = new TypedDocumentString(`
     query GetIndexDtfProposalVotingSnapshot($proposalId: ID!) {
   proposal(id: $proposalId) {

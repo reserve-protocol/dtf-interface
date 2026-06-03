@@ -1,0 +1,108 @@
+# Providers
+
+React SDK hooks require `DtfSdkProvider`. Query hooks also require TanStack Query.
+
+## App Setup
+
+```tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { DtfSdkProvider } from "@reserve-protocol/react-sdk";
+
+const queryClient = new QueryClient();
+
+export function Root() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <DtfSdkProvider
+        etherscanApiKey={import.meta.env.VITE_ETHERSCAN_API_KEY}
+        chains={{
+          8453: {
+            rpcUrls: ["https://base-mainnet.example"],
+          },
+        }}
+      >
+        <App />
+      </DtfSdkProvider>
+    </QueryClientProvider>
+  );
+}
+```
+
+`DtfSdkProvider` accepts the same config as `createDtfSdk`:
+
+| Prop              | Use                                                |
+| ----------------- | -------------------------------------------------- |
+| `apiBaseUrl`      | Override Reserve API base URL.                     |
+| `chains`          | Override RPC clients, RPC URLs, and subgraph URLs. |
+| `client`          | Pass a prebuilt SDK client.                        |
+| `etherscanApiKey` | Enable explorer ABI enrichment.                    |
+| `sdk`             | Pass a prebuilt SDK instance.                      |
+
+## useDtfSdk
+
+Use `useDtfSdk` when app code needs direct SDK access.
+
+```tsx
+import { useDtfSdk } from "@reserve-protocol/react-sdk";
+
+function ExportButton() {
+  const sdk = useDtfSdk();
+
+  async function load() {
+    return sdk.index.discover({ chainId: 8453 });
+  }
+}
+```
+
+Prefer query hooks for UI data. Use `useDtfSdk` for imperative flows, custom prefetching, or code that is not naturally a query hook yet.
+
+`useDtfSdk` throws if used outside `DtfSdkProvider`.
+
+## IndexDtfProvider
+
+Use `IndexDtfProvider` on DTF route pages.
+
+```tsx
+import { IndexDtfProvider } from "@reserve-protocol/react-sdk";
+
+function Route() {
+  return (
+    <IndexDtfProvider
+      address={address}
+      chainId={chainId}
+      prefetch
+    >
+      <IndexDtfPage />
+    </IndexDtfProvider>
+  );
+}
+```
+
+`prefetch` runs `useFullIndexDtf({ address, chainId, brand: true })` behind the scenes.
+
+## Current DTF Hooks
+
+Inside `IndexDtfProvider`, use current-DTF hooks.
+
+```tsx
+import { useCurrentIndexDtf, useCurrentIndexDtfBasket, useIndexDtfIdentity } from "@reserve-protocol/react-sdk";
+
+function Header() {
+  const dtf = useCurrentIndexDtf();
+  return <h1>{dtf.data?.token.symbol}</h1>;
+}
+
+function Basket() {
+  const basket = useCurrentIndexDtfBasket();
+  return <div>{Object.keys(basket ?? {}).length} assets</div>;
+}
+
+function RefetchButton() {
+  const identity = useIndexDtfIdentity();
+  return <button data-chain-id={identity.chainId}>Refresh</button>;
+}
+```
+
+`useCurrentIndexDtfBasket` returns derived basket data and hides loading/error state. Use `useCurrentIndexDtf` when UI needs query status.
+
+`useIndexDtfIdentity` returns the route-scoped `{ address, chainId }` from `IndexDtfProvider` and throws outside the provider.

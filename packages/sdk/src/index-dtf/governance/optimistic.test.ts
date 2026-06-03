@@ -10,6 +10,8 @@ import {
 } from "@/index-dtf/governance/optimistic";
 import { getVoteState } from "@/index-dtf/governance/utils";
 
+const MAX_UINT256 = (1n << 256n) - 1n;
+
 describe("Index DTF optimistic governance", () => {
   it("reads optimistic proposal veto context", async () => {
     const multicall = vi.fn(async () => [
@@ -118,6 +120,54 @@ describe("Index DTF optimistic governance", () => {
     });
   });
 
+  it("does not build optimistic proposal context for zero veto thresholds", async () => {
+    const readContract = vi.fn().mockResolvedValueOnce(100n);
+    const client = {
+      viem: {
+        getPublicClient: vi.fn(),
+        readContract,
+      },
+    } as unknown as DtfClient;
+
+    const context = await getOptimisticProposalContext(client, {
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId: "42",
+      isOptimistic: true,
+      voteToken: "0x0000000000000000000000000000000000000002",
+      snapshot: 100n,
+      vetoThreshold: 0n,
+    });
+
+    expect(context).toBeNull();
+    expect(readContract).not.toHaveBeenCalled();
+  });
+
+  it("rounds positive optimistic proposal context thresholds up to one vote", async () => {
+    const readContract = vi.fn().mockResolvedValueOnce(1n);
+    const client = {
+      viem: {
+        getPublicClient: vi.fn(),
+        readContract,
+      },
+    } as unknown as DtfClient;
+
+    const context = await getOptimisticProposalContext(client, {
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId: "42",
+      isOptimistic: true,
+      voteToken: "0x0000000000000000000000000000000000000002",
+      snapshot: 100n,
+      vetoThreshold: 1n,
+    });
+
+    expect(context?.vetoThresholdVotes).toEqual({
+      raw: 1n,
+      formatted: "0.000000000000000001",
+    });
+  });
+
   it("returns null when a governor does not expose optimistic reads", async () => {
     const readContract = vi.fn(async () => {
       throw new Error("The contract function returned no data");
@@ -221,7 +271,7 @@ describe("Index DTF optimistic governance", () => {
     });
   });
 
-  it("uses indexed optimistic veto threshold votes", () => {
+  it("defeats optimistic proposals immediately when the veto threshold is reached", () => {
     const proposal = {
       state: "ACTIVE",
       isOptimistic: true,
@@ -237,7 +287,7 @@ describe("Index DTF optimistic governance", () => {
     } as const;
 
     expect(getVoteState(proposal, 150)).toMatchObject({
-      state: "ACTIVE",
+      state: "DEFEATED",
       quorum: true,
       vetoReached: true,
       against: 500,
@@ -247,6 +297,173 @@ describe("Index DTF optimistic governance", () => {
       quorum: true,
       vetoReached: true,
       against: 500,
+    });
+  });
+
+  it("keeps optimistic proposals pending at the vote start boundary", () => {
+    expect(
+      getVoteState(
+        {
+          state: "PENDING",
+          isOptimistic: true,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 1n, formatted: "1" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 100n, formatted: "100" },
+          optimistic: {
+            vetoThresholdVotes: { raw: 1n, formatted: "1" },
+          },
+        },
+        100,
+      ),
+    ).toMatchObject({
+      state: "PENDING",
+      vetoReached: true,
+    });
+  });
+
+  it("keeps optimistic proposals active at the vote end boundary", () => {
+    expect(
+      getVoteState(
+        {
+          state: "ACTIVE",
+          isOptimistic: true,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 0n, formatted: "0" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 100n, formatted: "100" },
+          optimistic: {
+            vetoThresholdVotes: { raw: 1n, formatted: "1" },
+          },
+        },
+        200,
+      ),
+    ).toMatchObject({
+      state: "ACTIVE",
+      vetoReached: false,
+    });
+  });
+
+  it("defeats transitioned optimistic proposals after the pending boundary", () => {
+    expect(
+      getVoteState(
+        {
+          state: "ACTIVE",
+          isOptimistic: true,
+          vetoThreshold: MAX_UINT256,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 0n, formatted: "0" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 100n, formatted: "100" },
+        },
+        150,
+      ),
+    ).toMatchObject({
+      state: "DEFEATED",
+      vetoReached: false,
+    });
+  });
+
+  it("defeats stale pending optimistic proposals when the veto threshold is reached", () => {
+    expect(
+      getVoteState(
+        {
+          state: "PENDING",
+          isOptimistic: true,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 1n, formatted: "1" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 100n, formatted: "100" },
+          optimistic: {
+            vetoThresholdVotes: { raw: 1n, formatted: "1" },
+          },
+        },
+        150,
+      ),
+    ).toMatchObject({
+      state: "DEFEATED",
+      vetoReached: true,
+    });
+  });
+
+  it("keeps standard proposals active before the voting period ends", () => {
+    const proposal = {
+      state: "ACTIVE",
+      isOptimistic: false,
+      voteStart: 100,
+      voteEnd: 200,
+      forWeightedVotes: { raw: 0n, formatted: "0" },
+      againstWeightedVotes: { raw: 100n, formatted: "100" },
+      abstainWeightedVotes: { raw: 0n, formatted: "0" },
+      quorumVotes: { raw: 1n, formatted: "1" },
+    } as const;
+
+    expect(
+      getVoteState(proposal, 150),
+    ).toMatchObject({
+      state: "ACTIVE",
+    });
+    expect(getVoteState(proposal, 200)).toMatchObject({
+      state: "ACTIVE",
+    });
+  });
+
+  it("auto-cancels optimistic proposals with zero snapshot supply", () => {
+    expect(
+      getVoteState(
+        {
+          state: "ACTIVE",
+          isOptimistic: true,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 0n, formatted: "0" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 100n, formatted: "100" },
+          optimistic: {
+            snapshotSupply: { raw: 0n, formatted: "0" },
+            vetoThreshold: 100000000000000000n,
+            vetoThresholdVotes: { raw: 0n, formatted: "0" },
+          },
+        },
+        150,
+      ),
+    ).toMatchObject({
+      state: "CANCELED",
+      vetoReached: false,
+    });
+  });
+
+  it("does not treat zero veto thresholds as canceled", () => {
+    expect(
+      getVoteState(
+        {
+          state: "ACTIVE",
+          isOptimistic: true,
+          voteStart: 100,
+          voteEnd: 200,
+          forWeightedVotes: { raw: 0n, formatted: "0" },
+          againstWeightedVotes: { raw: 0n, formatted: "0" },
+          abstainWeightedVotes: { raw: 0n, formatted: "0" },
+          quorumVotes: { raw: 100n, formatted: "100" },
+          optimistic: {
+            snapshotSupply: { raw: 100n, formatted: "100" },
+            vetoThreshold: 0n,
+          },
+        },
+        150,
+      ),
+    ).toMatchObject({
+      state: "ACTIVE",
+      vetoReached: false,
     });
   });
 

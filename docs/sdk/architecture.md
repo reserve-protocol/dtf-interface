@@ -79,7 +79,7 @@ Bad direction:
 
 - `dtf-sdk/packages/sdk/src/index.ts`
 - `dtf-sdk/packages/sdk/src/client/*`
-- `dtf-sdk/packages/sdk/src/contract-call.ts`
+- `dtf-sdk/packages/sdk/src/lib/contract-call.ts`
 - `dtf-sdk/packages/sdk/src/index-dtf/namespace.ts`
 - `dtf-sdk/packages/sdk/src/index-dtf/*`
 

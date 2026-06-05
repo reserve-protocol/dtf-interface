@@ -137,7 +137,7 @@ describe("Index DTF deploy builders", () => {
       amounts: [100n, 200n],
     });
 
-    expect(getIndexDtfDeployApprovalAmount(100n)).toBe(200n);
+    expect(getIndexDtfDeployApprovalAmount({ amount: 100n })).toBe(200n);
     expect(approvals.map((approval) => approval.contract.args)).toEqual([
       [INDEX_DTF_DEPLOYER_ADDRESS[8453], 200n],
       [INDEX_DTF_DEPLOYER_ADDRESS[8453], 400n],

@@ -1,5 +1,4 @@
 export { createDtfClient } from "@/client";
-export { createWalletClient } from "@/client/viem";
 export { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
 export { createDtfSdk } from "@/create-dtf-sdk";
 export { SdkError, isSdkError } from "@/lib/errors";
@@ -46,7 +45,6 @@ export type {
   DtfClientViem,
   DtfClientViemChainConfig,
   DtfClientViemConfig,
-  CreateWalletClientParams,
 } from "@/client/viem";
 export type { DtfSdk, DtfSdkConfig } from "@/create-dtf-sdk";
 export type { ContractCall, ContractCallPlan } from "@/lib/contract-call";

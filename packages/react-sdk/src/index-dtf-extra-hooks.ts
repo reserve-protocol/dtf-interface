@@ -5,10 +5,18 @@ import { useQuery } from "@tanstack/react-query";
 import type { DtfQueryOptions } from "@/query-options";
 
 import {
+  accountPortfolioHistoryQueryOptions,
   accountPortfolioQueryOptions,
+  accountPortfolioTransactionsQueryOptions,
+  indexDtfApprovedRevenueTokensQueryOptions,
+  indexDtfCompletedRebalanceQueryOptions,
+  indexDtfCompletedRebalancesQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
   indexDtfExposureQueryOptions,
   indexDtfIssuanceStateQueryOptions,
+  indexDtfPendingFeeSharesQueryOptions,
+  indexDtfPlatformFeeQueryOptions,
+  indexDtfRebalanceAuctionsQueryOptions,
   indexDtfRebalancesQueryOptions,
   indexDtfRevenueQueryOptions,
   indexDtfStatusQueryOptions,
@@ -58,6 +66,30 @@ export function useIndexDtfRevenue<TData = MethodResult<IndexMethod<"getRevenue"
   return useQuery(indexDtfRevenueQueryOptions(sdk, params, options));
 }
 
+export function useIndexDtfPlatformFee<TData = MethodResult<IndexMethod<"getPlatformFee">>>(
+  params: MethodParams<IndexMethod<"getPlatformFee">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getPlatformFee">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfPlatformFeeQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfPendingFeeShares<TData = MethodResult<IndexMethod<"getPendingFeeShares">>>(
+  params: MethodParams<IndexMethod<"getPendingFeeShares">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getPendingFeeShares">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfPendingFeeSharesQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfApprovedRevenueTokens<TData = MethodResult<IndexMethod<"getApprovedRevenueTokens">>>(
+  params: MethodParams<IndexMethod<"getApprovedRevenueTokens">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getApprovedRevenueTokens">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfApprovedRevenueTokensQueryOptions(sdk, params, options));
+}
+
 export function useIndexDtfIssuanceState<TData = MethodResult<IndexMethod<"getIssuanceState">>>(
   params: MethodParams<IndexMethod<"getIssuanceState">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getIssuanceState">>, TData>,
@@ -82,6 +114,30 @@ export function useIndexDtfCurrentRebalance<TData = MethodResult<IndexMethod<"ge
   return useQuery(indexDtfCurrentRebalanceQueryOptions(sdk, params, options));
 }
 
+export function useIndexDtfRebalanceAuctions<TData = MethodResult<IndexMethod<"getRebalanceAuctions">>>(
+  params: MethodParams<IndexMethod<"getRebalanceAuctions">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getRebalanceAuctions">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfRebalanceAuctionsQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfCompletedRebalance<TData = MethodResult<IndexMethod<"getCompletedRebalance">>>(
+  params: MethodParams<IndexMethod<"getCompletedRebalance">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getCompletedRebalance">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfCompletedRebalanceQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfCompletedRebalances<TData = MethodResult<IndexMethod<"getCompletedRebalances">>>(
+  params: MethodParams<IndexMethod<"getCompletedRebalances">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getCompletedRebalances">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfCompletedRebalancesQueryOptions(sdk, params, options));
+}
+
 export function useIndexDtfVoteLockState<TData = MethodResult<IndexMethod<"getVoteLockState">>>(
   params: MethodParams<IndexMethod<"getVoteLockState">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getVoteLockState">>, TData>,
@@ -96,4 +152,20 @@ export function useAccountPortfolio<TData = MethodResult<PortfolioMethod<"get">>
 ) {
   const sdk = useDtfSdk();
   return useQuery(accountPortfolioQueryOptions(sdk, params, options));
+}
+
+export function useAccountPortfolioHistory<TData = MethodResult<PortfolioMethod<"getHistory">>>(
+  params: MethodParams<PortfolioMethod<"getHistory">> | undefined,
+  options?: DtfQueryOptions<MethodResult<PortfolioMethod<"getHistory">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(accountPortfolioHistoryQueryOptions(sdk, params, options));
+}
+
+export function useAccountPortfolioTransactions<TData = MethodResult<PortfolioMethod<"getTransactions">>>(
+  params: MethodParams<PortfolioMethod<"getTransactions">> | undefined,
+  options?: DtfQueryOptions<MethodResult<PortfolioMethod<"getTransactions">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(accountPortfolioTransactionsQueryOptions(sdk, params, options));
 }

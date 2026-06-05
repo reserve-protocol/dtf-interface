@@ -70,10 +70,11 @@ Common exported options include:
 | Discovery/detail      | `discoverDtfsQueryOptions`, `indexDtfListQueryOptions`, `indexDtfQueryOptions`, `fullIndexDtfQueryOptions`                                                                                     |
 | Basket/price          | `indexDtfBasketQueryOptions`, `indexDtfPriceQueryOptions`, `indexDtfPriceHistoryQueryOptions`, `indexDtfVersionQueryOptions`, `indexDtfBrandQueryOptions`                                      |
 | Product state         | `indexDtfStatusQueryOptions`, `indexDtfExposureQueryOptions`, `indexDtfTransactionsQueryOptions`, `indexDtfRevenueQueryOptions`, `indexDtfIssuanceStateQueryOptions`                           |
-| Rebalances            | `indexDtfRebalancesQueryOptions`, `indexDtfCurrentRebalanceQueryOptions`                                                                                                                       |
+| Fees/revenue          | `indexDtfPlatformFeeQueryOptions`, `indexDtfPendingFeeSharesQueryOptions`, `indexDtfApprovedRevenueTokensQueryOptions`                                                                         |
+| Rebalances            | `indexDtfRebalancesQueryOptions`, `indexDtfCurrentRebalanceQueryOptions`, `indexDtfRebalanceAuctionsQueryOptions`, `indexDtfCompletedRebalanceQueryOptions`, `indexDtfCompletedRebalancesQueryOptions` |
 | Governance            | `indexDtfProposalListQueryOptions`, `indexDtfProposalsQueryOptions`, `indexDtfProposalQueryOptions`, `indexDtfProposalVotesQueryOptions`, `indexDtfProposalVoterStateQueryOptions`             |
 | Optimistic governance | `indexDtfOptimisticGovernanceQueryOptions`, `indexDtfOptimisticProposalContextQueryOptions`, `indexDtfOptimisticProposalVoterStateQueryOptions`, `indexDtfOptimisticTimelockRolesQueryOptions` |
 | Selector registry     | `indexDtfSelectorRegistryTargetsQueryOptions`, `indexDtfSelectorRegistryAllowedSelectorsQueryOptions`, `indexDtfSelectorRegistryIsAllowedQueryOptions`                                         |
-| Vote-lock/portfolio   | `indexDtfVoteLockStateQueryOptions`, `accountPortfolioQueryOptions`                                                                                                                            |
+| Vote-lock/portfolio   | `indexDtfVoteLockStateQueryOptions`, `accountPortfolioQueryOptions`, `accountPortfolioHistoryQueryOptions`, `accountPortfolioTransactionsQueryOptions`                                         |
 
-Some newer product/analytics query options use local keys instead of `dtfQueryKeys` helpers. Prefer exported query options when you are not sure about the exact key shape.
+Exported query options use the shared `dtfQueryKeys` helpers. Prefer exported query options when you are not sure about the exact key shape.

@@ -13,6 +13,7 @@ Use this page as the first stop when an AI agent is reading or generating code f
 - Use `@reserve-protocol/react-sdk` for React apps that already use TanStack Query.
 - React apps should prefer React SDK hooks over direct `useDtfSdk()` calls for UI reads.
 - Both packages prepare transaction calls. They do not connect wallets, switch chains, send transactions, or own toast/confirmation UX.
+- Do not import wallet-client constructors from the SDK. Browser apps use wagmi/connector wallet clients; scripts import wallet helpers directly from `viem`.
 - `sdk.yield` is a placeholder boundary today. Its methods throw `NOT_IMPLEMENTED`.
 
 ## Canonical Example DTF
@@ -51,6 +52,7 @@ That address is LCAP from `indexDtfCatalog`.
 - Always pass `call.chainId` through to simulation and wallet layers when supported.
 - Use SDK builders for versioned writes instead of hand-encoding ABI calldata.
 - DTF settings builders often need `version: "5.0.0" | "6.0.0"`; read it with `sdk.index.getVersion({ address, chainId })`.
+- Raw version-sensitive `prepare*` helpers should receive the target DTF version explicitly. Higher-level proposal builders may fetch the DTF version when omitted.
 - Proposal action builders prepare vote, queue, execute, and cancel calls. They do not invalidate queries after a transaction.
 
 ## Public Surface Discovery

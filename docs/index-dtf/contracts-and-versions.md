@@ -63,6 +63,8 @@ The SDK handles version-specific write calls where the affected builder encodes 
 
 Product builders should accept a known DTF version or fetch it when needed. Keep version checks local to the affected write/read handler instead of adding a central operation registry.
 
+Current rebalance/open-auction and issuance helpers are v5-shaped unless the builder explicitly accepts a version. Do not assume every write helper supports every listed version.
+
 Source owner: SDK calldata builders are owned by `dtf-sdk/packages/sdk/src/index-dtf/governance/propose/calls.ts`; protocol mechanics are owned by the Index DTF contract repo.
 
 ## ABI Gotchas

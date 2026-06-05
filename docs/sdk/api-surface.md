@@ -85,7 +85,7 @@ Keep examples small and compile-check them before publishing externally. These d
 - `dtf-sdk/packages/sdk/src/create-dtf-sdk.ts`
 - `dtf-sdk/packages/sdk/src/index-dtf/index.ts`
 - `dtf-sdk/packages/sdk/src/index-dtf/namespace.ts`
-- `dtf-sdk/packages/sdk/src/contract-call.ts`
+- `dtf-sdk/packages/sdk/src/lib/contract-call.ts`
 
 ## Do Not Infer
 

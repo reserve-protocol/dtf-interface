@@ -32,7 +32,10 @@ pnpm install
 pnpm build
 pnpm typecheck
 pnpm test
+pnpm release:ci
 ```
+
+`pnpm release:ci` runs typecheck, tests, build, docs build, and package dry-runs for the publishable packages.
 
 ## Quick Example
 

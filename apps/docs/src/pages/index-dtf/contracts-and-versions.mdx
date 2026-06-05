@@ -6,16 +6,13 @@ Do not assume local protocol source, old docs, and SDK ABIs are interchangeable.
 
 ## SDK Write Targets
 
-Current SDK write builders support `5.0.0` and `6.0.0` ABI targets where version-specific encoding matters.
+Current SDK settings/proposal write builders support `5.0.0` and `6.0.0` ABI targets where version-specific encoding matters.
 
 Version-specific areas include:
 
-- `startRebalance`
-- `openAuction`
-- `openAuctionUnrestricted`
-- `bid`
 - allowlist settings
 - self-fee settings
+- auction length settings
 
 ## Why This Matters
 
@@ -32,6 +29,8 @@ startRebalance(TokenRebalanceParams[] tokens, RebalanceLimits limits, ...)
 ```
 
 Use SDK builders unless you have a specific reason to hand-encode a call.
+
+Current rebalance/open-auction and issuance helpers are v5-shaped unless the specific function explicitly accepts a version. Do not assume every write helper supports every deployed Folio version.
 
 ## Address Normalization
 

@@ -35,7 +35,7 @@ The SDK handles protocol encoding.
 
 Some Index DTF write builders need a contract version.
 
-The current write builders support `5.0.0` and `6.0.0` targets. Version-specific builders matter for DTF settings, allowlists, auction functions, and rebalance encoding.
+Current settings/proposal write builders support `5.0.0` and `6.0.0` targets where implemented. Some issuance, rebalance, and auction helpers are modern/v5-shaped; verify the specific builder before replacing legacy calldata.
 
 See [Contracts & Versions](/index-dtf/contracts-and-versions) before hand-encoding writes.
 

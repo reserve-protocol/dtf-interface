@@ -69,10 +69,12 @@ Refs are convenience handles only. They do not fetch, cache, or subscribe on cre
 The package also exports helpers directly for advanced use.
 
 ```ts
-import { createDtfClient, createDtfSdk, createWalletClient } from "@reserve-protocol/sdk";
+import { createDtfClient, createDtfSdk, prepareErc20Approval } from "@reserve-protocol/sdk";
 ```
 
 Most apps should start with `createDtfSdk()`.
+
+The SDK does not export wallet-client constructors. Browser apps should use their wallet connector or wagmi setup. Scripts should import wallet helpers directly from `viem`. See [Wallet Clients](/sdk/wallet-clients).
 
 ## Common Workflows
 

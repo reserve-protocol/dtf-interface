@@ -36,6 +36,10 @@ Keep code boring and product-shaped.
 - Run validation for complex, risky, or behavior-changing SDK work, and when explicitly requested.
 - Do not remove SDK tests unless explicitly requested. Avoid tests that only duplicate what typecheck or build already catches.
 
+## Releases
+
+- When preparing a new package release, use Changesets. Do not manually edit package versions or changelogs.
+
 ## Feedback Loop
 
 - Treat validated review feedback as repo style guidance for future changes.

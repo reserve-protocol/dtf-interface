@@ -4,6 +4,18 @@ import { describe, expect, it, vi } from "vitest";
 
 import { dtfQueryKeys } from "@/query-keys";
 import {
+  accountPortfolioHistoryQueryOptions,
+  accountPortfolioQueryOptions,
+  accountPortfolioTransactionsQueryOptions,
+  indexDtfApprovedRevenueTokensQueryOptions,
+  indexDtfCompletedRebalanceQueryOptions,
+  indexDtfCompletedRebalancesQueryOptions,
+  indexDtfPendingFeeSharesQueryOptions,
+  indexDtfPlatformFeeQueryOptions,
+  indexDtfRebalanceAuctionsQueryOptions,
+  indexDtfRevenueQueryOptions,
+} from "@/index-dtf-query-options";
+import {
   indexDtfOptimisticGovernanceQueryOptions,
   indexDtfOptimisticProposalContextQueryOptions,
   indexDtfOptimisticProposalVoterStateQueryOptions,
@@ -26,6 +38,7 @@ const VOTE_TOKEN = "0x0000000000000000000000000000000000000003";
 const TIMELOCK = "0x0000000000000000000000000000000000000004";
 const REGISTRY = "0x0000000000000000000000000000000000000005";
 const TARGET = "0x0000000000000000000000000000000000000006";
+const DTF = "0x0000000000000000000000000000000000000007";
 
 type QueryOptionCase = {
   readonly name: string;
@@ -143,6 +156,57 @@ const newReadQueryOptions: readonly QueryOptionCase[] = [
   },
 ];
 
+const extraIndexQueryOptions: readonly QueryOptionCase[] = [
+  {
+    name: "platform fee",
+    method: "getPlatformFee",
+    build: indexDtfPlatformFeeQueryOptions,
+    key: dtfQueryKeys.index.platformFee,
+    params: { address: DTF, chainId: 1 },
+    result: 50,
+  },
+  {
+    name: "pending fee shares",
+    method: "getPendingFeeShares",
+    build: indexDtfPendingFeeSharesQueryOptions,
+    key: dtfQueryKeys.index.pendingFeeShares,
+    params: { address: DTF, chainId: 1 },
+    result: 100n,
+  },
+  {
+    name: "approved revenue tokens",
+    method: "getApprovedRevenueTokens",
+    build: indexDtfApprovedRevenueTokensQueryOptions,
+    key: dtfQueryKeys.index.approvedRevenueTokens,
+    params: { address: DTF, chainId: 1 },
+    result: [TARGET],
+  },
+  {
+    name: "rebalance auctions",
+    method: "getRebalanceAuctions",
+    build: indexDtfRebalanceAuctionsQueryOptions,
+    key: dtfQueryKeys.index.rebalanceAuctions,
+    params: { chainId: 1, rebalanceId: "rebalance-1" },
+    result: [],
+  },
+  {
+    name: "completed rebalance",
+    method: "getCompletedRebalance",
+    build: indexDtfCompletedRebalanceQueryOptions,
+    key: dtfQueryKeys.index.completedRebalance,
+    params: { address: DTF, chainId: 1, nonce: 1n },
+    result: { id: "rebalance-1" },
+  },
+  {
+    name: "completed rebalances",
+    method: "getCompletedRebalances",
+    build: indexDtfCompletedRebalancesQueryOptions,
+    key: dtfQueryKeys.index.completedRebalances,
+    params: { address: DTF, chainId: 1 },
+    result: [],
+  },
+];
+
 describe("react SDK query options", () => {
   it("builds disabled options until required params exist", () => {
     const sdk = { index: { get: vi.fn() } } as unknown as DtfSdk;
@@ -216,4 +280,49 @@ describe("react SDK query options", () => {
       expect(method).toHaveBeenCalledWith(queryOption.params);
     });
   }
+
+  for (const queryOption of extraIndexQueryOptions) {
+    it(`builds ${queryOption.name} extra query options`, async () => {
+      const method = vi.fn(async () => queryOption.result);
+      const sdk = { index: { [queryOption.method]: method } } as unknown as DtfSdk;
+      const disabledOptions = queryOption.build(sdk, undefined);
+      const options = queryOption.build(sdk, queryOption.params);
+
+      expect(disabledOptions.enabled).toBe(false);
+      expect(disabledOptions.queryKey).toEqual(queryOption.key(undefined));
+      expect(options.queryKey).toEqual(queryOption.key(queryOption.params));
+      await expect(options.queryFn()).resolves.toBe(queryOption.result);
+      expect(method).toHaveBeenCalledWith(queryOption.params);
+    });
+  }
+
+  it("builds portfolio query options", async () => {
+    const portfolio = { indexDTFs: [], voteLocks: [] };
+    const history = { timeline: [] };
+    const transactions: readonly never[] = [];
+    const sdk = {
+      portfolio: {
+        get: vi.fn(async () => portfolio),
+        getHistory: vi.fn(async () => history),
+        getTransactions: vi.fn(async () => transactions),
+      },
+    } as unknown as DtfSdk;
+    const accountParams = { account: ACCOUNT } as const;
+    const historyParams = { account: ACCOUNT, period: "1m" } as const;
+
+    expect(accountPortfolioQueryOptions(sdk, undefined).queryKey).toEqual(dtfQueryKeys.portfolio.account(undefined));
+    expect(accountPortfolioHistoryQueryOptions(sdk, undefined).enabled).toBe(false);
+    expect(accountPortfolioTransactionsQueryOptions(sdk, undefined).enabled).toBe(false);
+
+    const accountOptions = accountPortfolioQueryOptions(sdk, accountParams);
+    const historyOptions = accountPortfolioHistoryQueryOptions(sdk, historyParams);
+    const transactionsOptions = accountPortfolioTransactionsQueryOptions(sdk, accountParams);
+
+    expect(accountOptions.queryKey).toEqual(dtfQueryKeys.portfolio.account(accountParams));
+    expect(historyOptions.queryKey).toEqual(dtfQueryKeys.portfolio.history(historyParams));
+    expect(transactionsOptions.queryKey).toEqual(dtfQueryKeys.portfolio.transactions(accountParams));
+    await expect(accountOptions.queryFn()).resolves.toBe(portfolio);
+    await expect(historyOptions.queryFn()).resolves.toBe(history);
+    await expect(transactionsOptions.queryFn()).resolves.toBe(transactions);
+  });
 });

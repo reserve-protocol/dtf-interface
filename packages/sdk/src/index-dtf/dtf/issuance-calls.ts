@@ -91,18 +91,21 @@ export function prepareIndexDtfBasketApproval(params: PrepareIndexDtfBasketAppro
 }
 
 /** Applies basis-point slippage to redeem amounts while preserving token order. */
-export function getIndexDtfRedeemMinAmounts(amounts: readonly bigint[], slippageBps: number): readonly bigint[] {
-  if (!Number.isInteger(slippageBps) || slippageBps < 0 || slippageBps > 10_000) {
+export function getIndexDtfRedeemMinAmounts(params: {
+  readonly amounts: readonly bigint[];
+  readonly slippageBps: number;
+}): readonly bigint[] {
+  if (!Number.isInteger(params.slippageBps) || params.slippageBps < 0 || params.slippageBps > 10_000) {
     throw new SdkError({
       code: "INVALID_INPUT",
       message: "slippageBps must be an integer between 0 and 10000",
-      meta: { slippageBps },
+      meta: { slippageBps: params.slippageBps },
     });
   }
 
-  const keepBps = BigInt(10_000 - slippageBps);
+  const keepBps = BigInt(10_000 - params.slippageBps);
 
-  return amounts.map((amount) => (amount * keepBps) / 10_000n);
+  return params.amounts.map((amount) => (amount * keepBps) / 10_000n);
 }
 
 function getMintArgs(params: {

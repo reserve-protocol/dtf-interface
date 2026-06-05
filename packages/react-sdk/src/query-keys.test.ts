@@ -294,6 +294,43 @@ describe("dtfQueryKeys", () => {
       },
     ]);
   });
+
+  it("normalizes extra index and portfolio keys", () => {
+    expect(
+      dtfQueryKeys.index.platformFee({
+        address: "0x000000000000000000000000000000000000000A",
+        chainId: 1,
+      }),
+    ).toEqual([
+      "dtf",
+      "index",
+      "platform-fee",
+      {
+        address: "0x000000000000000000000000000000000000000a",
+        chainId: 1,
+      },
+    ]);
+    expect(dtfQueryKeys.index.completedRebalances(undefined)).toEqual([
+      "dtf",
+      "index",
+      "completed-rebalances",
+      "default",
+    ]);
+    expect(
+      dtfQueryKeys.portfolio.history({
+        account: "0x000000000000000000000000000000000000000B",
+        period: "1m",
+      }),
+    ).toEqual([
+      "dtf",
+      "portfolio",
+      "history",
+      {
+        account: "0x000000000000000000000000000000000000000b",
+        period: "1m",
+      },
+    ]);
+  });
 });
 
 function createDtfKeyFixture() {

@@ -38,6 +38,7 @@ export default defineConfig({
         { text: "Overview", link: "/sdk/overview" },
         { text: "Architecture", link: "/sdk/architecture" },
         { text: "Client Configuration", link: "/sdk/client-configuration" },
+        { text: "Wallet Clients", link: "/sdk/wallet-clients" },
         { text: "Contract Calls", link: "/sdk/contract-calls" },
         { text: "Index DTF API", link: "/sdk/index-dtf" },
         { text: "Governance API", link: "/sdk/governance" },

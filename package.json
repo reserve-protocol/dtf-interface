@@ -23,6 +23,7 @@
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish",
+    "release:ci": "pnpm typecheck && pnpm test && pnpm build && pnpm docs:build && pnpm --filter @reserve-protocol/dtf-catalog pack --dry-run && pnpm --filter @reserve-protocol/sdk pack --dry-run && pnpm --filter @reserve-protocol/react-sdk pack --dry-run",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
   },

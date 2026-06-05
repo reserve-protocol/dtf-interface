@@ -194,6 +194,27 @@ describe("settings proposal builders", () => {
     ).toBe("setMandate");
   });
 
+  it("rejects unsupported fetched settings versions", async () => {
+    const readContract = vi.fn(async () => "7.0.0");
+    const client = createDtfClient({
+      chains: {
+        1: {
+          publicClient: { readContract } as unknown as PublicClient,
+        },
+      },
+    });
+
+    await expect(
+      buildIndexDtfSettingsProposal(client, {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        timelock: TIMELOCK,
+        mandate: "New mandate",
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_INPUT" });
+  });
+
   it("preserves explicit version in the settings schema", () => {
     expect(
       indexDtfSettingsProposalSchema.parse({

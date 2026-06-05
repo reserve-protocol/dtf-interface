@@ -1,0 +1,104 @@
+# Wallet Clients
+
+The SDK does not create wallet clients, connect wallets, switch chains, or send transactions.
+
+It only prepares `ContractCall` and `ContractCallPlan` objects. Your app or script owns the wallet layer.
+
+## Browser Apps
+
+Use your wallet connector and wagmi/viem setup outside the SDK.
+
+```tsx
+import { useIndexDtfVoteCall } from "@reserve-protocol/react-sdk";
+import { useSimulateContract, useWriteContract } from "wagmi";
+
+function VoteButton({ proposal, support }) {
+  const call = useIndexDtfVoteCall(
+    proposal
+      ? {
+          chainId: proposal.chainId,
+          governance: proposal.governance,
+          proposalId: proposal.id,
+          support,
+        }
+      : undefined,
+  );
+  const simulation = useSimulateContract(
+    call
+      ? {
+          chainId: call.chainId,
+          address: call.contract.address,
+          abi: call.contract.abi,
+          functionName: call.contract.functionName,
+          args: call.contract.args,
+          value: call.value,
+        }
+      : undefined,
+  );
+  const write = useWriteContract();
+
+  return (
+    <button
+      disabled={!simulation.data?.request}
+      onClick={() => {
+        if (simulation.data?.request) write.writeContract(simulation.data.request);
+      }}
+    >
+      Vote
+    </button>
+  );
+}
+```
+
+## Scripts And Bots
+
+Scripts can create a viem wallet client directly from `viem`.
+
+```ts
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { base } from "viem/chains";
+
+const walletClient = createWalletClient({
+  account: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`),
+  chain: base,
+  transport: http(process.env.BASE_RPC_URL),
+});
+```
+
+Then pass SDK-prepared calls to that wallet client.
+
+```ts
+const call = sdk.index.prepareVote({
+  chainId: 8453,
+  governance,
+  proposalId,
+  support: "FOR",
+});
+
+if (walletClient.chain?.id !== call.chainId) {
+  throw new Error("Wrong chain");
+}
+
+await walletClient.writeContract({
+  address: call.contract.address,
+  abi: call.contract.abi,
+  functionName: call.contract.functionName,
+  args: call.contract.args,
+  value: call.value,
+});
+```
+
+## Responsibilities
+
+Wallet code should handle:
+
+- account selection.
+- chain validation and switching.
+- simulation.
+- transaction submission.
+- pending and confirming state.
+- success/error UI.
+- post-confirmation query invalidation.
+
+Always preserve `call.chainId`; dropping it can simulate or send on the wrong chain.

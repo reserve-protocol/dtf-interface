@@ -74,7 +74,11 @@ const call = dtf.prepareMint({
 console.log(call.chainId, call.to, call.data, call.value);
 ```
 
+This example targets modern/v5 Folio mint signatures. Check the DTF version before using it for legacy DTFs.
+
 `ContractCall` also includes ABI metadata for apps that prefer wagmi or viem contract APIs:
+
+`walletClient` comes from your app wallet layer. The SDK does not create wallet clients.
 
 ```ts
 if (chain.id !== call.chainId) throw new Error("Wrong chain");
@@ -89,6 +93,8 @@ await walletClient.writeContract({
   value: call.value,
 });
 ```
+
+See [Wallet Clients](/sdk/wallet-clients) for complete wallet setup examples.
 
 ## React Quickstart
 

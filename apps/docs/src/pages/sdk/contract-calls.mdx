@@ -21,7 +21,7 @@ type ContractCall = {
 };
 ```
 
-Use `to`, `data`, and `value` for raw wallet clients.
+Use `to`, `data`, and `value` for app-owned raw wallet clients.
 
 ```ts
 if (chain.id !== call.chainId) throw new Error("Wrong chain");
@@ -35,7 +35,7 @@ await walletClient.sendTransaction({
 });
 ```
 
-Use `contract` metadata for viem or wagmi contract APIs.
+Use `contract` metadata for app-owned viem or wagmi contract APIs.
 
 ```ts
 if (chain.id !== call.chainId) throw new Error("Wrong chain");
@@ -52,6 +52,8 @@ await walletClient.writeContract({
 ```
 
 Always preserve `call.chainId` in simulation and transaction flows.
+
+The SDK does not create wallet clients. Browser apps should use their wallet connector or wagmi setup. Scripts should import wallet helpers directly from `viem`.
 
 ## ContractCallPlan
 

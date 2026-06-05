@@ -37,6 +37,10 @@ type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] ext
   ? DtfSdk["index"][TKey]
   : never;
 type IndexMethodParams<TKey extends keyof DtfSdk["index"]> = Parameters<IndexMethod<TKey>>[0];
+type PortfolioMethod<TKey extends keyof DtfSdk["portfolio"]> = DtfSdk["portfolio"][TKey] extends (...args: any) => any
+  ? DtfSdk["portfolio"][TKey]
+  : never;
+type PortfolioMethodParams<TKey extends keyof DtfSdk["portfolio"]> = Parameters<PortfolioMethod<TKey>>[0];
 type PastOptimisticVotesQueryKeyParams = Omit<IndexMethodParams<"getPastOptimisticVotes">, "timepoint"> & {
   readonly timepoint: bigint;
 };
@@ -191,6 +195,33 @@ export const dtfQueryKeys = {
     price: (params?: GetIndexDtfPriceParams) => [...dtfQueryKeys.index.all(), "price", keyParams(params)] as const,
     priceHistory: (params?: GetIndexDtfPriceHistoryParams) =>
       [...dtfQueryKeys.index.all(), "price-history", keyParams(params)] as const,
+    status: (params?: IndexMethodParams<"getStatus">) => [...dtfQueryKeys.index.all(), "status", keyParams(params)] as const,
+    exposure: (params?: IndexMethodParams<"getExposure">) =>
+      [...dtfQueryKeys.index.all(), "exposure", keyParams(params)] as const,
+    transactions: (params?: IndexMethodParams<"getTransactions">) =>
+      [...dtfQueryKeys.index.all(), "transactions", keyParams(params)] as const,
+    revenue: (params?: IndexMethodParams<"getRevenue">) =>
+      [...dtfQueryKeys.index.all(), "revenue", keyParams(params)] as const,
+    platformFee: (params?: IndexMethodParams<"getPlatformFee">) =>
+      [...dtfQueryKeys.index.all(), "platform-fee", keyParams(params)] as const,
+    pendingFeeShares: (params?: IndexMethodParams<"getPendingFeeShares">) =>
+      [...dtfQueryKeys.index.all(), "pending-fee-shares", keyParams(params)] as const,
+    approvedRevenueTokens: (params?: IndexMethodParams<"getApprovedRevenueTokens">) =>
+      [...dtfQueryKeys.index.all(), "approved-revenue-tokens", keyParams(params)] as const,
+    issuanceState: (params?: IndexMethodParams<"getIssuanceState">) =>
+      [...dtfQueryKeys.index.all(), "issuance-state", keyParams(params)] as const,
+    rebalances: (params?: IndexMethodParams<"getRebalances">) =>
+      [...dtfQueryKeys.index.all(), "rebalances", keyParams(params)] as const,
+    currentRebalance: (params?: IndexMethodParams<"getCurrentRebalance">) =>
+      [...dtfQueryKeys.index.all(), "current-rebalance", keyParams(params)] as const,
+    rebalanceAuctions: (params?: IndexMethodParams<"getRebalanceAuctions">) =>
+      [...dtfQueryKeys.index.all(), "rebalance-auctions", keyParams(params)] as const,
+    completedRebalance: (params?: IndexMethodParams<"getCompletedRebalance">) =>
+      [...dtfQueryKeys.index.all(), "completed-rebalance", keyParams(params)] as const,
+    completedRebalances: (params?: IndexMethodParams<"getCompletedRebalances">) =>
+      [...dtfQueryKeys.index.all(), "completed-rebalances", keyParams(params)] as const,
+    voteLockState: (params?: IndexMethodParams<"getVoteLockState">) =>
+      [...dtfQueryKeys.index.all(), "vote-lock-state", keyParams(params)] as const,
     governance: {
       all: () => [...dtfQueryKeys.index.all(), "governance"] as const,
       proposalList: (params?: GetIndexDtfProposalsParams) =>
@@ -255,5 +286,14 @@ export const dtfQueryKeys = {
           keyParams(optimisticProposalVoterStateKeyParams(params)),
         ] as const,
     },
+  },
+  portfolio: {
+    all: () => [...dtfQueryKeys.all, "portfolio"] as const,
+    account: (params?: PortfolioMethodParams<"get">) =>
+      [...dtfQueryKeys.portfolio.all(), "account", keyParams(params)] as const,
+    history: (params?: PortfolioMethodParams<"getHistory">) =>
+      [...dtfQueryKeys.portfolio.all(), "history", keyParams(params)] as const,
+    transactions: (params?: PortfolioMethodParams<"getTransactions">) =>
+      [...dtfQueryKeys.portfolio.all(), "transactions", keyParams(params)] as const,
   },
 } as const;

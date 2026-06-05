@@ -272,13 +272,21 @@ export function prepareIndexDtfDeployAssetApprovals(
     prepareIndexDtfDeployAssetApproval({
       chainId: params.chainId,
       token,
-      amount: getIndexDtfDeployApprovalAmount(params.amounts[index] ?? 0n, params.approvalBufferBps),
+      amount: getIndexDtfDeployApprovalAmount({
+        amount: params.amounts[index] ?? 0n,
+        approvalBufferBps: params.approvalBufferBps,
+      }),
     }),
   );
 }
 
-export function getIndexDtfDeployApprovalAmount(amount: bigint, approvalBufferBps = 20_000): bigint {
-  if (amount < 0n) {
+export function getIndexDtfDeployApprovalAmount(params: {
+  readonly amount: bigint;
+  readonly approvalBufferBps?: number | undefined;
+}): bigint {
+  const approvalBufferBps = params.approvalBufferBps ?? 20_000;
+
+  if (params.amount < 0n) {
     throw new SdkError({ code: "INVALID_INPUT", message: "approval amount must be non-negative" });
   }
   if (!Number.isInteger(approvalBufferBps) || approvalBufferBps < 10_000) {
@@ -289,7 +297,7 @@ export function getIndexDtfDeployApprovalAmount(amount: bigint, approvalBufferBp
     });
   }
 
-  return (amount * BigInt(approvalBufferBps)) / 10_000n;
+  return (params.amount * BigInt(approvalBufferBps)) / 10_000n;
 }
 
 export function extractIndexDtfDeployedAddress(logs: readonly Log[]): Address {

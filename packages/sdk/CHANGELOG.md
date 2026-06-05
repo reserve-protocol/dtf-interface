@@ -1,5 +1,13 @@
 # @reserve-protocol/sdk
 
+## 0.1.2
+
+### Patch Changes
+
+- Remove SDK-owned wallet client creation from the public API. Consumers now bring their own viem or wagmi wallet clients and pass SDK-prepared calls to them.
+- Switch deploy approval and redeem-minimum helper APIs to named params.
+- Clarify version-sensitive write builder behavior and document v5-shaped issuance/rebalance helpers.
+
 ## 0.1.1
 
 ### Patch Changes

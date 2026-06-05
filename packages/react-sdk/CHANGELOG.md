@@ -1,5 +1,15 @@
 # @reserve-protocol/react-sdk
 
+## 0.1.2
+
+### Patch Changes
+
+- Remove the re-exported SDK wallet client helper from the React package surface.
+- Add portfolio, revenue, and rebalance query options/hooks backed by existing SDK methods.
+- Move extra Index DTF query options onto shared `dtfQueryKeys` helpers.
+- Updated dependencies []:
+  - @reserve-protocol/sdk@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

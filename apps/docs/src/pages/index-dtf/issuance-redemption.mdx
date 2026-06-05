@@ -47,12 +47,17 @@ const plan = sdk.index.prepareMintPlan({
 
 Execute approvals first when `plan.type === 'approval-required'`, then execute `plan.call`.
 
+`getIssuanceState`, `prepareMint`, and `prepareMintPlan` use modern/v5 Folio issuance signatures. They are not v1-compatible.
+
 ## Redeem
 
 ```ts
 const assets = state.assets.map((asset) => asset.token.address);
 const expectedAmounts = state.assets.map((asset) => asset.redeemAmount?.raw ?? 0n);
-const minAmountsOut = sdk.index.getRedeemMinAmounts(expectedAmounts, 50);
+const minAmountsOut = sdk.index.getRedeemMinAmounts({
+  amounts: expectedAmounts,
+  slippageBps: 50,
+});
 
 const call = sdk.index.prepareRedeem({
   address,

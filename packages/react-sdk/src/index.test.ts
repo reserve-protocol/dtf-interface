@@ -17,6 +17,14 @@ describe("React SDK public surface", () => {
       "indexDtfSelectorRegistryTargetsQueryOptions",
       "indexDtfSelectorRegistryAllowedSelectorsQueryOptions",
       "indexDtfSelectorRegistryIsAllowedQueryOptions",
+      "accountPortfolioHistoryQueryOptions",
+      "accountPortfolioTransactionsQueryOptions",
+      "indexDtfApprovedRevenueTokensQueryOptions",
+      "indexDtfCompletedRebalanceQueryOptions",
+      "indexDtfCompletedRebalancesQueryOptions",
+      "indexDtfPendingFeeSharesQueryOptions",
+      "indexDtfPlatformFeeQueryOptions",
+      "indexDtfRebalanceAuctionsQueryOptions",
     ];
     const newHooks = [
       "useIndexDtfOptimisticGovernance",
@@ -34,11 +42,18 @@ describe("React SDK public surface", () => {
       "useIndexDtfSelectorRegistryTargets",
       "useIndexDtfSelectorRegistryAllowedSelectors",
       "useIndexDtfSelectorRegistryIsAllowed",
+      "useAccountPortfolioHistory",
+      "useAccountPortfolioTransactions",
+      "useIndexDtfApprovedRevenueTokens",
+      "useIndexDtfCompletedRebalance",
+      "useIndexDtfCompletedRebalances",
+      "useIndexDtfPendingFeeShares",
+      "useIndexDtfPlatformFee",
+      "useIndexDtfRebalanceAuctions",
     ];
 
     expect(typeof reactSdk.prepareIndexDtfVote).toBe("function");
     expect(typeof reactSdk.prepareIndexDtfQueueProposal).toBe("function");
-    expect(typeof reactSdk.createWalletClient).toBe("function");
     for (const exportName of [...newQueryOptions, ...newHooks]) {
       expect(typeof publicSurface[exportName]).toBe("function");
     }

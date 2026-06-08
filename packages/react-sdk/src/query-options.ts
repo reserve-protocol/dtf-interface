@@ -24,12 +24,8 @@ import {
   type ListIndexDtfsParams,
 } from "@reserve-protocol/sdk";
 
+import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
-import {
-  createDtfQueryOptions,
-  requireParams,
-  type DtfQueryOptions,
-} from "@/query";
 
 export type { DtfQueryOptions, DtfQueryOptionsResult } from "@/query";
 export { indexDtfDelegatesQueryOptions } from "@/index-dtf/use-index-dtf-delegates";

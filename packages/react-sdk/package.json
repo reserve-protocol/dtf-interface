@@ -1,6 +1,6 @@
 {
   "name": "@reserve-protocol/react-sdk",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "React Query hooks for DTF interface integrations.",
   "keywords": [
     "dtf",

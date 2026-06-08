@@ -15,7 +15,7 @@ import { indexDtfV5WriteAbi } from "@/index-dtf/governance/propose/calls";
 const DTF = "0x0000000000000000000000000000000000000001";
 const PROXY_ADMIN = "0x0000000000000000000000000000000000000002";
 const ST_TOKEN = "0x0000000000000000000000000000000000000003";
-const MAINNET_OPTIMISTIC_SPELL = "0x082E701456cd702fBE5797Ab515e6B00580E5a14";
+const MAINNET_OPTIMISTIC_SPELL = "0xd7238463494Fdd4b103C2AD9d229b3985b5bC6F1";
 
 describe("Index DTF proposal calldata decoder", () => {
   it("keeps Index DTF decoder ABIs ordered latest to oldest", () => {

@@ -1,9 +1,14 @@
-import type { DtfSdk, GetIndexDtfOptimisticProposalContextParams, IndexDtfOptimisticProposalContext } from "@reserve-protocol/sdk";
+import type {
+  DtfSdk,
+  GetIndexDtfOptimisticProposalContextParams,
+  IndexDtfOptimisticProposalContext,
+} from "@reserve-protocol/sdk";
+
 import { useQuery } from "@tanstack/react-query";
 
-import { dtfQueryKeys } from "@/query-keys";
-import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
 import { useDtfSdk } from "@/provider";
+import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
+import { dtfQueryKeys } from "@/query-keys";
 
 export function indexDtfOptimisticProposalContextQueryOptions<TData = IndexDtfOptimisticProposalContext | null>(
   sdk: DtfSdk,
@@ -12,7 +17,8 @@ export function indexDtfOptimisticProposalContextQueryOptions<TData = IndexDtfOp
 ) {
   return createDtfQueryOptions(
     dtfQueryKeys.index.governance.optimisticProposalContext(params),
-    () => sdk.index.getOptimisticProposalContext(requireParams(params, "indexDtfOptimisticProposalContextQueryOptions")),
+    () =>
+      sdk.index.getOptimisticProposalContext(requireParams(params, "indexDtfOptimisticProposalContextQueryOptions")),
     params !== undefined,
     options,
   );

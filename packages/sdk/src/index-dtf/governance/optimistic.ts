@@ -16,9 +16,9 @@ import { getLatestBlockTimepoint } from "@/client/viem";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
-import { getOptimisticVetoThresholdVotes } from "@/index-dtf/governance/utils";
 import { optimisticTimelockAbi } from "@/index-dtf/abis/optimistic-timelock";
 import { isUnsupportedOptimisticContractError } from "@/index-dtf/governance/optimistic-errors";
+import { getOptimisticVetoThresholdVotes } from "@/index-dtf/governance/utils";
 import { mapAmount } from "@/lib/utils";
 
 const MAX_UINT256 = (1n << 256n) - 1n;
@@ -66,24 +66,22 @@ export async function getOptimisticProposalContext(
   }
 
   if (snapshot === undefined || token === undefined) {
-    const [contractSnapshot, contractToken] = (await client.viem
-      .getPublicClient(params.chainId)
-      .multicall({
-        allowFailure: false,
-        contracts: [
-          {
-            address: governance,
-            abi: dtfIndexGovernanceOptimisticAbi,
-            functionName: "proposalSnapshot",
-            args: [proposalId],
-          },
-          {
-            address: governance,
-            abi: dtfIndexGovernanceOptimisticAbi,
-            functionName: "token",
-          },
-        ],
-      })) as readonly [bigint, Address];
+    const [contractSnapshot, contractToken] = (await client.viem.getPublicClient(params.chainId).multicall({
+      allowFailure: false,
+      contracts: [
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "proposalSnapshot",
+          args: [proposalId],
+        },
+        {
+          address: governance,
+          abi: dtfIndexGovernanceOptimisticAbi,
+          functionName: "token",
+        },
+      ],
+    })) as readonly [bigint, Address];
 
     snapshot = snapshot ?? contractSnapshot;
     token = token ?? contractToken;

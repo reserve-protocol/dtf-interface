@@ -14,10 +14,7 @@ const MAX_UINT256 = (1n << 256n) - 1n;
 
 describe("Index DTF optimistic governance", () => {
   it("reads optimistic proposal veto context", async () => {
-    const multicall = vi.fn(async () => [
-      100n,
-      "0x0000000000000000000000000000000000000002",
-    ]);
+    const multicall = vi.fn(async () => [100n, "0x0000000000000000000000000000000000000002"]);
     const readContract = vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(100000000000000000000n);
     const client = {
       viem: {
@@ -406,9 +403,7 @@ describe("Index DTF optimistic governance", () => {
       quorumVotes: { raw: 1n, formatted: "1" },
     } as const;
 
-    expect(
-      getVoteState(proposal, 150),
-    ).toMatchObject({
+    expect(getVoteState(proposal, 150)).toMatchObject({
       state: "ACTIVE",
     });
     expect(getVoteState(proposal, 200)).toMatchObject({

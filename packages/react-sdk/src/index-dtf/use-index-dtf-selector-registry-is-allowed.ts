@@ -1,9 +1,10 @@
 import type { DtfSdk } from "@reserve-protocol/sdk";
+
 import { useQuery } from "@tanstack/react-query";
 
-import { dtfQueryKeys } from "@/query-keys";
-import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
 import { useDtfSdk } from "@/provider";
+import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
+import { dtfQueryKeys } from "@/query-keys";
 
 type Params = Parameters<DtfSdk["index"]["getSelectorRegistryIsAllowed"]>[0];
 type Result = Awaited<ReturnType<DtfSdk["index"]["getSelectorRegistryIsAllowed"]>>;
@@ -15,7 +16,8 @@ export function indexDtfSelectorRegistryIsAllowedQueryOptions<TData = Result>(
 ) {
   return createDtfQueryOptions(
     dtfQueryKeys.index.governance.selectorRegistryIsAllowed(params),
-    () => sdk.index.getSelectorRegistryIsAllowed(requireParams(params, "indexDtfSelectorRegistryIsAllowedQueryOptions")),
+    () =>
+      sdk.index.getSelectorRegistryIsAllowed(requireParams(params, "indexDtfSelectorRegistryIsAllowedQueryOptions")),
     params !== undefined,
     options,
   );

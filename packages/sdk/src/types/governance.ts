@@ -119,7 +119,10 @@ export type GetIndexDtfProposalVoterStateParams = {
   readonly chainId: SupportedChainId;
   readonly governance: Address;
   readonly account: Address;
-  readonly proposal: Pick<IndexDtfProposalDetail, "id" | "isOptimistic" | "optimistic" | "voteStart" | "voteToken" | "votes">;
+  readonly proposal: Pick<
+    IndexDtfProposalDetail,
+    "id" | "isOptimistic" | "optimistic" | "voteStart" | "voteToken" | "votes"
+  >;
 };
 
 export type GetIndexDtfOptimisticProposalVoterStateParams = {

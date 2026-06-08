@@ -2,7 +2,6 @@ import type { DtfSdk } from "@reserve-protocol/sdk";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { dtfQueryKeys } from "@/query-keys";
 import {
   accountPortfolioHistoryQueryOptions,
   accountPortfolioQueryOptions,
@@ -15,6 +14,7 @@ import {
   indexDtfRebalanceAuctionsQueryOptions,
   indexDtfRevenueQueryOptions,
 } from "@/index-dtf-query-options";
+import { dtfQueryKeys } from "@/query-keys";
 import {
   indexDtfOptimisticGovernanceQueryOptions,
   indexDtfOptimisticProposalContextQueryOptions,
@@ -157,6 +157,14 @@ const newReadQueryOptions: readonly QueryOptionCase[] = [
 ];
 
 const extraIndexQueryOptions: readonly QueryOptionCase[] = [
+  {
+    name: "revenue",
+    method: "getRevenue",
+    build: indexDtfRevenueQueryOptions,
+    key: dtfQueryKeys.index.revenue,
+    params: { address: DTF, chainId: 1 },
+    result: { total: 100n },
+  },
   {
     name: "platform fee",
     method: "getPlatformFee",

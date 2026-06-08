@@ -95,7 +95,8 @@ export function createIndexDtfGovernanceNamespace(client: DtfClient) {
       getOptimisticProposalContext(client, params),
     getOptimisticTimelockRoles: (params: Parameters<typeof getOptimisticTimelockRoles>[1]) =>
       getOptimisticTimelockRoles(client, params),
-    getOptimisticSelectors: (params: Parameters<typeof getOptimisticSelectors>[1]) => getOptimisticSelectors(client, params),
+    getOptimisticSelectors: (params: Parameters<typeof getOptimisticSelectors>[1]) =>
+      getOptimisticSelectors(client, params),
     getOptimisticVotes: (params: Parameters<typeof getOptimisticVotes>[1]) => getOptimisticVotes(client, params),
     getPastOptimisticVotes: (params: Parameters<typeof getPastOptimisticVotes>[1]) =>
       getPastOptimisticVotes(client, params),

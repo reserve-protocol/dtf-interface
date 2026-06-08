@@ -1,7 +1,7 @@
 import type { DtfSdk } from "@reserve-protocol/sdk";
 
-import { dtfQueryKeys } from "@/query-keys";
 import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
+import { dtfQueryKeys } from "@/query-keys";
 
 type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
   ? DtfSdk["index"][TKey]

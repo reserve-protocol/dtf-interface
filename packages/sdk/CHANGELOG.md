@@ -1,5 +1,11 @@
 # @reserve-protocol/sdk
 
+## 0.1.3
+
+### Patch Changes
+
+- Update optimistic governance proposal decoding to recognize the current Reserve Optimistic Governance Spell deployments.
+
 ## 0.1.2
 
 ### Patch Changes

@@ -172,13 +172,8 @@ export {
   getProposalState,
   getProposalState as getIndexDtfProposalState,
 } from "@/index-dtf/governance/utils";
-export {
-  decodeIndexDtfProposal,
-  decodeIndexDtfProposalCalldatas,
-} from "@/index-dtf/governance/decoder";
-export type {
-  DecodeIndexDtfProposalParams,
-} from "@/index-dtf/governance/decoder";
+export { decodeIndexDtfProposal, decodeIndexDtfProposalCalldatas } from "@/index-dtf/governance/decoder";
+export type { DecodeIndexDtfProposalParams } from "@/index-dtf/governance/decoder";
 export type {
   IndexDtfProposalDtfContractContext,
   IndexDtfProposalGovernanceContractContext,

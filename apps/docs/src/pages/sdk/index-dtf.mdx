@@ -58,14 +58,14 @@ const [basket, price] = await Promise.all([
 
 ## Issuance And Redemption
 
-| Method                  | Use                                                                   |
-| ----------------------- | --------------------------------------------------------------------- |
-| `getIssuanceState`      | Wallet balances, allowances, and modern/v5 mint/redeem previews.      |
-| `getRedeemMinAmounts`   | Apply slippage bps to expected redeem amounts.                        |
-| `prepareBasketApproval` | ERC20 approval for one basket token.                                  |
-| `prepareMint`           | Modern/v5 `mint(shares, receiver, minSharesOut)` call.                |
-| `prepareMintPlan`       | Mint plan with optional approvals.                                    |
-| `prepareRedeem`         | Redeem call.                                                          |
+| Method                  | Use                                                              |
+| ----------------------- | ---------------------------------------------------------------- |
+| `getIssuanceState`      | Wallet balances, allowances, and modern/v5 mint/redeem previews. |
+| `getRedeemMinAmounts`   | Apply slippage bps to expected redeem amounts.                   |
+| `prepareBasketApproval` | ERC20 approval for one basket token.                             |
+| `prepareMint`           | Modern/v5 `mint(shares, receiver, minSharesOut)` call.           |
+| `prepareMintPlan`       | Mint plan with optional approvals.                               |
+| `prepareRedeem`         | Redeem call.                                                     |
 
 ```ts
 const state = await sdk.index.getIssuanceState({

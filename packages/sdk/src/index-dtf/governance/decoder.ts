@@ -149,7 +149,12 @@ export async function decodeIndexDtfProposal(
     return decoded;
   }
 
-  const externalContractMap = await getExternalAbiContractMap(explorer, params.chainId, decoded.unknownCalls, contractMap);
+  const externalContractMap = await getExternalAbiContractMap(
+    explorer,
+    params.chainId,
+    decoded.unknownCalls,
+    contractMap,
+  );
   if (!externalContractMap) {
     return decoded;
   }

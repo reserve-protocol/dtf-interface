@@ -13,6 +13,7 @@ import {
 } from "viem";
 
 import type { SupportedChainId } from "@/config";
+
 import { SdkError } from "@/lib/errors";
 
 export type DtfClientViemChainConfig = {

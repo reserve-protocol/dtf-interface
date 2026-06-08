@@ -1,9 +1,10 @@
 import type { DtfSdk } from "@reserve-protocol/sdk";
+
 import { useQuery } from "@tanstack/react-query";
 
-import { dtfQueryKeys } from "@/query-keys";
-import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
 import { useDtfSdk } from "@/provider";
+import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
+import { dtfQueryKeys } from "@/query-keys";
 
 type Params = Parameters<DtfSdk["index"]["getSelectorRegistryTargets"]>[0];
 type Result = Awaited<ReturnType<DtfSdk["index"]["getSelectorRegistryTargets"]>>;

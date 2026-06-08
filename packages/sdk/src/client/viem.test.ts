@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { createPublicClient, http, type PublicClient } from "viem";
 import { base } from "viem/chains";
+import { describe, expect, it } from "vitest";
 
 import { createDtfClient } from "@/client";
 

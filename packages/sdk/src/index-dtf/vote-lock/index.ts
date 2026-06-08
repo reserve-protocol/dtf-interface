@@ -228,7 +228,10 @@ async function readOptionalOptimisticVoteLockState(
       ],
     })) as OptionalOptimisticVoteLockStateResults;
 
-    return [readOptionalOptimisticVoteLockResult(delegateResult), readOptionalOptimisticVoteLockResult(votingPowerResult)];
+    return [
+      readOptionalOptimisticVoteLockResult(delegateResult),
+      readOptionalOptimisticVoteLockResult(votingPowerResult),
+    ];
   } catch (error) {
     if (isUnsupportedVoteLockOptimisticReadError(error)) {
       return [null, null];

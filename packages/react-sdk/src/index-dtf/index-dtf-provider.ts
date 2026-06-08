@@ -1,7 +1,7 @@
 import { createContext, createElement, useContext, useMemo, type PropsWithChildren } from "react";
-import type { Address } from "viem";
 
 import type { SupportedChainId } from "@reserve-protocol/sdk";
+import type { Address } from "viem";
 
 import { useFullIndexDtf } from "@/hooks";
 

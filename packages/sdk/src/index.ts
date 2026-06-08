@@ -36,10 +36,7 @@ export type {
   PortfolioTransaction,
   PortfolioVoteLock,
 } from "@/types/api";
-export type {
-  DtfClientExplorer,
-  DtfClientExplorerContractMetadata,
-} from "@/client/explorer";
+export type { DtfClientExplorer, DtfClientExplorerContractMetadata } from "@/client/explorer";
 export type {
   DtfClientReadContractParameters,
   DtfClientViem,

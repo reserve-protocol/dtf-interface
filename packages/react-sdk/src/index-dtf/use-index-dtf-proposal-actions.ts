@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import type {
   CancelIndexDtfProposalParams,
   ExecuteIndexDtfProposalParams,
@@ -5,7 +7,6 @@ import type {
   QueueIndexDtfProposalParams,
   VoteIndexDtfProposalParams,
 } from "@reserve-protocol/sdk";
-import { useMemo } from "react";
 
 import { useDtfSdk } from "@/provider";
 

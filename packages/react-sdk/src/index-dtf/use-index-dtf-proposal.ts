@@ -1,9 +1,10 @@
 import type { DtfSdk, GetIndexDtfProposalParams, IndexDtfProposalDetail } from "@reserve-protocol/sdk";
+
 import { useQuery } from "@tanstack/react-query";
 
-import { dtfQueryKeys } from "@/query-keys";
-import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
 import { useDtfSdk } from "@/provider";
+import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
+import { dtfQueryKeys } from "@/query-keys";
 
 export function indexDtfProposalQueryOptions<TData = IndexDtfProposalDetail>(
   sdk: DtfSdk,

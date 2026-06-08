@@ -17,7 +17,6 @@ import type {
 import { DEFAULT_PROPOSAL_LIMIT } from "@/index-dtf/governance/constants";
 import { buildProposalContractMap } from "@/index-dtf/governance/contract-map";
 import { decodeIndexDtfProposalCalldatas } from "@/index-dtf/governance/decoder";
-import { getOptimisticProposalContext } from "@/index-dtf/governance/optimistic";
 import {
   mapDtfProposalContractContext,
   mapIndexDtfProposal,
@@ -28,6 +27,7 @@ import {
   type ParsedIndexDtfProposalSummary,
   type SubgraphGovernedIndexDtfProposalDtf,
 } from "@/index-dtf/governance/mapper";
+import { getOptimisticProposalContext } from "@/index-dtf/governance/optimistic";
 import {
   getDtfProposalGovernanceIds,
   getProposalGovernanceAddresses,
@@ -73,13 +73,7 @@ export async function getProposalList(
     const governanceIds = normalizeGovernanceIds(params.governanceAddresses);
     const dtf = params.address ? { address: getAddress(params.address), chainId: params.chainId } : undefined;
 
-    return getProposalListByGovernanceIds(
-      client,
-      params.chainId,
-      governanceIds,
-      limit,
-      dtf,
-    );
+    return getProposalListByGovernanceIds(client, params.chainId, governanceIds, limit, dtf);
   }
 
   if (params.dtf) {
@@ -89,25 +83,13 @@ export async function getProposalList(
     };
     const governanceIds = normalizeGovernanceIds(getProposalGovernanceAddresses(params.dtf));
 
-    return getProposalListByGovernanceIds(
-      client,
-      dtf.chainId,
-      governanceIds,
-      limit,
-      dtf,
-    );
+    return getProposalListByGovernanceIds(client, dtf.chainId, governanceIds, limit, dtf);
   }
 
   const dtf = { address: getAddress(params.address), chainId: params.chainId };
   const governanceIds = await fetchDtfProposalGovernanceIds(client, dtf);
 
-  return getProposalListByGovernanceIds(
-    client,
-    dtf.chainId,
-    governanceIds,
-    limit,
-    dtf,
-  );
+  return getProposalListByGovernanceIds(client, dtf.chainId, governanceIds, limit, dtf);
 }
 
 export async function getAllProposals(
@@ -126,9 +108,7 @@ export async function getAllProposals(
     },
   });
 
-  return withProposalSummaryState(
-    proposals.map((proposal) => mapIndexDtfProposalSummary(proposal, params.chainId)),
-  );
+  return withProposalSummaryState(proposals.map((proposal) => mapIndexDtfProposalSummary(proposal, params.chainId)));
 }
 
 export async function getProposal(
@@ -338,9 +318,7 @@ function withProposalSummaryState(
   return proposalsWithChallengeState;
 }
 
-function withChallengeState<T extends ParsedIndexDtfProposalSummary>(
-  proposals: readonly T[],
-): readonly T[] {
+function withChallengeState<T extends ParsedIndexDtfProposalSummary>(proposals: readonly T[]): readonly T[] {
   const optimisticProposals = proposals.filter((proposal) => proposal.isOptimistic === true);
   const challengeMatches = new Map<string, string>();
 
@@ -400,9 +378,7 @@ function getChallengeDescription(description: string): string | undefined {
   // verbatim. The subgraph stores descriptions untrimmed and the challenge lookup
   // matches `description` exactly, so trimming here breaks matching whenever the
   // original optimistic proposal description has trailing whitespace/newlines.
-  const challengeDescription = description
-    .slice(CHALLENGE_DESCRIPTION_PREFIX.length)
-    .replace(/^ /, "");
+  const challengeDescription = description.slice(CHALLENGE_DESCRIPTION_PREFIX.length).replace(/^ /, "");
 
   return challengeDescription.trim().length > 0 ? challengeDescription : undefined;
 }

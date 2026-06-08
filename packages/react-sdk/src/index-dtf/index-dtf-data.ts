@@ -1,6 +1,13 @@
+import type {
+  Amount,
+  Authority,
+  Governance,
+  IndexDtfFull,
+  Timelock,
+  Token,
+  TokenWithSnapshot,
+} from "@reserve-protocol/sdk";
 import type { Address } from "viem";
-
-import type { Amount, Authority, Governance, IndexDtfFull, Timelock, Token, TokenWithSnapshot } from "@reserve-protocol/sdk";
 
 type IndexDtfGovernanceData = Omit<Governance, "timelock"> & {
   readonly id: Address;

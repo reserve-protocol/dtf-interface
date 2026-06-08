@@ -16,7 +16,6 @@ Do not use `plans/` as proof that an API exists. Check `sdk/api-surface.md` and 
 - `register-index-dtf-react-sdk-migration.md`: pending Register migration plan for replacing direct Index DTF data/action sources with SDK/react-sdk surfaces.
 - `optimistic-selectors-sdk-integration.md`: blocked SDK subgraph integration for indexed optimistic selector data after the Index DTF subgraph is deployed and reindexed.
 
-
 ## Plan File Rules
 
 Every plan should include:

@@ -4,11 +4,12 @@ import type {
   IndexDtfProposalList,
   IndexDtfProposalSummary,
 } from "@reserve-protocol/sdk";
+
 import { useQuery } from "@tanstack/react-query";
 
-import { dtfQueryKeys } from "@/query-keys";
-import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
 import { useDtfSdk } from "@/provider";
+import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
+import { dtfQueryKeys } from "@/query-keys";
 
 type IndexDtfProposalsQueryOptions<TData> = Omit<DtfQueryOptions<IndexDtfProposalList, TData>, "select"> & {
   readonly select?: (data: readonly IndexDtfProposalSummary[]) => TData;

@@ -8,10 +8,7 @@ import { GetIndexDtfDelegatesDocument } from "@/index-dtf/subgraph/dtf.generated
 import { SdkError } from "@/lib/errors";
 import { mapAmount } from "@/lib/utils";
 
-export async function getDelegates(
-  client: DtfClient,
-  params: GetIndexDtfDelegatesParams,
-): Promise<IndexDtfDelegates> {
+export async function getDelegates(client: DtfClient, params: GetIndexDtfDelegatesParams): Promise<IndexDtfDelegates> {
   const stToken = getAddress(params.stToken);
   const { stakingToken } = await client.subgraph.queryIndex({
     chainId: params.chainId,

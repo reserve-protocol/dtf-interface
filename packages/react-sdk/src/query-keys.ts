@@ -190,12 +190,14 @@ export const dtfQueryKeys = {
     dtf: (params?: GetIndexDtfParams) => [...dtfQueryKeys.index.all(), "dtf", keyParams(params)] as const,
     full: (params?: GetFullIndexDtfParams) => [...dtfQueryKeys.index.all(), "full", keyParams(params)] as const,
     basket: (params?: GetIndexDtfBasketParams) => [...dtfQueryKeys.index.all(), "basket", keyParams(params)] as const,
-    version: (params?: GetIndexDtfVersionParams) => [...dtfQueryKeys.index.all(), "version", keyParams(params)] as const,
+    version: (params?: GetIndexDtfVersionParams) =>
+      [...dtfQueryKeys.index.all(), "version", keyParams(params)] as const,
     brand: (params?: DtfParams) => [...dtfQueryKeys.index.all(), "brand", keyParams(params)] as const,
     price: (params?: GetIndexDtfPriceParams) => [...dtfQueryKeys.index.all(), "price", keyParams(params)] as const,
     priceHistory: (params?: GetIndexDtfPriceHistoryParams) =>
       [...dtfQueryKeys.index.all(), "price-history", keyParams(params)] as const,
-    status: (params?: IndexMethodParams<"getStatus">) => [...dtfQueryKeys.index.all(), "status", keyParams(params)] as const,
+    status: (params?: IndexMethodParams<"getStatus">) =>
+      [...dtfQueryKeys.index.all(), "status", keyParams(params)] as const,
     exposure: (params?: IndexMethodParams<"getExposure">) =>
       [...dtfQueryKeys.index.all(), "exposure", keyParams(params)] as const,
     transactions: (params?: IndexMethodParams<"getTransactions">) =>
@@ -225,7 +227,11 @@ export const dtfQueryKeys = {
     governance: {
       all: () => [...dtfQueryKeys.index.all(), "governance"] as const,
       proposalList: (params?: GetIndexDtfProposalsParams) =>
-        [...dtfQueryKeys.index.governance.all(), "proposal-list", keyParams(indexDtfProposalsKeyParams(params))] as const,
+        [
+          ...dtfQueryKeys.index.governance.all(),
+          "proposal-list",
+          keyParams(indexDtfProposalsKeyParams(params)),
+        ] as const,
       proposals: (params?: GetIndexDtfProposalsParams) => dtfQueryKeys.index.governance.proposalList(params),
       proposal: (params?: GetIndexDtfProposalParams) =>
         [...dtfQueryKeys.index.governance.all(), "proposal", keyParams(params)] as const,

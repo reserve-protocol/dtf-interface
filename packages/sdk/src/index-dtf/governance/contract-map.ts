@@ -17,6 +17,8 @@ export type ProposalContractDecoder = {
   readonly abi: Abi;
 };
 
+export type ProposalContractDecoderMap = Map<string, ProposalContractDecoder | readonly ProposalContractDecoder[]>;
+
 export type IndexDtfProposalGovernanceContractContext = {
   readonly address: Address;
   readonly timelock: {
@@ -101,8 +103,8 @@ export function buildProposalContractMap({
   chainId,
   dtf,
   proposalGovernance,
-}: BuildProposalContractMapParams): Map<string, ProposalContractDecoder> {
-  const contracts = new Map<string, ProposalContractDecoder>();
+}: BuildProposalContractMapParams): ProposalContractDecoderMap {
+  const contracts: ProposalContractDecoderMap = new Map();
 
   addContract(contracts, dtf.address, "Index DTF", dtfIndexProposalAbi);
   addContract(contracts, dtf.proxyAdmin, "ProxyAdmin", dtfAdminProposalAbi);
@@ -160,16 +162,22 @@ export function buildProposalContractMap({
   }
 
   for (const extraContract of EXTRA_PROPOSAL_CONTRACTS) {
-    addContract(contracts, extraContract.addresses[chainId], extraContract.contract, extraContract.abi);
+    addContract(contracts, extraContract.addresses[chainId], extraContract.contract, extraContract.abi, true);
   }
 
   return contracts;
 }
 
-export function getContractAliases(contractMap: Map<string, ProposalContractDecoder>): Record<Address, string> {
+export function getContractAliases(contractMap: ProposalContractDecoderMap): Record<Address, string> {
   const aliases: Record<Address, string> = {};
 
-  for (const contract of contractMap.values()) {
+  for (const entry of contractMap.values()) {
+    const decoders = getContractDecoders(entry);
+    const contract = decoders[0];
+    if (!contract) {
+      continue;
+    }
+
     aliases[contract.target] = contract.contract;
   }
 
@@ -177,10 +185,11 @@ export function getContractAliases(contractMap: Map<string, ProposalContractDeco
 }
 
 function addContract(
-  contracts: Map<string, ProposalContractDecoder>,
+  contracts: ProposalContractDecoderMap,
   target: Address | undefined,
   contract: string,
   abi: Abi,
+  prefer = false,
 ) {
   if (!target) {
     return;
@@ -189,15 +198,24 @@ function addContract(
   const address = getAddress(target);
   const key = address.toLowerCase();
 
-  if (contracts.has(key)) {
-    return;
-  }
-
-  contracts.set(key, {
+  const decoder = {
     target: address,
     contract,
     abi,
-  });
+  };
+  const existing = getContractDecoders(contracts.get(key));
+
+  contracts.set(key, existing ? (prefer ? [decoder, ...existing] : [...existing, decoder]) : [decoder]);
+}
+
+function getContractDecoders(
+  entry: ProposalContractDecoder | readonly ProposalContractDecoder[] | undefined,
+): readonly ProposalContractDecoder[] {
+  if (!entry) {
+    return [];
+  }
+
+  return "abi" in entry ? [entry] : entry;
 }
 
 function getGovernanceContractName(type: string | null | undefined): string {

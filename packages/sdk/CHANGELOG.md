@@ -1,5 +1,11 @@
 # @reserve-protocol/sdk
 
+## 0.1.4
+
+### Patch Changes
+
+- Fix proposal decoding when known upgrade spell addresses also appear as legacy governance roles.
+
 ## 0.1.3
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @reserve-protocol/react-sdk
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @reserve-protocol/sdk@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes

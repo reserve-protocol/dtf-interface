@@ -15,7 +15,7 @@ import { indexDtfV5WriteAbi } from "@/index-dtf/governance/propose/calls";
 const DTF = "0x0000000000000000000000000000000000000001";
 const PROXY_ADMIN = "0x0000000000000000000000000000000000000002";
 const ST_TOKEN = "0x0000000000000000000000000000000000000003";
-const MAINNET_OPTIMISTIC_SPELL = "0xd7238463494Fdd4b103C2AD9d229b3985b5bC6F1";
+const BSC_OPTIMISTIC_SPELL = "0x3DDe17cfd36e740CB7452cb2F59FC925eACb91aB";
 
 describe("Index DTF proposal calldata decoder", () => {
   it("keeps Index DTF decoder ABIs ordered latest to oldest", () => {
@@ -100,7 +100,7 @@ describe("Index DTF proposal calldata decoder", () => {
     expect(decoded.unknownCalls).toEqual([]);
   });
 
-  it("decodes the Register optimistic governance upgrade spell", () => {
+  it("decodes the Register optimistic governance upgrade spell when it is also a legacy owner", () => {
     const calldata = encodeFunctionData({
       abi: upgradeSpellProposalAbi,
       functionName: "upgradeFolio",
@@ -118,18 +118,21 @@ describe("Index DTF proposal calldata decoder", () => {
       ],
     });
     const decoded = decodeIndexDtfProposalCalldatas({
-      targets: [MAINNET_OPTIMISTIC_SPELL],
+      targets: [BSC_OPTIMISTIC_SPELL],
       calldatas: [calldata],
       contractMap: buildProposalContractMap({
-        chainId: 1,
-        dtf: getDtfContractContext(),
+        chainId: 56,
+        dtf: {
+          ...getDtfContractContext(),
+          legacyAdminGovernance: [BSC_OPTIMISTIC_SPELL],
+        },
       }),
     });
 
     expect(decoded.calls[0]).toMatchObject({
       contract: "Reserve Optimistic Governance Spell",
       functionName: "upgradeFolio",
-      target: MAINNET_OPTIMISTIC_SPELL,
+      target: BSC_OPTIMISTIC_SPELL,
     });
     expect(decoded.unknownCalls).toEqual([]);
   });

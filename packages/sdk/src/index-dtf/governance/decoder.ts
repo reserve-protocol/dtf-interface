@@ -12,6 +12,7 @@ import {
   type IndexDtfProposalDtfContractContext,
   type IndexDtfProposalGovernanceContractContext,
   type ProposalContractDecoder,
+  type ProposalContractDecoderMap,
 } from "@/index-dtf/governance/contract-map";
 
 const UNKNOWN_CONTRACT = "Unknown";
@@ -25,7 +26,7 @@ const FALLBACK_DECODERS: readonly Omit<ProposalContractDecoder, "target">[] = [
 type DecodeIndexDtfProposalCalldatasParams = {
   readonly targets: readonly Address[];
   readonly calldatas: readonly `0x${string}`[];
-  readonly contractMap: Map<string, ProposalContractDecoder>;
+  readonly contractMap: ProposalContractDecoderMap;
 };
 
 export type DecodeIndexDtfProposalParams = {
@@ -75,9 +76,9 @@ export function decodeIndexDtfProposalCalldatas({
 
     const targetAddress = getAddress(target);
     const targetKey = targetAddress.toLowerCase();
-    const contractDecoder = contractMap.get(targetKey);
+    const contractDecoders = getContractDecoders(contractMap.get(targetKey));
 
-    if (!contractDecoder) {
+    if (contractDecoders.length === 0) {
       const fallbackDecoded = decodeFallbackProposalCalldata(i, targetAddress, callData);
 
       if (fallbackDecoded) {
@@ -98,7 +99,7 @@ export function decodeIndexDtfProposalCalldatas({
       continue;
     }
 
-    const decoded = decodeProposalCalldata(contractDecoder, i, targetAddress, callData);
+    const decoded = decodeProposalCalldata(contractDecoders, i, targetAddress, callData);
 
     if (decoded) {
       calls.push(decoded);
@@ -107,7 +108,7 @@ export function decodeIndexDtfProposalCalldatas({
       const unknownCall = {
         index: i,
         target: targetAddress,
-        contract: contractDecoder.contract,
+        contract: contractDecoders[0]!.contract,
         callData,
       };
 
@@ -170,8 +171,8 @@ async function getExternalAbiContractMap(
   explorer: DtfClientExplorer,
   chainId: SupportedChainId,
   unknownCalls: readonly IndexDtfUnknownCalldata[],
-  contractMap: Map<string, ProposalContractDecoder>,
-): Promise<Map<string, ProposalContractDecoder> | null> {
+  contractMap: ProposalContractDecoderMap,
+): Promise<ProposalContractDecoderMap | null> {
   const targets = [...new Set(unknownCalls.map((call) => getAddress(call.target)))] as Address[];
   const metadata = await Promise.all(
     targets.map(async (target) => ({
@@ -185,44 +186,72 @@ async function getExternalAbiContractMap(
     return null;
   }
 
-  const externalContractMap = new Map(contractMap);
+  const externalContractMap: ProposalContractDecoderMap = new Map(contractMap);
 
   for (const { target, metadata } of withMetadata) {
     const key = target.toLowerCase();
-    const existing = externalContractMap.get(key);
+    const existing = getContractDecoders(externalContractMap.get(key));
 
-    externalContractMap.set(key, {
-      target,
-      contract: existing?.contract ?? metadata!.contractName,
-      abi: existing ? ([...existing.abi, ...metadata!.abi] as Abi) : metadata!.abi,
-    });
+    if (existing.length > 0) {
+      const [primary, ...rest] = existing;
+      externalContractMap.set(key, [
+        {
+          ...primary!,
+          abi: [...primary!.abi, ...metadata!.abi] as Abi,
+        },
+        ...rest,
+      ]);
+      continue;
+    }
+
+    externalContractMap.set(key, [
+      {
+        target,
+        contract: metadata!.contractName,
+        abi: metadata!.abi,
+      },
+    ]);
   }
 
   return externalContractMap;
 }
 
 function decodeProposalCalldata(
-  contractDecoder: ProposalContractDecoder,
+  contractDecoders: readonly ProposalContractDecoder[],
   index: number,
   target: Address,
   callData: `0x${string}`,
 ): IndexDtfDecodedCalldata | undefined {
-  const decoded = tryDecodeCalldata(contractDecoder.abi, callData);
+  for (const contractDecoder of contractDecoders) {
+    const decoded = tryDecodeCalldata(contractDecoder.abi, callData);
 
-  if (!decoded) {
-    return undefined;
+    if (!decoded) {
+      continue;
+    }
+
+    return {
+      index,
+      target,
+      contract: contractDecoder.contract,
+      functionName: decoded.functionName,
+      signature: decoded.signature,
+      parameters: decoded.parameters,
+      params: decoded.params,
+      callData,
+    };
   }
 
-  return {
-    index,
-    target,
-    contract: contractDecoder.contract,
-    functionName: decoded.functionName,
-    signature: decoded.signature,
-    parameters: decoded.parameters,
-    params: decoded.params,
-    callData,
-  };
+  return undefined;
+}
+
+function getContractDecoders(
+  entry: ProposalContractDecoder | readonly ProposalContractDecoder[] | undefined,
+): readonly ProposalContractDecoder[] {
+  if (!entry) {
+    return [];
+  }
+
+  return "abi" in entry ? [entry] : entry;
 }
 
 function tryDecodeCalldata(
@@ -259,7 +288,7 @@ function decodeFallbackProposalCalldata(
   callData: `0x${string}`,
 ): IndexDtfDecodedCalldata | undefined {
   for (const fallbackDecoder of FALLBACK_DECODERS) {
-    const decoded = decodeProposalCalldata({ ...fallbackDecoder, target }, index, target, callData);
+    const decoded = decodeProposalCalldata([{ ...fallbackDecoder, target }], index, target, callData);
 
     if (decoded) {
       return decoded;

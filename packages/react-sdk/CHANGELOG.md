@@ -1,5 +1,14 @@
 # @reserve-protocol/react-sdk
 
+## 0.1.5
+
+### Patch Changes
+
+- Add new Ethereum and BSC Index DTF catalog entries and expose `useIndexCatalog`.
+
+- Updated dependencies []:
+  - @reserve-protocol/sdk@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes

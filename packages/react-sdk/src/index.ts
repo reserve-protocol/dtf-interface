@@ -80,6 +80,7 @@ export {
   useBuildIndexDtfSettingsProposal,
   useDiscoverDtfs,
   useFullIndexDtf,
+  useIndexCatalog,
   useIndexDtf,
   useIndexDtfBasket,
   useIndexDtfBrand,

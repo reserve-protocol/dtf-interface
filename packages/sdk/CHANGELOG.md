@@ -1,5 +1,14 @@
 # @reserve-protocol/sdk
 
+## 0.1.5
+
+### Patch Changes
+
+- Add new Ethereum and BSC Index DTF catalog entries and expose `useIndexCatalog`.
+
+- Updated dependencies []:
+  - @reserve-protocol/dtf-catalog@0.0.2
+
 ## 0.1.4
 
 ### Patch Changes

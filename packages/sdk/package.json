@@ -1,6 +1,6 @@
 {
   "name": "@reserve-protocol/sdk",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Core TypeScript SDK for DTF interface integrations.",
   "keywords": [
     "dtf",

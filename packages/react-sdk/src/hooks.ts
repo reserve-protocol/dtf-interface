@@ -61,6 +61,13 @@ export function useIndexDtfList<TData = IndexDtfList>(
   return useQuery(indexDtfListQueryOptions(sdk, params, options));
 }
 
+export function useIndexCatalog<TData = IndexDtfList>(
+  params?: ListIndexDtfsParams,
+  options?: DtfQueryOptions<IndexDtfList, TData>,
+) {
+  return useIndexDtfList(params, options);
+}
+
 export function useIndexDtf<TData = IndexDtfFull>(
   params: GetIndexDtfParams | undefined,
   options?: DtfQueryOptions<IndexDtfFull, TData>,

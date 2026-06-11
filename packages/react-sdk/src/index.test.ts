@@ -35,6 +35,7 @@ describe("React SDK public surface", () => {
       "useIndexDtfPastOptimisticVotes",
       "useIndexDtfCancelProposalCall",
       "useIndexDtfExecuteProposalCall",
+      "useIndexCatalog",
       "useIndexDtfProposalList",
       "useIndexDtfQueueProposalCall",
       "useIndexDtfProposalThrottleCharges",

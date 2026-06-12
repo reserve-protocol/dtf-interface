@@ -1,30 +1,65 @@
-# Yield DTF Boundary
+# Yield DTF API
 
-Yield DTFs are part of the Reserve protocol, but the current SDK yield namespace is not implemented.
+Yield DTFs (formerly RTokens) are asset-backed currencies with on-chain prices, RSR staking, and revenue distribution. Unlike Index DTFs there is no Reserve API involved — every price and quote comes from the protocol's Facade contracts, and historical data comes from the Yield DTF subgraph.
+
+Supported chains: Ethereum mainnet (1) and Base (8453).
 
 ```ts
 const sdk = createDtfSdk();
 
-await sdk.yield.list(); // throws NOT_IMPLEMENTED
-await sdk.yield.get({ address, chainId }); // throws NOT_IMPLEMENTED
+const dtf = await sdk.yield.get({
+  address: "0xA0d69E286B938e21CBf7E51D71F6A4c8918f482F", // eUSD
+  chainId: 1,
+});
+
+const ref = sdk.yield.ref({ address: dtf.id, chainId: 1 });
+const state = await ref.getState();
 ```
 
-## What Exists Today
+## Reads
 
-- Product and protocol docs for Yield DTFs.
-- Chain context: Ethereum mainnet and Base.
-- A placeholder `sdk.yield` namespace so the SDK shape has a future boundary.
+| Method               | Source            | Use                                                                              |
+| -------------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `get`                | Subgraph + RPC    | Full Yield DTF view: token, collaterals, stToken, roles, revenue split, staking. |
+| `list`               | Subgraph          | Yield DTF summaries for one chain.                                               |
+| `getContracts`       | RPC (Main)        | Every component address (basketHandler, stRSR, traders, ...) + version.          |
+| `getState`           | RPC multicall     | Supply, basketsNeeded, exchange rate, throttles, pauses, basket nonce.           |
+| `getPrice`           | Facade            | On-chain price range `{ low, high, price }`.                                     |
+| `getBasket`          | Facade            | Basket breakdown with shares/targets, backing %, overcollateralization, buffer.  |
+| `getHolders`         | Subgraph          | Top holders.                                                                     |
+| `getTransactions`    | Subgraph          | Activity entries (transfers, issuance, staking).                                 |
+| `getIssuanceQuote`   | Facade callStatic | Collateral deposits required for an issue amount.                                |
+| `getRedemptionQuote` | Facade callStatic | Collateral returned for a redeem amount, with availability.                      |
+| `getMaxIssuable`     | Facade callStatic | Max issuable for an account.                                                     |
+| `getStakingState`    | RPC + Facade      | Exchange rate, RSR balance/allowance, stRSR balance, pending unstakes.           |
+| `getStakeHistory`    | Subgraph          | Historical stake/unstake records with exchange rates.                            |
 
-## What Does Not Exist Yet
+State reads target protocol `>= 3.0`. The protocol's hourly throttles mean `state.issuance.available` and `state.redemption.available` are the real limits, not the wallet balance.
 
-- Yield DTF discovery methods.
-- Yield DTF basket reads.
-- Yield DTF governance reads.
-- Yield DTF staking or revenue builders.
-- React SDK Yield DTF hooks.
+## Writes
 
-## Integration Guidance
+All builders return `ContractCall` objects (or `ContractCallPlan` with approvals), same as Index DTF.
 
-Do not assume Index DTF and Yield DTF APIs are symmetrical.
+| Method                 | Contract path                                               |
+| ---------------------- | ----------------------------------------------------------- |
+| `prepareIssue`         | `RToken.issue(amount)`                                      |
+| `prepareIssuePlan`     | Collateral approvals (to the Yield DTF) + issue             |
+| `prepareRedeem`        | `RToken.redeem(amount)`                                     |
+| `prepareRedeemCustom`  | `RToken.redeemCustom(...)` against historical basket nonces |
+| `prepareStake`         | `StRSR.stake(rsrAmount)`                                    |
+| `prepareStakePlan`     | RSR approval (to the staking vault) + stake                 |
+| `prepareUnstake`       | `StRSR.unstake(stAmount)` — enters the withdrawal queue     |
+| `prepareWithdraw`      | `StRSR.withdraw(account, endId)` after the unstaking delay  |
+| `prepareCancelUnstake` | `StRSR.cancelUnstake(endId)` — re-stakes pending drafts     |
 
-Index DTFs use Reserve API, RPC, and the Index DTF subgraph. Yield DTFs historically use subgraph plus RPC and have different contracts, lifecycle, and staking mechanics.
+```ts
+const quote = await ref.getIssuanceQuote(parseEther("100"));
+const plan = ref.prepareIssuePlan({
+  amount: parseEther("100"),
+  deposits: quote.deposits.map((d) => ({ token: d.token, amount: d.amount.raw })),
+});
+```
+
+## Coming in later phases
+
+Governance reads/actions (Phase 2), auctions and revenue (Phase 3), APY computation and proposal building (Phase 4). The phase specs live in the repo's `docs/IMPROVEMENT_PLAN.mdx`; the protocol architecture reference is `docs/yield-dtf/PROTOCOL.md`.

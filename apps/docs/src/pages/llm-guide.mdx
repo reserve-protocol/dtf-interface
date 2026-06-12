@@ -14,7 +14,7 @@ Use this page as the first stop when an AI agent is reading or generating code f
 - React apps should prefer React SDK hooks over direct `useDtfSdk()` calls for UI reads.
 - Both packages prepare transaction calls. They do not connect wallets, switch chains, send transactions, or own toast/confirmation UX.
 - Do not import wallet-client constructors from the SDK. Browser apps use wagmi/connector wallet clients; scripts import wallet helpers directly from `viem`.
-- `sdk.yield` is a placeholder boundary today. Its methods throw `NOT_IMPLEMENTED`.
+- `sdk.yield` covers Yield DTF (formerly RToken) reads, issuance, and staking on chains 1 and 8453. Governance/auctions/APY are not implemented yet.
 
 ## Canonical Example DTF
 
@@ -60,6 +60,16 @@ That address is LCAP from `indexDtfCatalog`.
 - DTF settings builders often need `version: "5.0.0" | "6.0.0"`; read it with `sdk.index.getVersion({ address, chainId })`.
 - Raw version-sensitive `prepare*` helpers should receive the target DTF version explicitly. Higher-level proposal builders may fetch the DTF version when omitted.
 - Proposal action builders prepare vote, queue, execute, and cancel calls. They do not invalidate queries after a transaction.
+
+## Yield DTF Rules
+
+- Yield DTF = the protocol formerly called RToken. ABIs keep contract-true names (`rTokenAbi`, `stRsrAbi`, `facadeReadAbi`); the API uses Yield DTF naming.
+- There is NO Reserve API for Yield DTFs. Prices and quotes are on-chain via the Facade: `sdk.yield.getPrice` returns `{ low, high, price }` from `FacadeRead.price`.
+- Canonical example: eUSD on mainnet — `{ address: "0xA0d69E286B938e21CBf7E51D71F6A4c8918f482F", chainId: 1 }`.
+- Issuance: quote first (`getIssuanceQuote`), approvals go to the Yield DTF token itself, then `prepareIssue`/`prepareIssuePlan`. Hourly throttles apply — check `getState().issuance.available`.
+- Staking: RSR approval goes to the staking vault (`stToken`); `exchangeRate` is RSR per stRSR and only grows (except seizure events). Unstaking is a two-step queue: `prepareUnstake`, wait `unstakingDelay`, then `prepareWithdraw(account, endId)` where `endId = pendingUnstake.index + 1`.
+- Subgraph BigDecimal fields (holder balances, transaction amounts, USD values) are display-class `number`s; raw BigInt fields map to `Amount`. Stake records carry both — the SDK already picks the raw fields.
+- `basketsNeeded / totalSupply` is the basket-units-per-token exchange rate; both are D18 `Amount`s.
 
 ## Renamed Or Removed APIs
 

@@ -46,7 +46,7 @@ export default defineConfig({
         { text: "Deployment", link: "/sdk/deployment" },
         { text: "Vote-Lock", link: "/sdk/vote-lock" },
         { text: "Portfolio & Tokens", link: "/sdk/portfolio-tokens" },
-        { text: "Yield DTF Boundary", link: "/sdk/yield-dtf" },
+        { text: "Yield DTF API", link: "/sdk/yield-dtf" },
       ],
     },
     {
@@ -55,6 +55,7 @@ export default defineConfig({
         { text: "Overview", link: "/react-sdk/overview" },
         { text: "Providers", link: "/react-sdk/providers" },
         { text: "Index DTF Hooks", link: "/react-sdk/index-dtf-hooks" },
+        { text: "Yield DTF Hooks", link: "/react-sdk/yield-dtf-hooks" },
         { text: "Governance Hooks", link: "/react-sdk/governance-hooks" },
         { text: "Query Options & Keys", link: "/react-sdk/query-options" },
         { text: "Transactions", link: "/react-sdk/transactions" },

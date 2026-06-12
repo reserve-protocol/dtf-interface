@@ -104,7 +104,6 @@ export {
   hashIndexDtfProposalDescription,
   getIndexDtfAssetList,
   getDtf,
-  getFullIndexDtf,
   getIndexDtf,
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBasket,

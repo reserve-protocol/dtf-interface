@@ -3,7 +3,7 @@ import { createContext, createElement, useContext, useMemo, type PropsWithChildr
 import type { SupportedChainId } from "@reserve-protocol/sdk";
 import type { Address } from "viem";
 
-import { useFullIndexDtf } from "@/hooks";
+import { useIndexDtf } from "@/hooks";
 
 export type IndexDtfIdentity = {
   readonly address: Address;
@@ -42,7 +42,7 @@ export function useIndexDtfIdentity(): IndexDtfIdentity {
 function IndexDtfPrefetch() {
   const identity = useIndexDtfIdentity();
 
-  useFullIndexDtf({ ...identity, brand: true });
+  useIndexDtf({ ...identity, brand: true });
 
   return null;
 }

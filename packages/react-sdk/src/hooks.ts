@@ -8,7 +8,6 @@ import type {
   DiscoverDtf,
   DtfParams,
   GetDiscoverDtfsOptions,
-  GetFullIndexDtfParams,
   GetIndexDtfBasketParams,
   GetIndexDtfParams,
   GetIndexDtfPriceHistoryParams,
@@ -31,7 +30,6 @@ import {
   buildIndexDtfDaoSettingsProposalQueryOptions,
   buildIndexDtfSettingsProposalQueryOptions,
   discoverDtfsQueryOptions,
-  fullIndexDtfQueryOptions,
   indexDtfBasketQueryOptions,
   indexDtfBrandQueryOptions,
   indexDtfListQueryOptions,
@@ -75,15 +73,6 @@ export function useIndexDtf<TData = IndexDtfFull>(
   const sdk = useDtfSdk();
 
   return useQuery(indexDtfQueryOptions(sdk, params, options));
-}
-
-export function useFullIndexDtf<TData = IndexDtfFull>(
-  params: GetFullIndexDtfParams | undefined,
-  options?: DtfQueryOptions<IndexDtfFull, TData>,
-) {
-  const sdk = useDtfSdk();
-
-  return useQuery(fullIndexDtfQueryOptions(sdk, params, options));
 }
 
 export function useIndexDtfBasket<TData = IndexDtfBasket>(

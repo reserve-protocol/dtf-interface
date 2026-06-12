@@ -21,7 +21,6 @@ export {
   getBasketWithPrice as getIndexDtfBasketWithPrice,
   getBrand as getIndexDtfBrand,
   getFull as getIndexDtf,
-  getFull as getFullIndexDtf,
   getMandate as getIndexDtfMandate,
   getPrice as getIndexDtfPrice,
   getPriceHistory as getIndexDtfPriceHistory,

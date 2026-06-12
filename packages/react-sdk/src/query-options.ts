@@ -10,7 +10,6 @@ import {
   type DtfParams,
   type DtfSdk,
   type GetDiscoverDtfsOptions,
-  type GetFullIndexDtfParams,
   type GetIndexDtfBasketParams,
   type GetIndexDtfParams,
   type GetIndexDtfPriceHistoryParams,
@@ -96,19 +95,6 @@ export function indexDtfQueryOptions<TData = IndexDtfFull>(
   return createDtfQueryOptions(
     dtfQueryKeys.index.full(params),
     () => sdk.index.get(requireParams(params, "indexDtfQueryOptions")),
-    params !== undefined,
-    options,
-  );
-}
-
-export function fullIndexDtfQueryOptions<TData = IndexDtfFull>(
-  sdk: DtfSdk,
-  params: GetFullIndexDtfParams | undefined,
-  options?: DtfQueryOptions<IndexDtfFull, TData>,
-) {
-  return createDtfQueryOptions(
-    dtfQueryKeys.index.full(params),
-    () => sdk.index.getFull(requireParams(params, "fullIndexDtfQueryOptions")),
     params !== undefined,
     options,
   );

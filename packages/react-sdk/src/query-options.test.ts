@@ -357,7 +357,9 @@ describe("staleTime defaults", () => {
   });
 
   it("applies the default class to governance queries", () => {
-    expect(indexDtfProposalQueryOptions(sdk, proposalParams).staleTime).toBe(DEFAULT_STALE_TIME);
+    expect(indexDtfProposalQueryOptions(sdk, { address: DTF, chainId: 1, proposalId: "1" }).staleTime).toBe(
+      DEFAULT_STALE_TIME,
+    );
   });
 
   it("lets callers override the default", () => {

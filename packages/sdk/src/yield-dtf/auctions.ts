@@ -1,4 +1,4 @@
-import { erc20Abi, getAddress, type Address } from "viem";
+import { erc20Abi, getAddress, zeroAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
 import type { ContractCall, ContractCallPlan } from "@/lib/contract-call";
@@ -6,12 +6,12 @@ import type { Amount } from "@/types/common";
 import type { YieldDtfParams } from "@/types/yield-dtf";
 
 import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
-import { mapAmount } from "@/lib/utils";
+import { mapAmount, sameAddress } from "@/lib/utils";
 import { backingManagerAbi } from "@/yield-dtf/abis/backing-manager";
 import { dutchTradeAbi } from "@/yield-dtf/abis/dutch-trade";
 import { facadeActAbi } from "@/yield-dtf/abis/facade-act";
 import { facadeReadAbi } from "@/yield-dtf/abis/facade-read";
-import { FACADE_ACT_ADDRESS, FACADE_READ_ADDRESS, type YieldDtfChainId } from "@/yield-dtf/config";
+import { FACADE_ACT_ADDRESS, FACADE_READ_ADDRESS, RSR_ADDRESS, type YieldDtfChainId } from "@/yield-dtf/config";
 import { getYieldDtfContracts } from "@/yield-dtf/dtf/index";
 import { GetYieldDtfTradesDocument } from "@/yield-dtf/subgraph/yield.generated";
 
@@ -35,12 +35,13 @@ export type YieldDtfTraderRevenue = {
 export type YieldDtfRevenue = {
   readonly rsrTrader: YieldDtfTraderRevenue;
   readonly rTokenTrader: YieldDtfTraderRevenue;
+  /** Null when the read reverts (trading paused/frozen or legacy versions). */
   readonly recollateralization: {
     readonly canStart: boolean;
     readonly sell: Address;
     readonly buy: Address;
     readonly sellAmount: Amount;
-  };
+  } | null;
 };
 
 /**
@@ -54,7 +55,7 @@ export async function getYieldDtfRevenue(client: DtfClient, params: YieldDtfPara
   const publicClient = client.viem.getPublicClient(params.chainId);
   const facadeAct = FACADE_ACT_ADDRESS[params.chainId];
 
-  const [rsrOverview, rTokenOverview, recollateralization, [rsrSettleable, rTokenSettleable]] = await Promise.all([
+  const [rsrOverview, rTokenOverview, recoResult, [rsrSettleable, rTokenSettleable]] = await Promise.all([
     publicClient.simulateContract({
       address: facadeAct,
       abi: facadeActAbi,
@@ -67,12 +68,16 @@ export async function getYieldDtfRevenue(client: DtfClient, params: YieldDtfPara
       functionName: "revenueOverview",
       args: [contracts.rTokenTrader],
     }),
-    publicClient.simulateContract({
-      address: facadeAct,
-      abi: facadeActAbi,
-      functionName: "nextRecollateralizationAuction",
-      args: [contracts.backingManager, 0],
-    }),
+    // WHY: reverts while trading is paused/frozen and on some legacy versions;
+    // a dead reco read must not take the revenue overviews down with it.
+    publicClient
+      .simulateContract({
+        address: facadeAct,
+        abi: facadeActAbi,
+        functionName: "nextRecollateralizationAuction",
+        args: [contracts.backingManager, 0],
+      })
+      .catch(() => null),
     publicClient.multicall({
       allowFailure: false,
       contracts: [
@@ -92,11 +97,18 @@ export async function getYieldDtfRevenue(client: DtfClient, params: YieldDtfPara
     }),
   ]);
 
-  const [recoCanStart, recoSell, recoBuy, recoAmount] = recollateralization.result;
+  const reco = recoResult?.result;
+  const recoCanStart = reco?.[0] ?? false;
+  // The facade returns zero addresses when no recollateralization can start.
+  const recoSell = reco && reco[1] !== zeroAddress ? getAddress(reco[1]) : undefined;
 
-  // Surpluses are denominated in each ERC20's own decimals.
+  // Surpluses (and the reco sell amount) are denominated in each ERC20's own decimals.
   const erc20s = [
-    ...new Set([...rsrOverview.result[0], ...rTokenOverview.result[0]].map((erc20) => getAddress(erc20))),
+    ...new Set(
+      [...rsrOverview.result[0], ...rTokenOverview.result[0], ...(recoSell ? [recoSell] : [])].map((erc20) =>
+        getAddress(erc20),
+      ),
+    ),
   ];
   const decimalResults = await publicClient.multicall({
     allowFailure: false,
@@ -105,14 +117,26 @@ export async function getYieldDtfRevenue(client: DtfClient, params: YieldDtfPara
   const decimals = new Map(erc20s.map((erc20, index) => [erc20, Number(decimalResults[index])]));
 
   return {
-    rsrTrader: mapTraderRevenue(contracts.rsrTrader, rsrOverview.result, rsrSettleable, decimals),
-    rTokenTrader: mapTraderRevenue(contracts.rTokenTrader, rTokenOverview.result, rTokenSettleable, decimals),
-    recollateralization: {
-      canStart: recoCanStart,
-      sell: getAddress(recoSell),
-      buy: getAddress(recoBuy),
-      sellAmount: mapAmount(recoAmount),
-    },
+    // While a recollateralization can start, revenue auctions revert on-chain
+    // (forwardRevenue requires full collateralization), so canStart is
+    // overridden — same derivation Register uses. The trader's own buy token
+    // is a distribution, not an auction, and is filtered out like Register.
+    rsrTrader: mapTraderRevenue(contracts.rsrTrader, rsrOverview.result, rsrSettleable, decimals, {
+      blocked: recoCanStart,
+      tokenToBuy: RSR_ADDRESS[params.chainId],
+    }),
+    rTokenTrader: mapTraderRevenue(contracts.rTokenTrader, rTokenOverview.result, rTokenSettleable, decimals, {
+      blocked: recoCanStart,
+      tokenToBuy: getAddress(params.address),
+    }),
+    recollateralization: reco
+      ? {
+          canStart: reco[0],
+          sell: getAddress(reco[1]),
+          buy: getAddress(reco[2]),
+          sellAmount: mapAmount(reco[3], decimals.get(getAddress(reco[1]))),
+        }
+      : null,
   };
 }
 
@@ -127,7 +151,8 @@ export type YieldDtfTrade = {
   /** Subgraph BigDecimal in human units — display-class. */
   readonly amount: number;
   readonly minBuyAmount: number;
-  readonly boughtAmount: number;
+  /** Absent until the trade settles. */
+  readonly boughtAmount?: number;
   readonly worstCasePrice: number;
   readonly startedAt: number;
   readonly endAt: number;
@@ -160,7 +185,9 @@ export async function getYieldDtfTrades(
     buyingSymbol: trade.buyingTokenSymbol,
     amount: Number(trade.amount),
     minBuyAmount: Number(trade.minBuyAmount),
-    boughtAmount: Number(trade.boughtAmount),
+    ...(trade.boughtAmount === null || trade.boughtAmount === undefined
+      ? {}
+      : { boughtAmount: Number(trade.boughtAmount) }),
     worstCasePrice: Number(trade.worstCasePrice),
     startedAt: Number(trade.startedAt),
     endAt: Number(trade.endAt),
@@ -176,8 +203,8 @@ export type YieldDtfDutchAuction = {
   readonly sellAmount: Amount;
   readonly endTime: number;
   readonly canSettle: boolean;
-  /** Cost in buy tokens to take the full lot right now. */
-  readonly currentBid: Amount;
+  /** Cost in buy tokens to take the full lot right now; absent outside the bidding window. */
+  readonly currentBid?: Amount;
 };
 
 /** Live state of one Dutch auction, including the current bid cost. */
@@ -202,8 +229,10 @@ export async function getYieldDtfDutchAuction(
     }),
     publicClient.getBlock(),
   ]);
+  // bidAmount reverts outside the OPEN window (not started yet / ended), which
+  // is exactly the canSettle case — it must not take the whole read down.
   const [sellDecimals, buyDecimals, currentBid] = await publicClient.multicall({
-    allowFailure: false,
+    allowFailure: true,
     contracts: [
       { address: getAddress(sell), abi: erc20Abi, functionName: "decimals" },
       { address: getAddress(buy), abi: erc20Abi, functionName: "decimals" },
@@ -211,14 +240,19 @@ export async function getYieldDtfDutchAuction(
     ],
   });
 
+  if (sellDecimals.status === "failure") throw sellDecimals.error;
+  if (buyDecimals.status === "failure") throw buyDecimals.error;
+
   return {
     trade,
     sell: getAddress(sell),
     buy: getAddress(buy),
-    sellAmount: mapAmount(lot, Number(sellDecimals)),
+    sellAmount: mapAmount(lot, Number(sellDecimals.result)),
     endTime: Number(endTime),
     canSettle,
-    currentBid: mapAmount(currentBid, Number(buyDecimals)),
+    ...(currentBid.status === "success"
+      ? { currentBid: mapAmount(currentBid.result, Number(buyDecimals.result)) }
+      : {}),
   };
 }
 
@@ -266,7 +300,7 @@ export function prepareYieldDtfRebalance(params: YieldDtfRebalanceParams): Contr
 export type YieldDtfBidParams = {
   readonly chainId: YieldDtfChainId;
   readonly trade: Address;
-  /** Buy-token amount to approve; use `currentBid.raw` plus headroom for price decay. */
+  /** Buy-token amount to approve; `currentBid.raw` at fetch time is the max the bid can cost (price only falls). */
   readonly approveAmount: bigint;
   readonly buyToken: Address;
 };
@@ -316,21 +350,29 @@ function mapTraderRevenue(
   ],
   settleable: readonly Address[],
   decimals: ReadonlyMap<Address, number>,
+  context: { readonly blocked: boolean; readonly tokenToBuy: Address },
 ): YieldDtfTraderRevenue {
   const [erc20s, canStart, surpluses, minTradeAmounts] = overview;
+  const auctions: YieldDtfRevenueAuction[] = [];
+
+  for (const [index, erc20] of erc20s.entries()) {
+    const address = getAddress(erc20);
+
+    if (sameAddress(address, context.tokenToBuy)) {
+      continue;
+    }
+
+    auctions.push({
+      erc20: address,
+      canStart: canStart[index]! && !context.blocked,
+      surplus: mapAmount(surpluses[index]!, decimals.get(address)),
+      minTradeAmount: mapAmount(minTradeAmounts[index]!, decimals.get(address)),
+    });
+  }
 
   return {
     trader,
-    auctions: erc20s.map((erc20, index) => {
-      const address = getAddress(erc20);
-
-      return {
-        erc20: address,
-        canStart: canStart[index]!,
-        surplus: mapAmount(surpluses[index]!, decimals.get(address)),
-        minTradeAmount: mapAmount(minTradeAmounts[index]!, decimals.get(address)),
-      };
-    }),
+    auctions,
     settleable: settleable.map((erc20) => getAddress(erc20)),
   };
 }

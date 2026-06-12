@@ -234,3 +234,13 @@ query GetYieldDtfTrades($rTokenId: String!, $limit: Int!, $offset: Int!) {
     settleTxHash
   }
 }
+
+query GetYieldDtfDailySnapshots($rTokenId: String!, $limit: Int!) {
+  rtokenDailySnapshots(where: { rToken: $rTokenId }, orderBy: timestamp, orderDirection: desc, first: $limit) {
+    timestamp
+    rsrExchangeRate
+    rsrStaked
+    rewardTokenSupply
+    rsrPrice
+  }
+}

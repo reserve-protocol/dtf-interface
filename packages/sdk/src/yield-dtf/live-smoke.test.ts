@@ -155,7 +155,9 @@ smokeDescribe("Yield DTF auctions live smoke (mainnet eUSD)", () => {
     for (const auction of [...revenue.rsrTrader.auctions, ...revenue.rTokenTrader.auctions]) {
       expect(Number(auction.surplus.formatted)).toBeLessThan(1e12);
     }
-    expect(typeof revenue.recollateralization.canStart).toBe("boolean");
+    expect(revenue.recollateralization === null || typeof revenue.recollateralization.canStart === "boolean").toBe(
+      true,
+    );
 
     expect(trades.length).toBeGreaterThan(0);
     expect(trades[0]!.selling).toMatch(/^0x/);

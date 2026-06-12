@@ -1,4 +1,4 @@
-import { getAddress, type Address, type Hex } from "viem";
+import { ContractFunctionExecutionError, getAddress, type Address, type Hex } from "viem";
 
 import type { DtfClient } from "@/client";
 import type { ContractCall } from "@/lib/contract-call";
@@ -13,12 +13,14 @@ import type {
 
 import { SdkError } from "@/lib/errors";
 import {
+  getGovernorTimelockOperationId,
   prepareGovernorCancel,
   prepareGovernorExecute,
   prepareGovernorPropose,
   prepareGovernorQueue,
   prepareGovernorVote,
   prepareGovernorVoteWithReason,
+  prepareTimelockCancel,
   type GovernorProposalPayload,
 } from "@/lib/governor-calls";
 import { getCurrentTime, mapAmount, sameAddress } from "@/lib/utils";
@@ -79,25 +81,22 @@ export async function getYieldDtfGovernance(client: DtfClient, params: YieldDtfP
   const governor = getAddress(framework.contractAddress);
   const isTimepointBased = isTimepointGovernor(framework.name);
 
-  let quorum = mapAmount(framework.quorumVotes);
-  let proposalThreshold = mapAmount(framework.proposalThreshold);
-  let quorumNumerator = Number(framework.quorumNumerator);
-
-  if (isTimepointBased) {
-    // A slightly-past timepoint avoids "future lookup" reverts.
-    const timepoint = BigInt(getCurrentTime() - 100);
-    const [quorumNow, quorumNumeratorNow, thresholdNow] = await client.viem.getPublicClient(params.chainId).multicall({
-      allowFailure: false,
-      contracts: [
-        { address: governor, abi: yieldGovernanceAnastasiusAbi, functionName: "quorum", args: [timepoint] },
-        { address: governor, abi: yieldGovernanceAnastasiusAbi, functionName: "quorumNumerator", args: [timepoint] },
-        { address: governor, abi: yieldGovernanceAnastasiusAbi, functionName: "proposalThreshold" },
-      ],
-    });
-    quorum = mapAmount(quorumNow);
-    quorumNumerator = Number(quorumNumeratorNow);
-    proposalThreshold = mapAmount(thresholdNow);
-  }
+  // Quorum and threshold always come from the governor: the subgraph stores
+  // quorumVotes as null for most Alexios frameworks and proposalThreshold in
+  // micro-percent — on-chain both are actual vote amounts for both flavors.
+  // Anastasius timepoints are timestamps, Alexios are block numbers; slightly
+  // in the past to avoid future-lookup reverts.
+  const publicClient = client.viem.getPublicClient(params.chainId);
+  const timepoint = isTimepointBased ? BigInt(getCurrentTime() - 100) : (await publicClient.getBlockNumber()) - 5n;
+  const [quorumVotes, thresholdVotes] = await publicClient.multicall({
+    allowFailure: false,
+    contracts: [
+      { address: governor, abi: yieldGovernanceAnastasiusAbi, functionName: "quorum", args: [timepoint] },
+      { address: governor, abi: yieldGovernanceAnastasiusAbi, functionName: "proposalThreshold" },
+    ],
+  });
+  const quorum = mapAmount(quorumVotes);
+  const proposalThreshold = mapAmount(thresholdVotes);
 
   return {
     governor,
@@ -110,8 +109,8 @@ export async function getYieldDtfGovernance(client: DtfClient, params: YieldDtfP
     executionDelay: Number(framework.executionDelay),
     proposalThreshold,
     quorum,
-    quorumNumerator,
-    quorumDenominator: Number(framework.quorumDenominator),
+    quorumNumerator: Number(framework.quorumNumerator ?? 0),
+    quorumDenominator: Number(framework.quorumDenominator ?? 0),
     stats: {
       proposals: Number(governance.proposals),
       proposalsExecuted: Number(governance.proposalsExecuted),
@@ -189,9 +188,7 @@ export async function getYieldDtfProposal(
     ...(proposal.executionTime ? { executionTime: Number(proposal.executionTime) } : {}),
     ...(proposal.executionTxnHash ? { executionTxnHash: proposal.executionTxnHash } : {}),
     ...(proposal.cancellationTime ? { cancellationTime: Number(proposal.cancellationTime) } : {}),
-    ...(proposal.governanceFramework?.timelockAddress
-      ? { timelock: getAddress(proposal.governanceFramework.timelockAddress) }
-      : {}),
+    timelock: getAddress(proposal.governanceFramework!.timelockAddress),
     targets: (proposal.targets ?? []).map((target) => getAddress(target)),
     calldatas: (proposal.calldatas ?? []) as readonly Hex[],
     votes: proposal.votes.map((vote) => ({
@@ -288,8 +285,20 @@ export function prepareYieldDtfExecuteProposal(params: YieldDtfProposalActionPar
   return prepareGovernorExecute(params);
 }
 
+/** Proposer cancellation via the governor (only while PENDING). */
 export function prepareYieldDtfCancelProposal(params: YieldDtfProposalActionParams): ContractCall {
   return prepareGovernorCancel(params);
+}
+
+/** Guardian cancellation of a QUEUED proposal, straight on the timelock (CANCELLER_ROLE). */
+export function prepareYieldDtfTimelockCancelProposal(
+  params: YieldDtfProposalActionParams & { readonly timelock: Address },
+): ContractCall {
+  return prepareTimelockCancel({
+    chainId: params.chainId,
+    timelock: params.timelock,
+    operationId: getGovernorTimelockOperationId(params.proposal),
+  });
 }
 
 export function prepareYieldDtfSubmitProposal(params: YieldDtfProposalActionParams): ContractCall {
@@ -305,7 +314,7 @@ function mapProposalSummary(
     chainId,
     governor: getAddress(proposal.governanceFramework!.contractAddress),
     governorName: proposal.governanceFramework!.name,
-    description: proposal.description ?? "",
+    description: proposal.description,
     proposer: getAddress(proposal.proposer.address),
     state: proposal.state as YieldDtfProposalState,
     creationTime: Number(proposal.creationTime),
@@ -335,8 +344,14 @@ async function readProposalState(
     });
 
     return PROPOSAL_STATES[state];
-  } catch {
-    // Legacy proposals can predate the current governor; keep the subgraph state.
-    return undefined;
+  } catch (error) {
+    // Unknown-proposal reverts happen for proposals that predate the current
+    // governor — fall back to the subgraph state. Anything else (RPC down)
+    // must not be silently mislabeled as authoritative.
+    if (error instanceof ContractFunctionExecutionError) {
+      return undefined;
+    }
+
+    throw error;
   }
 }

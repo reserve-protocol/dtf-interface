@@ -328,6 +328,9 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.yield.all(), "trades", keyParams(params)] as const,
     dutchAuction: (params?: YieldMethodParams<"getDutchAuction">) =>
       [...dtfQueryKeys.yield.all(), "dutch-auction", keyParams(params)] as const,
+    apy: (params?: YieldMethodParams<"getApy">) => [...dtfQueryKeys.yield.all(), "apy", keyParams(params)] as const,
+    stakingApyHistory: (params?: YieldMethodParams<"getStakingApyHistory">) =>
+      [...dtfQueryKeys.yield.all(), "staking-apy-history", keyParams(params)] as const,
   },
   portfolio: {
     all: () => [...dtfQueryKeys.all, "portfolio"] as const,

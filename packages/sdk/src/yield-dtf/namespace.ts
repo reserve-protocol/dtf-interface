@@ -1,6 +1,7 @@
 import type { DtfClient } from "@/client";
 import type { YieldDtfParams } from "@/types/yield-dtf";
 
+import { computeYieldDtfApy, getCollateralYields, getYieldDtfApy, getYieldDtfStakingApyHistory } from "@/yield-dtf/apy";
 import {
   getYieldDtfDutchAuction,
   getYieldDtfRevenue,
@@ -30,6 +31,7 @@ import {
   prepareYieldDtfExecuteProposal,
   prepareYieldDtfQueueProposal,
   prepareYieldDtfSubmitProposal,
+  prepareYieldDtfTimelockCancelProposal,
   prepareYieldDtfVote,
 } from "@/yield-dtf/governance";
 import {
@@ -90,6 +92,7 @@ export function createYieldDtfNamespace(client: DtfClient) {
     prepareQueueProposal: prepareYieldDtfQueueProposal,
     prepareExecuteProposal: prepareYieldDtfExecuteProposal,
     prepareCancelProposal: prepareYieldDtfCancelProposal,
+    prepareTimelockCancelProposal: prepareYieldDtfTimelockCancelProposal,
     prepareSubmitProposal: prepareYieldDtfSubmitProposal,
     getRevenue: (params: Parameters<typeof getYieldDtfRevenue>[1]) => getYieldDtfRevenue(client, params),
     getTrades: (params: Parameters<typeof getYieldDtfTrades>[1]) => getYieldDtfTrades(client, params),
@@ -98,5 +101,10 @@ export function createYieldDtfNamespace(client: DtfClient) {
     prepareRebalance: prepareYieldDtfRebalance,
     prepareBidPlan: prepareYieldDtfBidPlan,
     prepareClaimRewards: prepareYieldDtfClaimRewards,
+    getApy: (params: Parameters<typeof getYieldDtfApy>[1]) => getYieldDtfApy(client, params),
+    getStakingApyHistory: (params: Parameters<typeof getYieldDtfStakingApyHistory>[1]) =>
+      getYieldDtfStakingApyHistory(client, params),
+    getCollateralYields,
+    computeApy: computeYieldDtfApy,
   };
 }

@@ -6322,6 +6322,14 @@ export type GetYieldDtfTradesQueryVariables = Exact<{
 
 export type GetYieldDtfTradesQuery = { trades: Array<{ id: string, kind: number, auctionId?: string | null, selling: string, sellingTokenSymbol: string, sellingTokenDecimals: number, buying: string, buyingTokenSymbol: string, buyingTokenDecimals: number, amount: string, minBuyAmount: string, boughtAmount?: string | null, worstCasePrice: string, startedAt: string, endAt: string, isSettled: boolean, settleTxHash?: string | null }> };
 
+export type GetYieldDtfDailySnapshotsQueryVariables = Exact<{
+  rTokenId: Scalars['String']['input'];
+  limit: Scalars['Int']['input'];
+}>;
+
+
+export type GetYieldDtfDailySnapshotsQuery = { rtokenDailySnapshots: Array<{ timestamp: string, rsrExchangeRate: string, rsrStaked: string, rewardTokenSupply: string, rsrPrice: string }> };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -6609,3 +6617,19 @@ export const GetYieldDtfTradesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetYieldDtfTradesQuery, GetYieldDtfTradesQueryVariables>;
+export const GetYieldDtfDailySnapshotsDocument = new TypedDocumentString(`
+    query GetYieldDtfDailySnapshots($rTokenId: String!, $limit: Int!) {
+  rtokenDailySnapshots(
+    where: {rToken: $rTokenId}
+    orderBy: timestamp
+    orderDirection: desc
+    first: $limit
+  ) {
+    timestamp
+    rsrExchangeRate
+    rsrStaked
+    rewardTokenSupply
+    rsrPrice
+  }
+}
+    `) as unknown as TypedDocumentString<GetYieldDtfDailySnapshotsQuery, GetYieldDtfDailySnapshotsQueryVariables>;

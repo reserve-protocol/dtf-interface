@@ -1,16 +1,4 @@
-import {
-  bytesToHex,
-  encodeAbiParameters,
-  getAddress,
-  hexToBytes,
-  keccak256,
-  pad,
-  parseAbiParameters,
-  toBytes,
-  zeroHash,
-  type Address,
-  type Hex,
-} from "viem";
+import type { Hex } from "viem";
 
 import type {
   CancelIndexDtfProposalParams,
@@ -28,6 +16,7 @@ import { getZeroValues } from "@/index-dtf/governance/utils";
 import { prepareContractCall } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
 import {
+  getGovernorTimelockOperationId,
   hashProposalDescription,
   prepareGovernorCancel,
   prepareGovernorExecute,
@@ -37,8 +26,6 @@ import {
   prepareGovernorVoteWithReason,
   prepareGovernorVoteWithReasonAndParams,
 } from "@/lib/governor-calls";
-
-const TIMELOCK_OPERATION_PARAMS = parseAbiParameters("address[], uint256[], bytes[], bytes32, bytes32");
 
 export function prepareIndexDtfVote(params: VoteIndexDtfProposalParams) {
   return prepareGovernorVote({
@@ -141,32 +128,5 @@ function getTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
 }
 
 function calculateLegacyTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
-  const targets = proposal.targets;
-
-  return keccak256(
-    encodeAbiParameters(TIMELOCK_OPERATION_PARAMS, [
-      targets,
-      getZeroValues(targets.length),
-      [...proposal.calldatas],
-      zeroHash,
-      getTimelockSalt(proposal.governance, proposal.description),
-    ]),
-  );
-}
-
-function getTimelockSalt(governance: Address, description: string): Hex {
-  const governorBytes = hexToBytes(
-    pad(getAddress(governance).toLowerCase() as Hex, {
-      size: 32,
-      dir: "right",
-    }),
-  );
-  const descriptionHashBytes = hexToBytes(keccak256(toBytes(description)));
-  const saltBytes = new Uint8Array(32);
-
-  for (let i = 0; i < saltBytes.length; i++) {
-    saltBytes[i] = governorBytes[i]! ^ descriptionHashBytes[i]!;
-  }
-
-  return bytesToHex(saltBytes);
+  return getGovernorTimelockOperationId(toGovernorPayload(proposal));
 }

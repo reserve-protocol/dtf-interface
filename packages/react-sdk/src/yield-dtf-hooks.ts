@@ -599,6 +599,7 @@ export function yieldDtfRevenueQueryOptions<TData = MethodResult<YieldMethod<"ge
     () => sdk.yield.getRevenue(requireParams(params, "yieldDtfRevenueQueryOptions")),
     params !== undefined,
     options,
+    LIVE_STALE_TIME,
   );
 }
 
@@ -665,4 +666,48 @@ export function useYieldDtfClaimRewardsCall(params: Parameters<DtfSdk["yield"]["
 
     return sdk.yield.prepareClaimRewards({ chainId, address });
   }, [chainId, address, sdk]);
+}
+
+export function yieldDtfApyQueryOptions<TData = MethodResult<YieldMethod<"getApy">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getApy">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getApy">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.apy(params),
+    () => sdk.yield.getApy(requireParams(params, "yieldDtfApyQueryOptions")),
+    params !== undefined,
+    options,
+    STATIC_STALE_TIME,
+  );
+}
+
+export function yieldDtfStakingApyHistoryQueryOptions<TData = MethodResult<YieldMethod<"getStakingApyHistory">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getStakingApyHistory">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getStakingApyHistory">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.stakingApyHistory(params),
+    () => sdk.yield.getStakingApyHistory(requireParams(params, "yieldDtfStakingApyHistoryQueryOptions")),
+    params !== undefined,
+    options,
+    STATIC_STALE_TIME,
+  );
+}
+
+export function useYieldDtfApy<TData = MethodResult<YieldMethod<"getApy">>>(
+  params: MethodParams<YieldMethod<"getApy">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getApy">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfApyQueryOptions(sdk, params, options));
+}
+
+export function useYieldDtfStakingApyHistory<TData = MethodResult<YieldMethod<"getStakingApyHistory">>>(
+  params: MethodParams<YieldMethod<"getStakingApyHistory">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getStakingApyHistory">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfStakingApyHistoryQueryOptions(sdk, params, options));
 }

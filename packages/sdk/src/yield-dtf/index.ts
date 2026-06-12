@@ -39,6 +39,52 @@ export type {
   YieldDtfIssuePlanParams,
   YieldDtfRedeemCustomParams,
 } from "@/yield-dtf/issuance";
+export {
+  COLLATERAL_POOL_MAP,
+  computeYieldDtfApy,
+  getCollateralYields,
+  getYieldDtfApy,
+  getYieldDtfStakingApyHistory,
+} from "@/yield-dtf/apy";
+export type { CollateralYields, ComputeYieldDtfApyParams, YieldDtfApy, YieldDtfStakingApyPoint } from "@/yield-dtf/apy";
+export {
+  prepareYieldDtfGrantRole,
+  prepareYieldDtfRefreshBasket,
+  prepareYieldDtfRevokeRole,
+  prepareYieldDtfSetBackingBuffer,
+  prepareYieldDtfSetBackupConfig,
+  prepareYieldDtfSetBatchAuctionLength,
+  prepareYieldDtfSetDistribution,
+  prepareYieldDtfSetDutchAuctionLength,
+  prepareYieldDtfSetFurnaceRatio,
+  prepareYieldDtfSetIssuancePremiumEnabled,
+  prepareYieldDtfSetIssuanceThrottle,
+  prepareYieldDtfSetLongFreeze,
+  prepareYieldDtfSetMaxTradeSlippage,
+  prepareYieldDtfSetMinTradeVolume,
+  prepareYieldDtfSetPrimeBasket,
+  prepareYieldDtfSetRedemptionThrottle,
+  prepareYieldDtfSetRewardRatio,
+  prepareYieldDtfSetShortFreeze,
+  prepareYieldDtfSetTradingDelay,
+  prepareYieldDtfSetUnstakingDelay,
+  prepareYieldDtfSetWarmupPeriod,
+  prepareYieldDtfSetWithdrawalLeak,
+  toYieldDtfProposalPayload,
+  YIELD_DTF_ROLES,
+} from "@/yield-dtf/propose";
+export type {
+  YieldDtfProposalCall,
+  YieldDtfRole,
+  YieldDtfRoleChangeParams,
+  YieldDtfSetBackupConfigParams,
+  YieldDtfSetDistributionParams,
+  YieldDtfSetPrimeBasketParams,
+  YieldDtfThrottleParams as YieldDtfThrottleProposalParams,
+} from "@/yield-dtf/propose";
+export { brokerAbi } from "@/yield-dtf/abis/broker";
+export { distributorAbi } from "@/yield-dtf/abis/distributor";
+export { furnaceAbi } from "@/yield-dtf/abis/furnace";
 export { backingManagerAbi } from "@/yield-dtf/abis/backing-manager";
 export { dutchTradeAbi } from "@/yield-dtf/abis/dutch-trade";
 export { revenueTraderAbi } from "@/yield-dtf/abis/revenue-trader";
@@ -75,6 +121,7 @@ export {
   prepareYieldDtfExecuteProposal,
   prepareYieldDtfQueueProposal,
   prepareYieldDtfSubmitProposal,
+  prepareYieldDtfTimelockCancelProposal,
   prepareYieldDtfVote,
 } from "@/yield-dtf/governance";
 export type {

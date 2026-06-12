@@ -1,4 +1,16 @@
-import { keccak256, toBytes, type Address, type Hex } from "viem";
+import {
+  bytesToHex,
+  encodeAbiParameters,
+  getAddress,
+  hexToBytes,
+  keccak256,
+  pad,
+  parseAbiParameters,
+  toBytes,
+  zeroHash,
+  type Address,
+  type Hex,
+} from "viem";
 
 import type { SupportedChainId } from "@/config";
 
@@ -189,6 +201,61 @@ export function prepareGovernorCancel(params: GovernorProposalParams) {
 
 export function hashProposalDescription(description: string): Hex {
   return keccak256(toBytes(description));
+}
+
+const TIMELOCK_OPERATION_PARAMS = parseAbiParameters("address[], uint256[], bytes[], bytes32, bytes32");
+
+const timelockCancelAbi = [
+  {
+    inputs: [{ internalType: "bytes32", name: "id", type: "bytes32" }],
+    name: "cancel",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+] as const;
+
+/**
+ * OZ GovernorTimelockControl operation id for a queued proposal: the batch
+ * hash with the governor-XOR-description salt. Works for both DTF protocols.
+ */
+export function getGovernorTimelockOperationId(proposal: GovernorProposalPayload): Hex {
+  return keccak256(
+    encodeAbiParameters(TIMELOCK_OPERATION_PARAMS, [
+      proposal.targets,
+      zeroValues(proposal.targets.length),
+      [...proposal.calldatas],
+      zeroHash,
+      getGovernorTimelockSalt(proposal.governor, proposal.description),
+    ]),
+  );
+}
+
+/** Guardian cancellation of a queued proposal, straight on the timelock. */
+export function prepareTimelockCancel(params: {
+  readonly chainId: SupportedChainId;
+  readonly timelock: Address;
+  readonly operationId: Hex;
+}) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.timelock,
+    abi: timelockCancelAbi,
+    functionName: "cancel",
+    args: [params.operationId] as const,
+  });
+}
+
+function getGovernorTimelockSalt(governor: Address, description: string): Hex {
+  const governorBytes = hexToBytes(pad(getAddress(governor).toLowerCase() as Hex, { size: 32, dir: "right" }));
+  const descriptionHashBytes = hexToBytes(keccak256(toBytes(description)));
+  const saltBytes = new Uint8Array(32);
+
+  for (let i = 0; i < saltBytes.length; i++) {
+    saltBytes[i] = governorBytes[i]! ^ descriptionHashBytes[i]!;
+  }
+
+  return bytesToHex(saltBytes);
 }
 
 function proposalHashArgs(

@@ -288,7 +288,7 @@ export type YieldDtfProposalSummary = {
 
 export type YieldDtfProposalVote = {
   readonly voter: Address;
-  readonly choice: string;
+  readonly choice: "FOR" | "AGAINST" | "ABSTAIN";
   readonly weight: Amount;
 };
 

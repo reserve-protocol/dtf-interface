@@ -89,6 +89,7 @@ export function mapIndexDtfData(dtf: IndexDtfFull): IndexDtfData {
     timestamp: dtf.createdAt,
     deployer: dtf.roles.deployment.deployer,
     ownerAddress: dtf.roles.admin.primary,
+    // NOTE: fee rates as display-class numbers; full-precision Amounts stay on dtf.fees.
     mintingFee: Number(dtf.fees.mintingFee.formatted),
     tvlFee: Number(dtf.fees.tvlFee.formatted),
     annualizedTvlFee: dtf.fees.annualizedTvlFee,

@@ -12,14 +12,12 @@ export type IndexDtfTransactionType = "mint" | "redeem" | "transfer";
 export type GetIndexDtfTransactionsParams = IndexDtfInput & {
   readonly limit?: number;
   readonly offset?: number;
-  readonly dtfPriceUsd?: number;
 };
 
 export type IndexDtfTransaction = {
   readonly id: string;
   readonly hash: string;
   readonly amount: Amount;
-  readonly amountUsd?: number;
   readonly timestamp: number;
   readonly chainId: GetIndexDtfTransactionsParams["chainId"];
   readonly to?: Address;
@@ -29,7 +27,8 @@ export type IndexDtfTransaction = {
 
 /**
  * Reads Index DTF mint and redeem transfers from the Index DTF subgraph.
- * Pass `dtfPriceUsd` when you want the same current-price USD estimate Register shows.
+ * USD values are intentionally not derived here; multiply `amount.formatted`
+ * by a price from `getPrice` if you need one.
  */
 export async function getIndexDtfTransactions(
   client: DtfClient,
@@ -47,13 +46,10 @@ export async function getIndexDtfTransactions(
   });
 
   return response.transferEvents.map((event) => {
-    const amount = mapAmount(event.amount, 18);
-
     return {
       id: event.id,
       hash: event.hash,
-      amount,
-      ...(params.dtfPriceUsd === undefined ? {} : { amountUsd: Number(amount.formatted) * params.dtfPriceUsd }),
+      amount: mapAmount(event.amount, 18),
       timestamp: Number(event.timestamp),
       chainId: params.chainId,
       ...(event.to?.id ? { to: getAddress(event.to.id) } : {}),

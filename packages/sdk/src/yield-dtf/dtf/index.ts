@@ -147,9 +147,13 @@ export async function getYieldDtfContracts(client: DtfClient, params: YieldDtfPa
  * Reads block-by-block Yield DTF state. Targets protocol >= 3.0
  * (split tradingPaused/issuancePaused); 2.x mains are not supported.
  */
-export async function getYieldDtfState(client: DtfClient, params: YieldDtfParams): Promise<YieldDtfState> {
+export async function getYieldDtfState(
+  client: DtfClient,
+  params: YieldDtfParams & { readonly contracts?: YieldDtfContracts },
+): Promise<YieldDtfState> {
   const address = getAddress(params.address);
-  const contracts = await getYieldDtfContracts(client, params);
+  // Component resolution costs two extra roundtrips; pass cached contracts to skip it.
+  const contracts = params.contracts ?? (await getYieldDtfContracts(client, params));
   const publicClient = client.viem.getPublicClient(params.chainId);
   const rToken = { address, abi: rTokenAbi } as const;
   const basketHandler = { address: contracts.basketHandler, abi: basketHandlerAbi } as const;

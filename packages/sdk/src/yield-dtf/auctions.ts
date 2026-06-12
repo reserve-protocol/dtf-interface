@@ -3,7 +3,7 @@ import { erc20Abi, getAddress, zeroAddress, type Address } from "viem";
 import type { DtfClient } from "@/client";
 import type { ContractCall, ContractCallPlan } from "@/lib/contract-call";
 import type { Amount } from "@/types/common";
-import type { YieldDtfParams } from "@/types/yield-dtf";
+import type { YieldDtfContracts, YieldDtfParams } from "@/types/yield-dtf";
 
 import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
 import { mapAmount, sameAddress } from "@/lib/utils";
@@ -50,8 +50,11 @@ export type YieldDtfRevenue = {
  * auction. Facade "reads" are callStatic, so everything goes through
  * simulateContract/eth_call in parallel.
  */
-export async function getYieldDtfRevenue(client: DtfClient, params: YieldDtfParams): Promise<YieldDtfRevenue> {
-  const contracts = await getYieldDtfContracts(client, params);
+export async function getYieldDtfRevenue(
+  client: DtfClient,
+  params: YieldDtfParams & { readonly contracts?: YieldDtfContracts },
+): Promise<YieldDtfRevenue> {
+  const contracts = params.contracts ?? (await getYieldDtfContracts(client, params));
   const publicClient = client.viem.getPublicClient(params.chainId);
   const facadeAct = FACADE_ACT_ADDRESS[params.chainId];
 

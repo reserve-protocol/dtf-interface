@@ -72,7 +72,6 @@ smokeDescribe("Index DTF live smoke", () => {
             address: smokeCase.address,
             chainId: BASE_CHAIN_ID,
             limit: 5,
-            dtfPriceUsd: full.market.price,
           }),
           sdk.index.getPriceHistory({
             address: smokeCase.address,

@@ -3,7 +3,6 @@ import { getAddress, type Address } from "viem";
 import type { DtfClient } from "@/client";
 import type { BlockNumber, DtfParams } from "@/types/common";
 import type {
-  GetFullIndexDtfOptions,
   GetIndexDtfBasketOptions,
   GetIndexDtfBasketSnapshotOptions,
   GetIndexDtfOptions,
@@ -84,7 +83,6 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
     get: (options: GetIndexDtfOptions = {}) => getFull(client, { ...options, address, chainId }),
     getDtf: (options?: BlockNumberOption | BlockNumber) =>
       getDtf(client, { address, chainId, ...blockParams(options) }),
-    getFull: (options: GetFullIndexDtfOptions = {}) => getFull(client, { ...options, address, chainId }),
     getBasket: (options?: GetIndexDtfBasketOptions) => getBasket(client, { address, chainId, ...blockParams(options) }),
     getBasketSnapshot: (options?: GetIndexDtfBasketSnapshotOptions) =>
       getBasketSnapshot(client, { address, chainId, ...blockParams(options) }),

@@ -156,6 +156,9 @@ export function mapIndexDtf(dtf: SubgraphIndexDtf, chainId: SupportedChainId): I
       annualizedTvlFee: Number(mapAmount(dtf.annualizedTvlFee, 18).formatted),
       recipients: mapFeeRecipients(dtf.feeRecipients),
     },
+    // NOTE: revenue fields are subgraph BigDecimal analytics values (already in
+    // human units), kept as display-class numbers on purpose. On-chain integer
+    // amounts always map through mapAmount to Amount instead.
     financials: {
       totalRevenue: Number(dtf.totalRevenue),
       protocolRevenue: Number(dtf.protocolRevenue),

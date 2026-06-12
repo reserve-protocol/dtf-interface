@@ -3,7 +3,7 @@ import type { DecodeIndexDtfProposalParams, DtfSdk, IndexDtfProposalDecoded } fr
 import { useQuery } from "@tanstack/react-query";
 
 import { useDtfSdk } from "@/provider";
-import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
+import { createDtfQueryOptions, requireParams, STATIC_STALE_TIME, type DtfQueryOptions } from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
 
 export function indexDtfProposalDecodeQueryOptions<TData = IndexDtfProposalDecoded>(
@@ -16,6 +16,8 @@ export function indexDtfProposalDecodeQueryOptions<TData = IndexDtfProposalDecod
     () => sdk.index.decodeProposalCalldatas(requireParams(params, "indexDtfProposalDecodeQueryOptions")),
     params !== undefined,
     options,
+    // Proposal calldatas are immutable once submitted; the decode never changes.
+    STATIC_STALE_TIME,
   );
 }
 

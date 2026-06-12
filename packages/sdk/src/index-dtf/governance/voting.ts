@@ -19,7 +19,7 @@ import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
 import { isUnsupportedVoteLockOptimisticReadError } from "@/index-dtf/governance/optimistic-errors";
-import { mapAmount } from "@/lib/utils";
+import { mapAmount, sameAddress } from "@/lib/utils";
 
 type VotingMulticallResult<T> =
   | { readonly status: "success"; readonly result: T }
@@ -79,8 +79,8 @@ export async function getVoterState(
     votingWeight: voteSupply === 0n ? 0 : (Number(votingPower) / Number(voteSupply)) * 100,
     optimisticVotingPower: mappedOptimisticVotingPower,
     voteSupply: mapAmount(voteSupply),
-    isSelfDelegated: delegate.toLowerCase() === account.toLowerCase(),
-    isOptimisticSelfDelegated: optimisticDelegate?.toLowerCase() === account.toLowerCase(),
+    isSelfDelegated: sameAddress(delegate, account),
+    isOptimisticSelfDelegated: optimisticDelegate !== null && sameAddress(optimisticDelegate, account),
     hasVotingPower: votingPower > 0n,
     hasOptimisticVotingPower: (optimisticVotingPower ?? 0n) > 0n,
   };

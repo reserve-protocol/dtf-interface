@@ -11,7 +11,7 @@ export const dtfIndexProposalAbiV2 = dtfIndexAbiV2;
 export const dtfIndexProposalAbiV4 = dtfIndexAbiV4;
 export const dtfIndexProposalAbiV5 = dtfIndexAbi;
 
-type DtfIndexProposalAbiCatalogEntry = {
+export type DtfIndexProposalAbiCatalogEntry = {
   readonly version: string;
   readonly abi: Abi;
 };

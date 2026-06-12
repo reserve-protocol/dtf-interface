@@ -231,15 +231,11 @@ export type IndexDtfInput = IndexDtf | DtfParams;
 
 type IndexDtfIdentityParams = Omit<DtfParams, "blockNumber">;
 
-export type GetFullIndexDtfOptions = {
+export type GetIndexDtfOptions = {
   readonly brand?: boolean;
 };
 
-export type GetFullIndexDtfParams = IndexDtfIdentityParams & GetFullIndexDtfOptions;
-
-export type GetIndexDtfParams = GetFullIndexDtfParams;
-
-export type GetIndexDtfOptions = GetFullIndexDtfOptions;
+export type GetIndexDtfParams = IndexDtfIdentityParams & GetIndexDtfOptions;
 
 export type GetIndexDtfBasketParams = DtfParams;
 

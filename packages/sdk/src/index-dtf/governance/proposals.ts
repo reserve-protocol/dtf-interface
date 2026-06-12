@@ -45,7 +45,7 @@ import {
   type Proposal_Filter,
 } from "@/index-dtf/subgraph/dtf.generated";
 import { SdkError } from "@/lib/errors";
-import { getCurrentTime } from "@/lib/utils";
+import { getCurrentTime, sameAddress } from "@/lib/utils";
 
 const CHALLENGE_DESCRIPTION_PREFIX = "Confirmation For:";
 
@@ -271,6 +271,51 @@ export async function getProposalVotingSnapshot(
   return withVoteState(parsedProposal, timestamp);
 }
 
+/**
+ * Overlays a fresher voting snapshot onto a proposal detail. Use while a
+ * proposal is active: poll `getProposalVotingSnapshot` and merge instead of
+ * refetching the full detail.
+ */
+export function mergeProposalVotingSnapshot(
+  proposal: IndexDtfProposalDetail,
+  votingSnapshot: IndexDtfProposalVotingSnapshot | undefined,
+): IndexDtfProposalDetail {
+  if (!votingSnapshot) {
+    return proposal;
+  }
+
+  // WHY: snapshot reads for optimistic proposals with no votes yet report the
+  // generic governor threshold, not the optimistic veto threshold the detail
+  // already resolved. Keep the detail's values until real votes exist.
+  const keepDetailThreshold = proposal.isOptimistic && !!proposal.optimistic && votingSnapshot.votes.length === 0;
+
+  return {
+    ...proposal,
+    state: votingSnapshot.state,
+    voteStart: votingSnapshot.voteStart,
+    voteEnd: votingSnapshot.voteEnd,
+    quorumVotes: keepDetailThreshold ? proposal.quorumVotes : votingSnapshot.quorumVotes,
+    forWeightedVotes: votingSnapshot.forWeightedVotes,
+    againstWeightedVotes: votingSnapshot.againstWeightedVotes,
+    abstainWeightedVotes: votingSnapshot.abstainWeightedVotes,
+    votes: votingSnapshot.votes,
+    votingState: keepDetailThreshold
+      ? { ...votingSnapshot.votingState, threshold: proposal.votingState.threshold }
+      : votingSnapshot.votingState,
+    ...(votingSnapshot.isOptimistic === undefined ? {} : { isOptimistic: votingSnapshot.isOptimistic }),
+    ...(keepDetailThreshold
+      ? { vetoThreshold: proposal.vetoThreshold }
+      : votingSnapshot.vetoThreshold === undefined
+        ? {}
+        : { vetoThreshold: votingSnapshot.vetoThreshold }),
+    ...(keepDetailThreshold
+      ? { optimistic: proposal.optimistic }
+      : votingSnapshot.optimistic
+        ? { optimistic: votingSnapshot.optimistic }
+        : {}),
+  };
+}
+
 async function getProposalListByGovernanceIds(
   client: DtfClient,
   chainId: DtfParams["chainId"],
@@ -339,7 +384,7 @@ function withChallengeState<T extends ParsedIndexDtfProposalSummary>(proposals: 
         continue;
       }
 
-      if (optimisticProposal.governance.toLowerCase() !== proposal.governance.toLowerCase()) {
+      if (!sameAddress(optimisticProposal.governance, proposal.governance)) {
         continue;
       }
 

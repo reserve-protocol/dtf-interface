@@ -6,6 +6,7 @@ import type { IndexDtf } from "@/types/index-dtf";
 
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { getDtf } from "@/index-dtf/dtf/index";
+import { sameAddress } from "@/lib/utils";
 
 export async function getLegacyVoteLocks(
   client: DtfClient,
@@ -36,7 +37,7 @@ export async function getLegacyVoteLocks(
       continue;
     }
 
-    if (!result.some((existing) => existing.toLowerCase() === address.toLowerCase())) {
+    if (!result.some((existing) => sameAddress(existing, address))) {
       result.push(address);
     }
   }

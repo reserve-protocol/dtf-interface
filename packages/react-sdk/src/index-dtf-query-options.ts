@@ -1,16 +1,9 @@
 import type { DtfSdk } from "@reserve-protocol/sdk";
 
-import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
-import { dtfQueryKeys } from "@/query-keys";
+import type { IndexMethod, MethodParams, MethodResult, PortfolioMethod } from "@/sdk-methods";
 
-type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
-  ? DtfSdk["index"][TKey]
-  : never;
-type PortfolioMethod<TKey extends keyof DtfSdk["portfolio"]> = DtfSdk["portfolio"][TKey] extends (...args: any) => any
-  ? DtfSdk["portfolio"][TKey]
-  : never;
-type MethodParams<TMethod extends (...args: any) => any> = Parameters<TMethod>[0];
-type MethodResult<TMethod extends (...args: any) => any> = Awaited<ReturnType<TMethod>>;
+import { createDtfQueryOptions, LIVE_STALE_TIME, requireParams, type DtfQueryOptions } from "@/query";
+import { dtfQueryKeys } from "@/query-keys";
 
 export function indexDtfStatusQueryOptions<TData = MethodResult<IndexMethod<"getStatus">>>(
   sdk: DtfSdk,
@@ -74,6 +67,7 @@ export function indexDtfIssuanceStateQueryOptions<TData = MethodResult<IndexMeth
     () => sdk.index.getIssuanceState(requireParams(params, "indexDtfIssuanceStateQueryOptions")),
     params !== undefined,
     options,
+    LIVE_STALE_TIME,
   );
 }
 
@@ -100,6 +94,7 @@ export function indexDtfCurrentRebalanceQueryOptions<TData = MethodResult<IndexM
     () => sdk.index.getCurrentRebalance(requireParams(params, "indexDtfCurrentRebalanceQueryOptions")),
     params !== undefined,
     options,
+    LIVE_STALE_TIME,
   );
 }
 
@@ -111,6 +106,19 @@ export function indexDtfVoteLockStateQueryOptions<TData = MethodResult<IndexMeth
   return createDtfQueryOptions(
     dtfQueryKeys.index.voteLockState(params),
     () => sdk.index.getVoteLockState(requireParams(params, "indexDtfVoteLockStateQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfVoteLockVaultStateQueryOptions<TData = MethodResult<IndexMethod<"getVoteLockVaultState">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getVoteLockVaultState">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getVoteLockVaultState">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.voteLockVaultState(params),
+    () => sdk.index.getVoteLockVaultState(requireParams(params, "indexDtfVoteLockVaultStateQueryOptions")),
     params !== undefined,
     options,
   );
@@ -180,6 +188,7 @@ export function indexDtfRebalanceAuctionsQueryOptions<TData = MethodResult<Index
     () => sdk.index.getRebalanceAuctions(requireParams(params, "indexDtfRebalanceAuctionsQueryOptions")),
     params !== undefined,
     options,
+    LIVE_STALE_TIME,
   );
 }
 

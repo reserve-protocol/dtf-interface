@@ -10,7 +10,7 @@ import type {
 } from "@/types/governance";
 import type { IndexDtf } from "@/types/index-dtf";
 
-import { dedupeAddresses, getCurrentTime, mapAmount } from "@/lib/utils";
+import { getCurrentTime, mapAmount, uniqueAddresses } from "@/lib/utils";
 
 const D18 = 10n ** 18n;
 const MAX_UINT256 = (1n << 256n) - 1n;
@@ -58,7 +58,7 @@ type MutableProposalVotingState = {
 };
 
 export function getProposalGovernanceAddresses(dtf: IndexDtf): readonly Address[] {
-  return dedupeAddresses([
+  return uniqueAddresses([
     ...dtf.governance.all.flatMap((authority) => (authority.type === "governance" ? [authority.address] : [])),
     ...(dtf.governance.voteLock?.type === "governance" ? [dtf.governance.voteLock.address] : []),
     ...dtf.roles.admin.legacy,

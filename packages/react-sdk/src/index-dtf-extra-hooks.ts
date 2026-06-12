@@ -1,8 +1,7 @@
-import type { DtfSdk } from "@reserve-protocol/sdk";
-
 import { useQuery } from "@tanstack/react-query";
 
 import type { DtfQueryOptions } from "@/query-options";
+import type { IndexMethod, MethodParams, MethodResult, PortfolioMethod } from "@/sdk-methods";
 
 import {
   accountPortfolioHistoryQueryOptions,
@@ -22,17 +21,9 @@ import {
   indexDtfStatusQueryOptions,
   indexDtfTransactionsQueryOptions,
   indexDtfVoteLockStateQueryOptions,
+  indexDtfVoteLockVaultStateQueryOptions,
 } from "@/index-dtf-query-options";
 import { useDtfSdk } from "@/provider";
-
-type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
-  ? DtfSdk["index"][TKey]
-  : never;
-type PortfolioMethod<TKey extends keyof DtfSdk["portfolio"]> = DtfSdk["portfolio"][TKey] extends (...args: any) => any
-  ? DtfSdk["portfolio"][TKey]
-  : never;
-type MethodParams<TMethod extends (...args: any) => any> = Parameters<TMethod>[0];
-type MethodResult<TMethod extends (...args: any) => any> = Awaited<ReturnType<TMethod>>;
 
 export function useIndexDtfStatus<TData = MethodResult<IndexMethod<"getStatus">>>(
   params: MethodParams<IndexMethod<"getStatus">> | undefined,
@@ -144,6 +135,14 @@ export function useIndexDtfVoteLockState<TData = MethodResult<IndexMethod<"getVo
 ) {
   const sdk = useDtfSdk();
   return useQuery(indexDtfVoteLockStateQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfVoteLockVaultState<TData = MethodResult<IndexMethod<"getVoteLockVaultState">>>(
+  params: MethodParams<IndexMethod<"getVoteLockVaultState">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getVoteLockVaultState">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfVoteLockVaultStateQueryOptions(sdk, params, options));
 }
 
 export function useAccountPortfolio<TData = MethodResult<PortfolioMethod<"get">>>(

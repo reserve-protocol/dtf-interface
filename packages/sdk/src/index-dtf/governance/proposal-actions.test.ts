@@ -93,6 +93,22 @@ describe("Index DTF proposal actions", () => {
     expect(paramsCall.contract.args).toEqual([42n, 0, "No", "0x1234"]);
   });
 
+  it("encodes exact castVote calldata", () => {
+    const call = prepareIndexDtfVote({
+      chainId: 1,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId: 42n,
+      support: 1,
+    });
+
+    // castVote(uint256,uint8) selector + padded proposalId + padded support.
+    expect(call.data).toBe(
+      "0x56781388" +
+        "000000000000000000000000000000000000000000000000000000000000002a" +
+        "0000000000000000000000000000000000000000000000000000000000000001",
+    );
+  });
+
   it("prepares vote calls for very large proposal id strings without precision loss", () => {
     const proposalId = "114143694312255605278636846982278574633125503103201258989783472858643695239364";
     const call = prepareIndexDtfVote({

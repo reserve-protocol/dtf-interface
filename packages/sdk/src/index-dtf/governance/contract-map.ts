@@ -10,6 +10,7 @@ import {
   timelockProposalAbi,
   upgradeSpellProposalAbi,
 } from "@/index-dtf/abis/proposal-decoder";
+import { sameAddress } from "@/lib/utils";
 
 export type ProposalContractDecoder = {
   readonly target: Address;
@@ -112,7 +113,7 @@ export function buildProposalContractMap({
   const hasSharedOwnerAndBasketGovernance =
     dtf.ownerGovernance &&
     dtf.tradingGovernance &&
-    dtf.ownerGovernance.address.toLowerCase() === dtf.tradingGovernance.address.toLowerCase();
+    sameAddress(dtf.ownerGovernance.address, dtf.tradingGovernance.address);
 
   for (const governance of dtf.legacyAdminGovernance) {
     addContract(contracts, governance, "Legacy Owner Governance", dtfIndexGovernanceProposalAbi);

@@ -21,6 +21,7 @@ Keep code boring and product-shaped.
 ## Data Boundaries
 
 - Keep mappers deterministic: raw data shape conversion only. No time, fetching, decoding, or business state derivation.
+- Money rule: on-chain integer amounts are always `Amount { raw: bigint, formatted: string }` via `mapAmount`. Plain `number` is reserved for display-class values: counts, timestamps, durations, percentages, rates, and subgraph BigDecimal analytics.
 - Index DTF governance proposal IDs are unique. They encode the governor plus targets/calldatas and are very long decimal strings, for example `114143694312255605278636846982278574633125503103201258989783472858643695239364`. Do not add DTF membership checks around proposal IDs unless the data model changes.
 
 ## API Shape

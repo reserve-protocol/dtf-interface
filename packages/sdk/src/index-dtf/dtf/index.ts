@@ -5,7 +5,7 @@ import { getAddress } from "viem";
 import type { DtfClient } from "@/client";
 import type { DtfParams } from "@/types/common";
 import type {
-  GetFullIndexDtfParams,
+  GetIndexDtfParams,
   GetIndexDtfPriceHistoryParams,
   GetIndexDtfTotalAssetsParams,
   GetIndexDtfTotalSupplyParams,
@@ -62,7 +62,7 @@ export async function getDtf(client: DtfClient, params: DtfParams): Promise<Inde
   return mapIndexDtf(dtf, params.chainId);
 }
 
-export async function getFull(client: DtfClient, params: GetFullIndexDtfParams): Promise<IndexDtfFull> {
+export async function getFull(client: DtfClient, params: GetIndexDtfParams): Promise<IndexDtfFull> {
   const [dtf, market, brand] = await Promise.all([
     getDtf(client, params),
     getBasketWithPrice(client, params),

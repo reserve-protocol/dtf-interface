@@ -21,7 +21,6 @@ export {
   getBasketWithPrice as getIndexDtfBasketWithPrice,
   getBrand as getIndexDtfBrand,
   getFull as getIndexDtf,
-  getFull as getFullIndexDtf,
   getMandate as getIndexDtfMandate,
   getPrice as getIndexDtfPrice,
   getPriceHistory as getIndexDtfPriceHistory,
@@ -80,12 +79,28 @@ export {
 export { getDelegates as getIndexDtfDelegates } from "@/index-dtf/governance/delegates";
 export { getGuardians as getIndexDtfGuardians } from "@/index-dtf/governance/guardians";
 export { getLegacyVoteLocks as getIndexDtfLegacyVoteLocks } from "@/index-dtf/governance/legacy-vote-lock";
+export { daoFeeRegistryAbi } from "@/index-dtf/abis/dao-fee-registry";
+export { dtfAdminProposalAbi } from "@/index-dtf/abis/dtf-admin-proposal";
 export { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+export { dtfIndexAbiV1 } from "@/index-dtf/abis/dtf-index-abi-v1";
+export { dtfIndexAbiV2 } from "@/index-dtf/abis/dtf-index-abi-v2";
+export { dtfIndexAbiV4 } from "@/index-dtf/abis/dtf-index-abi-v4";
 export { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 export { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 export { dtfIndexGovernanceProposalAbi } from "@/index-dtf/abis/dtf-index-governance-proposal";
+export { dtfIndexProposalAbi, dtfIndexProposalAbiCatalog } from "@/index-dtf/abis/dtf-index-proposal";
+export type { DtfIndexProposalAbiCatalogEntry } from "@/index-dtf/abis/dtf-index-proposal";
 export { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 export { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
+export { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
+export { indexDtfDeployerAbi } from "@/index-dtf/abis/deployer";
+export { indexDtfGovernanceDeployerAbi } from "@/index-dtf/abis/governance-deployer";
+export { indexDtfProposalDecoderAbi } from "@/index-dtf/abis/proposal-decoder";
+export { optimisticTimelockAbi } from "@/index-dtf/abis/optimistic-timelock";
+export { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
+export { timelockAbi } from "@/index-dtf/abis/timelock";
+export { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
+export { upgradeSpellProposalAbi } from "@/index-dtf/abis/upgrade-spell-proposal";
 export {
   getOptimisticGovernance as getIndexDtfOptimisticGovernance,
   getOptimisticProposalContext as getIndexDtfOptimisticProposalContext,
@@ -121,6 +136,7 @@ export {
   getProposal as getIndexDtfProposal,
   getProposalList as getIndexDtfProposalList,
   getProposalVotingSnapshot as getIndexDtfProposalVotingSnapshot,
+  mergeProposalVotingSnapshot as mergeIndexDtfProposalVotingSnapshot,
   getProposals as getIndexDtfProposals,
 } from "@/index-dtf/governance/proposals";
 export {
@@ -207,6 +223,7 @@ export {
   getVoteLockDao as getIndexDtfVoteLockDao,
   getVoteLockDaos as getIndexDtfVoteLockDaos,
   getVoteLockState as getIndexDtfVoteLockState,
+  getVoteLockVaultState as getIndexDtfVoteLockVaultState,
   readVoteLockAllRewardTokens,
   readVoteLockAsset,
   readVoteLockBalanceOf,

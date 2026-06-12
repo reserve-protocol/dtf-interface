@@ -4,14 +4,12 @@ import type {
   BuildIndexDtfDaoSettingsProposalParams,
   BuildIndexDtfSettingsProposalParams,
   DtfParams,
-  DtfSdk,
   GetDiscoverDtfsOptions,
-  GetFullIndexDtfParams,
+  GetIndexDtfParams,
   GetIndexDtfBasketParams,
   DecodeIndexDtfProposalParams,
   GetIndexDtfDelegatesParams,
   GetIndexDtfGuardiansParams,
-  GetIndexDtfParams,
   GetIndexDtfPriceHistoryParams,
   GetIndexDtfPriceParams,
   GetIndexDtfVersionParams,
@@ -33,14 +31,8 @@ import { normalizeQueryKeyValue } from "@/normalize-query-key";
 
 const defaultKey = "default";
 
-type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
-  ? DtfSdk["index"][TKey]
-  : never;
-type IndexMethodParams<TKey extends keyof DtfSdk["index"]> = Parameters<IndexMethod<TKey>>[0];
-type PortfolioMethod<TKey extends keyof DtfSdk["portfolio"]> = DtfSdk["portfolio"][TKey] extends (...args: any) => any
-  ? DtfSdk["portfolio"][TKey]
-  : never;
-type PortfolioMethodParams<TKey extends keyof DtfSdk["portfolio"]> = Parameters<PortfolioMethod<TKey>>[0];
+import type { IndexMethodParams, PortfolioMethodParams } from "@/sdk-methods";
+
 type PastOptimisticVotesQueryKeyParams = Omit<IndexMethodParams<"getPastOptimisticVotes">, "timepoint"> & {
   readonly timepoint: bigint;
 };
@@ -187,8 +179,7 @@ export const dtfQueryKeys = {
   index: {
     all: () => [...dtfQueryKeys.all, "index"] as const,
     list: (params?: ListIndexDtfsParams) => [...dtfQueryKeys.index.all(), "list", keyParams(params)] as const,
-    dtf: (params?: GetIndexDtfParams) => [...dtfQueryKeys.index.all(), "dtf", keyParams(params)] as const,
-    full: (params?: GetFullIndexDtfParams) => [...dtfQueryKeys.index.all(), "full", keyParams(params)] as const,
+    full: (params?: GetIndexDtfParams) => [...dtfQueryKeys.index.all(), "full", keyParams(params)] as const,
     basket: (params?: GetIndexDtfBasketParams) => [...dtfQueryKeys.index.all(), "basket", keyParams(params)] as const,
     version: (params?: GetIndexDtfVersionParams) =>
       [...dtfQueryKeys.index.all(), "version", keyParams(params)] as const,
@@ -224,6 +215,8 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "completed-rebalances", keyParams(params)] as const,
     voteLockState: (params?: IndexMethodParams<"getVoteLockState">) =>
       [...dtfQueryKeys.index.all(), "vote-lock-state", keyParams(params)] as const,
+    voteLockVaultState: (params?: IndexMethodParams<"getVoteLockVaultState">) =>
+      [...dtfQueryKeys.index.all(), "vote-lock-vault-state", keyParams(params)] as const,
     governance: {
       all: () => [...dtfQueryKeys.index.all(), "governance"] as const,
       proposalList: (params?: GetIndexDtfProposalsParams) =>

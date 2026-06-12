@@ -10,7 +10,6 @@ import {
   type DtfParams,
   type DtfSdk,
   type GetDiscoverDtfsOptions,
-  type GetFullIndexDtfParams,
   type GetIndexDtfBasketParams,
   type GetIndexDtfParams,
   type GetIndexDtfPriceHistoryParams,
@@ -24,7 +23,13 @@ import {
   type ListIndexDtfsParams,
 } from "@reserve-protocol/sdk";
 
-import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
+import {
+  createDtfQueryOptions,
+  LIVE_STALE_TIME,
+  requireParams,
+  STATIC_STALE_TIME,
+  type DtfQueryOptions,
+} from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
 
 export type { DtfQueryOptions, DtfQueryOptionsResult } from "@/query";
@@ -59,7 +64,13 @@ export function discoverDtfsQueryOptions<TData = readonly DiscoverDtf[]>(
   params?: GetDiscoverDtfsOptions,
   options?: DtfQueryOptions<readonly DiscoverDtf[], TData>,
 ) {
-  return createDtfQueryOptions(dtfQueryKeys.discover(params), () => getDiscoverDtfs(sdk.client, params), true, options);
+  return createDtfQueryOptions(
+    dtfQueryKeys.discover(params),
+    () => getDiscoverDtfs(sdk.client, params),
+    true,
+    options,
+    STATIC_STALE_TIME,
+  );
 }
 
 export function indexDtfListQueryOptions<TData = IndexDtfList>(
@@ -67,7 +78,13 @@ export function indexDtfListQueryOptions<TData = IndexDtfList>(
   params?: ListIndexDtfsParams,
   options?: DtfQueryOptions<IndexDtfList, TData>,
 ) {
-  return createDtfQueryOptions(dtfQueryKeys.index.list(params), () => sdk.index.list(params), true, options);
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.list(params),
+    () => sdk.index.list(params),
+    true,
+    options,
+    STATIC_STALE_TIME,
+  );
 }
 
 export function indexDtfQueryOptions<TData = IndexDtfFull>(
@@ -78,19 +95,6 @@ export function indexDtfQueryOptions<TData = IndexDtfFull>(
   return createDtfQueryOptions(
     dtfQueryKeys.index.full(params),
     () => sdk.index.get(requireParams(params, "indexDtfQueryOptions")),
-    params !== undefined,
-    options,
-  );
-}
-
-export function fullIndexDtfQueryOptions<TData = IndexDtfFull>(
-  sdk: DtfSdk,
-  params: GetFullIndexDtfParams | undefined,
-  options?: DtfQueryOptions<IndexDtfFull, TData>,
-) {
-  return createDtfQueryOptions(
-    dtfQueryKeys.index.full(params),
-    () => sdk.index.getFull(requireParams(params, "fullIndexDtfQueryOptions")),
     params !== undefined,
     options,
   );
@@ -119,6 +123,7 @@ export function indexDtfVersionQueryOptions<TData = string>(
     () => sdk.index.getVersion(requireParams(params, "indexDtfVersionQueryOptions")),
     params !== undefined,
     options,
+    STATIC_STALE_TIME,
   );
 }
 
@@ -132,6 +137,7 @@ export function indexDtfBrandQueryOptions<TData = IndexDtfBrand | undefined>(
     () => sdk.index.getBrand(requireParams(params, "indexDtfBrandQueryOptions")),
     params !== undefined,
     options,
+    STATIC_STALE_TIME,
   );
 }
 
@@ -145,6 +151,7 @@ export function indexDtfPriceQueryOptions<TData = IndexDtfPrice>(
     () => sdk.index.getPrice(requireParams(params, "indexDtfPriceQueryOptions")),
     params !== undefined,
     options,
+    LIVE_STALE_TIME,
   );
 }
 

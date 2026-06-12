@@ -30,24 +30,23 @@ const dtfs = await sdk.index.discover({
 
 ## DTF Reads
 
-| Method              | Use                                                      |
-| ------------------- | -------------------------------------------------------- |
-| `get`               | Full product-shaped Index DTF view. Alias for `getFull`. |
-| `getFull`           | Full DTF view with market and basket data.               |
-| `getDtf`            | Subgraph DTF metadata.                                   |
-| `getBasket`         | Live RPC basket from `totalAssets()`.                    |
-| `getBasketSnapshot` | Reserve API current or block snapshot basket.            |
-| `getVersion`        | DTF version from contract.                               |
-| `getTotalSupply`    | Live total supply. Includes pending fee shares.          |
-| `getTotalAssets`    | Live total assets.                                       |
-| `getBrand`          | Product brand metadata.                                  |
-| `getMandate`        | DTF mandate string.                                      |
-| `getPrice`          | Current Reserve API price.                               |
-| `getPrices`         | Batch current prices.                                    |
-| `getPriceHistory`   | Historical Reserve API price points.                     |
-| `getExposure`       | Exposure/analytics data.                                 |
-| `getHolders`        | Holder data.                                             |
-| `getTransactions`   | Transaction history.                                     |
+| Method              | Use                                                             |
+| ------------------- | --------------------------------------------------------------- |
+| `get`               | Full product-shaped Index DTF view with market and basket data. |
+| `getDtf`            | Subgraph DTF metadata.                                          |
+| `getBasket`         | Live RPC basket from `totalAssets()`.                           |
+| `getBasketSnapshot` | Reserve API current or block snapshot basket.                   |
+| `getVersion`        | DTF version from contract.                                      |
+| `getTotalSupply`    | Live total supply. Includes pending fee shares.                 |
+| `getTotalAssets`    | Live total assets.                                              |
+| `getBrand`          | Product brand metadata.                                         |
+| `getMandate`        | DTF mandate string.                                             |
+| `getPrice`          | Current Reserve API price.                                      |
+| `getPrices`         | Batch current prices.                                           |
+| `getPriceHistory`   | Historical Reserve API price points.                            |
+| `getExposure`       | Exposure/analytics data.                                        |
+| `getHolders`        | Holder data.                                                    |
+| `getTransactions`   | Transaction history.                                            |
 
 ```ts
 const [basket, price] = await Promise.all([

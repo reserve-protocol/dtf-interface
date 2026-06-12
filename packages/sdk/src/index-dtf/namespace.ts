@@ -1,7 +1,6 @@
 import type { DtfClient } from "@/client";
 import type { DtfParams } from "@/types/common";
 import type {
-  GetFullIndexDtfParams,
   GetIndexDtfBasketParams,
   GetIndexDtfBasketSnapshotParams,
   GetIndexDtfParams,
@@ -107,7 +106,6 @@ export function createIndexDtfNamespace(client: DtfClient) {
     getAssetList: (params: Parameters<typeof getAssetList>[1]) => getAssetList(client, params),
     get: (params: GetIndexDtfParams) => getFull(client, params),
     getDtf: (params: DtfParams) => getDtf(client, params),
-    getFull: (params: GetFullIndexDtfParams) => getFull(client, params),
     getBasket: (params: GetIndexDtfBasketParams) => getBasket(client, params),
     getBasketSnapshot: (params: GetIndexDtfBasketSnapshotParams) => getBasketSnapshot(client, params),
     getVersion: (params: GetIndexDtfVersionParams) => getVersion(client, params),

@@ -126,9 +126,9 @@ All three remaining phases executed with per-phase adversarial reviews and live 
 
 ### Still open (feature-paced)
 
-- Register yield migration (view by view, as features change — product direction).
+- **Register yield migration**: full wave-by-wave plan in `docs/REGISTER_YIELD_IMPLEMENTATION.mdx`. Five SDK prerequisite reads identified there (consumption-driven gap analysis, sweep over-claims corrected): `getConfiguration` (all governed params, HIGH), `getAssets` (AssetRegistry + prices/maxTradeVolume, HIGH), `getBackupBaskets` (MEDIUM), collateral `status()` reads (MEDIUM), `getSupplyHistory` (subgraph token snapshots for charts, MEDIUM).
 - Batch (Gnosis) auction bidding — only dutch bids shipped; batch auctions need the EasyAuction interaction.
-- The `useYieldDtfProposalVotePower` hook key includes a live timestamp-ish param; fine for one-shot reads.
+- The `useYieldDtfProposalVotePower` hook key includes `voteStart`; for per-block re-reads use `refetchInterval`, not key-busting.
 
 ## Known boundaries
 

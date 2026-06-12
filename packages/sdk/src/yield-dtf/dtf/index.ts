@@ -1,3 +1,4 @@
+import { yieldDtfs as yieldDtfCatalog } from "@reserve-protocol/dtf-catalog";
 import { erc20Abi, getAddress, hexToString, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
@@ -85,7 +86,12 @@ export async function listYieldDtfs(
     },
   });
 
-  return rtokens.map((rtoken) => mapYieldDtfSummary(rtoken, params.chainId));
+  const catalog = yieldDtfCatalog[params.chainId] ?? {};
+  const catalogByAddress = new Map(Object.entries(catalog).map(([address, entry]) => [address.toLowerCase(), entry]));
+
+  return rtokens.map((rtoken) =>
+    mapYieldDtfSummary(rtoken, params.chainId, catalogByAddress.get(rtoken.id.toLowerCase())),
+  );
 }
 
 /** Resolves every component address from Main, plus the Main version. */

@@ -83,7 +83,11 @@ export function mapYieldDtf(
   };
 }
 
-export function mapYieldDtfSummary(dtf: SubgraphYieldDtfSummary, chainId: YieldDtfChainId): YieldDtfSummary {
+export function mapYieldDtfSummary(
+  dtf: SubgraphYieldDtfSummary,
+  chainId: YieldDtfChainId,
+  catalog?: { readonly status: "active" | "unsupported" | "deprecated"; readonly logo?: string },
+): YieldDtfSummary {
   return {
     id: getAddress(dtf.id),
     chainId,
@@ -99,10 +103,28 @@ export function mapYieldDtfSummary(dtf: SubgraphYieldDtfSummary, chainId: YieldD
     rsrStaked: mapAmount(dtf.rsrStaked),
     basketsNeeded: mapAmount(dtf.basketsNeeded),
     priceUsd: Number(dtf.token.lastPriceUSD),
+    ...(catalog ? { status: catalog.status, ...(catalog.logo ? { logo: catalog.logo } : {}) } : {}),
   };
 }
 
 export function mapRevenueSplit(distribution: SubgraphYieldDtf["revenueDistribution"]): YieldDtfRevenueSplit {
+  // WHY: a subgraph rounding bug can make shares sum to != 10000; the protocol
+  // guarantees the total, so the remainder is folded into the largest share
+  // (same patch Register applies).
+  const total = distribution.reduce((sum, entry) => sum + entry.rTokenDist + entry.rsrDist, 0);
+  let adjusted = [...distribution];
+  if (total !== 10000 && total > 0) {
+    adjusted = [...distribution].sort((a, b) => b.rTokenDist + b.rsrDist - (a.rTokenDist + a.rsrDist));
+    const [largest, ...rest] = adjusted;
+    const remaining = 10000 - total;
+    adjusted = [
+      ...rest,
+      largest!.rTokenDist > largest!.rsrDist
+        ? { ...largest!, rTokenDist: largest!.rTokenDist + remaining }
+        : { ...largest!, rsrDist: largest!.rsrDist + remaining },
+    ];
+  }
+
   let holders = 0;
   let stakers = 0;
   const external: {
@@ -111,7 +133,7 @@ export function mapRevenueSplit(distribution: SubgraphYieldDtf["revenueDistribut
     readonly stakersShare: number;
   }[] = [];
 
-  for (const entry of distribution) {
+  for (const entry of adjusted) {
     const destination = entry.destination.toLowerCase();
 
     // Shares are basis points of 10000.
@@ -146,8 +168,8 @@ export function mapYieldDtfTransaction(entry: SubgraphEntry, chainId: YieldDtfCh
     id: entry.id,
     hash: entry.hash,
     type: mapEntryType(entry.type),
-    // NOTE: entry amounts are subgraph BigDecimal in human units — display-class.
-    amount: Number(entry.amount ?? 0),
+    // Entry.amount is raw BigInt (RToken/stRSR are 18 decimals); amountUSD is BigDecimal.
+    amount: mapAmount(entry.amount ?? 0n),
     amountUsd: Number(entry.amountUSD ?? 0),
     timestamp: Number(entry.timestamp),
     chainId,
@@ -174,10 +196,11 @@ function mapEntryType(type: string): YieldDtfTransactionType {
   switch (type) {
     case "TRANSFER":
       return "transfer";
+    // MINT = issuance; BURN = furnace melt — NOT a user redemption.
     case "MINT":
-    case "ISSUE":
-      return "issue";
+      return "mint";
     case "BURN":
+      return "burn";
     case "REDEEM":
       return "redeem";
     case "STAKE":

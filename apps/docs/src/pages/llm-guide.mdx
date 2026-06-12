@@ -68,7 +68,7 @@ That address is LCAP from `indexDtfCatalog`.
 - Canonical example: eUSD on mainnet — `{ address: "0xA0d69E286B938e21CBf7E51D71F6A4c8918f482F", chainId: 1 }`.
 - Issuance: quote first (`getIssuanceQuote`), approvals go to the Yield DTF token itself, then `prepareIssue`/`prepareIssuePlan`. Hourly throttles apply — check `getState().issuance.available`.
 - Staking: RSR approval goes to the staking vault (`stToken`); `exchangeRate` is RSR per stRSR and only grows (except seizure events). Unstaking is a two-step queue: `prepareUnstake`, wait `unstakingDelay`, then `prepareWithdraw(account, endId)` where `endId = pendingUnstake.index + 1`.
-- Subgraph BigDecimal fields (holder balances, transaction amounts, USD values) are display-class `number`s; raw BigInt fields map to `Amount`. Stake records carry both — the SDK already picks the raw fields.
+- Subgraph BigDecimal fields (holder balances, USD values, exchange rates) are display-class `number`s; raw BigInt fields (transaction amounts, supplies, stake record `*Raw` fields) map to `Amount`. Transaction `type: "burn"` is a furnace melt, not a user redemption.
 - `basketsNeeded / totalSupply` is the basket-units-per-token exchange rate; both are D18 `Amount`s.
 
 ## Renamed Or Removed APIs

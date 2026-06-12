@@ -16,18 +16,12 @@ const subgraphDtf: NonNullable<GetYieldDtfQuery["rtoken"]> = {
   pausers: [OWNER],
   freezers: [],
   longFreezers: [],
-  backing: "1000000000000000000",
-  backingRSR: "50000000000000000",
   rewardTokenSupply: "21000000000000000000000000",
   rsrExchangeRate: "1.0845",
-  rawRsrExchangeRate: "1084500000000000000",
   rsrStaked: "21000000000000000000000000",
   rsrStakedUSD: "157500.55",
   basketsNeeded: "24500000000000000000000000",
-  holdersRewardShare: "60",
-  stakersRewardShare: "40",
   targetUnits: "USD",
-  collateralDistribution: "{}",
   token: {
     id: "0xa0d69e286b938e21cbf7e51d71f6a4c8918f482f",
     name: "Electronic Dollar",
@@ -38,9 +32,6 @@ const subgraphDtf: NonNullable<GetYieldDtfQuery["rtoken"]> = {
     transferCount: "99000",
     mintCount: "5000",
     burnCount: "3000",
-    totalMinted: "30000000000000000000000000",
-    totalBurned: "5500000000000000000000000",
-    lastPriceUSD: "1.0001",
   },
   rewardToken: {
     token: {
@@ -51,10 +42,6 @@ const subgraphDtf: NonNullable<GetYieldDtfQuery["rtoken"]> = {
       totalSupply: "19000000000000000000000000",
     },
   },
-  collaterals: [
-    { id: "0x60c384e226b120d93f3e0f4c502957b2b9c32b15", symbol: "saUSDC" },
-    { id: "0x465a5a630482f3abd6d3b84b39b29b07214d19e5", symbol: "fUSDC" },
-  ],
   revenueDistribution: [
     { id: "1", destination: "0x0000000000000000000000000000000000000001", rTokenDist: 6000, rsrDist: 0 },
     { id: "2", destination: "0x0000000000000000000000000000000000000002", rTokenDist: 0, rsrDist: 3500 },
@@ -128,21 +115,41 @@ describe("mapYieldDtfTransaction", () => {
         id: "tx-1",
         hash: "0xabc",
         type: "STAKE",
-        amount: "100.5",
+        amount: "100500000000000000000",
         amountUSD: "100.45",
-        stAmount: "98",
         timestamp: "1700000000",
-        blockNumber: "18000000",
         from: { id: OWNER.toLowerCase() },
         to: null,
       },
       1,
     );
 
+    // Entry.amount is raw BigInt — maps to an Amount, never a float.
     expect(transaction.type).toBe("stake");
-    expect(transaction.amount).toBe(100.5);
+    expect(transaction.amount.raw).toBe(100500000000000000000n);
+    expect(transaction.amount.formatted).toBe("100.5");
+    expect(transaction.amountUsd).toBe(100.45);
     expect(transaction.from).toBe(OWNER);
     expect(transaction.to).toBeUndefined();
+  });
+});
+
+describe("mapYieldDtfTransaction entry types", () => {
+  const entry = {
+    id: "tx-2",
+    hash: "0xabc",
+    amount: "1000000000000000000",
+    amountUSD: "1",
+    timestamp: "1700000000",
+    from: { id: OWNER.toLowerCase() },
+    to: null,
+  };
+
+  it("keeps furnace melts (BURN) distinct from user redemptions (REDEEM)", () => {
+    expect(mapYieldDtfTransaction({ ...entry, type: "BURN" }, 1).type).toBe("burn");
+    expect(mapYieldDtfTransaction({ ...entry, type: "REDEEM" }, 1).type).toBe("redeem");
+    expect(mapYieldDtfTransaction({ ...entry, type: "MINT" }, 1).type).toBe("mint");
+    expect(mapYieldDtfTransaction({ ...entry, type: "CLAIM" }, 1).type).toBe("other");
   });
 });
 

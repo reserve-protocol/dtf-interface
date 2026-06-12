@@ -9,7 +9,7 @@ export type YieldDtfChainId = 1 | 8453;
 
 export const FACADE_READ_ADDRESS: Record<YieldDtfChainId, Address> = {
   1: "0x2C7ca56342177343A2954C250702Fd464f4d0613",
-  8453: "0xeb2071e9b542555e90e6e4e1f83fa17423583991",
+  8453: "0xEb2071e9B542555E90E6e4E1F83fa17423583991",
 };
 
 export const FACADE_ACT_ADDRESS: Record<YieldDtfChainId, Address> = {

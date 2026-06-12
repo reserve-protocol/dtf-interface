@@ -6253,7 +6253,7 @@ export type GetYieldDtfQueryVariables = Exact<{
 }>;
 
 
-export type GetYieldDtfQuery = { rtoken?: { id: string, createdTimestamp: string, owners: Array<string>, pausers: Array<string>, freezers: Array<string>, longFreezers: Array<string>, backing: string, backingRSR: string, rewardTokenSupply: string, rsrExchangeRate: string, rawRsrExchangeRate: string, rsrStaked: string, rsrStakedUSD: string, basketsNeeded: string, holdersRewardShare: string, stakersRewardShare: string, targetUnits: string, collateralDistribution: string, token: { id: string, name: string, symbol: string, decimals: number, totalSupply: string, holderCount: string, transferCount: string, mintCount: string, burnCount: string, totalMinted: string, totalBurned: string, lastPriceUSD: string }, rewardToken: { token: { id: string, name: string, symbol: string, decimals: number, totalSupply: string } }, collaterals: Array<{ id: string, symbol: string }>, revenueDistribution: Array<{ id: string, destination: string, rTokenDist: number, rsrDist: number }> } | null };
+export type GetYieldDtfQuery = { rtoken?: { id: string, createdTimestamp: string, owners: Array<string>, pausers: Array<string>, freezers: Array<string>, longFreezers: Array<string>, rewardTokenSupply: string, rsrExchangeRate: string, rsrStaked: string, rsrStakedUSD: string, basketsNeeded: string, targetUnits: string, token: { id: string, name: string, symbol: string, decimals: number, totalSupply: string, holderCount: string, transferCount: string, mintCount: string, burnCount: string }, rewardToken: { token: { id: string, name: string, symbol: string, decimals: number, totalSupply: string } }, revenueDistribution: Array<{ id: string, destination: string, rTokenDist: number, rsrDist: number }> } | null };
 
 export type ListYieldDtfsQueryVariables = Exact<{
   limit: Scalars['Int']['input'];
@@ -6279,7 +6279,7 @@ export type GetYieldDtfTransactionsQueryVariables = Exact<{
 }>;
 
 
-export type GetYieldDtfTransactionsQuery = { entries: Array<{ id: string, hash: string, type: string, amount?: string | null, amountUSD?: string | null, stAmount?: string | null, timestamp: string, blockNumber: string, from: { id: string }, to?: { id: string } | null }> };
+export type GetYieldDtfTransactionsQuery = { entries: Array<{ id: string, hash: string, type: string, amount?: string | null, amountUSD?: string | null, timestamp: string, from: { id: string }, to?: { id: string } | null }> };
 
 export type GetAccountStakeRecordsQueryVariables = Exact<{
   accountRTokenId: Scalars['String']['input'];
@@ -6318,18 +6318,12 @@ export const GetYieldDtfDocument = new TypedDocumentString(`
     pausers
     freezers
     longFreezers
-    backing
-    backingRSR
     rewardTokenSupply
     rsrExchangeRate
-    rawRsrExchangeRate
     rsrStaked
     rsrStakedUSD
     basketsNeeded
-    holdersRewardShare
-    stakersRewardShare
     targetUnits
-    collateralDistribution
     token {
       id
       name
@@ -6340,9 +6334,6 @@ export const GetYieldDtfDocument = new TypedDocumentString(`
       transferCount
       mintCount
       burnCount
-      totalMinted
-      totalBurned
-      lastPriceUSD
     }
     rewardToken {
       token {
@@ -6352,10 +6343,6 @@ export const GetYieldDtfDocument = new TypedDocumentString(`
         decimals
         totalSupply
       }
-    }
-    collaterals {
-      id
-      symbol
     }
     revenueDistribution {
       id
@@ -6424,9 +6411,7 @@ export const GetYieldDtfTransactionsDocument = new TypedDocumentString(`
     type
     amount
     amountUSD
-    stAmount
     timestamp
-    blockNumber
     from {
       id
     }

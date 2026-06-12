@@ -30,20 +30,20 @@ UUPS proxies throughout; every contract reports `version()` (current protocol 4.
 
 **No Reserve API for Yield DTFs — all prices and quotes are on-chain.** The Facade is a diamond-style router (ReadFacet/ActFacet/MaxIssuableFacet/RevenueFacet behind one address) and is the read gateway:
 
-| Method                                             | Returns                                                   | SDK Phase 1 use                                |
-| -------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------- |
-| `price(rToken)`                                    | `(low, high)` D18 USD                                     | `getYieldDtfPrice` (midpoint as display price) |
-| `basketBreakdown(rToken)`                          | erc20s, uoaShares (D18 fractions), target names (bytes32) | `getYieldDtfBasket`                            |
-| `primeBasket(rToken)`                              | erc20s, target names, target amounts                      | `getYieldDtfBasket` (targetAmount)             |
-| `backingOverview(rToken)`                          | backing fraction, overcollateralization fraction          | `getYieldDtfBasket`                            |
-| `backingBuffer(rToken)`                            | required, actual                                          | `getYieldDtfBasket`                            |
-| `basketTokens(rToken)`                             | collateral addresses                                      | `getYieldDtf` collaterals                      |
-| `stToken(rToken)`                                  | stRSR address                                             | available; SDK reads it from Main instead      |
-| `issue(rToken, amount)`                            | tokens + deposits needed                                  | `getYieldDtfIssuanceQuote`                     |
-| `redeem(rToken, amount)`                           | tokens + withdrawals + available                          | `getYieldDtfRedemptionQuote`                   |
-| `maxIssuable(rToken, account)`                     | max issuable                                              | `getYieldDtfMaxIssuable`                       |
-| `pendingUnstakings(rToken, draftEra, account)`     | `{index, availableAt, amount}[]`                          | `getYieldDtfStakingState`                      |
-| `auctionsSettleable(trader)` / `revenues(rTokens)` | auction surfaces                                          | Phase 3                                        |
+| Method                                             | Returns                                                   | SDK Phase 1 use                                                             |
+| -------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `price(rToken)`                                    | `(low, high)` D18 USD                                     | `getYieldDtfPrice` (midpoint as display price)                              |
+| `basketBreakdown(rToken)`                          | erc20s, uoaShares (D18 fractions), target names (bytes32) | `getYieldDtfBasket`                                                         |
+| `primeBasket(rToken)`                              | erc20s, target names, target amounts                      | `getYieldDtfBasket` (targetAmount)                                          |
+| `backingOverview(rToken)`                          | backing fraction, overcollateralization fraction          | `getYieldDtfBasket`                                                         |
+| `backingBuffer(rToken)`                            | required, actual                                          | `getYieldDtfBasket`                                                         |
+| `basketTokens(rToken)`                             | collateral addresses                                      | `getYieldDtf` collaterals                                                   |
+| `stToken(rToken)`                                  | stRSR address                                             | available; `get` uses the subgraph `rewardToken`, `getContracts` reads Main |
+| `issue(rToken, amount)`                            | tokens + deposits needed                                  | `getYieldDtfIssuanceQuote`                                                  |
+| `redeem(rToken, amount)`                           | tokens + withdrawals + available                          | `getYieldDtfRedemptionQuote`                                                |
+| `maxIssuable(rToken, account)`                     | max issuable                                              | `getYieldDtfMaxIssuable`                                                    |
+| `pendingUnstakings(rToken, draftEra, account)`     | `{index, availableAt, amount}[]`                          | `getYieldDtfStakingState`                                                   |
+| `auctionsSettleable(trader)` / `revenues(rTokens)` | auction surfaces                                          | Phase 3                                                                     |
 
 Most facade "reads" are `stateMutability: nonpayable` (callStatic pattern) — the SDK calls them via `simulateContract`/`eth_call`, never as transactions.
 
@@ -92,9 +92,9 @@ Deployed per chain (SDK config: Goldsky `dtf-yield-mainnet` / `dtf-yield-base`, 
 - `RTokenDailySnapshot` / `HourlySnapshot` — APY timeseries (`rsrExchangeRate`, revenue, staking flows).
 - `Governance` / `GovernanceFramework` / `Proposal` / `Vote` / `Delegate` / `TokenHolder` — governance (Phase 2).
 - `Trade` — auction history (Phase 3).
-- `Entry` — typed activity feed (TRANSFER/STAKE/UNSTAKE/WITHDRAW/...), amounts in **BigDecimal human units** (display-class in the SDK).
+- `Entry` — typed activity feed (TRANSFER/MINT/BURN/REDEEM/STAKE/UNSTAKE/UNSTAKE_CANCELLED/WITHDRAW). `amount` is **raw BigInt** (maps to `Amount`); `amountUSD` is BigDecimal. BURN entries are furnace melts, not user redemptions.
 
-Scalar rule of thumb in this subgraph: `*Raw` and counters are BigInt (map to `Amount`/counts); `*USD`, exchange rates, and entry/balance amounts are BigDecimal (display-class numbers).
+Scalar rule of thumb: `*Raw`, `Entry.amount`, supplies, and counters are BigInt (map to `Amount`/counts); `*USD`, exchange rates, and account balance amounts are BigDecimal (display-class numbers). When unsure, introspect the deployed schema — this bit us once already.
 
 ## Differences vs Index DTF that shape the SDK
 

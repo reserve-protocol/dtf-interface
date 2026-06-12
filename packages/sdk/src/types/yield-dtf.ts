@@ -67,6 +67,9 @@ export type YieldDtfSummary = {
   readonly rsrStaked: Amount;
   readonly basketsNeeded: Amount;
   readonly priceUsd: number;
+  /** From the curated dtf-catalog; absent for unlisted Yield DTFs. */
+  readonly status?: "active" | "unsupported" | "deprecated";
+  readonly logo?: string;
 };
 
 export type YieldDtfContracts = {
@@ -153,9 +156,10 @@ export type YieldDtfHolder = {
 
 export type YieldDtfTransactionType =
   | "transfer"
+  /** Issuance mint. */
   | "mint"
+  /** Furnace melt — not a user redemption. */
   | "burn"
-  | "issue"
   | "redeem"
   | "stake"
   | "unstake"
@@ -167,8 +171,7 @@ export type YieldDtfTransaction = {
   readonly id: string;
   readonly hash: string;
   readonly type: YieldDtfTransactionType;
-  /** Subgraph BigDecimal in human units — display-class. */
-  readonly amount: number;
+  readonly amount: Amount;
   readonly amountUsd: number;
   readonly timestamp: number;
   readonly chainId: YieldDtfChainId;
@@ -205,7 +208,8 @@ export type YieldDtfStakingState = {
   readonly account: Address;
   /** RSR per stRSR (D18). */
   readonly exchangeRate: Amount;
-  readonly unstakingDelay: bigint;
+  /** Seconds. */
+  readonly unstakingDelay: number;
   readonly rsrBalance: Amount;
   readonly rsrAllowance: Amount;
   readonly stTokenBalance: Amount;

@@ -137,6 +137,15 @@ Phase 1 shipped 2026-06-12 on `feat/yield-dtf-phase-1`. Protocol architecture re
 2. **Proposal building**: parameter contract map (Register `parameterContractMapAtom`) → `prepareYieldDtfSet*` builders (tradingDelay, backingBuffer, maxTradeSlippage, minTrade, rewardRatio, unstakingDelay, withdrawalLeak, warmupPeriod, issuancePremium, auction lengths, throttles, freezes), role grant/revoke, basket + backup config changes, asset (un)registration, upgrade spells. Compose into governor `propose` calldata via the shared builders.
 3. **Register migration begins**: replace Register's rToken atoms/updaters with SDK hooks view by view (overview → issuance → staking → governance → auctions), same lockstep release pattern as Index DTF.
 
+## Post-review fixes (Dark/Light Claude pass)
+
+- **Critical (caught by review, verified against live data)**: `Entry.amount` is raw BigInt, not BigDecimal — `getYieldDtfTransactions` now maps it to `Amount`; the live smoke asserts amount-vs-USD magnitude so a units regression fails loudly.
+- `BURN` entries are furnace melts and map to `"burn"`, distinct from `"redeem"`; `MINT` maps to `"mint"`.
+- Revenue split ports Register's sum-to-10000 rounding patch.
+- `list` now merges dtf-catalog metadata (`status`, `logo`) per the original plan.
+- Added `useYieldDtfCancelUnstakeCall`; yield full/list staleTime corrected to the default class (they carry supply/price data); `unstakingDelay` is a display-class number; over-fetched subgraph fields trimmed.
+- Intentional divergences from Register documented: backing/staked percentages are unrounded (Register ceils for UI); `targetAmount` is the contract-true value (Register stores it x100 for UI) — Phase 4 proposal builders must not double-apply that convention.
+
 ## Known boundaries
 
 - Protocol 2.x mains (legacy `paused()`) unsupported — all live listed Yield DTFs are >= 3.0.

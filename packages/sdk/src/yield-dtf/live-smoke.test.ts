@@ -87,7 +87,16 @@ smokeDescribe("Yield DTF live smoke (mainnet eUSD)", () => {
     ]);
 
     expect(list.length).toBeGreaterThan(0);
+    expect(list.some((dtf) => dtf.status === "active")).toBe(true);
     expect(holders.length).toBeGreaterThan(0);
     expect(transactions.length).toBeGreaterThan(0);
+    // Entry amounts are raw bigints mapped to Amounts; eUSD is ~1 USD, so the
+    // formatted amount and the USD value must be the same order of magnitude.
+    const withUsd = transactions.find((tx) => tx.amountUsd > 1);
+    if (withUsd) {
+      const ratio = Number(withUsd.amount.formatted) / withUsd.amountUsd;
+      expect(ratio).toBeGreaterThan(0.1);
+      expect(ratio).toBeLessThan(10);
+    }
   });
 });

@@ -59,7 +59,7 @@ export async function getYieldDtfStakingState(
     stToken,
     account,
     exchangeRate: mapAmount(exchangeRate),
-    unstakingDelay: BigInt(unstakingDelay),
+    unstakingDelay: Number(unstakingDelay),
     rsrBalance: mapAmount(rsrBalance),
     rsrAllowance: mapAmount(rsrAllowance),
     stTokenBalance: mapAmount(stTokenBalance),
@@ -140,7 +140,7 @@ export type YieldDtfWithdrawParams = {
   readonly chainId: YieldDtfChainId;
   readonly stToken: Address;
   readonly account: Address;
-  /** Drafts strictly before this id are withdrawn; pass `pendingUnstake.index + 1`. */
+  /** Drafts with id < endId are withdrawn; they must be past `availableAt`. Pass BigInt(lastAvailable.index + 1). */
   readonly endId: bigint;
 };
 

@@ -26,7 +26,6 @@ export function yieldDtfQueryOptions<TData = MethodResult<YieldMethod<"get">>>(
     () => sdk.yield.get(requireParams(params, "yieldDtfQueryOptions")),
     params !== undefined,
     options,
-    STATIC_STALE_TIME,
   );
 }
 
@@ -40,7 +39,6 @@ export function yieldDtfListQueryOptions<TData = MethodResult<YieldMethod<"list"
     () => sdk.yield.list(requireParams(params, "yieldDtfListQueryOptions")),
     params !== undefined,
     options,
-    STATIC_STALE_TIME,
   );
 }
 
@@ -354,6 +352,23 @@ export function useYieldDtfUnstakeCall(params: Parameters<DtfSdk["yield"]["prepa
 
     return sdk.yield.prepareUnstake({ chainId, stToken, amount });
   }, [chainId, stToken, amount, sdk]);
+}
+
+export function useYieldDtfCancelUnstakeCall(
+  params: Parameters<DtfSdk["yield"]["prepareCancelUnstake"]>[0] | undefined,
+) {
+  const sdk = useDtfSdk();
+  const chainId = params?.chainId;
+  const stToken = params?.stToken;
+  const endId = params?.endId;
+
+  return useMemo(() => {
+    if (chainId === undefined || !stToken || endId === undefined) {
+      return undefined;
+    }
+
+    return sdk.yield.prepareCancelUnstake({ chainId, stToken, endId });
+  }, [chainId, stToken, endId, sdk]);
 }
 
 export function useYieldDtfWithdrawCall(params: Parameters<DtfSdk["yield"]["prepareWithdraw"]>[0] | undefined) {

@@ -2,7 +2,7 @@ import type { DtfSdk } from "@reserve-protocol/sdk";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { DEFAULT_STALE_TIME, LIVE_STALE_TIME, STATIC_STALE_TIME } from "@/query";
+import { DEFAULT_STALE_TIME, LIVE_STALE_TIME } from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
 import {
   yieldDtfIssuanceQuoteQueryOptions,
@@ -57,7 +57,8 @@ describe("yield query options", () => {
   it("applies staleTime classes per data kind", () => {
     const sdk = createSdk();
 
-    expect(yieldDtfQueryOptions(sdk, params).staleTime).toBe(STATIC_STALE_TIME);
+    // full view carries supply/staking data, so it gets the default class.
+    expect(yieldDtfQueryOptions(sdk, params).staleTime).toBe(DEFAULT_STALE_TIME);
     expect(yieldDtfPriceQueryOptions(sdk, params).staleTime).toBe(LIVE_STALE_TIME);
     expect(yieldDtfIssuanceQuoteQueryOptions(sdk, { ...params, amount: 1n }).staleTime).toBe(LIVE_STALE_TIME);
     expect(yieldDtfStateQueryOptions(sdk, params).staleTime).toBe(DEFAULT_STALE_TIME);

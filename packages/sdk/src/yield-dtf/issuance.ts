@@ -146,7 +146,7 @@ export function prepareYieldDtfRedeemCustom(params: YieldDtfRedeemCustomParams):
     args: [
       getAddress(params.recipient),
       params.amount,
-      params.basketNonces.map((nonce) => Number(nonce)),
+      [...params.basketNonces],
       [...params.portions],
       params.expectedTokensOut.map((token) => getAddress(token)),
       [...params.minAmountsOut],

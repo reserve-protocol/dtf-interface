@@ -114,6 +114,7 @@ export {
   useYieldDtfContracts,
   useYieldDtfHolders,
   useYieldDtfIssuanceQuote,
+  useYieldDtfCancelUnstakeCall,
   useYieldDtfIssueCall,
   useYieldDtfList,
   useYieldDtfMaxIssuable,

@@ -3,6 +3,7 @@ import { getAddress, type Address } from "viem";
 import type { DtfClient } from "@/client";
 import type { YieldDtfParams } from "@/types/yield-dtf";
 
+import { getYieldDtfRevenue, getYieldDtfTrades, prepareYieldDtfClaimRewards } from "@/yield-dtf/auctions";
 import {
   getYieldDtf,
   getYieldDtfBasket,
@@ -61,5 +62,9 @@ export function createYieldDtfRef(client: DtfClient, params: YieldDtfParams) {
     getGovernance: () => getYieldDtfGovernance(client, { address, chainId }),
     getProposals: (options?: { readonly limit?: number; readonly offset?: number }) =>
       getYieldDtfProposals(client, { address, chainId, ...options }),
+    getRevenue: () => getYieldDtfRevenue(client, { address, chainId }),
+    getTrades: (options?: { readonly limit?: number; readonly offset?: number }) =>
+      getYieldDtfTrades(client, { address, chainId, ...options }),
+    prepareClaimRewards: () => prepareYieldDtfClaimRewards({ address, chainId }),
   };
 }

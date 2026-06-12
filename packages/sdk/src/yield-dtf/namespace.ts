@@ -2,6 +2,15 @@ import type { DtfClient } from "@/client";
 import type { YieldDtfParams } from "@/types/yield-dtf";
 
 import {
+  getYieldDtfDutchAuction,
+  getYieldDtfRevenue,
+  getYieldDtfTrades,
+  prepareYieldDtfBidPlan,
+  prepareYieldDtfClaimRewards,
+  prepareYieldDtfRebalance,
+  prepareYieldDtfRunRevenueAuctions,
+} from "@/yield-dtf/auctions";
+import {
   getYieldDtf,
   getYieldDtfBasket,
   getYieldDtfContracts,
@@ -82,5 +91,12 @@ export function createYieldDtfNamespace(client: DtfClient) {
     prepareExecuteProposal: prepareYieldDtfExecuteProposal,
     prepareCancelProposal: prepareYieldDtfCancelProposal,
     prepareSubmitProposal: prepareYieldDtfSubmitProposal,
+    getRevenue: (params: Parameters<typeof getYieldDtfRevenue>[1]) => getYieldDtfRevenue(client, params),
+    getTrades: (params: Parameters<typeof getYieldDtfTrades>[1]) => getYieldDtfTrades(client, params),
+    getDutchAuction: (params: Parameters<typeof getYieldDtfDutchAuction>[1]) => getYieldDtfDutchAuction(client, params),
+    prepareRunRevenueAuctions: prepareYieldDtfRunRevenueAuctions,
+    prepareRebalance: prepareYieldDtfRebalance,
+    prepareBidPlan: prepareYieldDtfBidPlan,
+    prepareClaimRewards: prepareYieldDtfClaimRewards,
   };
 }

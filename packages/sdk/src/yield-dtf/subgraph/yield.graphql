@@ -212,3 +212,25 @@ query GetYieldDtfProposal($id: ID!) {
     }
   }
 }
+
+query GetYieldDtfTrades($rTokenId: String!, $limit: Int!, $offset: Int!) {
+  trades(where: { rToken: $rTokenId }, orderBy: startedAt, orderDirection: desc, first: $limit, skip: $offset) {
+    id
+    kind
+    auctionId
+    selling
+    sellingTokenSymbol
+    sellingTokenDecimals
+    buying
+    buyingTokenSymbol
+    buyingTokenDecimals
+    amount
+    minBuyAmount
+    boughtAmount
+    worstCasePrice
+    startedAt
+    endAt
+    isSettled
+    settleTxHash
+  }
+}

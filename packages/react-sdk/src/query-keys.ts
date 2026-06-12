@@ -322,6 +322,12 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.yield.all(), "voter-state", keyParams(params)] as const,
     proposalVotePower: (params?: YieldMethodParams<"getProposalVotePower">) =>
       [...dtfQueryKeys.yield.all(), "proposal-vote-power", keyParams(params)] as const,
+    revenue: (params?: YieldMethodParams<"getRevenue">) =>
+      [...dtfQueryKeys.yield.all(), "revenue", keyParams(params)] as const,
+    trades: (params?: YieldMethodParams<"getTrades">) =>
+      [...dtfQueryKeys.yield.all(), "trades", keyParams(params)] as const,
+    dutchAuction: (params?: YieldMethodParams<"getDutchAuction">) =>
+      [...dtfQueryKeys.yield.all(), "dutch-auction", keyParams(params)] as const,
   },
   portfolio: {
     all: () => [...dtfQueryKeys.all, "portfolio"] as const,

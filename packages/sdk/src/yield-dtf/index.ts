@@ -39,6 +39,29 @@ export type {
   YieldDtfIssuePlanParams,
   YieldDtfRedeemCustomParams,
 } from "@/yield-dtf/issuance";
+export { backingManagerAbi } from "@/yield-dtf/abis/backing-manager";
+export { dutchTradeAbi } from "@/yield-dtf/abis/dutch-trade";
+export { revenueTraderAbi } from "@/yield-dtf/abis/revenue-trader";
+export {
+  getYieldDtfDutchAuction,
+  getYieldDtfRevenue,
+  getYieldDtfTrades,
+  prepareYieldDtfBidPlan,
+  prepareYieldDtfClaimRewards,
+  prepareYieldDtfRebalance,
+  prepareYieldDtfRunRevenueAuctions,
+} from "@/yield-dtf/auctions";
+export type {
+  YieldDtfBidParams,
+  YieldDtfDutchAuction,
+  YieldDtfRebalanceParams,
+  YieldDtfRevenue,
+  YieldDtfRevenueAuction,
+  YieldDtfRunRevenueAuctionsParams,
+  YieldDtfTrade,
+  YieldDtfTradeKind,
+  YieldDtfTraderRevenue,
+} from "@/yield-dtf/auctions";
 export { yieldGovernanceAbi } from "@/yield-dtf/abis/governance";
 export { yieldGovernanceAnastasiusAbi } from "@/yield-dtf/abis/governance-anastasius";
 export {

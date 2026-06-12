@@ -588,3 +588,81 @@ export function useYieldDtfSubmitProposalCall(
     return sdk.yield.prepareSubmitProposal({ chainId, proposal: { governor, targets, calldatas, description } });
   }, [chainId, governor, targets, calldatas, description, sdk]);
 }
+
+export function yieldDtfRevenueQueryOptions<TData = MethodResult<YieldMethod<"getRevenue">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getRevenue">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getRevenue">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.revenue(params),
+    () => sdk.yield.getRevenue(requireParams(params, "yieldDtfRevenueQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function yieldDtfTradesQueryOptions<TData = MethodResult<YieldMethod<"getTrades">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getTrades">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getTrades">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.trades(params),
+    () => sdk.yield.getTrades(requireParams(params, "yieldDtfTradesQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function yieldDtfDutchAuctionQueryOptions<TData = MethodResult<YieldMethod<"getDutchAuction">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getDutchAuction">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getDutchAuction">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.dutchAuction(params),
+    () => sdk.yield.getDutchAuction(requireParams(params, "yieldDtfDutchAuctionQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
+export function useYieldDtfRevenue<TData = MethodResult<YieldMethod<"getRevenue">>>(
+  params: MethodParams<YieldMethod<"getRevenue">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getRevenue">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfRevenueQueryOptions(sdk, params, options));
+}
+
+export function useYieldDtfTrades<TData = MethodResult<YieldMethod<"getTrades">>>(
+  params: MethodParams<YieldMethod<"getTrades">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getTrades">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfTradesQueryOptions(sdk, params, options));
+}
+
+export function useYieldDtfDutchAuction<TData = MethodResult<YieldMethod<"getDutchAuction">>>(
+  params: MethodParams<YieldMethod<"getDutchAuction">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getDutchAuction">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfDutchAuctionQueryOptions(sdk, params, options));
+}
+
+export function useYieldDtfClaimRewardsCall(params: Parameters<DtfSdk["yield"]["prepareClaimRewards"]>[0] | undefined) {
+  const sdk = useDtfSdk();
+  const chainId = params?.chainId;
+  const address = params?.address;
+
+  return useMemo(() => {
+    if (chainId === undefined || !address) {
+      return undefined;
+    }
+
+    return sdk.yield.prepareClaimRewards({ chainId, address });
+  }, [chainId, address, sdk]);
+}

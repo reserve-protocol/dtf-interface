@@ -138,3 +138,27 @@ smokeDescribe("Yield DTF governance live smoke (mainnet eUSD)", () => {
     expect(voter.delegate).toMatch(/^0x/);
   });
 });
+
+smokeDescribe("Yield DTF auctions live smoke (mainnet eUSD)", () => {
+  const sdk = createDtfSdk();
+
+  it("reads the revenue overview and trades history", async () => {
+    const [revenue, trades] = await Promise.all([
+      sdk.yield.getRevenue({ address: EUSD, chainId: MAINNET }),
+      sdk.yield.getTrades({ address: EUSD, chainId: MAINNET, limit: 5 }),
+    ]);
+
+    expect(revenue.rsrTrader.trader).toMatch(/^0x/);
+    expect(revenue.rTokenTrader.auctions.length).toBeGreaterThan(0);
+    // Surplus amounts must be formatted in the token's own decimals — a USDC-line
+    // collateral surplus formatted at 18 decimals would be absurdly small.
+    for (const auction of [...revenue.rsrTrader.auctions, ...revenue.rTokenTrader.auctions]) {
+      expect(Number(auction.surplus.formatted)).toBeLessThan(1e12);
+    }
+    expect(typeof revenue.recollateralization.canStart).toBe("boolean");
+
+    expect(trades.length).toBeGreaterThan(0);
+    expect(trades[0]!.selling).toMatch(/^0x/);
+    expect(trades[0]!.startedAt).toBeGreaterThan(1600000000);
+  });
+});

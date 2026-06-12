@@ -6313,6 +6313,15 @@ export type GetYieldDtfProposalQueryVariables = Exact<{
 
 export type GetYieldDtfProposalQuery = { proposal?: { id: string, txnHash: string, description: string, creationTime: string, creationBlock: string, state: ProposalState, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, againstDelegateVotes: string, abstainDelegateVotes: string, startBlock: string, endBlock: string, queueTime?: string | null, queueTxnHash?: string | null, executionETA?: string | null, executionTime?: string | null, executionTxnHash?: string | null, cancellationTime?: string | null, targets?: Array<string> | null, calldatas?: Array<string> | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governanceFramework: { name: string, contractAddress: string, timelockAddress: string } } | null };
 
+export type GetYieldDtfTradesQueryVariables = Exact<{
+  rTokenId: Scalars['String']['input'];
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+}>;
+
+
+export type GetYieldDtfTradesQuery = { trades: Array<{ id: string, kind: number, auctionId?: string | null, selling: string, sellingTokenSymbol: string, sellingTokenDecimals: number, buying: string, buyingTokenSymbol: string, buyingTokenDecimals: number, amount: string, minBuyAmount: string, boughtAmount?: string | null, worstCasePrice: string, startedAt: string, endAt: string, isSettled: boolean, settleTxHash?: string | null }> };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -6571,3 +6580,32 @@ export const GetYieldDtfProposalDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetYieldDtfProposalQuery, GetYieldDtfProposalQueryVariables>;
+export const GetYieldDtfTradesDocument = new TypedDocumentString(`
+    query GetYieldDtfTrades($rTokenId: String!, $limit: Int!, $offset: Int!) {
+  trades(
+    where: {rToken: $rTokenId}
+    orderBy: startedAt
+    orderDirection: desc
+    first: $limit
+    skip: $offset
+  ) {
+    id
+    kind
+    auctionId
+    selling
+    sellingTokenSymbol
+    sellingTokenDecimals
+    buying
+    buyingTokenSymbol
+    buyingTokenDecimals
+    amount
+    minBuyAmount
+    boughtAmount
+    worstCasePrice
+    startedAt
+    endAt
+    isSettled
+    settleTxHash
+  }
+}
+    `) as unknown as TypedDocumentString<GetYieldDtfTradesQuery, GetYieldDtfTradesQueryVariables>;

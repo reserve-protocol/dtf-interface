@@ -1,0 +1,128 @@
+query GetYieldDtf($id: ID!) {
+  rtoken(id: $id) {
+    id
+    createdTimestamp
+    owners
+    pausers
+    freezers
+    longFreezers
+    backing
+    backingRSR
+    rewardTokenSupply
+    rsrExchangeRate
+    rawRsrExchangeRate
+    rsrStaked
+    rsrStakedUSD
+    basketsNeeded
+    holdersRewardShare
+    stakersRewardShare
+    targetUnits
+    collateralDistribution
+    token {
+      id
+      name
+      symbol
+      decimals
+      totalSupply
+      holderCount
+      transferCount
+      mintCount
+      burnCount
+      totalMinted
+      totalBurned
+      lastPriceUSD
+    }
+    rewardToken {
+      token {
+        id
+        name
+        symbol
+        decimals
+        totalSupply
+      }
+    }
+    collaterals {
+      id
+      symbol
+    }
+    revenueDistribution {
+      id
+      destination
+      rTokenDist
+      rsrDist
+    }
+  }
+}
+
+query ListYieldDtfs($limit: Int!, $offset: Int!) {
+  rtokens(first: $limit, skip: $offset, orderBy: cumulativeUniqueUsers, orderDirection: desc) {
+    id
+    targetUnits
+    rsrStaked
+    basketsNeeded
+    token {
+      id
+      name
+      symbol
+      decimals
+      totalSupply
+      holderCount
+      lastPriceUSD
+    }
+  }
+}
+
+query GetYieldDtfHolders($id: ID!, $limit: Int!, $offset: Int!) {
+  token(id: $id) {
+    holderCount
+    holdersBalance(first: $limit, skip: $offset, orderBy: amount, orderDirection: desc) {
+      account {
+        id
+      }
+      amount
+      transferCount
+      timestamp
+    }
+  }
+}
+
+query GetYieldDtfTransactions($rTokenId: String!, $limit: Int!, $offset: Int!) {
+  entries(where: { rToken: $rTokenId }, orderBy: timestamp, orderDirection: desc, first: $limit, skip: $offset) {
+    id
+    hash
+    type
+    amount
+    amountUSD
+    stAmount
+    timestamp
+    blockNumber
+    from {
+      id
+    }
+    to {
+      id
+    }
+  }
+}
+
+query GetAccountStakeRecords($accountRTokenId: String!, $limit: Int!, $offset: Int!) {
+  accountStakeRecords(
+    where: { account: $accountRTokenId }
+    orderBy: blockNumber
+    orderDirection: asc
+    first: $limit
+    skip: $offset
+  ) {
+    id
+    hash
+    isStake
+    amount
+    amountRaw
+    rsrAmount
+    rsrAmountRaw
+    exchangeRate
+    rsrPriceUSD
+    timestamp
+    blockNumber
+  }
+}

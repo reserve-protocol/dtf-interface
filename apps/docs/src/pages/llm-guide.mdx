@@ -46,6 +46,12 @@ That address is LCAP from `indexDtfCatalog`.
 - Onchain token amounts, shares, auction IDs, and raw balances are `bigint`. Do not cast money to `number`.
 - `getIssuanceState` does not return `requiredApprovals`; derive approvals from asset allowances and mint amounts.
 
+## Caching Defaults (React SDK)
+
+- Every query options builder applies a `staleTime` default: 10s for live data (prices, auctions, issuance quotes), 30s for governance and account state, 5min for static metadata (identity, brand, version, catalogs, proposal decodes).
+- Override per query via the options param: `useIndexDtfPrice(params, { staleTime: 0 })`.
+- The constants are exported: `LIVE_STALE_TIME`, `DEFAULT_STALE_TIME`, `STATIC_STALE_TIME`.
+
 ## Write And Transaction Rules
 
 - SDK write helpers return `ContractCall` objects.
@@ -54,6 +60,20 @@ That address is LCAP from `indexDtfCatalog`.
 - DTF settings builders often need `version: "5.0.0" | "6.0.0"`; read it with `sdk.index.getVersion({ address, chainId })`.
 - Raw version-sensitive `prepare*` helpers should receive the target DTF version explicitly. Higher-level proposal builders may fetch the DTF version when omitted.
 - Proposal action builders prepare vote, queue, execute, and cancel calls. They do not invalidate queries after a transaction.
+
+## Renamed Or Removed APIs
+
+- `getFull` / `getFullIndexDtf` / `useFullIndexDtf` / `fullIndexDtfQueryOptions` no longer exist; `get` / `getIndexDtf` / `useIndexDtf` / `indexDtfQueryOptions` are the one name for the full DTF view.
+- `getTransactions` no longer accepts `dtfPriceUsd` and does not return `amountUsd`; multiply `amount.formatted` by a price from `getPrice` if a USD value is needed.
+
+## Vote Lock And Snapshot Helpers
+
+- `sdk.index.getVoteLockState({ address, chainId, account })` resolves the vault from the DTF; `sdk.index.getVoteLockVaultState({ stToken, chainId, account })` reads straight from a staking vault when no DTF is known. Both include `underlyingPrice` when the price API is up.
+- `mergeIndexDtfProposalVotingSnapshot(proposal, snapshot)` is the canonical way to overlay a fresher voting snapshot onto a proposal detail while a proposal is active.
+
+## ABIs
+
+All contract ABIs are exported from the sdk root (and re-exported by react-sdk): `dtfIndexAbi` (+ `V1/V2/V4`), `folioArtifactAbi` (v6), governance and staking-vault ABIs, `timelockAbi`, `optimisticTimelockAbi`, `selectorRegistryAbi`, `unstakingManagerAbi`, deployer ABIs, `daoFeeRegistryAbi`, and the proposal decode set (`dtfIndexProposalAbi`, `dtfIndexProposalAbiCatalog`, `indexDtfProposalDecoderAbi`). Never copy ABIs into a consumer project.
 
 ## Public Surface Discovery
 

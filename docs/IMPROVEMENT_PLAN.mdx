@@ -1,249 +1,93 @@
 # DTF SDK Improvement Plan
 
-Audit date: 2026-06-11. Scope: `@reserve-protocol/sdk`, `@reserve-protocol/react-sdk`, `@reserve-protocol/dtf-catalog`, plus how Register (`~/projects/register`, react-sdk `^0.1.5`, ~48 files) consumes them. Dimensions: code quality, patterns, performance, security.
+Audited 2026-06-11; the P0–P3 roadmap from that audit was **executed the same day** on branch `chore/sdk-audit-improvements` (SDK) with the matching Register migration left uncommitted in `~/projects/register`. This document now records: what shipped, what the audit got wrong (verified during execution), and the next plan.
 
-Method: parallel codebase audits per package + a consumption audit of Register, with every load-bearing finding hand-verified against source. Findings that didn't survive verification are listed at the bottom so future audits don't re-flag them.
+## Product framing (unchanged — drives all priorities)
 
-## Product framing
-
-These decisions drive every priority below:
-
-- **Register is the main consumer and shapes the SDK**, but the SDK is becoming the main tool for the broader stack (dtf-ai, bots, custom pages). Optimize for completeness and correctness, not surface minimization.
-- **Breaking changes are fine.** SDK and Register ship together in lockstep. Every breaking item below includes the Register migration as part of the same work item — no deprecation shims, design the best API and fix Register with it.
-- **Register's partial adoption is intentional.** Unused hooks are future surface, not dead code. Don't migrate Register to features it doesn't need yet.
-- **react-sdk is the one-stop import.** `export * from "@reserve-protocol/sdk"` stays. Everything SDK-related — including ABIs — must be reachable through it.
-- **dtf-catalog stays plain JSON.** No validation layer.
-- **Testing must be rock solid** — it's a top-level pillar (P1), not hygiene.
-
-Severity legend: **High** = correctness/money risk or major perf impact. **Medium** = maintenance/consistency cost that compounds. **Low** = note it, fix opportunistically.
+- **Register is the main consumer and shapes the SDK**, but the SDK is becoming the main tool for dtf-ai, bots, and custom pages. Optimize for completeness and correctness.
+- **Breaking changes are fine.** SDK and Register ship together in lockstep; no deprecation shims.
+- **Register's partial adoption is intentional.** Unused hooks are future surface, not dead code.
+- **react-sdk is the one-stop import** — `export * from "@reserve-protocol/sdk"` stays; everything (including ABIs) reachable through it.
+- **dtf-catalog stays plain JSON.**
+- **Money rule** (now in AGENTS.md): on-chain integer amounts are always `Amount { raw, formatted }` via `mapAmount`; plain `number` is reserved for display-class values (counts, timestamps, durations, percentages, rates, subgraph BigDecimal analytics).
+- **Testing is rock solid as a pillar** — calldata encoding is the center of gravity.
 
 ---
 
-## Package: @reserve-protocol/sdk
-
-Structure: 115 source files / 29 test files. Domains: `index-dtf` (dtf, governance, rebalance, vote-lock, deploy), `client` (viem/subgraph/api/explorer transports), `lib`, `types`. ESM-only via tsdown, `sideEffects: false`. Minimal deps (viem, graphql-request, decimal.js-light, zod) — all justified.
-
-### Code quality
-
-**[High] `as never` cast kills type safety on all calldata encoding** — `src/lib/contract-call.ts:67`
-
-```ts
-const data = encodeFunctionData({
-  abi: params.abi,
-  functionName: params.functionName,
-  args: params.args,
-} as never) as Hex;
-```
-
-Every governance write (vote, queue, execute, cancel, propose) encodes through this function. The `as never` suppresses viem's ABI/functionName/args type checking, so a wrong arg shape compiles fine and produces malformed calldata at runtime. This is the single highest-stakes line in the SDK. Fix: make the generics line up so `encodeFunctionData` typechecks for real, or constrain the param types until the cast is unnecessary.
-
-**[High] ABI export gap** — `src/index.ts`
-
-~28 ABI consts are defined in the SDK but only 8 are exported from the root: `dtfIndexAbi`, `dtfIndexGovernanceAbi`, `dtfIndexGovernanceOptimisticAbi`, `dtfIndexGovernanceProposalAbi`, `dtfIndexStakingVaultAbi`, `dtfIndexStakingVaultOptimisticAbi`, `indexDtfV5WriteAbi`, `indexDtfV6WriteAbi`.
-
-Missing from the root export: `timelockAbi`, `optimisticTimelockAbi`, `selectorRegistryAbi`, `unstakingManagerAbi`, `indexDtfDeployerAbi`, `indexDtfGovernanceDeployerAbi`, `daoFeeRegistryAbi`, `dtfIndexProposalAbi` + the version catalog (`dtfIndexProposalAbiCatalog`, v1/v2/v4/v5 proposal ABIs), `dtfAdminProposalAbi`, `upgradeSpellProposalAbi`, `folioArtifactAbi`, `indexDtfProposalDecoderAbi`, `dtfIndexAbiV1/V2/V4`.
-
-Consumers (Register, bots, custom pages) end up copy-pasting ABIs the SDK already has. Exporting them from the sdk root automatically exposes them through react-sdk's `export *`.
-
-**[Medium] `Number()` on subgraph money strings** — multiple mappers
-
-- `src/index-dtf/dtf/mappers.ts` (timestamps, fees, revenue totals)
-- `src/index-dtf/governance/mapper.ts` (delegate vote counts)
-- `src/index-dtf/governance/voting.ts:79` (`Number(votingPower) / Number(voteSupply)` — acceptable as a display percentage, but the inputs are raw vote weights)
-- `src/index-dtf/dtf/transactions.ts:56` (`Number(amount.formatted) * dtfPriceUsd`)
-- react-sdk `src/index-dtf/index-dtf-data.ts:92-93` (`Number(dtf.fees.mintingFee.formatted)`)
-
-JS numbers lose precision past 2^53 and on long decimal strings. Some of these are display-class values (percentages, timestamps) where `number` is the right call; others are money. The fix is a triage, not a blanket conversion — see the money rule in Direction Feedback. **Any type change ships with the Register call sites updated in the same release** (e.g. `mintingFee`/`tvlFee` consumers of `mapIndexDtfData`).
-
-**[Low] Duplicate dedupe utilities** — `src/lib/utils.ts` has both `uniqueAddresses` and `dedupeAddresses` doing the same job. Keep one.
-
-**[Low] One-off lowercase address comparison** — `src/index-dtf/governance/proposals.ts:342` compares with manual `.toLowerCase()` while the rest of the codebase normalizes with `getAddress`. Harmless, just inconsistent.
-
-### Patterns
-
-**[Medium] `index.get` and `index.getFull` are the same function** — `src/index-dtf/namespace.ts:108-110`
-
-```ts
-get: (params: GetIndexDtfParams) => getFull(client, params),
-getFull: (params: GetFullIndexDtfParams) => getFull(client, params),
-```
-
-react-sdk mirrors the duplication: `indexDtfQueryOptions` and `fullIndexDtfQueryOptions` (`src/query-options.ts:73-97`) hit the same query key and the same underlying function. Two names for one thing is API ambiguity that every new consumer pays for. Breaking-OK: pick one name (`get` reads better as the flat API), delete the other across sdk + react-sdk, update Register if it touches the removed name.
-
-**[Medium] Transaction mapper derives business state** — `src/index-dtf/dtf/transactions.ts:56`
-
-The mapper accepts `dtfPriceUsd` and computes `amountUsd`. AGENTS.md says mappers are deterministic raw-shape conversion only. Move the USD derivation to the caller (or a dedicated enrichment step) and keep the mapper pure.
-
-**[Medium] Governance domain outgrew its structure** — `src/index-dtf/governance/`
-
-7+ files (proposals, voting, delegates, decoder, optimistic, guardians, proposal-actions, propose/) with flat wildcard barrels, while vote-lock has the proper `reads.ts`/`builders.ts`/`namespace.ts`/`ref.ts` shape AGENTS.md mandates for grown domains. Restructure for navigability. Note: per the "expose everything" direction, this is about file organization, not hiding exports — the public surface stays complete.
-
-### Performance
-
-**[Medium] Sequential page polling in discovery** — `src/index-dtf/dtf/discovery.ts:145-160` fetches discovery pages one at a time in a while loop. Fine for small catalogs, slow at scale. Low urgency until DTF count grows; flagging so it's a known ceiling.
-
-**[Low] Default 1000-item cap on subgraph discovery** — `src/index-dtf/dtf/discovery.ts:113`. Document the cap or expose pagination; silent truncation is the failure mode to avoid.
-
-Otherwise good: multicall batching is used in the read-heavy paths (vote-lock, rebalance), `Promise.all` where it matters, Decimal.js for basket math.
-
-### Security
-
-Clean. No secrets or API keys committed; subgraph URLs in `src/config/index.ts` are public Goldsky endpoints. Addresses normalized through `getAddress` consistently. GraphQL variables go through `graphql-request` against a typed schema. The `as never` finding above is the only thing in the codebase with real funds-adjacent risk, and it's a type-safety issue, not an exploit.
-
-### Tests
-
-29 test files for 115 source files, concentrated on reads and mappers. Zero coverage on: `lib/utils.ts`, `lib/contract-call.ts` (calldata encoding!), `transports/` error paths, `client/api`. The live smoke test covers Index DTF reads only. See P1.
-
----
-
-## Package: @reserve-protocol/react-sdk
-
-Structure: ~60 hooks + ~50 query option builders over the core SDK, two-tier provider (`DtfSdkProvider` → `IndexDtfProvider`), centralized query keys with bigint/address normalization. Peer deps: react 18/19, @tanstack/react-query 5, viem 2. 4 test files (~820 lines), all on query keys/options.
-
-### Performance
-
-**[High] No `staleTime`/`gcTime` anywhere** — verified by grep across the package
-
-Every query uses React Query's default `staleTime: 0`, so every mount refetches. Register renders governance pages with a dozen SDK queries; all of them re-hit the subgraph/API on every navigation. This is the highest-impact performance fix in the repo and it's additive (defaults remain overridable through the existing `options` param every builder already accepts).
-
-Suggested defaults by data class, set inside `createDtfQueryOptions` callers:
-
-| Data class          | Examples                                   | staleTime |
-| ------------------- | ------------------------------------------ | --------- |
-| Prices              | `indexDtfPriceQueryOptions`, price history | ~10s      |
-| Governance state    | proposals, voter state, vote-lock          | 30–60s    |
-| Static-ish metadata | DTF identity, brand, version, catalog      | ~5min     |
-
-### Code quality
-
-**[Medium] Type helpers copy-pasted in 3 files** — `IndexMethod`/`PortfolioMethod`/`MethodParams`/`MethodResult` are defined identically in `src/query-keys.ts:36-43`, `src/index-dtf-query-options.ts:6-13`, and `src/index-dtf-extra-hooks.ts:28-35`. Move to one shared module.
-
-**[Medium] Duplicate query option builders** — `indexDtfQueryOptions` vs `fullIndexDtfQueryOptions` (see the `get`/`getFull` finding above; one removal fixes both layers).
-
-**[Low] `normalizeQueryKeyValue` doesn't normalize `number`** — `src/normalize-query-key.ts`. bigints become strings but numbers pass through, so `100` and `100n` produce different cache keys for the same value. Low risk since the SDK uses bigint for on-chain values, but cheap to close.
-
-### Patterns
-
-The query key architecture is good: deterministic normalization, address lowercasing, sorted governance address sets, and `enabled` is computed internally from `params !== undefined` (`src/query.ts:30`) so hooks accept `undefined` params safely — consumers don't need their own guards. Action hooks (`useIndexDtfVoteCall` etc., `src/index-dtf/use-index-dtf-proposal-actions.ts`) return prepared calls via `useMemo` rather than queries; the repeated param extraction across the four hooks is deliberate explicit style per AGENTS.md, not a defect.
-
-### Tests
-
-Query keys and option builders are well covered. The 60+ hooks have zero tests — including the four proposal action hooks that build transaction calls. See P1.
-
----
-
-## Package: @reserve-protocol/dtf-catalog
-
-Plain JSON catalogs (index + yield DTFs for chains 1, 56, 8453) with thin typed wrappers. **Plain on purpose** — no validation layer wanted, data is manually curated.
-
-One note worth a comment in code, not a fix: the merged `dtfs` record (`src/index.ts:22-34`) spreads yield then index, so an address present in both silently resolves to the index entry. If that precedence is intentional (it appears to be), say so in a one-line comment.
-
----
-
-## Register consumption audit
-
-### Usage inventory
-
-Register uses **~18 of the ~32 governance-area hooks** plus `dtfQueryKeys`, both providers, and a handful of types (`IndexDtfProposalSummary`, `Amount`, `SupportedChainId`, `IndexDtfData`). Heaviest: `useIndexDtfIdentity` (11 sites), `useIndexDtfProposal` (10), `useDtfSdk` (9), `dtfQueryKeys` (9).
-
-Unused surface — **intentionally**, per the partial-adoption strategy: the optimistic-governance hook family, selector-registry hooks, and all 23 "extra" hooks (rebalance, portfolio, price, status, revenue). These are future surface for dtf-ai, bots, and custom pages. Not deprecation candidates.
-
-### Gaps the SDK should absorb (breaking-OK, ship with Register migration)
-
-**Vote-lock state should include token prices.** Register's `src/components/vote-lock/hooks/use-fallback-vote-lock-state.ts` (~120 lines) exists because the SDK's vote-lock state lacks underlying token prices — it manually calls `sdk.client.api.getTokenPrices()` and assembles the drawer state. Add prices to the SDK's vote-lock state read (or a sibling read that includes them), then collapse Register's fallback hook to the SDK hook.
-
-**Proposal + voting snapshot should be one read.** Register's `withVotingSnapshot()` in `src/views/index-dtf/governance/views/proposal/hooks/use-proposal-detail.ts:34-77` manually merges `useIndexDtfProposal` with `useIndexDtfProposalVotingSnapshot`, including threshold-keeping logic. That merge is generic, not Register-specific — absorb it as an SDK read/hook and delete the local merge.
-
-### Register-side consumption fixes (no SDK change required)
-
-- `src/views/index-dtf/governance/views/propose/shared/hooks/use-proposal-type-eligibility.ts:82-84` calls `sdk.index.getSelectorRegistryIsAllowed` raw inside `useQueries` — `indexDtfSelectorRegistryIsAllowedQueryOptions` already exists and composes with `useQueries` directly. Switching gets cache keys and enabled handling for free.
-- `src/components/vote-lock/hooks/use-vote-lock-refresh.ts` hand-manages `dtfQueryKeys` invalidation — re-verify the keys after the vote-lock changes above; it likely shrinks.
-- `mapProposalDetail()` in `use-proposal-detail.ts:79-131` re-shapes the SDK's proposal detail — revisit after the snapshot merge lands; some of it should disappear.
-
-### Intentional frontend boundaries (not SDK gaps)
-
-`src/views/index-dtf/governance/utils/recent-proposals.ts` (~456 lines) parses `ProposalCreated` events from tx receipts to show proposals before the subgraph indexes them. This **stays in Register**: it requires the receipt from the just-submitted transaction, which only the frontend has. The SDK's contract is subgraph-indexed data; this is the documented seam between the two.
-
-### Migration state
-
-Governance is fully on the SDK (proposals, voting, voter state, proposal actions, vote-lock with the fallback noted above). Rebalance, portfolio, and price surfaces are not migrated — by choice, pending feature work. Treat migration % as a strategy artifact, not a debt metric.
-
----
-
-## Roadmap
-
-Effort: S = hours, M = a day-ish, L = multi-day. Register impact: **none** / **migrate-with-it** (ships in the same lockstep release).
+## Executed (this session)
 
 ### P0 — Correctness & exposure
 
-| #   | Item                                | Where                               | Effort | Register impact                                       |
-| --- | ----------------------------------- | ----------------------------------- | ------ | ----------------------------------------------------- |
-| 1   | Fix `as never` in calldata encoding | `sdk/src/lib/contract-call.ts:67`   | M      | none (types only, verify Register still compiles)     |
-| 2   | Export all ABIs from sdk root       | `sdk/src/index.ts` + abi modules    | S      | none (additive; lets Register delete any copied ABIs) |
-| 3   | `staleTime` defaults per data class | `react-sdk/src/query.ts` + builders | S–M    | none (behavioral improvement, overridable)            |
+| Item                                 | Result                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `as never` cast in calldata encoding | `lib/contract-call.ts` now bridges viem's generic limitation with a precise `EncodeFunctionDataParameters<TAbi, TFunctionName>` cast + WHY comment. The caller-facing signature was always sound; viem validates function name and arg count at runtime (now proven by test).                                                                               |
+| ABI export gap                       | All 20 distinct ABIs exported from the sdk root (timelock, optimistic timelock, selector registry, unstaking manager, both deployers, DAO fee registry, proposal ABI catalog + decoder set, v1/v2/v4 index ABIs, `folioArtifactAbi`). Pure rename aliases (`timelockProposalAbi`, `dtfIndexProposalAbiV1-V5`) deliberately not exported — one name per ABI. |
+| staleTime defaults                   | `createDtfQueryOptions` applies 30s by default; price/auction/issuance builders pass `LIVE_STALE_TIME` (10s); identity/brand/version/list/discover/proposal-decode pass `STATIC_STALE_TIME` (5min). Constants exported. Overridable per query.                                                                                                              |
 
-### P1 — Testing rock solid
+### P1 — Testing
 
-| #   | Item                      | Where                                                       | Effort | Notes                                                                                                                            |
-| --- | ------------------------- | ----------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| 4   | Calldata encoding tests   | `contract-call.ts`, propose builders                        | M      | Highest-stakes code in the repo: assert exact encoded calldata for vote/queue/execute/cancel/propose against known-good fixtures |
-| 5   | Mapper fixture tests      | `dtf/mappers.ts`, `governance/mapper.ts`                    | M      | Frozen subgraph response fixtures → catch schema drift and the Number/Amount changes in P2                                       |
-| 6   | Transport error paths     | `transports/subgraph.ts`, `transports/api.ts`, `client/api` | S–M    | Currently zero coverage                                                                                                          |
-| 7   | `lib/utils` tests         | `sdk/src/lib/utils.ts`                                      | S      | Used everywhere, untested                                                                                                        |
-| 8   | Representative hook tests | react-sdk: proposal actions, vote-lock state, proposal list | M      | QueryClient + mocked SDK; covers param-undefined behavior and memo stability                                                     |
+New: exact-calldata fixture tests for `prepareContractCall`/`prepareErc20Approval` (including a runtime-validation proof that malformed args throw), an exact `castVote` calldata fixture, full `lib/utils` coverage, API transport error paths (SdkError meta, query param handling, network failure), `mergeProposalVotingSnapshot` tests, react-sdk staleTime class assertions, and the first react-sdk hook tests (proposal action hooks via jsdom + testing-library: undefined-param behavior, memo stability, provider errors). Workspace totals: **sdk 211 tests, react-sdk 59 tests**, all green.
 
-### P2 — Best-API breaking pass (SDK + Register together)
+### P2 — Breaking pass (SDK + Register lockstep)
 
-| #   | Item                                                             | Where                                                                       | Effort | Register impact                                                                      |
-| --- | ---------------------------------------------------------------- | --------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------ |
-| 9   | Remove `get`/`getFull` duplication (keep one)                    | `sdk/src/index-dtf/namespace.ts`, `react-sdk/src/query-options.ts`, ref API | S      | migrate-with-it (rename call sites if any)                                           |
-| 10  | Money type triage: `Number()` → `Amount`/bigint where it's money | mappers listed above + `react-sdk/src/index-dtf/index-dtf-data.ts:92-93`    | M–L    | migrate-with-it (`mintingFee`/`tvlFee` consumers and any transaction-amount readers) |
-| 11  | Mapper determinism: drop `dtfPriceUsd` from transaction mapper   | `sdk/src/index-dtf/dtf/transactions.ts`                                     | S      | migrate-with-it (callers compute `amountUsd`)                                        |
-| 12  | Vote-lock state with prices                                      | sdk vote-lock reads + react-sdk hook                                        | M      | migrate-with-it (**delete** Register's `use-fallback-vote-lock-state.ts`)            |
-| 13  | Proposal + snapshot merged read                                  | sdk governance reads + react-sdk hook                                       | M      | migrate-with-it (**delete** `withVotingSnapshot`, shrink `use-proposal-detail.ts`)   |
-| 14  | Governance domain restructure (reads/builders/namespace/ref)     | `sdk/src/index-dtf/governance/`                                             | M      | none (exports stay complete)                                                         |
-| 15  | Dedupe type helpers into one module                              | react-sdk (3 files)                                                         | S      | none                                                                                 |
+| Item                           | Result                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get`/`getFull` duplication    | Removed `getFull`, `getFullIndexDtf`, `GetFullIndexDtfParams/Options`, `fullIndexDtfQueryOptions`, `useFullIndexDtf`. `get`/`getIndexDtf`/`useIndexDtf`/`indexDtfQueryOptions` are the one name. Register used none of the removed names.                                                                                                                                                                |
+| Transaction mapper determinism | `getTransactions` no longer takes `dtfPriceUsd` or derives `amountUsd`.                                                                                                                                                                                                                                                                                                                                  |
+| Vote-lock for unknown DTFs     | New `getVoteLockVaultState({ stToken, chainId, account })` reads drawer state straight from a staking vault (resolves underlying via `asset()` + erc20 metadata on-chain). Shares one core with `getVoteLockState`; prices now fetched in parallel with the multicall and **tolerated on failure** (price API outage no longer breaks the drawer). New `useIndexDtfVoteLockVaultState` hook + query key. |
+| Proposal + snapshot merge      | `mergeIndexDtfProposalVotingSnapshot(proposal, snapshot)` absorbed from Register, including the optimistic threshold-keeping rule (documented with a WHY).                                                                                                                                                                                                                                               |
+| Type helper dedup              | `IndexMethod`/`PortfolioMethod`/`MethodParams`/`MethodResult` now live once in `react-sdk/src/sdk-methods.ts` (were copy-pasted in 3 files).                                                                                                                                                                                                                                                             |
+| Address utilities              | `dedupeAddresses` (case-sensitive, could double-count mixed-case guardians) deleted; `uniqueAddresses` is the one dedupe. Manual `.toLowerCase()` comparisons switched to `sameAddress`.                                                                                                                                                                                                                 |
 
-### P3 — Register consumption cleanup
+### Register migration (uncommitted in `~/projects/register`, ships with the SDK bump)
 
-| #   | Item                                                                                   | Where                                       | Effort |
-| --- | -------------------------------------------------------------------------------------- | ------------------------------------------- | ------ |
-| 16  | Adopt `indexDtfSelectorRegistryIsAllowedQueryOptions` in eligibility hook              | register `use-proposal-type-eligibility.ts` | S      |
-| 17  | Simplify vote-lock refresh invalidation after #12                                      | register `use-vote-lock-refresh.ts`         | S      |
-| 18  | Shrink `mapProposalDetail` after #13                                                   | register `use-proposal-detail.ts`           | S      |
-| 19  | Cleanup: duplicate dedupe util, lowercase comparison, comment catalog merge precedence | sdk + dtf-catalog                           | S      |
+- `use-fallback-vote-lock-state.ts` (~120 lines) **deleted**; `external-vote-lock-drawer.tsx` uses `useIndexDtfVoteLockVaultState`.
+- `withVotingSnapshot()` deleted from `use-proposal-detail.ts`; uses `mergeIndexDtfProposalVotingSnapshot`.
+- `use-proposal-type-eligibility.ts` uses the canonical `dtfQueryKeys.index.governance.selectorRegistryIsAllowed` key instead of a hand-rolled one (note: RQ v5 `useQueries` rejects the full branded options object, so the key + a plain `queryFn` is the dumb shape that works).
+- **Verified**: Register typechecks clean against the locally built SDK (link test, then restored to `^0.1.5` — bump on release).
 
-Sequencing: P0 is independent and can ship immediately. P1 items 4–5 should land **before** P2 — the encoding and mapper tests are exactly the safety net the breaking pass needs. P2 ships as one lockstep SDK+Register release (or a couple of them, grouped by domain). P3 rides along with the P2 release that unblocks each item.
+### Docs
+
+- `apps/docs` updated for every API change (get/getFull, vault state, merge helper, hooks tables); builds clean.
+- **LLM guide** (`llm-guide.mdx`, consumed by reserve-ai) gained: caching defaults section, renamed/removed APIs section, vote-lock + snapshot helper guidance, and the full-ABI-surface rule ("never copy ABIs into a consumer project").
 
 ---
 
-## Direction feedback
+## Corrected findings (the audit was wrong; don't re-flag)
 
-Asked for, so here it is straight:
+1. **"Governance domain lacks namespace/ref structure"** — false. `governance/namespace.ts` and `governance/ref.ts` exist and compose into the root factories. Topical read files (proposals/voting/delegates/…) beat a monolithic `reads.ts`; no restructure done or needed.
+2. **"Money paths use Number()"** — mostly false. Everything weight/amount-like already maps through `mapAmount`; the flagged `Number()` calls are counts (`forDelegateVotes` is a delegate count, not weight), timestamps, durations, and display percentages. Revenue fields are subgraph BigDecimal analytics — display-class by design (NOTE comments added at the two ambiguous spots; rule added to AGENTS.md).
+3. **"Vote-lock state lacks prices"** — stale. `getVoteLockState` already returned `underlyingPrice`. The real gap was the DTF-address requirement; fixed with the vault-keyed read.
+4. **"Zero transport/API tests"** — overstated. `transports/subgraph` had 5 tests including error context; `client/api` had happy-path coverage. The real gaps (api error paths, contract-call, utils) are now filled.
+5. **"as never produces silent malformed calldata"** — overstated. The public signature always type-checked callers, and viem throws at runtime on arg mismatches (now proven by a test). The fix still landed for honesty of the internal types.
 
-**Lockstep breaking releases are the right call today — with one cheap hedge.** While every consumer is yours (Register, dtf-ai, bots), shipping SDK + consumers together is strictly faster than maintaining deprecation paths. The door closes the moment something external pins a version. The hedge: keep changeset notes honest about what broke and how to migrate, even for internal releases. It costs minutes now and becomes the migration guide the day the SDK has a consumer you don't control.
+## Intentional choices (don't re-litigate)
 
-**State the money rule once and enforce it in mappers.** The Number findings aren't 15 separate bugs, they're one missing convention: anything that is money is `Amount { raw: bigint, formatted: string }`; plain `number` is reserved for display-class values (percentages, timestamps, counts). Mappers enforce it at the boundary and everything downstream inherits it. One sentence in AGENTS.md, applied in P2 item 10, done.
-
-**Calldata encoding is the testing center of gravity.** A wrong subgraph mapping shows a wrong number on a screen; wrong calldata queues a wrong governance action on-chain. That asymmetry should shape the test suite — exact-encoding fixture tests for every prepare/build function matter more than any coverage percentage. P1 item 4 is the most valuable test work in the repo.
-
-**The one-stop-import design is right; ambiguity is the actual enemy.** Re-exporting the whole SDK through react-sdk is good DX for a Register-first SDK, and `sideEffects: false` keeps bundlers happy. The thing to guard is two names for one thing (`get`/`getFull`) and defined-but-not-exported artifacts (the ABIs). Completeness plus exactly-one-way-to-do-it is what makes the SDK feel like "the main tool" to a bot author or the dtf-ai project.
+Security clean (no secrets, public Goldsky URLs, consistent `getAddress`). `export *` re-export is the design. dtf-catalog plain JSON, index-over-yield merge precedence now commented in code. `recent-proposals.ts` stays in Register (needs the tx receipt — inherently frontend). Proposal action hooks' repeated param extraction is deliberate explicit style. Register `mapProposalDetail` is Register's own legacy boundary — shrink only when its consumers change.
 
 ---
 
-## Non-findings & intentional choices
+## Next plan
 
-Checked and fine — don't re-litigate in future audits:
+Ordered by value; nothing here blocks the release of what's above.
 
-- **Security**: no secrets/keys committed; public Goldsky subgraph URLs only; consistent `getAddress` normalization; schema-typed GraphQL variables.
-- **`export * from "@reserve-protocol/sdk"` in react-sdk**: by design — react-sdk is the one-stop import.
-- **dtf-catalog as plain JSON**: by design, manually curated.
-- **Register partial adoption**: deliberate strategy — migrate as features change.
-- **`recent-proposals.ts` in Register**: inherently frontend (needs the tx receipt); not an SDK gap.
-- **Action hook param extraction repetition**: intentional explicit style per AGENTS.md.
+### Release (do first)
 
-Retracted findings from the audit (verified false):
+1. **Changesets + lockstep release.** One changeset covering the breaking changes (getFull removal, getTransactions param, vote-lock additions). Publish sdk + react-sdk, bump Register's `@reserve-protocol/react-sdk`, commit Register's migration files (4 files + 1 deletion), ship together. Register's vote-lock and governance flows should get a manual smoke pass (`/verify`) after the bump.
 
-- _"Register hooks missing `enabled` guards"_ — the SDK computes `enabled` from `params !== undefined` internally (`react-sdk/src/query.ts:30`); passing `undefined` params is the intended usage.
-- _"Governance decoder silently returns partial decodes"_ — `unknownCalls` on the result is the contract; Register intentionally renders unknown calls as raw calldata.
-- _"Duplicate query options cause cache collisions"_ — `indexDtfQueryOptions` and `fullIndexDtfQueryOptions` share a key but also share the underlying function, so the cache is coherent; the problem is duplication (P2 #9), not corruption.
+### Quality (next sessions)
+
+2. **Hook test coverage expansion** (S–M): the jsdom harness now exists; add tests for `useIndexDtfProposalList` select behavior, `IndexDtfProvider` identity, and one query-flow hook with a mocked sdk. Target the hooks Register leans on hardest (`useIndexDtfIdentity`, `useIndexDtfProposal`).
+3. **Propose-builder calldata fixtures** (M): `buildBasketProposal`/`buildSettingsProposal` produce governance calldata; they have behavior tests but not exact-encoding fixtures like `castVote` now has. Same pattern, highest-stakes remaining code.
+4. **Discovery pagination ceiling** (S): `discovery.ts` still polls pages sequentially and defaults to a 1000-item subgraph cap. Fine today; document the cap in the JSDoc now, parallelize when DTF count makes it visible.
+
+### API health (opportunistic)
+
+5. **`useQueries` interop** (S): RQ v5's `UseQueryOptionsForUseQueries` rejects `DtfQueryOptionsResult` (branded `queryFn`/`placeholderData` variance). If more multi-query consumers appear, export a `forUseQueries()`-shaped builder or adopt RQ's `queryOptions()` branding in `createDtfQueryOptions`.
+6. **Register `use-vote-lock-refresh.ts`** (S): still hand-manages invalidation keys; now that the fallback is an SDK hook with a canonical key, the external-refresh branch can likely invalidate `dtfQueryKeys.index.voteLockVaultState(...)` instead of threading refetch callbacks. Do it when next touching the drawer.
+7. **`sdk.yield` boundary** (L, when Yield DTF work starts): placeholder methods throw `NOT_IMPLEMENTED`; the audit scope was Index-only. When yield work lands, repeat the calldata-fixture pattern from day one.
+
+### Watchlist
+
+- The `Number(bigint)` ratio in `votingWeight` rounds above 2^53 — harmless for a percentage, but if anyone ever sorts/compares by it for consensus-critical UI, switch to a Decimal ratio.
+- `normalizeQueryKeyValue` doesn't normalize `number` vs `bigint` for the same value — irrelevant while params are typed, cheap to close if a cache-miss bug ever points there.

@@ -12,17 +12,18 @@ const proposal = await sdk.index.getProposal({
 
 ## Proposal Reads
 
-| Method                      | Use                                                                |
-| --------------------------- | ------------------------------------------------------------------ |
-| `getProposals`              | Proposal list response for a DTF/governance context.               |
-| `getProposalList`           | Proposal list items only.                                          |
-| `getProposal`               | Proposal detail with local calldata decode and governance context. |
-| `decodeProposalCalldatas`   | Async proposal calldata decode/enrichment.                         |
-| `getAllProposals`           | Chain-level proposal query.                                        |
-| `getProposalVotingSnapshot` | Voting snapshot/totals from RPC-aware reads.                       |
-| `getProposalVotes`          | Current proposal vote totals.                                      |
-| `getProposalVoterState`     | Account state for a proposal.                                      |
-| `getProposalState`          | Exported helper for raw proposal state reads.                      |
+| Method                                | Use                                                                |
+| ------------------------------------- | ------------------------------------------------------------------ |
+| `getProposals`                        | Proposal list response for a DTF/governance context.               |
+| `getProposalList`                     | Proposal list items only.                                          |
+| `getProposal`                         | Proposal detail with local calldata decode and governance context. |
+| `decodeProposalCalldatas`             | Async proposal calldata decode/enrichment.                         |
+| `getAllProposals`                     | Chain-level proposal query.                                        |
+| `getProposalVotingSnapshot`           | Voting snapshot/totals from RPC-aware reads.                       |
+| `mergeIndexDtfProposalVotingSnapshot` | Pure overlay of a fresher voting snapshot onto a proposal detail.  |
+| `getProposalVotes`                    | Current proposal vote totals.                                      |
+| `getProposalVoterState`               | Account state for a proposal.                                      |
+| `getProposalState`                    | Exported helper for raw proposal state reads.                      |
 
 Proposal IDs can be extremely long decimal strings. Keep them as strings in routes and UI state.
 

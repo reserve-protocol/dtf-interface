@@ -23,7 +23,6 @@ const dtfs = useDiscoverDtfs({
 | Hook                      | Core SDK method             |
 | ------------------------- | --------------------------- |
 | `useIndexDtf`             | `sdk.index.get`             |
-| `useFullIndexDtf`         | `sdk.index.getFull`         |
 | `useIndexDtfBasket`       | `sdk.index.getBasket`       |
 | `useIndexDtfVersion`      | `sdk.index.getVersion`      |
 | `useIndexDtfBrand`        | `sdk.index.getBrand`        |
@@ -37,17 +36,18 @@ const price = useIndexDtfPrice({ address, chainId });
 
 ## Product And Analytics Reads
 
-| Hook                          | Core SDK method                 |
-| ----------------------------- | ------------------------------- |
-| `useIndexDtfStatus`           | `sdk.index.getStatus`           |
-| `useIndexDtfExposure`         | `sdk.index.getExposure`         |
-| `useIndexDtfTransactions`     | `sdk.index.getTransactions`     |
-| `useIndexDtfRevenue`          | `sdk.index.getRevenue`          |
-| `useIndexDtfIssuanceState`    | `sdk.index.getIssuanceState`    |
-| `useIndexDtfRebalances`       | `sdk.index.getRebalances`       |
-| `useIndexDtfCurrentRebalance` | `sdk.index.getCurrentRebalance` |
-| `useIndexDtfVoteLockState`    | `sdk.index.getVoteLockState`    |
-| `useAccountPortfolio`         | `sdk.portfolio.get`             |
+| Hook                            | Core SDK method                   |
+| ------------------------------- | --------------------------------- |
+| `useIndexDtfStatus`             | `sdk.index.getStatus`             |
+| `useIndexDtfExposure`           | `sdk.index.getExposure`           |
+| `useIndexDtfTransactions`       | `sdk.index.getTransactions`       |
+| `useIndexDtfRevenue`            | `sdk.index.getRevenue`            |
+| `useIndexDtfIssuanceState`      | `sdk.index.getIssuanceState`      |
+| `useIndexDtfRebalances`         | `sdk.index.getRebalances`         |
+| `useIndexDtfCurrentRebalance`   | `sdk.index.getCurrentRebalance`   |
+| `useIndexDtfVoteLockState`      | `sdk.index.getVoteLockState`      |
+| `useIndexDtfVoteLockVaultState` | `sdk.index.getVoteLockVaultState` |
+| `useAccountPortfolio`           | `sdk.portfolio.get`               |
 
 ```tsx
 const issuance = useIndexDtfIssuanceState(

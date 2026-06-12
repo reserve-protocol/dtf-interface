@@ -179,7 +179,6 @@ export const dtfQueryKeys = {
   index: {
     all: () => [...dtfQueryKeys.all, "index"] as const,
     list: (params?: ListIndexDtfsParams) => [...dtfQueryKeys.index.all(), "list", keyParams(params)] as const,
-    dtf: (params?: GetIndexDtfParams) => [...dtfQueryKeys.index.all(), "dtf", keyParams(params)] as const,
     full: (params?: GetIndexDtfParams) => [...dtfQueryKeys.index.all(), "full", keyParams(params)] as const,
     basket: (params?: GetIndexDtfBasketParams) => [...dtfQueryKeys.index.all(), "basket", keyParams(params)] as const,
     version: (params?: GetIndexDtfVersionParams) =>

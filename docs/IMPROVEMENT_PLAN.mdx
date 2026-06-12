@@ -26,7 +26,7 @@ Audited 2026-06-11; the P0–P3 roadmap from that audit was **executed the same 
 
 ### P1 — Testing
 
-New: exact-calldata fixture tests for `prepareContractCall`/`prepareErc20Approval` (including a runtime-validation proof that malformed args throw), an exact `castVote` calldata fixture, full `lib/utils` coverage, API transport error paths (SdkError meta, query param handling, network failure), `mergeProposalVotingSnapshot` tests, react-sdk staleTime class assertions, and the first react-sdk hook tests (proposal action hooks via jsdom + testing-library: undefined-param behavior, memo stability, provider errors). Workspace totals: **sdk 211 tests, react-sdk 59 tests**, all green.
+New: exact-calldata fixture tests for `prepareContractCall`/`prepareErc20Approval` (including a runtime-validation proof that malformed args throw), an exact `castVote` calldata fixture, full `lib/utils` coverage, API transport error paths (SdkError meta, query param handling, network failure), `mergeProposalVotingSnapshot` tests, react-sdk staleTime class assertions, and the first react-sdk hook tests (proposal action hooks via jsdom + testing-library: undefined-param behavior, memo stability, provider errors). Workspace totals: **sdk 209 tests (+10 skipped live-smoke), react-sdk 50 tests**, all green.
 
 ### P2 — Breaking pass (SDK + Register lockstep)
 
@@ -37,7 +37,7 @@ New: exact-calldata fixture tests for `prepareContractCall`/`prepareErc20Approva
 | Vote-lock for unknown DTFs     | New `getVoteLockVaultState({ stToken, chainId, account })` reads drawer state straight from a staking vault (resolves underlying via `asset()` + erc20 metadata on-chain). Shares one core with `getVoteLockState`; prices now fetched in parallel with the multicall and **tolerated on failure** (price API outage no longer breaks the drawer). New `useIndexDtfVoteLockVaultState` hook + query key. |
 | Proposal + snapshot merge      | `mergeIndexDtfProposalVotingSnapshot(proposal, snapshot)` absorbed from Register, including the optimistic threshold-keeping rule (documented with a WHY).                                                                                                                                                                                                                                               |
 | Type helper dedup              | `IndexMethod`/`PortfolioMethod`/`MethodParams`/`MethodResult` now live once in `react-sdk/src/sdk-methods.ts` (were copy-pasted in 3 files).                                                                                                                                                                                                                                                             |
-| Address utilities              | `dedupeAddresses` (case-sensitive, could double-count mixed-case guardians) deleted; `uniqueAddresses` is the one dedupe. Manual `.toLowerCase()` comparisons switched to `sameAddress`.                                                                                                                                                                                                                 |
+| Address utilities              | `dedupeAddresses` (case-sensitive, could double-count mixed-case guardians) deleted; `uniqueAddresses` is the one dedupe. Manual `.toLowerCase()` comparisons in touched governance files switched to `sameAddress` (two remain in `dtf/discovery.ts` and `propose/basket.ts` — sweep when next touching those files).                                                                                   |
 
 ### Register migration (uncommitted in `~/projects/register`, ships with the SDK bump)
 
@@ -45,6 +45,12 @@ New: exact-calldata fixture tests for `prepareContractCall`/`prepareErc20Approva
 - `withVotingSnapshot()` deleted from `use-proposal-detail.ts`; uses `mergeIndexDtfProposalVotingSnapshot`.
 - `use-proposal-type-eligibility.ts` uses the canonical `dtfQueryKeys.index.governance.selectorRegistryIsAllowed` key instead of a hand-rolled one (note: RQ v5 `useQueries` rejects the full branded options object, so the key + a plain `queryFn` is the dumb shape that works).
 - **Verified**: Register typechecks clean against the locally built SDK (link test, then restored to `^0.1.5` — bump on release).
+
+### Post-review fixes (Dark/Light Claude pass)
+
+- Changeset added for the breaking release (minor bumps on sdk + react-sdk).
+- Orphan `dtfQueryKeys.index.dtf` key deleted (zero consumers anywhere).
+- `governance.mdx` now says the merge helper is a root export, not an `sdk.index` method.
 
 ### Docs
 

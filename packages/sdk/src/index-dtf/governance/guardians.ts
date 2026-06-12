@@ -3,7 +3,7 @@ import type { GetIndexDtfGuardiansParams, IndexDtfGuardians } from "@/types/gove
 
 import { getDtf } from "@/index-dtf/dtf/index";
 import { mapGuardianGroup } from "@/index-dtf/governance/utils";
-import { dedupeAddresses } from "@/lib/utils";
+import { uniqueAddresses } from "@/lib/utils";
 
 export async function getGuardians(client: DtfClient, params: GetIndexDtfGuardiansParams): Promise<IndexDtfGuardians> {
   const dtf = "dtf" in params ? params.dtf : await getDtf(client, params);
@@ -15,6 +15,6 @@ export async function getGuardians(client: DtfClient, params: GetIndexDtfGuardia
     owner,
     basket,
     dao,
-    all: dedupeAddresses([...owner.guardians, ...basket.guardians, ...dao.guardians]),
+    all: uniqueAddresses([...owner.guardians, ...basket.guardians, ...dao.guardians]),
   };
 }

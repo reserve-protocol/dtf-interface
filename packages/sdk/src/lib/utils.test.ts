@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { isSdkError } from "@/lib/errors";
-import { dedupeAddresses, mapAmount, sameAddress, toUint, toUintNumber, uniqueAddresses } from "@/lib/utils";
+import { mapAmount, sameAddress, toUint, toUintNumber, uniqueAddresses } from "@/lib/utils";
 
 const CHECKSUMMED = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const LOWERCASE = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
@@ -16,19 +16,6 @@ describe("uniqueAddresses", () => {
     const b = "0x2222222222222222222222222222222222222222";
 
     expect(uniqueAddresses([b, a, b])).toEqual([b, a]);
-  });
-});
-
-describe("dedupeAddresses", () => {
-  it("dedupes exact duplicates", () => {
-    expect(dedupeAddresses([CHECKSUMMED, CHECKSUMMED])).toEqual([CHECKSUMMED]);
-  });
-
-  // NOTE: documents the case-sensitivity difference vs uniqueAddresses. The
-  // same address in different casing is NOT deduped here — callers must pass
-  // consistently-cased addresses (subgraph data is lowercase across sources).
-  it("does not dedupe across different casings", () => {
-    expect(dedupeAddresses([LOWERCASE, CHECKSUMMED])).toHaveLength(2);
   });
 });
 

@@ -19,6 +19,8 @@ export const yieldDtfs: Partial<Record<1 | 56 | 8453, Record<string, CatalogYiel
   8453: yieldBase as Record<string, CatalogYieldDTF>,
 };
 
+// NOTE: spread order is intentional - if an address exists in both catalogs,
+// the index DTF entry wins over the yield DTF entry.
 const dtfs: Record<1 | 56 | 8453, Record<string, CatalogIndexDTF | CatalogYieldDTF>> = {
   1: {
     ...yieldDtfs[1],

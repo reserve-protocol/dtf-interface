@@ -4,10 +4,6 @@ import type { Amount } from "@/types/common";
 
 import { SdkError } from "@/lib/errors";
 
-export function dedupeAddresses(addresses: readonly Address[]): readonly Address[] {
-  return [...new Set(addresses)];
-}
-
 export function getCurrentTime(): number {
   return Math.floor(Date.now() / 1000);
 }

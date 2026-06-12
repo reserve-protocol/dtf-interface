@@ -45,7 +45,7 @@ import {
   type Proposal_Filter,
 } from "@/index-dtf/subgraph/dtf.generated";
 import { SdkError } from "@/lib/errors";
-import { getCurrentTime } from "@/lib/utils";
+import { getCurrentTime, sameAddress } from "@/lib/utils";
 
 const CHALLENGE_DESCRIPTION_PREFIX = "Confirmation For:";
 
@@ -384,7 +384,7 @@ function withChallengeState<T extends ParsedIndexDtfProposalSummary>(proposals: 
         continue;
       }
 
-      if (optimisticProposal.governance.toLowerCase() !== proposal.governance.toLowerCase()) {
+      if (!sameAddress(optimisticProposal.governance, proposal.governance)) {
         continue;
       }
 

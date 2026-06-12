@@ -45,9 +45,12 @@
   "devDependencies": {
     "@dtf-interface/tsconfig": "workspace:*",
     "@tanstack/react-query": "catalog:",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
+    "jsdom": "^29.1.1",
     "react": "catalog:",
+    "react-dom": "^18.3.1",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "viem": "catalog:",

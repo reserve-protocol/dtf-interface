@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createDtfClient } from "@/client";
+import { isSdkError } from "@/lib/errors";
+import { get } from "@/transports/api";
 
 describe("api client", () => {
   afterEach(() => {
@@ -32,5 +34,51 @@ describe("api client", () => {
     expect(init.method).toBe("POST");
     expect(new Headers(init.headers).get("content-type")).toBe("application/json");
     expect(JSON.parse(String(init.body))).toEqual({ name: "CMC20" });
+  });
+
+  it("throws SdkError with status metadata on non-ok responses", async () => {
+    const fetch = vi.fn(async () => new Response("nope", { status: 503, statusText: "Service Unavailable" }));
+    vi.stubGlobal("fetch", fetch);
+
+    try {
+      await get({ baseUrl: "https://api.example", path: "/discover/dtfs" });
+      expect.unreachable("expected get to throw");
+    } catch (error) {
+      expect(isSdkError(error)).toBe(true);
+      expect(error).toMatchObject({
+        code: "REQUEST_FAILED",
+        meta: {
+          status: 503,
+          statusText: "Service Unavailable",
+          transport: "api",
+          url: "https://api.example/discover/dtfs",
+        },
+      });
+    }
+  });
+
+  it("skips null and undefined query params and strips leading path slashes", async () => {
+    const fetch = vi.fn(async () => Response.json({}));
+    vi.stubGlobal("fetch", fetch);
+
+    await get({
+      baseUrl: "https://api.example",
+      path: "//discover/dtfs",
+      query: { chainId: 1, cursor: null, limit: undefined, active: false },
+    });
+
+    const [url] = fetch.mock.calls[0] as unknown as [URL];
+    expect(String(url)).toBe("https://api.example/discover/dtfs?chainId=1&active=false");
+  });
+
+  it("propagates network failures from fetch", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new TypeError("fetch failed");
+      }),
+    );
+
+    await expect(get({ baseUrl: "https://api.example", path: "/x" })).rejects.toThrow("fetch failed");
   });
 });

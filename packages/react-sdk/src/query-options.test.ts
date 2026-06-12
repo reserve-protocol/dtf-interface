@@ -14,6 +14,7 @@ import {
   indexDtfRebalanceAuctionsQueryOptions,
   indexDtfRevenueQueryOptions,
 } from "@/index-dtf-query-options";
+import { DEFAULT_STALE_TIME, LIVE_STALE_TIME, STATIC_STALE_TIME } from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
 import {
   indexDtfOptimisticGovernanceQueryOptions,
@@ -29,7 +30,9 @@ import {
   indexDtfProposalsQueryOptions,
   indexDtfSelectorRegistryAllowedSelectorsQueryOptions,
   indexDtfSelectorRegistryIsAllowedQueryOptions,
+  indexDtfPriceQueryOptions,
   indexDtfSelectorRegistryTargetsQueryOptions,
+  indexDtfVersionQueryOptions,
 } from "@/query-options";
 
 const GOVERNANCE = "0x0000000000000000000000000000000000000001";
@@ -332,5 +335,32 @@ describe("react SDK query options", () => {
     await expect(accountOptions.queryFn()).resolves.toBe(portfolio);
     await expect(historyOptions.queryFn()).resolves.toBe(history);
     await expect(transactionsOptions.queryFn()).resolves.toBe(transactions);
+  });
+});
+
+describe("staleTime defaults", () => {
+  const sdk = {
+    index: {
+      getPrice: vi.fn(),
+      getVersion: vi.fn(),
+      getProposal: vi.fn(),
+    },
+  } as unknown as DtfSdk;
+  const dtfParams = { chainId: 1, address: DTF } as const;
+
+  it("applies the live class to price queries", () => {
+    expect(indexDtfPriceQueryOptions(sdk, dtfParams).staleTime).toBe(LIVE_STALE_TIME);
+  });
+
+  it("applies the static class to version queries", () => {
+    expect(indexDtfVersionQueryOptions(sdk, dtfParams).staleTime).toBe(STATIC_STALE_TIME);
+  });
+
+  it("applies the default class to governance queries", () => {
+    expect(indexDtfProposalQueryOptions(sdk, proposalParams).staleTime).toBe(DEFAULT_STALE_TIME);
+  });
+
+  it("lets callers override the default", () => {
+    expect(indexDtfPriceQueryOptions(sdk, dtfParams, { staleTime: 0 }).staleTime).toBe(0);
   });
 });

@@ -1,6 +1,6 @@
 import type { DtfSdk } from "@reserve-protocol/sdk";
 
-import { createDtfQueryOptions, requireParams, type DtfQueryOptions } from "@/query";
+import { createDtfQueryOptions, LIVE_STALE_TIME, requireParams, type DtfQueryOptions } from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
 
 type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
@@ -74,6 +74,7 @@ export function indexDtfIssuanceStateQueryOptions<TData = MethodResult<IndexMeth
     () => sdk.index.getIssuanceState(requireParams(params, "indexDtfIssuanceStateQueryOptions")),
     params !== undefined,
     options,
+    LIVE_STALE_TIME,
   );
 }
 
@@ -100,6 +101,7 @@ export function indexDtfCurrentRebalanceQueryOptions<TData = MethodResult<IndexM
     () => sdk.index.getCurrentRebalance(requireParams(params, "indexDtfCurrentRebalanceQueryOptions")),
     params !== undefined,
     options,
+    LIVE_STALE_TIME,
   );
 }
 
@@ -180,6 +182,7 @@ export function indexDtfRebalanceAuctionsQueryOptions<TData = MethodResult<Index
     () => sdk.index.getRebalanceAuctions(requireParams(params, "indexDtfRebalanceAuctionsQueryOptions")),
     params !== undefined,
     options,
+    LIVE_STALE_TIME,
   );
 }
 

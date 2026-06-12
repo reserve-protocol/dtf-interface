@@ -6,6 +6,7 @@ import {
   type Address,
   type ContractFunctionArgs,
   type ContractFunctionName,
+  type EncodeFunctionDataParameters,
   type Hex,
 } from "viem";
 
@@ -60,11 +61,18 @@ export function prepareContractCall<
   readonly value?: bigint;
 }): ContractCall<WriteFunctionArgs<TAbi, TFunctionName>, TAbi, TFunctionName> {
   const address = getAddress(params.address);
-  const data = encodeFunctionData({
+  // WHY: viem cannot resolve EncodeFunctionDataParameters for a generic TAbi (its
+  // conditional types only narrow for concrete ABIs), so the call needs a cast.
+  // Casting the function instead of the arguments keeps the argument object fully
+  // type-checked against viem's parameter type. The public signature above already
+  // type-checks abi/functionName/args for callers, and viem validates the function
+  // name and argument count at runtime.
+  const encode = encodeFunctionData as (parameters: EncodeFunctionDataParameters<TAbi, TFunctionName>) => Hex;
+  const data = encode({
     abi: params.abi,
     functionName: params.functionName,
     args: params.args,
-  } as never) as Hex;
+  } as EncodeFunctionDataParameters<TAbi, TFunctionName>);
 
   return {
     chainId: params.chainId,

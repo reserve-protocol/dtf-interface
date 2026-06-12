@@ -8,6 +8,7 @@ export { useCurrentIndexDtfBasket } from "@/index-dtf/use-current-index-dtf-bask
 export { mapIndexDtfData } from "@/index-dtf/index-dtf-data";
 export type { IndexDtfData } from "@/index-dtf/index-dtf-data";
 export { normalizeQueryKeyValue } from "@/normalize-query-key";
+export { DEFAULT_STALE_TIME, LIVE_STALE_TIME, STATIC_STALE_TIME } from "@/query";
 export { dtfQueryKeys } from "@/query-keys";
 export {
   buildIndexDtfBasketProposalQueryOptions,

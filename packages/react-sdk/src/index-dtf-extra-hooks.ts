@@ -22,6 +22,7 @@ import {
   indexDtfStatusQueryOptions,
   indexDtfTransactionsQueryOptions,
   indexDtfVoteLockStateQueryOptions,
+  indexDtfVoteLockVaultStateQueryOptions,
 } from "@/index-dtf-query-options";
 import { useDtfSdk } from "@/provider";
 
@@ -144,6 +145,14 @@ export function useIndexDtfVoteLockState<TData = MethodResult<IndexMethod<"getVo
 ) {
   const sdk = useDtfSdk();
   return useQuery(indexDtfVoteLockStateQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfVoteLockVaultState<TData = MethodResult<IndexMethod<"getVoteLockVaultState">>>(
+  params: MethodParams<IndexMethod<"getVoteLockVaultState">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getVoteLockVaultState">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfVoteLockVaultStateQueryOptions(sdk, params, options));
 }
 
 export function useAccountPortfolio<TData = MethodResult<PortfolioMethod<"get">>>(

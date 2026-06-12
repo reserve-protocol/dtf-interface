@@ -223,6 +223,8 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "completed-rebalances", keyParams(params)] as const,
     voteLockState: (params?: IndexMethodParams<"getVoteLockState">) =>
       [...dtfQueryKeys.index.all(), "vote-lock-state", keyParams(params)] as const,
+    voteLockVaultState: (params?: IndexMethodParams<"getVoteLockVaultState">) =>
+      [...dtfQueryKeys.index.all(), "vote-lock-vault-state", keyParams(params)] as const,
     governance: {
       all: () => [...dtfQueryKeys.index.all(), "governance"] as const,
       proposalList: (params?: GetIndexDtfProposalsParams) =>

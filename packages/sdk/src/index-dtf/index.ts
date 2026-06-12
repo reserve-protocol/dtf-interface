@@ -136,6 +136,7 @@ export {
   getProposal as getIndexDtfProposal,
   getProposalList as getIndexDtfProposalList,
   getProposalVotingSnapshot as getIndexDtfProposalVotingSnapshot,
+  mergeProposalVotingSnapshot as mergeIndexDtfProposalVotingSnapshot,
   getProposals as getIndexDtfProposals,
 } from "@/index-dtf/governance/proposals";
 export {
@@ -222,6 +223,7 @@ export {
   getVoteLockDao as getIndexDtfVoteLockDao,
   getVoteLockDaos as getIndexDtfVoteLockDaos,
   getVoteLockState as getIndexDtfVoteLockState,
+  getVoteLockVaultState as getIndexDtfVoteLockVaultState,
   readVoteLockAllRewardTokens,
   readVoteLockAsset,
   readVoteLockBalanceOf,

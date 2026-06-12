@@ -119,13 +119,108 @@ export async function getVoteLockState(
     });
   }
 
-  const account = params.account;
-  const stToken = vault.token.address;
-  const underlying = vault.underlying;
-  const prices = await client.api.getTokenPrices({
+  return readVoteLockState(client, {
     chainId: params.chainId,
-    addresses: [underlying.address],
+    stToken: vault.token.address,
+    underlying: vault.underlying,
+    account: params.account,
   });
+}
+
+export type GetVoteLockVaultStateParams = {
+  readonly chainId: IndexDtf["chainId"];
+  readonly stToken: Address;
+  readonly account: Address;
+};
+
+/**
+ * Reads vote-lock drawer state straight from a staking vault, without a DTF
+ * subgraph lookup. Use this when you only know the vault address — e.g.
+ * external or legacy vote locks not tied to an indexed DTF.
+ */
+export async function getVoteLockVaultState(
+  client: DtfClient,
+  params: GetVoteLockVaultStateParams,
+): Promise<VoteLockState> {
+  const stToken = getAddress(params.stToken);
+  const publicClient = client.viem.getPublicClient(params.chainId);
+  const asset = await publicClient.readContract({
+    address: stToken,
+    abi: dtfIndexStakingVaultAbi,
+    functionName: "asset",
+  });
+  const underlyingAddress = getAddress(asset);
+  const [name, symbol, decimals] = await publicClient.multicall({
+    allowFailure: false,
+    contracts: [
+      { address: underlyingAddress, abi: erc20Abi, functionName: "name" },
+      { address: underlyingAddress, abi: erc20Abi, functionName: "symbol" },
+      { address: underlyingAddress, abi: erc20Abi, functionName: "decimals" },
+    ],
+  });
+
+  return readVoteLockState(client, {
+    chainId: params.chainId,
+    stToken,
+    underlying: { address: underlyingAddress, name, symbol, decimals },
+    account: params.account,
+  });
+}
+
+async function readVoteLockState(
+  client: DtfClient,
+  params: {
+    readonly chainId: IndexDtf["chainId"];
+    readonly stToken: Address;
+    readonly underlying: Token;
+    readonly account: Address;
+  },
+): Promise<VoteLockState> {
+  const { account, chainId, stToken, underlying } = params;
+  const [prices, results, [optimisticDelegate, optimisticVotingPower]] = await Promise.all([
+    // The drawer works without a price; a Reserve API outage must not break it.
+    client.api.getTokenPrices({ chainId, addresses: [underlying.address] }).catch(() => []),
+    client.viem.getPublicClient(chainId).multicall({
+      allowFailure: true,
+      contracts: [
+        {
+          address: underlying.address,
+          abi: erc20Abi,
+          functionName: "balanceOf",
+          args: [account],
+        },
+        {
+          address: underlying.address,
+          abi: erc20Abi,
+          functionName: "allowance",
+          args: [account, stToken],
+        },
+        {
+          address: stToken,
+          abi: dtfIndexStakingVaultAbi,
+          functionName: "delegates",
+          args: [account],
+        },
+        {
+          address: stToken,
+          abi: dtfIndexStakingVaultAbi,
+          functionName: "maxWithdraw",
+          args: [account],
+        },
+        {
+          address: stToken,
+          abi: dtfIndexStakingVaultAbi,
+          functionName: "unstakingDelay",
+        },
+        {
+          address: stToken,
+          abi: dtfIndexStakingVaultAbi,
+          functionName: "unstakingManager",
+        },
+      ],
+    }) as Promise<VoteLockStateMulticallResults>,
+    readOptionalOptimisticVoteLockState(client, chainId, stToken, account),
+  ]);
   const [
     balanceResult,
     allowanceResult,
@@ -133,51 +228,7 @@ export async function getVoteLockState(
     maxWithdrawResult,
     unstakingDelayResult,
     unstakingManagerResult,
-  ] = (await client.viem.getPublicClient(params.chainId).multicall({
-    allowFailure: true,
-    contracts: [
-      {
-        address: underlying.address,
-        abi: erc20Abi,
-        functionName: "balanceOf",
-        args: [account],
-      },
-      {
-        address: underlying.address,
-        abi: erc20Abi,
-        functionName: "allowance",
-        args: [account, stToken],
-      },
-      {
-        address: stToken,
-        abi: dtfIndexStakingVaultAbi,
-        functionName: "delegates",
-        args: [account],
-      },
-      {
-        address: stToken,
-        abi: dtfIndexStakingVaultAbi,
-        functionName: "maxWithdraw",
-        args: [account],
-      },
-      {
-        address: stToken,
-        abi: dtfIndexStakingVaultAbi,
-        functionName: "unstakingDelay",
-      },
-      {
-        address: stToken,
-        abi: dtfIndexStakingVaultAbi,
-        functionName: "unstakingManager",
-      },
-    ],
-  })) as VoteLockStateMulticallResults;
-  const [optimisticDelegate, optimisticVotingPower] = await readOptionalOptimisticVoteLockState(
-    client,
-    params.chainId,
-    stToken,
-    account,
-  );
+  ] = results;
 
   if (balanceResult.status === "failure") throw balanceResult.error;
   if (allowanceResult.status === "failure") throw allowanceResult.error;

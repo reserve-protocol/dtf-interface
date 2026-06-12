@@ -106,6 +106,7 @@ export {
   indexDtfStatusQueryOptions,
   indexDtfTransactionsQueryOptions,
   indexDtfVoteLockStateQueryOptions,
+  indexDtfVoteLockVaultStateQueryOptions,
 } from "@/index-dtf-query-options";
 export {
   useAccountPortfolioHistory,
@@ -125,4 +126,5 @@ export {
   useIndexDtfStatus,
   useIndexDtfTransactions,
   useIndexDtfVoteLockState,
+  useIndexDtfVoteLockVaultState,
 } from "@/index-dtf-extra-hooks";

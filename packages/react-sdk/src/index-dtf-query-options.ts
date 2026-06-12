@@ -118,6 +118,19 @@ export function indexDtfVoteLockStateQueryOptions<TData = MethodResult<IndexMeth
   );
 }
 
+export function indexDtfVoteLockVaultStateQueryOptions<TData = MethodResult<IndexMethod<"getVoteLockVaultState">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getVoteLockVaultState">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getVoteLockVaultState">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.voteLockVaultState(params),
+    () => sdk.index.getVoteLockVaultState(requireParams(params, "indexDtfVoteLockVaultStateQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
 export function accountPortfolioQueryOptions<TData = MethodResult<PortfolioMethod<"get">>>(
   sdk: DtfSdk,
   params: MethodParams<PortfolioMethod<"get">> | undefined,

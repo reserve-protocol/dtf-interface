@@ -48,8 +48,10 @@ export {
 } from "@/yield-dtf/apy";
 export type { CollateralYields, ComputeYieldDtfApyParams, YieldDtfApy, YieldDtfStakingApyPoint } from "@/yield-dtf/apy";
 export {
+  prepareYieldDtfGrantGuardian,
   prepareYieldDtfGrantRole,
   prepareYieldDtfRefreshBasket,
+  prepareYieldDtfRevokeGuardian,
   prepareYieldDtfRevokeRole,
   prepareYieldDtfSetBackingBuffer,
   prepareYieldDtfSetBackupConfig,
@@ -71,9 +73,11 @@ export {
   prepareYieldDtfSetWarmupPeriod,
   prepareYieldDtfSetWithdrawalLeak,
   toYieldDtfProposalPayload,
+  YIELD_DTF_GUARDIAN_ROLE,
   YIELD_DTF_ROLES,
 } from "@/yield-dtf/propose";
 export type {
+  YieldDtfGuardianChangeParams,
   YieldDtfProposalCall,
   YieldDtfRole,
   YieldDtfRoleChangeParams,

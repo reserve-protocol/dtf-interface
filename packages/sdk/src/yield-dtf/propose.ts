@@ -1,4 +1,4 @@
-import { getAddress, keccak256, stringToHex, toBytes, type Address, type Hex } from "viem";
+import { getAddress, stringToHex, type Address, type Hex } from "viem";
 
 import type { ContractCall } from "@/lib/contract-call";
 import type { YieldDtfChainId } from "@/yield-dtf/config";
@@ -13,15 +13,19 @@ import { rTokenMainAbi } from "@/yield-dtf/abis/main";
 import { rTokenAbi } from "@/yield-dtf/abis/r-token";
 import { stRsrAbi } from "@/yield-dtf/abis/st-rsr";
 
-// Main AccessControl role ids.
+// Main role ids are plain left-aligned strings (bytes32(bytes("OWNER"))),
+// NOT keccak hashes — see protocol IMain.sol.
 export const YIELD_DTF_ROLES = {
-  owner: keccak256(toBytes("OWNER")),
-  pauser: keccak256(toBytes("PAUSER")),
-  shortFreezer: keccak256(toBytes("SHORT_FREEZER")),
-  longFreezer: keccak256(toBytes("LONG_FREEZER")),
-} as const;
+  owner: "0x4f574e4552000000000000000000000000000000000000000000000000000000",
+  pauser: "0x5041555345520000000000000000000000000000000000000000000000000000",
+  shortFreezer: "0x53484f52545f465245455a455200000000000000000000000000000000000000",
+  longFreezer: "0x4c4f4e475f465245455a45520000000000000000000000000000000000000000",
+} as const satisfies Record<string, Hex>;
 
 export type YieldDtfRole = keyof typeof YIELD_DTF_ROLES;
+
+// Guardians live on the timelock as OZ's CANCELLER_ROLE (this one IS a keccak hash).
+export const YIELD_DTF_GUARDIAN_ROLE: Hex = "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783";
 
 type Target = { readonly chainId: YieldDtfChainId; readonly address: Address };
 
@@ -70,6 +74,7 @@ export function prepareYieldDtfSetMinTradeVolume(params: Target & { readonly val
   });
 }
 
+/** Register-parity "reward ratio" proposals set BOTH Furnace.setRatio and StRSR.setRewardRatio. */
 export function prepareYieldDtfSetFurnaceRatio(params: Target & { readonly ratio: bigint }): ContractCall {
   return prepareContractCall({
     chainId: params.chainId,
@@ -220,12 +225,37 @@ export function prepareYieldDtfRevokeRole(params: YieldDtfRoleChangeParams): Con
   });
 }
 
+export type YieldDtfGuardianChangeParams = Target & {
+  readonly account: Address;
+};
+
+/** Grants the guardian (CANCELLER_ROLE) on the governance timelock. */
+export function prepareYieldDtfGrantGuardian(params: YieldDtfGuardianChangeParams): ContractCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: getAddress(params.address),
+    abi: rTokenMainAbi,
+    functionName: "grantRole",
+    args: [YIELD_DTF_GUARDIAN_ROLE, getAddress(params.account)],
+  });
+}
+
+export function prepareYieldDtfRevokeGuardian(params: YieldDtfGuardianChangeParams): ContractCall {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: getAddress(params.address),
+    abi: rTokenMainAbi,
+    functionName: "revokeRole",
+    args: [YIELD_DTF_GUARDIAN_ROLE, getAddress(params.account)],
+  });
+}
+
 export type YieldDtfSetPrimeBasketParams = Target & {
   readonly erc20s: readonly Address[];
   readonly targetAmounts: readonly bigint[];
 };
 
-/** Pair with prepareYieldDtfRefreshBasket in the same proposal. */
+/** Pair with prepareYieldDtfRefreshBasket after; reweightable RTokens also need a refresh BEFORE this call. */
 export function prepareYieldDtfSetPrimeBasket(params: YieldDtfSetPrimeBasketParams): ContractCall {
   return prepareContractCall({
     chainId: params.chainId,

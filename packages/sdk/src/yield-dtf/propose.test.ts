@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  prepareYieldDtfGrantGuardian,
   prepareYieldDtfGrantRole,
   prepareYieldDtfRefreshBasket,
   prepareYieldDtfSetDistribution,
@@ -16,16 +17,28 @@ const ERC20 = "0x3333333333333333333333333333333333333333";
 const GOVERNOR = "0x4444444444444444444444444444444444444444";
 
 describe("yield DTF proposal builders", () => {
-  it("encodes grantRole with the protocol role hash", () => {
+  it("encodes grantRole with the protocol's plain bytes32 role ids (NOT keccak)", () => {
     const call = prepareYieldDtfGrantRole({ chainId: 1, address: MAIN, role: "owner", account: ACCOUNT });
 
-    // grantRole(bytes32,address) + keccak("OWNER") + padded account.
+    // grantRole(bytes32,address) + bytes32("OWNER") left-aligned + padded account.
     expect(call.data).toBe(
       "0x2f2ff15d" +
-        "6270edb7c868f86fda4adedba75108201087268ea345934db8bad688e1feb91b" +
+        "4f574e4552000000000000000000000000000000000000000000000000000000" +
         ACCOUNT.replace("0x", "").padStart(64, "0"),
     );
-    expect(YIELD_DTF_ROLES.owner).toBe("0x6270edb7c868f86fda4adedba75108201087268ea345934db8bad688e1feb91b");
+    // Register's ROLES table values, byte for byte.
+    expect(YIELD_DTF_ROLES.owner).toBe("0x4f574e4552000000000000000000000000000000000000000000000000000000");
+    expect(YIELD_DTF_ROLES.shortFreezer).toBe("0x53484f52545f465245455a455200000000000000000000000000000000000000");
+  });
+
+  it("grants guardians via the timelock CANCELLER_ROLE keccak hash", () => {
+    const call = prepareYieldDtfGrantGuardian({ chainId: 1, address: MAIN, account: ACCOUNT });
+
+    expect(call.data).toBe(
+      "0x2f2ff15d" +
+        "fd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783" +
+        ACCOUNT.replace("0x", "").padStart(64, "0"),
+    );
   });
 
   it("encodes setPrimeBasket and pairs with refreshBasket", () => {

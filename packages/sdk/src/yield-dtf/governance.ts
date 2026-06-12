@@ -13,7 +13,7 @@ import type {
 
 import { SdkError } from "@/lib/errors";
 import {
-  getGovernorTimelockOperationId,
+  getGovernorTimelockOperationIdV4,
   prepareGovernorCancel,
   prepareGovernorExecute,
   prepareGovernorPropose,
@@ -297,7 +297,8 @@ export function prepareYieldDtfTimelockCancelProposal(
   return prepareTimelockCancel({
     chainId: params.chainId,
     timelock: params.timelock,
-    operationId: getGovernorTimelockOperationId(params.proposal),
+    // Yield governors are OZ 4.x: timelock salt is the plain description hash.
+    operationId: getGovernorTimelockOperationIdV4(params.proposal),
   });
 }
 

@@ -216,8 +216,8 @@ const timelockCancelAbi = [
 ] as const;
 
 /**
- * OZ GovernorTimelockControl operation id for a queued proposal: the batch
- * hash with the governor-XOR-description salt. Works for both DTF protocols.
+ * Timelock operation id for an OZ 5.x GovernorTimelockControl (Index DTF):
+ * the batch hash with the governor-XOR-description salt.
  */
 export function getGovernorTimelockOperationId(proposal: GovernorProposalPayload): Hex {
   return keccak256(
@@ -227,6 +227,22 @@ export function getGovernorTimelockOperationId(proposal: GovernorProposalPayload
       [...proposal.calldatas],
       zeroHash,
       getGovernorTimelockSalt(proposal.governor, proposal.description),
+    ]),
+  );
+}
+
+/**
+ * Timelock operation id for an OZ 4.x GovernorTimelockControl (Yield DTF):
+ * 4.x schedules with salt = descriptionHash directly, no governor XOR.
+ */
+export function getGovernorTimelockOperationIdV4(proposal: GovernorProposalPayload): Hex {
+  return keccak256(
+    encodeAbiParameters(TIMELOCK_OPERATION_PARAMS, [
+      proposal.targets,
+      zeroValues(proposal.targets.length),
+      [...proposal.calldatas],
+      zeroHash,
+      hashProposalDescription(proposal.description),
     ]),
   );
 }

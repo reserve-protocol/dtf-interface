@@ -12,6 +12,7 @@ export {
   prepareGovernorVoteWithReasonAndParams,
   prepareTimelockCancel,
   getGovernorTimelockOperationId,
+  getGovernorTimelockOperationIdV4,
 } from "@/lib/governor-calls";
 export type { GovernorProposalParams, GovernorProposalPayload, GovernorVoteParams } from "@/lib/governor-calls";
 export { createDtfSdk } from "@/create-dtf-sdk";
@@ -354,9 +355,11 @@ export {
   prepareYieldDtfCancelProposal,
   prepareYieldDtfClaimRewards,
   prepareYieldDtfExecuteProposal,
+  prepareYieldDtfGrantGuardian,
   prepareYieldDtfGrantRole,
   prepareYieldDtfRebalance,
   prepareYieldDtfRefreshBasket,
+  prepareYieldDtfRevokeGuardian,
   prepareYieldDtfRevokeRole,
   prepareYieldDtfRunRevenueAuctions,
   prepareYieldDtfSetBackingBuffer,
@@ -384,6 +387,7 @@ export {
   prepareYieldDtfVote,
   revenueTraderAbi,
   toYieldDtfProposalPayload,
+  YIELD_DTF_GUARDIAN_ROLE,
   YIELD_DTF_ROLES,
   yieldGovernanceAbi,
   yieldGovernanceAnastasiusAbi,

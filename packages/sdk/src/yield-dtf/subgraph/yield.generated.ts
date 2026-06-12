@@ -6290,6 +6290,29 @@ export type GetAccountStakeRecordsQueryVariables = Exact<{
 
 export type GetAccountStakeRecordsQuery = { accountStakeRecords: Array<{ id: string, hash: string, isStake: boolean, amount: string, amountRaw: string, rsrAmount: string, rsrAmountRaw: string, exchangeRate: string, rsrPriceUSD: string, timestamp: string, blockNumber: string }> };
 
+export type GetYieldDtfGovernanceQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetYieldDtfGovernanceQuery = { rtoken?: { owners: Array<string> } | null, governance?: { proposals: string, proposalsQueued: string, proposalsExecuted: string, proposalsCanceled: string, currentDelegates: string, delegatedVotes: string, totalTokenSupply: string, guardians: Array<string>, governanceFrameworks: Array<{ id: string, name: string, contractAddress: string, timelockAddress: string, executionDelay: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null }> } | null };
+
+export type GetYieldDtfProposalsQueryVariables = Exact<{
+  governanceId: Scalars['String']['input'];
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+}>;
+
+
+export type GetYieldDtfProposalsQuery = { proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, startBlock: string, endBlock: string, executionETA?: string | null, proposer: { address: string }, governanceFramework: { name: string, contractAddress: string } }> };
+
+export type GetYieldDtfProposalQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetYieldDtfProposalQuery = { proposal?: { id: string, txnHash: string, description: string, creationTime: string, creationBlock: string, state: ProposalState, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, againstDelegateVotes: string, abstainDelegateVotes: string, startBlock: string, endBlock: string, queueTime?: string | null, queueTxnHash?: string | null, executionETA?: string | null, executionTime?: string | null, executionTxnHash?: string | null, cancellationTime?: string | null, targets?: Array<string> | null, calldatas?: Array<string> | null, proposer: { address: string }, votes: Array<{ choice: VoteChoice, weight: string, voter: { address: string } }>, governanceFramework: { name: string, contractAddress: string, timelockAddress: string } } | null };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -6444,3 +6467,107 @@ export const GetAccountStakeRecordsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetAccountStakeRecordsQuery, GetAccountStakeRecordsQueryVariables>;
+export const GetYieldDtfGovernanceDocument = new TypedDocumentString(`
+    query GetYieldDtfGovernance($id: ID!) {
+  rtoken(id: $id) {
+    owners
+  }
+  governance(id: $id) {
+    proposals
+    proposalsQueued
+    proposalsExecuted
+    proposalsCanceled
+    currentDelegates
+    delegatedVotes
+    totalTokenSupply
+    guardians
+    governanceFrameworks(orderBy: name, orderDirection: desc) {
+      id
+      name
+      contractAddress
+      timelockAddress
+      executionDelay
+      votingDelay
+      votingPeriod
+      proposalThreshold
+      quorumVotes
+      quorumNumerator
+      quorumDenominator
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetYieldDtfGovernanceQuery, GetYieldDtfGovernanceQueryVariables>;
+export const GetYieldDtfProposalsDocument = new TypedDocumentString(`
+    query GetYieldDtfProposals($governanceId: String!, $limit: Int!, $offset: Int!) {
+  proposals(
+    where: {governance: $governanceId}
+    orderBy: creationTime
+    orderDirection: desc
+    first: $limit
+    skip: $offset
+  ) {
+    id
+    description
+    creationTime
+    state
+    forWeightedVotes
+    againstWeightedVotes
+    abstainWeightedVotes
+    quorumVotes
+    startBlock
+    endBlock
+    executionETA
+    proposer {
+      address
+    }
+    governanceFramework {
+      name
+      contractAddress
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetYieldDtfProposalsQuery, GetYieldDtfProposalsQueryVariables>;
+export const GetYieldDtfProposalDocument = new TypedDocumentString(`
+    query GetYieldDtfProposal($id: ID!) {
+  proposal(id: $id) {
+    id
+    txnHash
+    description
+    creationTime
+    creationBlock
+    state
+    forWeightedVotes
+    againstWeightedVotes
+    abstainWeightedVotes
+    quorumVotes
+    forDelegateVotes
+    againstDelegateVotes
+    abstainDelegateVotes
+    startBlock
+    endBlock
+    queueTime
+    queueTxnHash
+    executionETA
+    executionTime
+    executionTxnHash
+    cancellationTime
+    targets
+    calldatas
+    proposer {
+      address
+    }
+    votes(orderBy: weight, orderDirection: desc, first: 500) {
+      choice
+      weight
+      voter {
+        address
+      }
+    }
+    governanceFramework {
+      name
+      contractAddress
+      timelockAddress
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetYieldDtfProposalQuery, GetYieldDtfProposalQueryVariables>;

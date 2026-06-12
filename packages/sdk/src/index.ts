@@ -1,5 +1,17 @@
 export { createDtfClient } from "@/client";
 export { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
+export {
+  governorWriteAbi,
+  hashProposalDescription,
+  prepareGovernorCancel,
+  prepareGovernorExecute,
+  prepareGovernorPropose,
+  prepareGovernorQueue,
+  prepareGovernorVote,
+  prepareGovernorVoteWithReason,
+  prepareGovernorVoteWithReasonAndParams,
+} from "@/lib/governor-calls";
+export type { GovernorProposalParams, GovernorProposalPayload, GovernorVoteParams } from "@/lib/governor-calls";
 export { createDtfSdk } from "@/create-dtf-sdk";
 export { SdkError, isSdkError } from "@/lib/errors";
 export {
@@ -317,6 +329,19 @@ export {
   facadeReadAbi,
   getYieldDtf,
   getYieldDtfBasket,
+  getYieldDtfGovernance,
+  getYieldDtfProposal,
+  getYieldDtfProposals,
+  getYieldDtfProposalVotePower,
+  getYieldDtfVoterState,
+  isTimepointGovernor,
+  prepareYieldDtfCancelProposal,
+  prepareYieldDtfExecuteProposal,
+  prepareYieldDtfQueueProposal,
+  prepareYieldDtfSubmitProposal,
+  prepareYieldDtfVote,
+  yieldGovernanceAbi,
+  yieldGovernanceAnastasiusAbi,
   getYieldDtfContracts,
   getYieldDtfHolders,
   getYieldDtfIssuanceQuote,

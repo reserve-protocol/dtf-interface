@@ -39,6 +39,29 @@ export type {
   YieldDtfIssuePlanParams,
   YieldDtfRedeemCustomParams,
 } from "@/yield-dtf/issuance";
+export { yieldGovernanceAbi } from "@/yield-dtf/abis/governance";
+export { yieldGovernanceAnastasiusAbi } from "@/yield-dtf/abis/governance-anastasius";
+export {
+  getYieldDtfGovernance,
+  getYieldDtfProposal,
+  getYieldDtfProposals,
+  getYieldDtfProposalVotePower,
+  getYieldDtfVoterState,
+  isTimepointGovernor,
+  prepareYieldDtfCancelProposal,
+  prepareYieldDtfExecuteProposal,
+  prepareYieldDtfQueueProposal,
+  prepareYieldDtfSubmitProposal,
+  prepareYieldDtfVote,
+} from "@/yield-dtf/governance";
+export type {
+  GetYieldDtfProposalParams,
+  GetYieldDtfProposalsParams,
+  GetYieldDtfProposalVotePowerParams,
+  GetYieldDtfVoterStateParams,
+  YieldDtfProposalActionParams,
+  YieldDtfVoteParams,
+} from "@/yield-dtf/governance";
 export {
   getYieldDtfStakeHistory,
   getYieldDtfStakingState,

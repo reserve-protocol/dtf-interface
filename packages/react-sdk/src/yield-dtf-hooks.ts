@@ -386,3 +386,205 @@ export function useYieldDtfWithdrawCall(params: Parameters<DtfSdk["yield"]["prep
     return sdk.yield.prepareWithdraw({ chainId, stToken, account, endId });
   }, [chainId, stToken, account, endId, sdk]);
 }
+
+export function yieldDtfGovernanceQueryOptions<TData = MethodResult<YieldMethod<"getGovernance">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getGovernance">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getGovernance">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.governance(params),
+    () => sdk.yield.getGovernance(requireParams(params, "yieldDtfGovernanceQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function yieldDtfProposalsQueryOptions<TData = MethodResult<YieldMethod<"getProposals">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getProposals">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getProposals">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.proposals(params),
+    () => sdk.yield.getProposals(requireParams(params, "yieldDtfProposalsQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function yieldDtfProposalQueryOptions<TData = MethodResult<YieldMethod<"getProposal">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getProposal">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getProposal">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.proposal(params),
+    () => sdk.yield.getProposal(requireParams(params, "yieldDtfProposalQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function yieldDtfVoterStateQueryOptions<TData = MethodResult<YieldMethod<"getVoterState">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getVoterState">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getVoterState">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.voterState(params),
+    () => sdk.yield.getVoterState(requireParams(params, "yieldDtfVoterStateQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function yieldDtfProposalVotePowerQueryOptions<TData = MethodResult<YieldMethod<"getProposalVotePower">>>(
+  sdk: DtfSdk,
+  params: MethodParams<YieldMethod<"getProposalVotePower">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getProposalVotePower">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.yield.proposalVotePower(params),
+    () => sdk.yield.getProposalVotePower(requireParams(params, "yieldDtfProposalVotePowerQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function useYieldDtfGovernance<TData = MethodResult<YieldMethod<"getGovernance">>>(
+  params: MethodParams<YieldMethod<"getGovernance">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getGovernance">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfGovernanceQueryOptions(sdk, params, options));
+}
+
+export function useYieldDtfProposals<TData = MethodResult<YieldMethod<"getProposals">>>(
+  params: MethodParams<YieldMethod<"getProposals">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getProposals">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfProposalsQueryOptions(sdk, params, options));
+}
+
+export function useYieldDtfProposal<TData = MethodResult<YieldMethod<"getProposal">>>(
+  params: MethodParams<YieldMethod<"getProposal">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getProposal">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfProposalQueryOptions(sdk, params, options));
+}
+
+export function useYieldDtfVoterState<TData = MethodResult<YieldMethod<"getVoterState">>>(
+  params: MethodParams<YieldMethod<"getVoterState">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getVoterState">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfVoterStateQueryOptions(sdk, params, options));
+}
+
+export function useYieldDtfProposalVotePower<TData = MethodResult<YieldMethod<"getProposalVotePower">>>(
+  params: MethodParams<YieldMethod<"getProposalVotePower">> | undefined,
+  options?: DtfQueryOptions<MethodResult<YieldMethod<"getProposalVotePower">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(yieldDtfProposalVotePowerQueryOptions(sdk, params, options));
+}
+
+export function useYieldDtfVoteCall(params: Parameters<DtfSdk["yield"]["prepareVote"]>[0] | undefined) {
+  const sdk = useDtfSdk();
+  const chainId = params?.chainId;
+  const governor = params?.governor;
+  const proposalId = params?.proposalId;
+  const support = params?.support;
+  const reason = params?.reason;
+
+  return useMemo(() => {
+    if (chainId === undefined || !governor || proposalId === undefined || support === undefined) {
+      return undefined;
+    }
+
+    return sdk.yield.prepareVote({ chainId, governor, proposalId, support, ...(reason ? { reason } : {}) });
+  }, [chainId, governor, proposalId, support, reason, sdk]);
+}
+
+export function useYieldDtfQueueProposalCall(
+  params: Parameters<DtfSdk["yield"]["prepareQueueProposal"]>[0] | undefined,
+) {
+  const sdk = useDtfSdk();
+  const chainId = params?.chainId;
+  const proposal = params?.proposal;
+  const governor = proposal?.governor;
+  const targets = proposal?.targets;
+  const calldatas = proposal?.calldatas;
+  const description = proposal?.description;
+
+  return useMemo(() => {
+    if (chainId === undefined || !governor || !targets || !calldatas || description === undefined) {
+      return undefined;
+    }
+
+    return sdk.yield.prepareQueueProposal({ chainId, proposal: { governor, targets, calldatas, description } });
+  }, [chainId, governor, targets, calldatas, description, sdk]);
+}
+
+export function useYieldDtfExecuteProposalCall(
+  params: Parameters<DtfSdk["yield"]["prepareExecuteProposal"]>[0] | undefined,
+) {
+  const sdk = useDtfSdk();
+  const chainId = params?.chainId;
+  const proposal = params?.proposal;
+  const governor = proposal?.governor;
+  const targets = proposal?.targets;
+  const calldatas = proposal?.calldatas;
+  const description = proposal?.description;
+
+  return useMemo(() => {
+    if (chainId === undefined || !governor || !targets || !calldatas || description === undefined) {
+      return undefined;
+    }
+
+    return sdk.yield.prepareExecuteProposal({ chainId, proposal: { governor, targets, calldatas, description } });
+  }, [chainId, governor, targets, calldatas, description, sdk]);
+}
+
+export function useYieldDtfCancelProposalCall(
+  params: Parameters<DtfSdk["yield"]["prepareCancelProposal"]>[0] | undefined,
+) {
+  const sdk = useDtfSdk();
+  const chainId = params?.chainId;
+  const proposal = params?.proposal;
+  const governor = proposal?.governor;
+  const targets = proposal?.targets;
+  const calldatas = proposal?.calldatas;
+  const description = proposal?.description;
+
+  return useMemo(() => {
+    if (chainId === undefined || !governor || !targets || !calldatas || description === undefined) {
+      return undefined;
+    }
+
+    return sdk.yield.prepareCancelProposal({ chainId, proposal: { governor, targets, calldatas, description } });
+  }, [chainId, governor, targets, calldatas, description, sdk]);
+}
+
+export function useYieldDtfSubmitProposalCall(
+  params: Parameters<DtfSdk["yield"]["prepareSubmitProposal"]>[0] | undefined,
+) {
+  const sdk = useDtfSdk();
+  const chainId = params?.chainId;
+  const proposal = params?.proposal;
+  const governor = proposal?.governor;
+  const targets = proposal?.targets;
+  const calldatas = proposal?.calldatas;
+  const description = proposal?.description;
+
+  return useMemo(() => {
+    if (chainId === undefined || !governor || !targets || !calldatas || description === undefined) {
+      return undefined;
+    }
+
+    return sdk.yield.prepareSubmitProposal({ chainId, proposal: { governor, targets, calldatas, description } });
+  }, [chainId, governor, targets, calldatas, description, sdk]);
+}

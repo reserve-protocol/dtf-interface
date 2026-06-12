@@ -12,6 +12,18 @@ import {
   listYieldDtfs,
 } from "@/yield-dtf/dtf/index";
 import {
+  getYieldDtfGovernance,
+  getYieldDtfProposal,
+  getYieldDtfProposals,
+  getYieldDtfProposalVotePower,
+  getYieldDtfVoterState,
+  prepareYieldDtfCancelProposal,
+  prepareYieldDtfExecuteProposal,
+  prepareYieldDtfQueueProposal,
+  prepareYieldDtfSubmitProposal,
+  prepareYieldDtfVote,
+} from "@/yield-dtf/governance";
+import {
   getYieldDtfIssuanceQuote,
   getYieldDtfMaxIssuable,
   getYieldDtfRedemptionQuote,
@@ -59,5 +71,16 @@ export function createYieldDtfNamespace(client: DtfClient) {
     prepareUnstake: prepareYieldDtfUnstake,
     prepareWithdraw: prepareYieldDtfWithdraw,
     prepareCancelUnstake: prepareYieldDtfCancelUnstake,
+    getGovernance: (params: Parameters<typeof getYieldDtfGovernance>[1]) => getYieldDtfGovernance(client, params),
+    getProposals: (params: Parameters<typeof getYieldDtfProposals>[1]) => getYieldDtfProposals(client, params),
+    getProposal: (params: Parameters<typeof getYieldDtfProposal>[1]) => getYieldDtfProposal(client, params),
+    getVoterState: (params: Parameters<typeof getYieldDtfVoterState>[1]) => getYieldDtfVoterState(client, params),
+    getProposalVotePower: (params: Parameters<typeof getYieldDtfProposalVotePower>[1]) =>
+      getYieldDtfProposalVotePower(client, params),
+    prepareVote: prepareYieldDtfVote,
+    prepareQueueProposal: prepareYieldDtfQueueProposal,
+    prepareExecuteProposal: prepareYieldDtfExecuteProposal,
+    prepareCancelProposal: prepareYieldDtfCancelProposal,
+    prepareSubmitProposal: prepareYieldDtfSubmitProposal,
   };
 }

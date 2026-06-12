@@ -312,6 +312,16 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.yield.all(), "staking-state", keyParams(params)] as const,
     stakeHistory: (params?: YieldMethodParams<"getStakeHistory">) =>
       [...dtfQueryKeys.yield.all(), "stake-history", keyParams(params)] as const,
+    governance: (params?: YieldMethodParams<"getGovernance">) =>
+      [...dtfQueryKeys.yield.all(), "governance", keyParams(params)] as const,
+    proposals: (params?: YieldMethodParams<"getProposals">) =>
+      [...dtfQueryKeys.yield.all(), "proposals", keyParams(params)] as const,
+    proposal: (params?: YieldMethodParams<"getProposal">) =>
+      [...dtfQueryKeys.yield.all(), "proposal", keyParams(params)] as const,
+    voterState: (params?: YieldMethodParams<"getVoterState">) =>
+      [...dtfQueryKeys.yield.all(), "voter-state", keyParams(params)] as const,
+    proposalVotePower: (params?: YieldMethodParams<"getProposalVotePower">) =>
+      [...dtfQueryKeys.yield.all(), "proposal-vote-power", keyParams(params)] as const,
   },
   portfolio: {
     all: () => [...dtfQueryKeys.all, "portfolio"] as const,

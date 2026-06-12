@@ -12,6 +12,7 @@ import {
   getYieldDtfState,
   getYieldDtfTransactions,
 } from "@/yield-dtf/dtf/index";
+import { getYieldDtfGovernance, getYieldDtfProposals } from "@/yield-dtf/governance";
 import {
   getYieldDtfIssuanceQuote,
   getYieldDtfMaxIssuable,
@@ -57,5 +58,8 @@ export function createYieldDtfRef(client: DtfClient, params: YieldDtfParams) {
     prepareRedeem: (amount: bigint) => prepareYieldDtfRedeem({ address, chainId, amount }),
     prepareRedeemCustom: (options: Omit<YieldDtfRedeemCustomParams, "address" | "chainId">) =>
       prepareYieldDtfRedeemCustom({ ...options, address, chainId }),
+    getGovernance: () => getYieldDtfGovernance(client, { address, chainId }),
+    getProposals: (options?: { readonly limit?: number; readonly offset?: number }) =>
+      getYieldDtfProposals(client, { address, chainId, ...options }),
   };
 }

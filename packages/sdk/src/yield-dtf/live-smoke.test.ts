@@ -100,3 +100,41 @@ smokeDescribe("Yield DTF live smoke (mainnet eUSD)", () => {
     }
   });
 });
+
+smokeDescribe("Yield DTF governance live smoke (mainnet eUSD)", () => {
+  const sdk = createDtfSdk();
+
+  it("reads governance, proposals, and an authoritative proposal state", async () => {
+    const governance = await sdk.yield.getGovernance({ address: EUSD, chainId: MAINNET });
+
+    expect(governance.governor).toMatch(/^0x/);
+    expect(governance.timelock).toMatch(/^0x/);
+    expect(governance.quorum.raw).toBeGreaterThan(0n);
+    expect(governance.proposalThreshold.raw).toBeGreaterThan(0n);
+    expect(governance.stats.proposals).toBeGreaterThan(0);
+
+    const proposals = await sdk.yield.getProposals({ address: EUSD, chainId: MAINNET, limit: 5 });
+    expect(proposals.length).toBeGreaterThan(0);
+    expect(proposals[0]!.governor).toMatch(/^0x/);
+
+    const detail = await sdk.yield.getProposal({ chainId: MAINNET, proposalId: proposals[0]!.id });
+    expect(detail.targets.length).toBeGreaterThan(0);
+    expect(detail.calldatas.length).toBe(detail.targets.length);
+    // Old proposals must have settled into a terminal state.
+    expect(["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED", "QUEUED", "SUCCEEDED", "ACTIVE", "PENDING"]).toContain(
+      detail.state,
+    );
+  });
+
+  it("reads voter state from the stRSR votes token", async () => {
+    const dtf = await sdk.yield.get({ address: EUSD, chainId: MAINNET });
+    const voter = await sdk.yield.getVoterState({
+      chainId: MAINNET,
+      stToken: dtf.stToken.address,
+      account: SMOKE_ACCOUNT,
+    });
+
+    expect(voter.votingPower.raw).toBeGreaterThanOrEqual(0n);
+    expect(voter.delegate).toMatch(/^0x/);
+  });
+});

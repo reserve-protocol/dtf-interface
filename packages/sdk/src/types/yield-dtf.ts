@@ -230,3 +230,90 @@ export type YieldDtfStakeRecord = {
   readonly timestamp: number;
   readonly blockNumber: number;
 };
+
+export type YieldDtfGovernance = {
+  readonly governor: Address;
+  /** "Governor Anastasius" (timepoint-based) or "Governor Alexios" (block-based). */
+  readonly name: string;
+  /** Anastasius governors use unix timestamps for voting timepoints. */
+  readonly isTimepointBased: boolean;
+  readonly timelock: Address;
+  readonly guardians: readonly Address[];
+  /** Seconds for Anastasius, blocks for Alexios. */
+  readonly votingDelay: number;
+  readonly votingPeriod: number;
+  readonly executionDelay: number;
+  readonly proposalThreshold: Amount;
+  readonly quorum: Amount;
+  readonly quorumNumerator: number;
+  readonly quorumDenominator: number;
+  readonly stats: {
+    readonly proposals: number;
+    readonly proposalsExecuted: number;
+    readonly proposalsQueued: number;
+    readonly proposalsCanceled: number;
+    readonly currentDelegates: number;
+    readonly delegatedVotes: number;
+  };
+};
+
+export type YieldDtfProposalState =
+  | "PENDING"
+  | "ACTIVE"
+  | "CANCELED"
+  | "DEFEATED"
+  | "SUCCEEDED"
+  | "QUEUED"
+  | "EXPIRED"
+  | "EXECUTED";
+
+export type YieldDtfProposalSummary = {
+  readonly id: string;
+  readonly chainId: YieldDtfChainId;
+  readonly governor: Address;
+  readonly governorName: string;
+  readonly description: string;
+  readonly proposer: Address;
+  readonly state: YieldDtfProposalState;
+  readonly creationTime: number;
+  /** Timepoint: unix seconds for Anastasius, block number for Alexios. */
+  readonly voteStart: number;
+  readonly voteEnd: number;
+  readonly executionEta?: number;
+  readonly forWeightedVotes: Amount;
+  readonly againstWeightedVotes: Amount;
+  readonly abstainWeightedVotes: Amount;
+  readonly quorumVotes: Amount;
+};
+
+export type YieldDtfProposalVote = {
+  readonly voter: Address;
+  readonly choice: string;
+  readonly weight: Amount;
+};
+
+export type YieldDtfProposalDetail = YieldDtfProposalSummary & {
+  readonly txnHash: string;
+  readonly creationBlock: number;
+  readonly forDelegateVotes: number;
+  readonly againstDelegateVotes: number;
+  readonly abstainDelegateVotes: number;
+  readonly queueTime?: number;
+  readonly queueTxnHash?: string;
+  readonly executionTime?: number;
+  readonly executionTxnHash?: string;
+  readonly cancellationTime?: number;
+  readonly timelock?: Address;
+  readonly targets: readonly Address[];
+  readonly calldatas: readonly `0x${string}`[];
+  readonly votes: readonly YieldDtfProposalVote[];
+};
+
+export type YieldDtfVoterState = {
+  readonly account: Address;
+  /** Current voting power from StRSRVotes. */
+  readonly votingPower: Amount;
+  readonly delegate: Address;
+  readonly isSelfDelegated: boolean;
+  readonly stTokenBalance: Amount;
+};

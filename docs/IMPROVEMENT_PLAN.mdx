@@ -115,36 +115,20 @@ Phase 1 shipped 2026-06-12 on `feat/yield-dtf-phase-1`. Protocol architecture re
 - react-sdk: `dtfQueryKeys.yield.*`, 13 query option builders + hooks with staleTime classes, 5 call hooks.
 - Tests: exact-calldata fixtures for every prepare builder, frozen subgraph mapper fixtures, key/staleTime/call-hook tests, live smoke against mainnet eUSD (all 4 passing live).
 
-## Phase 2 — governance
+## Phases 2-4 — SHIPPED (2026-06-12, same branch)
 
-1. **Extract shared OZ governor call builders** from `index-dtf/governance/proposal-actions.ts` into `lib/` (vote/voteWithReason/queue/execute/cancel/propose + description hashing + legacy timelock salt). Both domains consume; index tests keep passing unchanged.
-2. Subgraph reads: `getYieldDtfGovernance` (governance + governanceFrameworks + guardians under `governance(id: rtoken)`), `getYieldDtfProposals`/`getYieldDtfProposal` (Proposal entity with targets/values/calldatas/state/votes), `getYieldDtfDelegates`, voter state (TokenHolder + Delegate + on-chain `getVotes`).
-3. **Anastasius handling**: governors named "Governance Anastasius" use timepoints — read `quorum(timepoint)`/`proposalThreshold()` on-chain to override stale subgraph values (Register `RTokenGovernanceUpdater` is the reference). Alexios (block-based) uses subgraph values directly.
-4. Proposal actions: prepare vote/queue/execute/cancel against the per-DTF Governor + Timelock via the shared builders.
-5. react-sdk hooks mirroring the index governance set.
-6. Fixture tests with the OZ selectors; live smoke on a real proposal.
+All three remaining phases executed with per-phase adversarial reviews and live validation:
 
-## Phase 3 — auctions & revenue
+- **Phase 2 (governance)**: shared OZ governor builders extracted to `lib/governor-calls.ts` (index-dtf delegates to them, 120 index tests unchanged); yield governance reads with always-on-chain quorum/threshold (review caught: subgraph `quorumVotes` null for most Alexios frameworks — guaranteed crash — and `proposalThreshold` stored as micro-percent); authoritative on-chain proposal `state()`; voter state; both cancel paths (governor + guardian timelock via shared OZ operation-id math).
+- **Phase 3 (auctions/revenue)**: revenue overview with Register-parity semantics (review caught: reco `sellAmount` decimals, dutch `bidAmount` reverting in exactly the canSettle state, reco read revert tolerance, canStart-during-reco override, tokenToBuy row filtering — plus a zero-address decimals crash caught by live testing); trades history; dutch auction live state; run-auctions/rebalance/bid/claim builders.
+- **Phase 4 (APY + proposing)**: SDK-owned DefiLlama integration (pool map absorbed from Register's CollateralYieldUpdater), pure `computeYieldDtfApy` with golden-number tests, realized staking APY from exchange-rate snapshots; the full proposal-builder set (every governed parameter, roles, baskets, distribution) composing into the shared governor propose.
+- **Validation**: `pnpm --filter @reserve-protocol/sdk validate:yield` — ~170 live checks against eUSD, ETH+ (mainnet), bsdETH (base), all passing. Workspace totals after phases: sdk 250+ tests, react-sdk 58 tests.
 
-1. ABIs: broker, dutch-trade, gnosis-trade, backing-manager, revenue-trader, distributor, furnace (from Register `src/abis`).
-2. Reads: `getYieldDtfRevenueOverview` (`FacadeAct.revenueOverview` per trader: surpluses/canStart/minTradeAmounts), `getYieldDtfSettleableAuctions` (`FacadeRead.auctionsSettleable`), `getYieldDtfNextRecollateralization` (`FacadeAct.nextRecollateralizationAuction`), `getYieldDtfTrades` (subgraph Trade history), dutch auction status + `bidAmount(timestamp)` quotes.
-3. Builders: `prepareYieldDtfRunRevenueAuctions` (FacadeAct multicall: toSettle/toStart/kinds), `prepareYieldDtfRebalance` (BackingManager), `prepareYieldDtfBid` (DutchTrade bid + approval plan), `prepareYieldDtfClaimRewards` (FacadeAct).
-4. Register reference: `src/views/yield-dtf/auctions/atoms.ts` + `useAuctions.ts` (availableAuctionRevenue/pendingToMelt/claimable computation).
+### Still open (feature-paced)
 
-## Phase 4 — APY, proposal building, Register migration
-
-1. **APY (SDK-owned per product decision)**: absorb Register's DefiLlama pool-id→symbol map (`CollateralYieldUpdater.tsx`, per-chain) into the SDK; `getCollateralYields(chainId)` fetch helper + pure `computeYieldDtfApy({ basketShares, collateralYields, revenueSplit, supplyUsd, stakedUsd })` returning `{ basket, holders, stakers }` (stakers leveraged by supplyUsd/stakedUsd). Realized staking APY from `RTokenDailySnapshot.rsrExchangeRate` growth: new snapshot query + `getYieldDtfStakingApyHistory`.
-2. **Proposal building**: parameter contract map (Register `parameterContractMapAtom`) → `prepareYieldDtfSet*` builders (tradingDelay, backingBuffer, maxTradeSlippage, minTrade, rewardRatio, unstakingDelay, withdrawalLeak, warmupPeriod, issuancePremium, auction lengths, throttles, freezes), role grant/revoke, basket + backup config changes, asset (un)registration, upgrade spells. Compose into governor `propose` calldata via the shared builders.
-3. **Register migration begins**: replace Register's rToken atoms/updaters with SDK hooks view by view (overview → issuance → staking → governance → auctions), same lockstep release pattern as Index DTF.
-
-## Post-review fixes (Dark/Light Claude pass)
-
-- **Critical (caught by review, verified against live data)**: `Entry.amount` is raw BigInt, not BigDecimal — `getYieldDtfTransactions` now maps it to `Amount`; the live smoke asserts amount-vs-USD magnitude so a units regression fails loudly.
-- `BURN` entries are furnace melts and map to `"burn"`, distinct from `"redeem"`; `MINT` maps to `"mint"`.
-- Revenue split ports Register's sum-to-10000 rounding patch.
-- `list` now merges dtf-catalog metadata (`status`, `logo`) per the original plan.
-- Added `useYieldDtfCancelUnstakeCall`; yield full/list staleTime corrected to the default class (they carry supply/price data); `unstakingDelay` is a display-class number; over-fetched subgraph fields trimmed.
-- Intentional divergences from Register documented: backing/staked percentages are unrounded (Register ceils for UI); `targetAmount` is the contract-true value (Register stores it x100 for UI) — Phase 4 proposal builders must not double-apply that convention.
+- Register yield migration (view by view, as features change — product direction).
+- Batch (Gnosis) auction bidding — only dutch bids shipped; batch auctions need the EasyAuction interaction.
+- The `useYieldDtfProposalVotePower` hook key includes a live timestamp-ish param; fine for one-shot reads.
 
 ## Known boundaries
 

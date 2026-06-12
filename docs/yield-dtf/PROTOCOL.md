@@ -109,11 +109,11 @@ Scalar rule of thumb: `*Raw`, `Entry.amount`, supplies, and counters are BigInt 
 | Subgraph    | `rtoken` entities, BigDecimal-heavy                      | `dtf` entities, raw-heavy                                   |
 | Chains      | 1, 8453 (SDK; Arbitrum exists but unconfigured)          | 1, 8453, 56                                                 |
 
-## SDK phase map
+## SDK phase map — ALL SHIPPED (2026-06-12)
 
-- **Phase 1 (shipped)**: core reads, issuance, staking, react-sdk hooks, tests, live smoke. `sdk.yield.*` + `useYieldDtf*`.
-- **Phase 2**: governance reads + actions (shared OZ governor builders), Anastasius quorum override, roles.
-- **Phase 3**: auctions/revenue (FacadeAct), trades history, dutch bids, claim rewards.
-- **Phase 4**: APY (DefiLlama absorption + snapshot-based realized APY), proposal building, Register yield migration.
+- **Phase 1**: core reads, issuance, staking, react-sdk hooks, tests, live smoke.
+- **Phase 2**: governance — frameworks with on-chain quorum/threshold (subgraph `quorumVotes` is null for most Alexios frameworks and `proposalThreshold` is micro-percent, so the governor is always the source: timestamps for Anastasius timepoints, block numbers for Alexios), proposals with authoritative `state()`, voter state, vote/queue/execute/cancel (+ guardian timelock cancel) via SHARED OZ governor builders (`lib/governor-calls.ts`, also used by index-dtf).
+- **Phase 3**: auctions/revenue — revenueOverview per trader (canStart overridden while a recollateralization is pending; tokenToBuy rows filtered; amounts in each token's decimals), settleable, next reco (revert-tolerant; zero address when idle), trades history, dutch auction live state (bidAmount allowed to fail outside the OPEN window), run-auctions/rebalance/bid/claim builders.
+- **Phase 4**: APY — SDK-owned DefiLlama integration (`COLLATERAL_POOL_MAP` + `getCollateralYields`), pure `computeYieldDtfApy` (staker leverage = supplyUsd/stakedUsd), realized staking APY from `rsrExchangeRate` snapshots; full proposal builder set (parameter setters, roles, prime basket + refresh, backup config, distribution) composing into the shared governor propose.
 
-Full phase specs live in `docs/IMPROVEMENT_PLAN.mdx`.
+Validation: `pnpm --filter @reserve-protocol/sdk validate:yield` runs ~170 live checks against eUSD, ETH+ (mainnet), and bsdETH (base). Register migration remains feature-paced per product direction.

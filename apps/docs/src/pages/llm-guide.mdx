@@ -14,7 +14,7 @@ Use this page as the first stop when an AI agent is reading or generating code f
 - React apps should prefer React SDK hooks over direct `useDtfSdk()` calls for UI reads.
 - Both packages prepare transaction calls. They do not connect wallets, switch chains, send transactions, or own toast/confirmation UX.
 - Do not import wallet-client constructors from the SDK. Browser apps use wagmi/connector wallet clients; scripts import wallet helpers directly from `viem`.
-- `sdk.yield` covers Yield DTF (formerly RToken) reads, issuance, and staking on chains 1 and 8453. Governance/auctions/APY are not implemented yet.
+- `sdk.yield` covers the full Yield DTF (formerly RToken) surface on chains 1 and 8453: reads, issuance, staking, governance, auctions/revenue, APY, and proposal builders.
 
 ## Canonical Example DTF
 
@@ -70,6 +70,9 @@ That address is LCAP from `indexDtfCatalog`.
 - Staking: RSR approval goes to the staking vault (`stToken`); `exchangeRate` is RSR per stRSR and only grows (except seizure events). Unstaking is a two-step queue: `prepareUnstake`, wait `unstakingDelay`, then `prepareWithdraw(account, endId)` where `endId = pendingUnstake.index + 1`.
 - Subgraph BigDecimal fields (holder balances, USD values, exchange rates) are display-class `number`s; raw BigInt fields (transaction amounts, supplies, stake record `*Raw` fields) map to `Amount`. Transaction `type: "burn"` is a furnace melt, not a user redemption.
 - `basketsNeeded / totalSupply` is the basket-units-per-token exchange rate; both are D18 `Amount`s.
+- Governance: `getGovernance().quorum`/`proposalThreshold` are always on-chain vote amounts (never trust subgraph quorum for Yield DTFs). Proposal `state` from `getProposal` is the on-chain governor state. Two cancel paths: `prepareCancelProposal` (proposer, PENDING) vs `prepareTimelockCancelProposal` (guardian, QUEUED).
+- Auctions: `getRevenue().rsrTrader.auctions[].canStart` is already reconciled with pending recollateralization — trust it, don't re-derive. `recollateralization` is null when the read reverts (paused/frozen).
+- APY: `getApy` fetches DefiLlama; `computeApy` is the pure formula. Staker APY is leveraged by supplyUsd/stakedUsd.
 
 ## Renamed Or Removed APIs
 

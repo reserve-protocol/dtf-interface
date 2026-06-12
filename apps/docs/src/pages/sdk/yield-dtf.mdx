@@ -60,6 +60,42 @@ const plan = ref.prepareIssuePlan({
 });
 ```
 
-## Coming in later phases
+## Governance
 
-Governance reads/actions (Phase 2), auctions and revenue (Phase 3), APY computation and proposal building (Phase 4). The phase specs live in the repo's `docs/IMPROVEMENT_PLAN.mdx`; the protocol architecture reference is `docs/yield-dtf/PROTOCOL.md`.
+| Method                                                                                      | Use                                                                          |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `getGovernance`                                                                             | Active framework + on-chain quorum/threshold (votes, both governor flavors). |
+| `getProposals`                                                                              | Proposal summaries from the subgraph.                                        |
+| `getProposal`                                                                               | Detail with authoritative on-chain `state()`.                                |
+| `getVoterState`                                                                             | Voting power + delegation from StRSRVotes.                                   |
+| `getProposalVotePower`                                                                      | Voting power at a proposal snapshot.                                         |
+| `prepareVote` / `prepareQueueProposal` / `prepareExecuteProposal` / `prepareSubmitProposal` | Standard OZ governor calls.                                                  |
+| `prepareCancelProposal`                                                                     | Proposer cancel via the governor (PENDING only).                             |
+| `prepareTimelockCancelProposal`                                                             | Guardian cancel of a QUEUED proposal (CANCELLER_ROLE).                       |
+
+## Auctions & Revenue
+
+| Method                      | Use                                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `getRevenue`                | Per-trader surpluses (canStart already reconciled with recollateralization), settleable auctions, next reco. |
+| `getTrades`                 | Historical auctions from the subgraph.                                                                       |
+| `getDutchAuction`           | Live dutch trade state; `currentBid` present only inside the bid window.                                     |
+| `prepareRunRevenueAuctions` | Settle + start revenue auctions on a trader.                                                                 |
+| `prepareRebalance`          | Start the next recollateralization auction.                                                                  |
+| `prepareBidPlan`            | Buy-token approval + `bid()`.                                                                                |
+| `prepareClaimRewards`       | Claim collateral rewards via FacadeAct.                                                                      |
+
+## APY
+
+| Method                 | Use                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| `getApy`               | Estimated APY: DefiLlama collateral yields x basket shares, holders/stakers split with staker leverage. |
+| `getStakingApyHistory` | Realized staking APY from stRSR exchange-rate snapshots.                                                |
+| `getCollateralYields`  | Raw DefiLlama 30d yields per collateral symbol.                                                         |
+| `computeApy`           | The pure formula, for custom inputs.                                                                    |
+
+## Proposal Builders
+
+Direct package exports for every governed parameter: `prepareYieldDtfSetTradingDelay`, `SetBackingBuffer`, `SetMaxTradeSlippage`, `SetMinTradeVolume`, `SetFurnaceRatio`, `SetRewardRatio`, `SetUnstakingDelay`, `SetWithdrawalLeak`, `SetWarmupPeriod`, `SetIssuancePremiumEnabled`, `SetBatchAuctionLength`, `SetDutchAuctionLength`, `SetIssuanceThrottle`, `SetRedemptionThrottle`, `SetShortFreeze`, `SetLongFreeze`, `GrantRole`/`RevokeRole` (with `YIELD_DTF_ROLES`), `SetPrimeBasket` (+ pair with `RefreshBasket`), `SetBackupConfig`, `SetDistribution`. Compose with `toYieldDtfProposalPayload(governor, description, calls)` then `prepareSubmitProposal`.
+
+The protocol architecture reference is the repo's `docs/yield-dtf/PROTOCOL.md`. Validate the live surface with `pnpm --filter @reserve-protocol/sdk validate:yield` (eUSD, ETH+, bsdETH).

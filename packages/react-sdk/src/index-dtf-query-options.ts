@@ -1,16 +1,9 @@
 import type { DtfSdk } from "@reserve-protocol/sdk";
 
+import type { IndexMethod, MethodParams, MethodResult, PortfolioMethod } from "@/sdk-methods";
+
 import { createDtfQueryOptions, LIVE_STALE_TIME, requireParams, type DtfQueryOptions } from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
-
-type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
-  ? DtfSdk["index"][TKey]
-  : never;
-type PortfolioMethod<TKey extends keyof DtfSdk["portfolio"]> = DtfSdk["portfolio"][TKey] extends (...args: any) => any
-  ? DtfSdk["portfolio"][TKey]
-  : never;
-type MethodParams<TMethod extends (...args: any) => any> = Parameters<TMethod>[0];
-type MethodResult<TMethod extends (...args: any) => any> = Awaited<ReturnType<TMethod>>;
 
 export function indexDtfStatusQueryOptions<TData = MethodResult<IndexMethod<"getStatus">>>(
   sdk: DtfSdk,

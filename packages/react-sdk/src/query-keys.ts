@@ -4,7 +4,6 @@ import type {
   BuildIndexDtfDaoSettingsProposalParams,
   BuildIndexDtfSettingsProposalParams,
   DtfParams,
-  DtfSdk,
   GetDiscoverDtfsOptions,
   GetIndexDtfParams,
   GetIndexDtfBasketParams,
@@ -32,14 +31,8 @@ import { normalizeQueryKeyValue } from "@/normalize-query-key";
 
 const defaultKey = "default";
 
-type IndexMethod<TKey extends keyof DtfSdk["index"]> = DtfSdk["index"][TKey] extends (...args: any) => any
-  ? DtfSdk["index"][TKey]
-  : never;
-type IndexMethodParams<TKey extends keyof DtfSdk["index"]> = Parameters<IndexMethod<TKey>>[0];
-type PortfolioMethod<TKey extends keyof DtfSdk["portfolio"]> = DtfSdk["portfolio"][TKey] extends (...args: any) => any
-  ? DtfSdk["portfolio"][TKey]
-  : never;
-type PortfolioMethodParams<TKey extends keyof DtfSdk["portfolio"]> = Parameters<PortfolioMethod<TKey>>[0];
+import type { IndexMethodParams, PortfolioMethodParams } from "@/sdk-methods";
+
 type PastOptimisticVotesQueryKeyParams = Omit<IndexMethodParams<"getPastOptimisticVotes">, "timepoint"> & {
   readonly timepoint: bigint;
 };

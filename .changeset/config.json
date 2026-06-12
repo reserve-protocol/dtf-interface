@@ -1,11 +1,6 @@
 {
   "$schema": "../node_modules/@changesets/config/schema.json",
-  "changelog": [
-    "@changesets/changelog-github",
-    {
-      "repo": "reserve-protocol/dtf-interface"
-    }
-  ],
+  "changelog": "@changesets/cli/changelog",
   "baseBranch": "main",
   "commit": false,
   "fixed": [],

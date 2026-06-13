@@ -31,7 +31,7 @@ import { normalizeQueryKeyValue } from "@/normalize-query-key";
 
 const defaultKey = "default";
 
-import type { IndexMethodParams, PortfolioMethodParams } from "@/sdk-methods";
+import type { IndexMethodParams, PortfolioMethodParams, YieldMethodParams } from "@/sdk-methods";
 
 type PastOptimisticVotesQueryKeyParams = Omit<IndexMethodParams<"getPastOptimisticVotes">, "timepoint"> & {
   readonly timepoint: bigint;
@@ -285,6 +285,52 @@ export const dtfQueryKeys = {
           keyParams(optimisticProposalVoterStateKeyParams(params)),
         ] as const,
     },
+  },
+  yield: {
+    all: () => [...dtfQueryKeys.all, "yield"] as const,
+    full: (params?: YieldMethodParams<"get">) => [...dtfQueryKeys.yield.all(), "full", keyParams(params)] as const,
+    list: (params?: YieldMethodParams<"list">) => [...dtfQueryKeys.yield.all(), "list", keyParams(params)] as const,
+    contracts: (params?: YieldMethodParams<"getContracts">) =>
+      [...dtfQueryKeys.yield.all(), "contracts", keyParams(params)] as const,
+    state: (params?: YieldMethodParams<"getState">) =>
+      [...dtfQueryKeys.yield.all(), "state", keyParams(params)] as const,
+    price: (params?: YieldMethodParams<"getPrice">) =>
+      [...dtfQueryKeys.yield.all(), "price", keyParams(params)] as const,
+    basket: (params?: YieldMethodParams<"getBasket">) =>
+      [...dtfQueryKeys.yield.all(), "basket", keyParams(params)] as const,
+    holders: (params?: YieldMethodParams<"getHolders">) =>
+      [...dtfQueryKeys.yield.all(), "holders", keyParams(params)] as const,
+    transactions: (params?: YieldMethodParams<"getTransactions">) =>
+      [...dtfQueryKeys.yield.all(), "transactions", keyParams(params)] as const,
+    issuanceQuote: (params?: YieldMethodParams<"getIssuanceQuote">) =>
+      [...dtfQueryKeys.yield.all(), "issuance-quote", keyParams(params)] as const,
+    redemptionQuote: (params?: YieldMethodParams<"getRedemptionQuote">) =>
+      [...dtfQueryKeys.yield.all(), "redemption-quote", keyParams(params)] as const,
+    maxIssuable: (params?: YieldMethodParams<"getMaxIssuable">) =>
+      [...dtfQueryKeys.yield.all(), "max-issuable", keyParams(params)] as const,
+    stakingState: (params?: YieldMethodParams<"getStakingState">) =>
+      [...dtfQueryKeys.yield.all(), "staking-state", keyParams(params)] as const,
+    stakeHistory: (params?: YieldMethodParams<"getStakeHistory">) =>
+      [...dtfQueryKeys.yield.all(), "stake-history", keyParams(params)] as const,
+    governance: (params?: YieldMethodParams<"getGovernance">) =>
+      [...dtfQueryKeys.yield.all(), "governance", keyParams(params)] as const,
+    proposals: (params?: YieldMethodParams<"getProposals">) =>
+      [...dtfQueryKeys.yield.all(), "proposals", keyParams(params)] as const,
+    proposal: (params?: YieldMethodParams<"getProposal">) =>
+      [...dtfQueryKeys.yield.all(), "proposal", keyParams(params)] as const,
+    voterState: (params?: YieldMethodParams<"getVoterState">) =>
+      [...dtfQueryKeys.yield.all(), "voter-state", keyParams(params)] as const,
+    proposalVotePower: (params?: YieldMethodParams<"getProposalVotePower">) =>
+      [...dtfQueryKeys.yield.all(), "proposal-vote-power", keyParams(params)] as const,
+    revenue: (params?: YieldMethodParams<"getRevenue">) =>
+      [...dtfQueryKeys.yield.all(), "revenue", keyParams(params)] as const,
+    trades: (params?: YieldMethodParams<"getTrades">) =>
+      [...dtfQueryKeys.yield.all(), "trades", keyParams(params)] as const,
+    dutchAuction: (params?: YieldMethodParams<"getDutchAuction">) =>
+      [...dtfQueryKeys.yield.all(), "dutch-auction", keyParams(params)] as const,
+    apy: (params?: YieldMethodParams<"getApy">) => [...dtfQueryKeys.yield.all(), "apy", keyParams(params)] as const,
+    stakingApyHistory: (params?: YieldMethodParams<"getStakingApyHistory">) =>
+      [...dtfQueryKeys.yield.all(), "staking-apy-history", keyParams(params)] as const,
   },
   portfolio: {
     all: () => [...dtfQueryKeys.all, "portfolio"] as const,

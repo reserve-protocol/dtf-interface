@@ -2,17 +2,20 @@
 
 The SDK is source-aware. It does not pretend all DTF data comes from one place.
 
-| Data                        | Source                  | Why                                                                 |
-| --------------------------- | ----------------------- | ------------------------------------------------------------------- |
-| Live Index basket balances  | RPC                     | The Index subgraph does not own live basket balances.               |
-| Active rebalance state      | RPC                     | Auction and rebalance state must be current.                        |
-| Proposal state freshness    | RPC                     | Subgraph proposal state is event-driven and can lag terminal state. |
-| Discovery                   | Reserve API or catalog  | Product listings are curated and API-backed.                        |
-| Prices                      | Reserve API             | Prices are aggregated and normalized by Reserve.                    |
-| Historical analytics        | Reserve API or subgraph | Depends on the query shape and data freshness needs.                |
-| Governance metadata         | Index subgraph plus RPC | Indexed history plus live contract reads.                           |
-| Vote-lock DAO stats         | Reserve API             | The API aggregates DAO/vote-lock position data.                     |
-| Unknown proposal call names | Explorer metadata       | Etherscan-style ABI fetch is optional and best-effort.              |
+| Data                                          | Source                  | Why                                                                 |
+| --------------------------------------------- | ----------------------- | ------------------------------------------------------------------- |
+| Live Index basket balances                    | RPC                     | The Index subgraph does not own live basket balances.               |
+| Active rebalance state                        | RPC                     | Auction and rebalance state must be current.                        |
+| Proposal state freshness                      | RPC                     | Subgraph proposal state is event-driven and can lag terminal state. |
+| Discovery                                     | Reserve API or catalog  | Product listings are curated and API-backed.                        |
+| Prices                                        | Reserve API             | Prices are aggregated and normalized by Reserve.                    |
+| Historical analytics                          | Reserve API or subgraph | Depends on the query shape and data freshness needs.                |
+| Governance metadata                           | Index subgraph plus RPC | Indexed history plus live contract reads.                           |
+| Vote-lock DAO stats                           | Reserve API             | The API aggregates DAO/vote-lock position data.                     |
+| Unknown proposal call names                   | Explorer metadata       | Etherscan-style ABI fetch is optional and best-effort.              |
+| Yield DTF prices and quotes                   | RPC (Facade)            | No Reserve API involvement — the protocol facade computes them.     |
+| Yield DTF identity/staking/governance history | Yield subgraph plus RPC | Indexed entities plus on-chain quorum/state truth.                  |
+| Yield collateral APYs                         | DefiLlama               | 30d mean pool yields mapped to collateral plugins.                  |
 
 ## RPC
 

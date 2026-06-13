@@ -2,6 +2,30 @@ overwrite: true
 ignoreNoDocuments: true
 
 generates:
+  src/yield-dtf/subgraph/yield.generated.ts:
+    # Tracks the deployed Yield DTF subgraph (reserve-subgraph repo), shared tag across chains.
+    schema: https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-yield-base/4.2.0-v2/gn
+    documents:
+      - src/yield-dtf/subgraph/**/*.graphql
+    plugins:
+      - typescript
+      - typescript-operations
+      - typed-document-node
+    config:
+      documentMode: string
+      emitLegacyCommonJSImports: false
+      enumsAsTypes: true
+      importExtension: .js
+      onlyOperationTypes: true
+      preResolveTypes: true
+      scalars:
+        BigDecimal: string
+        BigInt: string
+        Bytes: string
+        Int8: string
+        Timestamp: string
+      skipTypename: true
+      useTypeImports: true
   src/index-dtf/subgraph/dtf.generated.ts:
     # Intentionally tracks the prod Index subgraph schema; prod is the shared runtime tag across supported chains.
     schema: https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-index-base/prod/gn

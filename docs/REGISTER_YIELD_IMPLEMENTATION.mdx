@@ -1,0 +1,110 @@
+# Register × Yield DTF SDK — Integration Plan
+
+Written 2026-06-12, after the full `sdk.yield` surface shipped (see `docs/yield-dtf/PROTOCOL.md`). This is the executable plan for migrating Register's yield-dtf data layer (9 atoms, 2 updaters, ~80 consumer components) onto the SDK, wave by wave, plus the SDK gaps that block specific waves. Migration is feature-paced per product direction — each wave ships when its view is next touched, no big bang.
+
+## Ground rules
+
+- **Lockstep releases**: SDK additions and the Register wave that consumes them land together.
+- **`ContractCall` is wagmi-ready as-is**: every builder returns `{ to, data, value, contract: { abi, address, functionName, args } }` — spread `call.contract` straight into `useSimulateContract`/`writeContract`. No calldata-decoding adapter is needed (an earlier sweep suggested one; wrong).
+- **Hooks over raw SDK**: views consume `useYieldDtf*` hooks; the SDK client comes from the existing `DtfSdkProvider` Register already mounts.
+- **Atoms become thin**: where a jotai atom must survive (cross-view state), it wraps the hook result; data fetching itself moves to React Query via the SDK hooks.
+
+## What the SDK already covers (verified, not the sweep's guesses)
+
+The exploratory sweep over-reported gaps. Corrections, confirmed against the shipped code:
+
+| Claimed gap                     | Reality                                                                                                                                                                                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Revenue split fetch             | `sdk.yield.get().revenueSplit` — subgraph-sourced with the sum-to-10000 patch. Only the DistributionSet event-log fallback (for un-indexed tokens) has no SDK path; keep Register's fallback or drop it.                                                                                         |
+| On-chain quorum for Anastasius  | `getGovernance` always reads quorum/threshold on-chain, both flavors.                                                                                                                                                                                                                            |
+| `basketNonce`                   | In `getState().basketNonce`.                                                                                                                                                                                                                                                                     |
+| APY history / collateral yields | `getStakingApyHistory` / `getCollateralYields` shipped.                                                                                                                                                                                                                                          |
+| Proposal builders               | Every parameter/role/basket/distribution setter exists (`prepareYieldDtfSet*`, `GrantRole`, `SetPrimeBasket`, ...) + `toYieldDtfProposalPayload` + `prepareSubmitProposal`. What stays in Register is the **form-diffing** (turning form deltas into a list of builder calls) — that's UI logic. |
+
+## SDK prerequisites — real gaps, in priority order
+
+These block specific waves. Each is a contained read in the established pattern (multicall, Amount mapping, fixture + live-smoke tests).
+
+1. **`getConfiguration({ address, chainId, contracts? })`** — all ~20 governed params in one multicall across BackingManager/Broker/StRSR/Furnace/BasketHandler/RToken/Main: tradingDelay, backingBuffer, maxTradeSlippage, minTradeVolume, rewardRatio (furnace + stRSR), unstakingDelay, withdrawalLeak, warmupPeriod, issuancePremiumEnabled, batch/dutch auction lengths, throttle params, short/long freeze, reweightable. Replaces `rTokenConfigurationAtom`. Blocks: settings view, governance proposal forms. **HIGH**
+2. **`getAssets({ address, chainId })`** — `AssetRegistry.getRegistry()` then per-asset multicall `price()`, `maxTradeVolume()`, `version()` + ERC20 meta. Replaces `rTokenAssetsAtom`. Blocks: issuance display details, governance asset proposals. **HIGH**
+3. **`getBackupBaskets({ address, chainId })`** — target units from `basketBreakdown`, then `FacadeRead.backupConfig(rToken, targetName)` per unit. Replaces `rTokenBackupAtom`. Blocks: emergency-collateral view, backup-change proposals. **MEDIUM**
+4. **Collateral status** — `status()` (0 SOUND / 1 IFFY / 2 DISABLED) per collateral asset; either extend `getBasket` or a `getCollateralStatus` read. Replaces `rTokenCollateralStatusAtom` feed. Blocks: basket health display. **MEDIUM**
+5. **`getSupplyHistory({ address, chainId, interval, from })`** — the yield subgraph's `hourlyTokenSnapshot`/`dailyTokenSnapshot`; the SDK owns this subgraph, so charts shouldn't keep a parallel gql client. Replaces `supply-chart.tsx` inline queries. **MEDIUM**
+
+## Migration waves
+
+Ordered by SDK coverage (fullest first) so early waves need zero SDK work.
+
+### Wave 1 — Staking (full SDK match, no prerequisites)
+
+| Register source                                   | Consumers                          | Replacement                                                                                                                                 |
+| ------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| staking view atoms + `accountStakeRecords` gql    | stake/unstake/withdraw/claim flows | `useYieldDtfStakingState`, `useYieldDtfStakeHistory`, `useYieldDtfStakeCall/UnstakeCall/WithdrawCall/CancelUnstakeCall`, `prepareStakePlan` |
+| `withdraw/updater.tsx` storage-slot draftEra read | withdraw view                      | gone — `getStakingState` handles draftEra internally                                                                                        |
+
+Delete: the hand-rolled `pendingUnstakings` wiring, stake-history gql + reward math (SDK records carry exchange rates).
+
+### Wave 2 — Auctions (full match, no prerequisites)
+
+| Register source                                                 | Consumers                | Replacement                                                                                            |
+| --------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `auctions/atoms.ts` (revenueOverview/settleable/reco simulates) | auctions sidebar + lists | `useYieldDtfRevenue` (canStart already reconciled with reco; tokenToBuy rows filtered)                 |
+| trades gql                                                      | auction history          | `useYieldDtfTrades`                                                                                    |
+| dutch price hooks                                               | dutch auction page       | `useYieldDtfDutchAuction` + `prepareBidPlan`                                                           |
+| `useAuctions.ts` runRevenueAuctions encoding                    | execute button           | `prepareRunRevenueAuctions` per trader (wrap in `FacadeAct.multicall` in Register if batching traders) |
+| claim rewards buttons                                           | claim flows              | `useYieldDtfClaimRewardsCall`                                                                          |
+
+### Wave 3 — Issuance core (full match; zap/wrapping stay)
+
+| Register source                                                 | Consumers          | Replacement                                                                        |
+| --------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------- |
+| `issuance/atoms.ts` quotes + maxIssuable                        | issue/redeem forms | `useYieldDtfIssuanceQuote`, `useYieldDtfRedemptionQuote`, `useYieldDtfMaxIssuable` |
+| issue/redeem tx assembly                                        | confirm modals     | `prepareIssuePlan` / `prepareRedeem` / `prepareRedeemCustom`                       |
+| **stays**: zapV2/ (zapper SDK), wrapping/ (collateral wrappers) |                    |                                                                                    |
+
+### Wave 4 — Governance (reads + actions now; forms after prerequisite 1)
+
+| Register source                                        | Consumers        | Replacement                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RTokenGovernanceUpdater` (gql + Anastasius reads)     | governance views | `useYieldDtfGovernance` (on-chain quorum built in)                                                                                                                                                                                                                                                                                                                        |
+| `ProposalList.tsx` gql                                 | proposal list    | `useYieldDtfProposals`                                                                                                                                                                                                                                                                                                                                                    |
+| `useProposalDetail` gql + client-side state derivation | proposal detail  | `useYieldDtfProposal` (authoritative on-chain `state()` — better than the current block-math)                                                                                                                                                                                                                                                                             |
+| vote power reads                                       | vote modal       | `useYieldDtfProposalVotePower`, `useYieldDtfVoterState`                                                                                                                                                                                                                                                                                                                   |
+| vote/queue/execute/cancel txs                          | action buttons   | the `useYieldDtf*ProposalCall` hooks; guardian cancel via `prepareTimelockCancelProposal` (OZ 4.x salt — the SDK computes the id Register currently hand-rolls in `proposal-detail/atom.ts`)                                                                                                                                                                              |
+| `useProposalTx.ts` call encoding                       | propose form     | SDK setters (`prepareYieldDtfSet*`, roles incl. `GrantGuardian`) + `toYieldDtfProposalPayload` + `useYieldDtfSubmitProposalCall`; the form-diff orchestration stays in Register. Note: a "reward ratio" change = `SetFurnaceRatio` AND `SetRewardRatio`; reweightable baskets need refresh BEFORE `SetPrimeBasket`. Blocked on prerequisite 1 for current-value prefills. |
+
+### Wave 5 — Overview + core atoms (after prerequisites 4–5)
+
+| Register source                          | Consumers              | Replacement                                                                                                                                      |
+| ---------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `rTokenAtom`                             | 25+                    | `useYieldDtf` (keep Register's collateral→protocol/displayName mapping as a derived layer)                                                       |
+| `rTokenStateAtom` + `RTokenStateUpdater` | 15+                    | `useYieldDtfState` (pass cached `contracts` from a `useYieldDtfContracts` query to skip re-resolution) + collateral status read (prerequisite 4) |
+| `rTokenContractsAtom`                    | 8+                     | `useYieldDtfContracts` (1:1)                                                                                                                     |
+| `rTokenBackingDistributionAtom`          | 8+                     | `useYieldDtfBasket` (backing buffer included)                                                                                                    |
+| `rTokenPriceAtom`                        | pricing                | `useYieldDtfPrice`                                                                                                                               |
+| APY atoms + `CollateralYieldUpdater`     | overview/staking stats | `useYieldDtfApy`, `useYieldDtfStakingApyHistory`; delete the DefiLlama updater + pool map (SDK owns it)                                          |
+| supply charts gql                        | charts                 | `getSupplyHistory` (prerequisite 5)                                                                                                              |
+| `rTokenRevenueSplitAtom`                 | 4+                     | `useYieldDtf().revenueSplit`; keep the event-log fallback only if un-indexed tokens still matter                                                 |
+
+### Wave 6 — Settings (after prerequisites 1–3)
+
+`rTokenConfigurationAtom` → `getConfiguration`; `rTokenAssetsAtom` → `getAssets`; `rTokenBackupAtom` → `getBackupBaskets`. Settings is read-only display — pure swap.
+
+## Stays in Register permanently
+
+- **Zap + wrapping** (separate SDKs / wrapper-specific flows), **deploy** (FacadeWrite — its own future SDK phase if ever).
+- **Chainlink ETH/BTC/RSR/gas price atoms** (UI-wide concerns, not yield-domain).
+- **Chart rendering + collateral-detail enrichment** (`rTokenCollateralDetailedAtom` — combines SDK data with UI context).
+- **Proposal form-diffing** (form state → which builders to call) and proposal simulation UX.
+- **Batch (Gnosis) auction bidding** — SDK gap noted in IMPROVEMENT_PLAN; dutch covers current usage.
+
+## Issues found in current SDK code during this analysis
+
+None functional — the sweep's claimed gaps were either covered (see corrections above) or genuinely missing reads (the five prerequisites). Two sharp edges worth knowing during migration:
+
+1. `getState` resolves Main components internally (3 RPC roundtrips); always pass the cached `contracts` param from a long-lived `useYieldDtfContracts` query in Register (STATIC staleTime) — this matches Register's current contracts-atom caching behavior.
+2. `useYieldDtfProposalVotePower` keys include `voteStart`; for ACTIVE proposals where Register re-reads power per block, prefer a manual `refetchInterval` instead of key-busting.
+
+## Verification per wave
+
+Each wave: typecheck Register against the linked SDK build, run the affected view manually against eUSD (mainnet) + bsdETH (base), and diff displayed values against production Register side by side. SDK side: `pnpm --filter @reserve-protocol/sdk validate:yield` stays the regression gate; new prerequisite reads get fixtures + a validate-script check before their wave starts.

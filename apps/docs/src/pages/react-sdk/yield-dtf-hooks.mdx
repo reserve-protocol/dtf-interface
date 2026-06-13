@@ -1,0 +1,54 @@
+# Yield DTF Hooks
+
+Every hook wraps the matching `sdk.yield` method with TanStack Query, the shared query-key namespace (`dtfQueryKeys.yield.*`), and staleTime defaults (price/quotes 10s, state/staking 30s, identity/list 5min). Params-first, options-second, `undefined` params disable the query.
+
+## Query hooks
+
+| Hook                           | SDK method                       |
+| ------------------------------ | -------------------------------- |
+| `useYieldDtf`                  | `sdk.yield.get`                  |
+| `useYieldDtfList`              | `sdk.yield.list`                 |
+| `useYieldDtfContracts`         | `sdk.yield.getContracts`         |
+| `useYieldDtfState`             | `sdk.yield.getState`             |
+| `useYieldDtfPrice`             | `sdk.yield.getPrice`             |
+| `useYieldDtfBasket`            | `sdk.yield.getBasket`            |
+| `useYieldDtfHolders`           | `sdk.yield.getHolders`           |
+| `useYieldDtfTransactions`      | `sdk.yield.getTransactions`      |
+| `useYieldDtfIssuanceQuote`     | `sdk.yield.getIssuanceQuote`     |
+| `useYieldDtfRedemptionQuote`   | `sdk.yield.getRedemptionQuote`   |
+| `useYieldDtfMaxIssuable`       | `sdk.yield.getMaxIssuable`       |
+| `useYieldDtfStakingState`      | `sdk.yield.getStakingState`      |
+| `useYieldDtfStakeHistory`      | `sdk.yield.getStakeHistory`      |
+| `useYieldDtfGovernance`        | `sdk.yield.getGovernance`        |
+| `useYieldDtfProposals`         | `sdk.yield.getProposals`         |
+| `useYieldDtfProposal`          | `sdk.yield.getProposal`          |
+| `useYieldDtfVoterState`        | `sdk.yield.getVoterState`        |
+| `useYieldDtfProposalVotePower` | `sdk.yield.getProposalVotePower` |
+| `useYieldDtfRevenue`           | `sdk.yield.getRevenue`           |
+| `useYieldDtfTrades`            | `sdk.yield.getTrades`            |
+| `useYieldDtfDutchAuction`      | `sdk.yield.getDutchAuction`      |
+| `useYieldDtfApy`               | `sdk.yield.getApy`               |
+| `useYieldDtfStakingApyHistory` | `sdk.yield.getStakingApyHistory` |
+
+```tsx
+const { data: dtf } = useYieldDtf({ address, chainId: 1 });
+const { data: quote } = useYieldDtfIssuanceQuote(amount > 0n ? { address, chainId: 1, amount } : undefined);
+```
+
+## Call hooks
+
+Synchronous builders (memoized, return `ContractCall | undefined` — not queries):
+
+| Hook                                                                                                          | Prepares                                   |
+| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `useYieldDtfIssueCall`                                                                                        | `RToken.issue`                             |
+| `useYieldDtfRedeemCall`                                                                                       | `RToken.redeem`                            |
+| `useYieldDtfStakeCall`                                                                                        | `StRSR.stake`                              |
+| `useYieldDtfUnstakeCall`                                                                                      | `StRSR.unstake`                            |
+| `useYieldDtfWithdrawCall`                                                                                     | `StRSR.withdraw`                           |
+| `useYieldDtfCancelUnstakeCall`                                                                                | `StRSR.cancelUnstake`                      |
+| `useYieldDtfVoteCall`                                                                                         | Governor `castVote` / `castVoteWithReason` |
+| `useYieldDtfQueueProposalCall` / `...ExecuteProposalCall` / `...CancelProposalCall` / `...SubmitProposalCall` | Governor lifecycle                         |
+| `useYieldDtfClaimRewardsCall`                                                                                 | `FacadeAct.claimRewards`                   |
+
+Query option builders (`yieldDtfQueryOptions`, `yieldDtfStateQueryOptions`, ...) are exported for `useQueries`/prefetch composition, same shape as the Index DTF builders.

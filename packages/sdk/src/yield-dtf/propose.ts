@@ -4,6 +4,7 @@ import type { ContractCall } from "@/lib/contract-call";
 import type { YieldDtfChainId } from "@/yield-dtf/config";
 
 import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { backingManagerAbi } from "@/yield-dtf/abis/backing-manager";
 import { basketHandlerAbi } from "@/yield-dtf/abis/basket-handler";
 import { brokerAbi } from "@/yield-dtf/abis/broker";
@@ -257,6 +258,14 @@ export type YieldDtfSetPrimeBasketParams = Target & {
 
 /** Pair with prepareYieldDtfRefreshBasket after; reweightable RTokens also need a refresh BEFORE this call. */
 export function prepareYieldDtfSetPrimeBasket(params: YieldDtfSetPrimeBasketParams): ContractCall {
+  if (params.erc20s.length !== params.targetAmounts.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "erc20s and targetAmounts must have the same length",
+      meta: { erc20s: params.erc20s.length, targetAmounts: params.targetAmounts.length },
+    });
+  }
+
   return prepareContractCall({
     chainId: params.chainId,
     address: getAddress(params.address),

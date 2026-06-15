@@ -95,6 +95,15 @@ export function prepareIndexDtfSubmitProposal(params: ProposeIndexDtfProposalPar
 export function prepareIndexDtfSubmitOptimisticProposal(params: SubmitOptimisticIndexDtfProposalParams) {
   const targets = params.proposal.targets;
   const calldatas = [...params.proposal.calldatas];
+
+  if (targets.length !== calldatas.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "proposal targets and calldatas must have the same length",
+      meta: { targets: targets.length, calldatas: calldatas.length },
+    });
+  }
+
   const values = getZeroValues(targets.length);
 
   return prepareContractCall({

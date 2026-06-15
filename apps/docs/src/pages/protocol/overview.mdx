@@ -2,7 +2,7 @@
 
 Reserve Protocol is a platform for creating asset-backed tokens.
 
-The current DTF SDK focuses on Index DTFs.
+The current DTF SDK covers Index DTFs and Yield DTFs.
 
 ## Product Types
 
@@ -30,15 +30,7 @@ Arbitrum can appear in legacy Reserve repos and frontend constants. Do not treat
 
 ## SDK Scope
 
-The SDK implements Index DTF workflows first:
+The SDK implements product workflows across both DTF lines:
 
-- discovery
-- live basket and price reads
-- proposal and governance reads
-- proposal payload builders
-- mint/redeem builders
-- rebalance and auction builders
-- deploy builders
-- vote-lock reads and builders
-
-Yield DTF SDK coverage: core reads, issuance, and staking (`sdk.yield.*`); governance and auctions land in later phases.
+- Index DTF discovery, live basket and price reads, proposal and governance reads, proposal payload builders, mint/redeem builders, rebalance and auction builders, deploy builders, and vote-lock reads/builders.
+- Yield DTF core reads, issuance, staking, governance, auctions, APY, and proposal builders (`sdk.yield.*`).

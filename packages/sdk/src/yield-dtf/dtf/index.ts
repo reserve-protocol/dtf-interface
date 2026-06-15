@@ -39,21 +39,11 @@ export async function getYieldDtf(client: DtfClient, params: YieldDtfParams): Pr
   const publicClient = client.viem.getPublicClient(params.chainId);
   const facade = FACADE_READ_ADDRESS[params.chainId];
 
-  const [{ rtoken }, [main, mandate, basketTokens]] = await Promise.all([
-    client.subgraph.queryYield({
-      chainId: params.chainId,
-      query: GetYieldDtfDocument,
-      variables: { id: address.toLowerCase() },
-    }),
-    publicClient.multicall({
-      allowFailure: false,
-      contracts: [
-        { address, abi: rTokenAbi, functionName: "main" },
-        { address, abi: rTokenAbi, functionName: "mandate" },
-        { address: facade, abi: facadeReadAbi, functionName: "basketTokens", args: [address] },
-      ],
-    }),
-  ]);
+  const { rtoken } = await client.subgraph.queryYield({
+    chainId: params.chainId,
+    query: GetYieldDtfDocument,
+    variables: { id: address.toLowerCase() },
+  });
 
   if (!rtoken) {
     throw new SdkError({
@@ -62,6 +52,15 @@ export async function getYieldDtf(client: DtfClient, params: YieldDtfParams): Pr
       meta: { chainId: params.chainId, entity: "yieldDtf", address },
     });
   }
+
+  const [main, mandate, basketTokens] = await publicClient.multicall({
+    allowFailure: false,
+    contracts: [
+      { address, abi: rTokenAbi, functionName: "main" },
+      { address, abi: rTokenAbi, functionName: "mandate" },
+      { address: facade, abi: facadeReadAbi, functionName: "basketTokens", args: [address] },
+    ],
+  });
 
   const collaterals = await readTokens(client, params.chainId, basketTokens);
 

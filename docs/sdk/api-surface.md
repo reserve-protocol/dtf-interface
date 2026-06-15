@@ -9,6 +9,9 @@ Main package exports live in:
 - `packages/sdk/src/index.ts`
 - `packages/sdk/src/index-dtf/index.ts`
 - `packages/sdk/src/index-dtf/namespace.ts`
+- `packages/sdk/src/yield-dtf/index.ts`
+- `packages/sdk/src/yield-dtf/namespace.ts`
+- `packages/sdk/src/yield-dtf/ref.ts`
 
 ## Namespaces
 
@@ -16,7 +19,7 @@ Main package exports live in:
 
 - `sdk.index`: implemented Index DTF reads, builders, and refs.
 - `sdk.portfolio`: implemented portfolio helpers.
-- `sdk.yield`: placeholder boundary only; `yield.get` and `yield.list` throw `NOT_IMPLEMENTED`.
+- `sdk.yield`: implemented Yield DTF reads, issuance, staking, governance, auctions, APY, proposal builders, and refs for Ethereum mainnet and Base.
 
 ## Index Namespace
 
@@ -85,6 +88,9 @@ Keep examples small and compile-check them before publishing externally. These d
 - `dtf-sdk/packages/sdk/src/create-dtf-sdk.ts`
 - `dtf-sdk/packages/sdk/src/index-dtf/index.ts`
 - `dtf-sdk/packages/sdk/src/index-dtf/namespace.ts`
+- `dtf-sdk/packages/sdk/src/yield-dtf/index.ts`
+- `dtf-sdk/packages/sdk/src/yield-dtf/namespace.ts`
+- `dtf-sdk/packages/sdk/src/yield-dtf/ref.ts`
 - `dtf-sdk/packages/sdk/src/lib/contract-call.ts`
 
 ## Do Not Infer

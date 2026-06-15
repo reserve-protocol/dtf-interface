@@ -5,6 +5,7 @@ import type { ContractCall, ContractCallPlan } from "@/lib/contract-call";
 import type { YieldDtfIssuanceQuote, YieldDtfParams, YieldDtfRedemptionQuote } from "@/types/yield-dtf";
 
 import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 import { mapAmount } from "@/lib/utils";
 import { facadeReadAbi } from "@/yield-dtf/abis/facade-read";
 import { rTokenAbi } from "@/yield-dtf/abis/r-token";
@@ -138,6 +139,22 @@ export type YieldDtfRedeemCustomParams = YieldDtfParams & {
 
 /** Redemption against historical basket nonces (used during rebalances). */
 export function prepareYieldDtfRedeemCustom(params: YieldDtfRedeemCustomParams): ContractCall {
+  if (params.basketNonces.length !== params.portions.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "basketNonces and portions must have the same length",
+      meta: { basketNonces: params.basketNonces.length, portions: params.portions.length },
+    });
+  }
+
+  if (params.expectedTokensOut.length !== params.minAmountsOut.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "expectedTokensOut and minAmountsOut must have the same length",
+      meta: { expectedTokensOut: params.expectedTokensOut.length, minAmountsOut: params.minAmountsOut.length },
+    });
+  }
+
   return prepareContractCall({
     chainId: params.chainId,
     address: getAddress(params.address),

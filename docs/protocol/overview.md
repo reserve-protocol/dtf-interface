@@ -44,7 +44,7 @@ Main properties:
 - RSR stakers provide governance and overcollateralization.
 - Data is primarily subgraph and RPC sourced.
 
-Yield DTFs are still important protocol context, but Index DTFs are the primary product scope for current SDK work.
+Yield DTFs are covered by current SDK work for core reads, issuance, staking, governance, auctions, APY, and proposal builders.
 
 ## Supported Chains
 

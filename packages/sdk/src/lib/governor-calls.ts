@@ -15,6 +15,7 @@ import {
 import type { SupportedChainId } from "@/config";
 
 import { prepareContractCall } from "@/lib/contract-call";
+import { SdkError } from "@/lib/errors";
 
 /**
  * Standard OZ Governor write surface. Index and Yield DTF governors share
@@ -126,6 +127,8 @@ export type GovernorProposalParams = {
 };
 
 export function prepareGovernorVote(params: GovernorVoteParams) {
+  validateGovernorVoteSupport(params.support);
+
   return prepareContractCall({
     chainId: params.chainId,
     address: params.governor,
@@ -136,6 +139,8 @@ export function prepareGovernorVote(params: GovernorVoteParams) {
 }
 
 export function prepareGovernorVoteWithReason(params: GovernorVoteParams & { readonly reason: string }) {
+  validateGovernorVoteSupport(params.support);
+
   return prepareContractCall({
     chainId: params.chainId,
     address: params.governor,
@@ -148,6 +153,8 @@ export function prepareGovernorVoteWithReason(params: GovernorVoteParams & { rea
 export function prepareGovernorVoteWithReasonAndParams(
   params: GovernorVoteParams & { readonly reason: string; readonly voteParams: Hex },
 ) {
+  validateGovernorVoteSupport(params.support);
+
   return prepareContractCall({
     chainId: params.chainId,
     address: params.governor,
@@ -159,6 +166,8 @@ export function prepareGovernorVoteWithReasonAndParams(
 
 export function prepareGovernorPropose(params: GovernorProposalParams) {
   const { targets, calldatas, description } = params.proposal;
+
+  validateGovernorProposalPayload(params.proposal);
 
   return prepareContractCall({
     chainId: params.chainId,
@@ -220,6 +229,8 @@ const timelockCancelAbi = [
  * the batch hash with the governor-XOR-description salt.
  */
 export function getGovernorTimelockOperationId(proposal: GovernorProposalPayload): Hex {
+  validateGovernorProposalPayload(proposal);
+
   return keccak256(
     encodeAbiParameters(TIMELOCK_OPERATION_PARAMS, [
       proposal.targets,
@@ -236,6 +247,8 @@ export function getGovernorTimelockOperationId(proposal: GovernorProposalPayload
  * 4.x schedules with salt = descriptionHash directly, no governor XOR.
  */
 export function getGovernorTimelockOperationIdV4(proposal: GovernorProposalPayload): Hex {
+  validateGovernorProposalPayload(proposal);
+
   return keccak256(
     encodeAbiParameters(TIMELOCK_OPERATION_PARAMS, [
       proposal.targets,
@@ -277,6 +290,8 @@ function getGovernorTimelockSalt(governor: Address, description: string): Hex {
 function proposalHashArgs(
   proposal: GovernorProposalPayload,
 ): readonly [readonly Address[], readonly bigint[], readonly Hex[], Hex] {
+  validateGovernorProposalPayload(proposal);
+
   return [
     proposal.targets,
     zeroValues(proposal.targets.length),
@@ -287,4 +302,27 @@ function proposalHashArgs(
 
 function zeroValues(length: number): readonly bigint[] {
   return new Array<bigint>(length).fill(0n);
+}
+
+function validateGovernorVoteSupport(support: number): void {
+  if (support !== 0 && support !== 1 && support !== 2) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "support must be 0, 1, or 2",
+      meta: { support },
+    });
+  }
+}
+
+function validateGovernorProposalPayload(proposal: GovernorProposalPayload): void {
+  if (proposal.targets.length !== proposal.calldatas.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "proposal targets and calldatas must have the same length",
+      meta: {
+        targets: proposal.targets.length,
+        calldatas: proposal.calldatas.length,
+      },
+    });
+  }
 }

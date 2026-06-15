@@ -1,4 +1,4 @@
-import { ContractFunctionExecutionError, getAddress, type Address, type Hex } from "viem";
+import { BaseError, ContractFunctionRevertedError, getAddress, type Address, type Hex } from "viem";
 
 import type { DtfClient } from "@/client";
 import type { ContractCall } from "@/lib/contract-call";
@@ -23,7 +23,7 @@ import {
   prepareTimelockCancel,
   type GovernorProposalPayload,
 } from "@/lib/governor-calls";
-import { getCurrentTime, mapAmount, sameAddress } from "@/lib/utils";
+import { mapAmount, sameAddress } from "@/lib/utils";
 import { yieldGovernanceAbi } from "@/yield-dtf/abis/governance";
 import { yieldGovernanceAnastasiusAbi } from "@/yield-dtf/abis/governance-anastasius";
 import { stRsrVotesAbi } from "@/yield-dtf/abis/st-rsr-votes";
@@ -87,12 +87,22 @@ export async function getYieldDtfGovernance(client: DtfClient, params: YieldDtfP
   // Anastasius timepoints are timestamps, Alexios are block numbers; slightly
   // in the past to avoid future-lookup reverts.
   const publicClient = client.viem.getPublicClient(params.chainId);
-  const timepoint = isTimepointBased ? BigInt(getCurrentTime() - 100) : (await publicClient.getBlockNumber()) - 5n;
-  const [quorumVotes, thresholdVotes] = await publicClient.multicall({
+  const timepoint = isTimepointBased
+    ? BigInt(
+        await publicClient.readContract({
+          address: governor,
+          abi: yieldGovernanceAnastasiusAbi,
+          functionName: "clock",
+        }),
+      ) - 100n
+    : (await publicClient.getBlockNumber()) - 5n;
+  const [quorumVotes, thresholdVotes, quorumNumerator, quorumDenominator] = await publicClient.multicall({
     allowFailure: false,
     contracts: [
       { address: governor, abi: yieldGovernanceAnastasiusAbi, functionName: "quorum", args: [timepoint] },
       { address: governor, abi: yieldGovernanceAnastasiusAbi, functionName: "proposalThreshold" },
+      { address: governor, abi: yieldGovernanceAnastasiusAbi, functionName: "quorumNumerator", args: [timepoint] },
+      { address: governor, abi: yieldGovernanceAnastasiusAbi, functionName: "quorumDenominator" },
     ],
   });
   const quorum = mapAmount(quorumVotes);
@@ -109,8 +119,8 @@ export async function getYieldDtfGovernance(client: DtfClient, params: YieldDtfP
     executionDelay: Number(framework.executionDelay),
     proposalThreshold,
     quorum,
-    quorumNumerator: Number(framework.quorumNumerator ?? 0),
-    quorumDenominator: Number(framework.quorumDenominator ?? 0),
+    quorumNumerator: Number(quorumNumerator),
+    quorumDenominator: Number(quorumDenominator),
     stats: {
       proposals: Number(governance.proposals),
       proposalsExecuted: Number(governance.proposalsExecuted),
@@ -245,11 +255,20 @@ export async function getYieldDtfProposalVotePower(
   params: GetYieldDtfProposalVotePowerParams,
 ): Promise<bigint> {
   const publicClient = client.viem.getPublicClient(params.chainId);
-  const current = params.isTimepointBased ? getCurrentTime() : Number(await publicClient.getBlockNumber());
-  const snapshot = BigInt(Math.min(params.voteStart - 1, current - 1));
+  const governor = getAddress(params.governor);
+  const current = params.isTimepointBased
+    ? Number(
+        await publicClient.readContract({
+          address: governor,
+          abi: yieldGovernanceAnastasiusAbi,
+          functionName: "clock",
+        }),
+      )
+    : Number(await publicClient.getBlockNumber());
+  const snapshot = BigInt(Math.max(Math.min(params.voteStart - 1, current - 1), 0));
 
   return publicClient.readContract({
-    address: getAddress(params.governor),
+    address: governor,
     abi: yieldGovernanceAbi,
     functionName: "getVotes",
     args: [getAddress(params.account), snapshot],
@@ -265,7 +284,7 @@ export type YieldDtfVoteParams = {
 };
 
 export function prepareYieldDtfVote(params: YieldDtfVoteParams): ContractCall {
-  if (params.reason) {
+  if (params.reason !== undefined) {
     return prepareGovernorVoteWithReason({ ...params, reason: params.reason });
   }
 
@@ -349,8 +368,16 @@ async function readProposalState(
     // Unknown-proposal reverts happen for proposals that predate the current
     // governor — fall back to the subgraph state. Anything else (RPC down)
     // must not be silently mislabeled as authoritative.
-    if (error instanceof ContractFunctionExecutionError) {
-      return undefined;
+    if (error instanceof BaseError) {
+      const revertError = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
+
+      if (
+        revertError instanceof ContractFunctionRevertedError &&
+        (revertError.data?.errorName === "GovernorNonexistentProposal" ||
+          revertError.reason === "Governor: unknown proposal id")
+      ) {
+        return undefined;
+      }
     }
 
     throw error;

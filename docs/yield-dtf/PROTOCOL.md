@@ -30,7 +30,7 @@ UUPS proxies throughout; every contract reports `version()` (current protocol 4.
 
 **No Reserve API for Yield DTFs — all prices and quotes are on-chain.** The Facade is a diamond-style router (ReadFacet/ActFacet/MaxIssuableFacet/RevenueFacet behind one address) and is the read gateway:
 
-| Method                                             | Returns                                                   | SDK Phase 1 use                                                             |
+| Method                                             | Returns                                                   | SDK use                                                                     |
 | -------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `price(rToken)`                                    | `(low, high)` D18 USD                                     | `getYieldDtfPrice` (midpoint as display price)                              |
 | `basketBreakdown(rToken)`                          | erc20s, uoaShares (D18 fractions), target names (bytes32) | `getYieldDtfBasket`                                                         |
@@ -43,7 +43,7 @@ UUPS proxies throughout; every contract reports `version()` (current protocol 4.
 | `redeem(rToken, amount)`                           | tokens + withdrawals + available                          | `getYieldDtfRedemptionQuote`                                                |
 | `maxIssuable(rToken, account)`                     | max issuable                                              | `getYieldDtfMaxIssuable`                                                    |
 | `pendingUnstakings(rToken, draftEra, account)`     | `{index, availableAt, amount}[]`                          | `getYieldDtfStakingState`                                                   |
-| `auctionsSettleable(trader)` / `revenues(rTokens)` | auction surfaces                                          | Phase 3                                                                     |
+| `auctionsSettleable(trader)` / `revenues(rTokens)` | auction surfaces                                          | available via auctions/revenue reads and builders                           |
 
 Most facade "reads" are `stateMutability: nonpayable` (callStatic pattern) — the SDK calls them via `simulateContract`/`eth_call`, never as transactions.
 
@@ -65,21 +65,21 @@ Most facade "reads" are `stateMutability: nonpayable` (callStatic pattern) — t
 - **Eras**: if all RSR is seized (full default), `era` increments and balances reset. Drafts have their own `draftEra`.
 - Stake history lives in the subgraph (`accountStakeRecords` keyed `${account}-${rtoken}`, lowercase) with the exchange rate at each event — this is how Register computes staking rewards per account.
 
-## Governance (Phase 2 target)
+## Governance
 
-Standard **OZ Governor** over `StRSRVotes` + `TimelockController`, one Governor per DTF. Flavors: "Alexios" (block-based voting, legacy) and "Anastasius" (timepoint-based; read `quorum(timepoint)`/`quorumNumerator(timepoint)` on-chain because the subgraph values go stale). Proposal lifecycle, votes, delegates, and `governanceFrameworks` (params + timelock) are all indexed in the subgraph under `governance(id: rtokenAddress)`. The vote/queue/execute/cancel call builders are the same OZ shapes as Index DTF governance — extract shared builders from `index-dtf/governance/proposal-actions.ts` when Phase 2 lands.
+Standard **OZ Governor** over `StRSRVotes` + `TimelockController`, one Governor per DTF. Flavors: "Alexios" (block-based voting, legacy) and "Anastasius" (timepoint-based; read `quorum(timepoint)`/`quorumNumerator(timepoint)` on-chain because the subgraph values go stale). Proposal lifecycle, votes, delegates, and `governanceFrameworks` (params + timelock) are all indexed in the subgraph under `governance(id: rtokenAddress)`. The vote/queue/execute/cancel call builders use the shared OZ governor helpers in `lib/governor-calls.ts`.
 
 Proposal building (Phase 4) maps parameter names to component setters (Register's `parameterContractMapAtom`): `tradingDelay`/`backingBuffer`/`maxTradeSlippage`/`minTrade` → BackingManager (+ traders), `rewardRatio` → Furnace+StRSR, `unstakingDelay`/`withdrawalLeak` → StRSR, `warmupPeriod`/`enableIssuancePremium` → BasketHandler, auction lengths → Broker, throttles → RToken, freezes → Main; plus role changes, basket/backup changes, asset registration, and upgrade spells.
 
-## Auctions and revenue (Phase 3 target)
+## Auctions and revenue
 
 Two trade kinds opened by the Broker: `DutchTrade` (4-piece falling price: geometric 1000x→1.5x defense, then linear to best, linear to worst, flat tail; `bidAmount(timestamp)` quotes, `bid()` executes) and `GnosisTrade` (sealed-bid batch via EasyAuction). Sources: revenue auctions (RSRTrader/RTokenTrader surpluses, run via `FacadeAct.runRevenueAuctions(trader, toSettle, toStart, kinds)`) and recollateralization (`BackingManager.rebalance(kind)`, next auction previewed by `FacadeAct.nextRecollateralizationAuction`). `FacadeAct.claimRewards(rToken)` claims collateral rewards. Historical trades are indexed in the subgraph `Trade` entity (`kind`: 0 dutch / 1 batch, settled flags).
 
-## APY (Phase 4 target)
+## APY
 
 Two distinct APYs:
 
-1. **Estimated (forward-looking)** — Register's headline number. `basketYield = Σ(collateral 30d APY from DefiLlama × basket share)`; `holdersApy = basketYield × holdersShare`; `stakersApy = (basketYield × supplyUsd / stakedUsd) × stakersShare` (stakers are leveraged by the supply/stake ratio). Collateral APYs come from DefiLlama `https://yields.llama.fi/pools` via a pool-id → collateral-symbol map (Register `CollateralYieldUpdater.tsx`, ~50 entries/chain — to be absorbed by the SDK per product decision).
+1. **Estimated (forward-looking)** — Register's headline number. `basketYield = Σ(collateral 30d APY from DefiLlama × basket share)`; `holdersApy = basketYield × holdersShare`; `stakersApy = (basketYield × supplyUsd / stakedUsd) × stakersShare` (stakers are leveraged by the supply/stake ratio). Collateral APYs come from DefiLlama `https://yields.llama.fi/pools` via the SDK-owned pool-id → collateral-symbol map.
 2. **Realized staking APY (historical)** — growth of `rsrExchangeRate` between subgraph `RTokenDailySnapshot`s: `((rateB / rateA) - 1) × (365 / days) × 100`.
 
 ## Subgraph (reserve-subgraph)
@@ -90,8 +90,8 @@ Deployed per chain (SDK config: Goldsky `dtf-yield-mainnet` / `dtf-yield-base`, 
 - `Token` — ERC20 supply/holder/transfer counts (BigInt raw), `lastPriceUSD` (BigDecimal).
 - `AccountRToken` + `AccountStakeRecord` — staking positions and history (both raw + BigDecimal fields; SDK maps `*Raw` to `Amount`).
 - `RTokenDailySnapshot` / `HourlySnapshot` — APY timeseries (`rsrExchangeRate`, revenue, staking flows).
-- `Governance` / `GovernanceFramework` / `Proposal` / `Vote` / `Delegate` / `TokenHolder` — governance (Phase 2).
-- `Trade` — auction history (Phase 3).
+- `Governance` / `GovernanceFramework` / `Proposal` / `Vote` / `Delegate` / `TokenHolder` — governance.
+- `Trade` — auction history.
 - `Entry` — typed activity feed (TRANSFER/MINT/BURN/REDEEM/STAKE/UNSTAKE/UNSTAKE_CANCELLED/WITHDRAW). `amount` is **raw BigInt** (maps to `Amount`); `amountUSD` is BigDecimal. BURN entries are furnace melts, not user redemptions.
 
 Scalar rule of thumb: `*Raw`, `Entry.amount`, supplies, and counters are BigInt (map to `Amount`/counts); `*USD`, exchange rates, and account balance amounts are BigDecimal (display-class numbers). When unsure, introspect the deployed schema — this bit us once already.
@@ -111,8 +111,8 @@ Scalar rule of thumb: `*Raw`, `Entry.amount`, supplies, and counters are BigInt 
 
 ## SDK phase map — ALL SHIPPED (2026-06-12)
 
-- **Phase 1**: core reads, issuance, staking, react-sdk hooks, tests, live smoke.
-- **Phase 2**: governance — frameworks with on-chain quorum/threshold (subgraph `quorumVotes` is null for most Alexios frameworks and `proposalThreshold` is micro-percent, so the governor is always the source: timestamps for Anastasius timepoints, block numbers for Alexios), proposals with authoritative `state()`, voter state, vote/queue/execute/cancel (+ guardian timelock cancel) via SHARED OZ governor builders (`lib/governor-calls.ts`, also used by index-dtf).
+- **Shipped**: core reads, issuance, staking, governance, auctions/revenue, APY, react-sdk hooks, tests, and live smoke.
+- Governance uses on-chain quorum/threshold (subgraph `quorumVotes` is null for most Alexios frameworks and `proposalThreshold` is micro-percent, so the governor is always the source: timestamps for Anastasius timepoints, block numbers for Alexios), proposals with authoritative `state()`, voter state, vote/queue/execute/cancel (+ guardian timelock cancel) via shared OZ governor builders (`lib/governor-calls.ts`, also used by index-dtf).
 - **Phase 3**: auctions/revenue — revenueOverview per trader (canStart overridden while a recollateralization is pending; tokenToBuy rows filtered; amounts in each token's decimals), settleable, next reco (revert-tolerant; zero address when idle), trades history, dutch auction live state (bidAmount allowed to fail outside the OPEN window), run-auctions/rebalance/bid/claim builders.
 - **Phase 4**: APY — SDK-owned DefiLlama integration (`COLLATERAL_POOL_MAP` + `getCollateralYields`), pure `computeYieldDtfApy` (staker leverage = supplyUsd/stakedUsd), realized staking APY from `rsrExchangeRate` snapshots; full proposal builder set (parameter setters, roles, prime basket + refresh, backup config, distribution) composing into the shared governor propose.
 

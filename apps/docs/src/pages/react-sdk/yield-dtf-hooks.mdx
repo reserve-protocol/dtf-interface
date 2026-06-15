@@ -1,6 +1,6 @@
 # Yield DTF Hooks
 
-Every hook wraps the matching `sdk.yield` method with TanStack Query, the shared query-key namespace (`dtfQueryKeys.yield.*`), and staleTime defaults (price/quotes 10s, state/staking 30s, identity/list 5min). Params-first, options-second, `undefined` params disable the query.
+Query hooks wrap the matching `sdk.yield` read method with TanStack Query, the shared query-key namespace (`dtfQueryKeys.yield.*`), and staleTime defaults (price/quotes 10s, state/staking 30s, identity/list 5min). Params-first, options-second, `undefined` params disable the query.
 
 ## Query hooks
 
@@ -49,6 +49,7 @@ Synchronous builders (memoized, return `ContractCall | undefined` — not querie
 | `useYieldDtfCancelUnstakeCall`                                                                                | `StRSR.cancelUnstake`                      |
 | `useYieldDtfVoteCall`                                                                                         | Governor `castVote` / `castVoteWithReason` |
 | `useYieldDtfQueueProposalCall` / `...ExecuteProposalCall` / `...CancelProposalCall` / `...SubmitProposalCall` | Governor lifecycle                         |
+| `useYieldDtfTimelockCancelProposalCall`                                                                       | Timelock guardian cancel                   |
 | `useYieldDtfClaimRewardsCall`                                                                                 | `FacadeAct.claimRewards`                   |
 
 Query option builders (`yieldDtfQueryOptions`, `yieldDtfStateQueryOptions`, ...) are exported for `useQueries`/prefetch composition, same shape as the Index DTF builders.

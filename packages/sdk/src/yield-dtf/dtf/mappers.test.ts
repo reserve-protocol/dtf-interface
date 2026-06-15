@@ -1,8 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import type { GetYieldDtfQuery } from "@/yield-dtf/subgraph/yield.generated";
+import type {
+  GetYieldDtfHoldersQuery,
+  GetYieldDtfQuery,
+  ListYieldDtfsQuery,
+} from "@/yield-dtf/subgraph/yield.generated";
 
-import { mapRevenueSplit, mapYieldDtf, mapYieldDtfStakeRecord, mapYieldDtfTransaction } from "@/yield-dtf/dtf/mappers";
+import {
+  mapRevenueSplit,
+  mapYieldDtf,
+  mapYieldDtfHolder,
+  mapYieldDtfStakeRecord,
+  mapYieldDtfSummary,
+  mapYieldDtfTransaction,
+} from "@/yield-dtf/dtf/mappers";
 
 const MAIN = "0x4444444444444444444444444444444444444444";
 const OWNER = "0x5555555555555555555555555555555555555555";
@@ -105,6 +116,55 @@ describe("mapRevenueSplit", () => {
     const split = mapRevenueSplit([{ id: "1", destination: EXTERNAL, rTokenDist: 0, rsrDist: 0 }]);
 
     expect(split.external).toEqual([]);
+  });
+});
+
+describe("mapYieldDtfSummary", () => {
+  it("checksums addresses, maps Amounts, and coerces display values", () => {
+    const summary = mapYieldDtfSummary(
+      {
+        id: subgraphDtf.id,
+        targetUnits: "USD",
+        rsrStaked: "21000000000000000000000000",
+        basketsNeeded: "24500000000000000000000000",
+        token: {
+          id: subgraphDtf.token.id,
+          name: subgraphDtf.token.name,
+          symbol: subgraphDtf.token.symbol,
+          decimals: subgraphDtf.token.decimals,
+          totalSupply: subgraphDtf.token.totalSupply,
+          holderCount: subgraphDtf.token.holderCount,
+          lastPriceUSD: "1.0035",
+        },
+      } satisfies ListYieldDtfsQuery["rtokens"][number],
+      1,
+      { status: "active", logo: "https://example.com/eusd.png" },
+    );
+
+    expect(summary.id).toBe("0xA0d69E286B938e21CBf7E51D71F6A4c8918f482F");
+    expect(summary.token.address).toBe("0xA0d69E286B938e21CBf7E51D71F6A4c8918f482F");
+    expect(summary.token.totalSupply.raw).toBe(24500000000000000000000000n);
+    expect(summary.token.holderCount).toBe(1234);
+    expect(summary.rsrStaked.formatted).toBe("21000000");
+    expect(summary.priceUsd).toBe(1.0035);
+    expect(summary.status).toBe("active");
+    expect(summary.logo).toBe("https://example.com/eusd.png");
+  });
+});
+
+describe("mapYieldDtfHolder", () => {
+  it("checksums addresses and keeps subgraph BigDecimal balances as display numbers", () => {
+    const holder = mapYieldDtfHolder({
+      account: { id: OWNER.toLowerCase() },
+      amount: "123.456",
+      transferCount: 42,
+      timestamp: "1700000000",
+    } satisfies NonNullable<GetYieldDtfHoldersQuery["token"]>["holdersBalance"][number]);
+
+    expect(holder.address).toBe(OWNER);
+    expect(holder.balance).toBe(123.456);
+    expect(holder.transferCount).toBe(42);
+    expect(holder.lastActivity).toBe(1700000000);
   });
 });
 

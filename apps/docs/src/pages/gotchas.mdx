@@ -60,9 +60,9 @@ Dropping `chainId` can simulate or send a transaction on the user's current chai
 
 ## Yield Namespace
 
-`sdk.yield.get` and `sdk.yield.list` exist as a boundary but are not implemented yet. They throw `NOT_IMPLEMENTED`.
+`sdk.yield` is implemented for Yield DTF reads, issuance, staking, governance, auctions, APY, and proposal builders on Ethereum mainnet and Base.
 
-Do not build product flows that assume Yield DTF parity with Index DTF SDK methods.
+Yield DTFs do not use Reserve API price and quote surfaces; current prices and quotes come from protocol Facade contracts.
 
 ## RSR And Vote-Lock
 

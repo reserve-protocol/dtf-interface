@@ -14,7 +14,7 @@ Use this page as the first stop when an AI agent is reading or generating code f
 - React apps should prefer React SDK hooks over direct `useDtfSdk()` calls for UI reads.
 - Both packages prepare transaction calls. They do not connect wallets, switch chains, send transactions, or own toast/confirmation UX.
 - Do not import wallet-client constructors from the SDK. Browser apps use wagmi/connector wallet clients; scripts import wallet helpers directly from `viem`.
-- `sdk.yield` covers the full Yield DTF (formerly RToken) surface on chains 1 and 8453: reads, issuance, staking, governance, auctions/revenue, APY, and proposal builders.
+- `sdk.yield` covers Yield DTF (formerly RToken) core reads, issuance, staking, governance, auctions/revenue, APY, and proposal builders on chains 1 and 8453.
 
 ## Canonical Example DTF
 
@@ -95,8 +95,10 @@ Start from these source files when docs and types disagree:
 - `packages/sdk/src/index.ts` for exported SDK types, constants, builders, ABIs, and catalog exports.
 - `packages/sdk/src/create-dtf-sdk.ts` for the root namespace shape.
 - `packages/sdk/src/index-dtf/namespace.ts` and `packages/sdk/src/index-dtf/ref.ts` for Index DTF direct/ref APIs.
-- `packages/sdk/src/types/index-dtf.ts` and `packages/sdk/src/types/governance.ts` for data shapes.
+- `packages/sdk/src/yield-dtf/namespace.ts` and `packages/sdk/src/yield-dtf/ref.ts` for Yield DTF direct/ref APIs.
+- `packages/sdk/src/types/index-dtf.ts`, `packages/sdk/src/types/yield-dtf.ts`, and `packages/sdk/src/types/governance.ts` for data shapes.
 - `packages/react-sdk/src/index.ts` for exported React hooks and query options.
+- `packages/react-sdk/src/yield-dtf-hooks.ts` for Yield DTF React hooks and query option builders.
 - `packages/react-sdk/src/query-keys.ts` for shared query-key helpers.
 - `packages/dtf-catalog/src/index.ts` for raw catalog exports like `indexDtfs` and `yieldDtfs`; `packages/sdk/src/index.ts` re-exports them as `indexDtfCatalog` and `yieldDtfCatalog`.
 

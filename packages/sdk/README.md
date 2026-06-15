@@ -7,9 +7,8 @@ This package is environment-agnostic. It should work in modern Node, browser app
 Implemented SDK product surface:
 
 - Index DTFs: Ethereum mainnet, Base, BSC.
+- Yield DTFs: Ethereum mainnet and Base reads, issuance, staking, governance, auctions, APY, and proposal builders.
 - Account portfolio API reads: current portfolio, historical portfolio, and transactions.
-
-Yield DTF catalog entries and subgraph defaults exist for Ethereum mainnet and Base, but `sdk.yield.get` and `sdk.yield.list` are not implemented yet.
 
 ## Usage
 

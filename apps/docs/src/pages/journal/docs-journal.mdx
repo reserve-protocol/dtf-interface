@@ -4,7 +4,7 @@ This journal records issues noticed while writing docs. It is intentionally not 
 
 ## API Shape Notes
 
-- `sdk.yield` exists but only throws `NOT_IMPLEMENTED`. Public docs should keep Yield DTF protocol context separate from implemented SDK APIs until real methods exist.
+- `sdk.yield` now has an implemented Yield DTF surface. Public docs should keep source boundaries clear because Yield prices/quotes come from protocol Facade contracts, not Reserve API.
 - The SDK exports a very large top-level surface. The product-shaped namespace is easier to document and learn than raw export lists.
 - Some React SDK query options use `dtfQueryKeys`, while newer product/analytics options use local keys. This is fine internally, but public docs should recommend query option builders over hand-built keys for those surfaces.
 - `useIndexDtfProposals` and `useIndexDtfProposalList` share cache but return different shapes. This is useful, but easy to miss in docs and app code.

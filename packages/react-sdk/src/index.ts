@@ -130,6 +130,7 @@ export {
   useYieldDtfProposalVotePower,
   useYieldDtfQueueProposalCall,
   useYieldDtfSubmitProposalCall,
+  useYieldDtfTimelockCancelProposalCall,
   useYieldDtfVoteCall,
   useYieldDtfVoterState,
   useYieldDtfRedeemCall,

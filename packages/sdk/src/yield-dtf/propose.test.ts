@@ -55,6 +55,17 @@ describe("yield DTF proposal builders", () => {
     expect(refresh.contract.functionName).toBe("refreshBasket");
   });
 
+  it("rejects setPrimeBasket with mismatched erc20s and targetAmounts", () => {
+    expect(() =>
+      prepareYieldDtfSetPrimeBasket({
+        chainId: 1,
+        address: MAIN,
+        erc20s: [ERC20],
+        targetAmounts: [],
+      }),
+    ).toThrow("erc20s and targetAmounts must have the same length");
+  });
+
   it("encodes throttle params as the tuple the contract expects", () => {
     const call = prepareYieldDtfSetIssuanceThrottle({
       chainId: 1,

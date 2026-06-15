@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { prepareYieldDtfVote } from "@/yield-dtf/governance";
 import {
   prepareYieldDtfIssue,
   prepareYieldDtfIssuePlan,
@@ -54,6 +55,34 @@ describe("yield DTF issuance calls", () => {
     expect(call.contract.args).toEqual([ACCOUNT, 42n, [1], [10n ** 18n], [ST_TOKEN], [0n]]);
   });
 
+  it("rejects redeemCustom with mismatched paired arrays", () => {
+    expect(() =>
+      prepareYieldDtfRedeemCustom({
+        chainId: 1,
+        address: DTF,
+        recipient: ACCOUNT,
+        amount: 42n,
+        basketNonces: [1],
+        portions: [],
+        expectedTokensOut: [ST_TOKEN],
+        minAmountsOut: [0n],
+      }),
+    ).toThrow("basketNonces and portions must have the same length");
+
+    expect(() =>
+      prepareYieldDtfRedeemCustom({
+        chainId: 1,
+        address: DTF,
+        recipient: ACCOUNT,
+        amount: 42n,
+        basketNonces: [1],
+        portions: [10n ** 18n],
+        expectedTokensOut: [ST_TOKEN],
+        minAmountsOut: [],
+      }),
+    ).toThrow("expectedTokensOut and minAmountsOut must have the same length");
+  });
+
   it("plans issuance approvals against the Yield DTF token", () => {
     const plan = prepareYieldDtfIssuePlan({
       chainId: 1,
@@ -77,6 +106,21 @@ describe("yield DTF issuance calls", () => {
     const plan = prepareYieldDtfIssuePlan({ chainId: 1, address: DTF, amount: 42n, deposits: [] });
 
     expect(plan.type).toBe("call");
+  });
+});
+
+describe("yield DTF governance calls", () => {
+  it("preserves an explicit empty vote reason", () => {
+    const call = prepareYieldDtfVote({
+      chainId: 1,
+      governor: DTF,
+      proposalId: 42n,
+      support: 1,
+      reason: "",
+    });
+
+    expect(call.contract.functionName).toBe("castVoteWithReason");
+    expect(call.contract.args).toEqual([42n, 1, ""]);
   });
 });
 

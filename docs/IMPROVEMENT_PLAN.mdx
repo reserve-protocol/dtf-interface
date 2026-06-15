@@ -91,7 +91,7 @@ Ordered by value; nothing here blocks the release of what's above.
 
 5. **`useQueries` interop** (S): RQ v5's `UseQueryOptionsForUseQueries` rejects `DtfQueryOptionsResult` (branded `queryFn`/`placeholderData` variance). If more multi-query consumers appear, export a `forUseQueries()`-shaped builder or adopt RQ's `queryOptions()` branding in `createDtfQueryOptions`.
 6. **Register `use-vote-lock-refresh.ts`** (S): still hand-manages invalidation keys; now that the fallback is an SDK hook with a canonical key, the external-refresh branch can likely invalidate `dtfQueryKeys.index.voteLockVaultState(...)` instead of threading refetch callbacks. Do it when next touching the drawer.
-7. **`sdk.yield` boundary** (L, when Yield DTF work starts): placeholder methods throw `NOT_IMPLEMENTED`; the audit scope was Index-only. When yield work lands, repeat the calldata-fixture pattern from day one.
+7. **`sdk.yield` boundary** (done): the placeholder namespace has been replaced with the implemented Yield DTF surface. Keep repeating the calldata-fixture pattern as new Yield builders land.
 
 ### Watchlist
 
@@ -112,7 +112,7 @@ Phase 1 shipped 2026-06-12 on `feat/yield-dtf-phase-1`. Protocol architecture re
 - Issuance: facade callStatic quotes (`getIssuanceQuote`/`getRedemptionQuote`/`getMaxIssuable`), `prepareIssue(+Plan)`, `prepareRedeem`, `prepareRedeemCustom`.
 - Staking: `getStakingState` (incl. pendingUnstakings via the draftEra storage slot `0x109` — no public getter exists), `getStakeHistory`, `prepareStake(+Plan)`, `prepareUnstake`, `prepareWithdraw`, `prepareCancelUnstake`.
 - `createYieldDtfNamespace` + `createYieldDtfRef`; `sdk.yield` placeholder replaced.
-- react-sdk: `dtfQueryKeys.yield.*`, 13 query option builders + hooks with staleTime classes, 5 call hooks.
+- react-sdk: `dtfQueryKeys.yield.*`, 23 query option builders + hooks with staleTime classes, 13 selected call hooks.
 - Tests: exact-calldata fixtures for every prepare builder, frozen subgraph mapper fixtures, key/staleTime/call-hook tests, live smoke against mainnet eUSD (all 4 passing live).
 
 ## Phases 2-4 — SHIPPED (2026-06-12, same branch)

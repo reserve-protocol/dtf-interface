@@ -2,10 +2,11 @@ import type { DtfSdk } from "@reserve-protocol/sdk";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { DEFAULT_STALE_TIME, LIVE_STALE_TIME } from "@/query";
+import { DEFAULT_STALE_TIME, LIVE_STALE_TIME, STATIC_STALE_TIME } from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
 import {
   yieldDtfIssuanceQuoteQueryOptions,
+  yieldDtfListQueryOptions,
   yieldDtfPriceQueryOptions,
   yieldDtfQueryOptions,
   yieldDtfStakingStateQueryOptions,
@@ -20,6 +21,7 @@ function createSdk() {
   return {
     yield: {
       get: vi.fn(async () => ({ id: DTF })),
+      list: vi.fn(async () => ({ dtfs: [] })),
       getState: vi.fn(async () => ({ frozen: false })),
       getPrice: vi.fn(async () => ({ price: 1 })),
       getIssuanceQuote: vi.fn(async () => ({ deposits: [] })),
@@ -59,6 +61,7 @@ describe("yield query options", () => {
 
     // full view carries supply/staking data, so it gets the default class.
     expect(yieldDtfQueryOptions(sdk, params).staleTime).toBe(DEFAULT_STALE_TIME);
+    expect(yieldDtfListQueryOptions(sdk, { chainId: 1 }).staleTime).toBe(STATIC_STALE_TIME);
     expect(yieldDtfPriceQueryOptions(sdk, params).staleTime).toBe(LIVE_STALE_TIME);
     expect(yieldDtfIssuanceQuoteQueryOptions(sdk, { ...params, amount: 1n }).staleTime).toBe(LIVE_STALE_TIME);
     expect(yieldDtfStateQueryOptions(sdk, params).staleTime).toBe(DEFAULT_STALE_TIME);

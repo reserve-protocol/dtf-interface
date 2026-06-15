@@ -61,4 +61,75 @@ describe("React SDK public surface", () => {
     expect("useIndexDtfVoteMutation" in reactSdk).toBe(false);
     expect("useIndexDtfDelegateMutation" in reactSdk).toBe(false);
   });
+
+  it("re-exports Yield DTF hooks and query option builders", () => {
+    const publicSurface = reactSdk as Record<string, unknown>;
+    const yieldHooks = [
+      "useYieldDtf",
+      "useYieldDtfApy",
+      "useYieldDtfBasket",
+      "useYieldDtfContracts",
+      "useYieldDtfDutchAuction",
+      "useYieldDtfHolders",
+      "useYieldDtfIssuanceQuote",
+      "useYieldDtfCancelProposalCall",
+      "useYieldDtfClaimRewardsCall",
+      "useYieldDtfCancelUnstakeCall",
+      "useYieldDtfExecuteProposalCall",
+      "useYieldDtfGovernance",
+      "useYieldDtfIssueCall",
+      "useYieldDtfList",
+      "useYieldDtfMaxIssuable",
+      "useYieldDtfPrice",
+      "useYieldDtfProposal",
+      "useYieldDtfProposals",
+      "useYieldDtfProposalVotePower",
+      "useYieldDtfQueueProposalCall",
+      "useYieldDtfSubmitProposalCall",
+      "useYieldDtfTimelockCancelProposalCall",
+      "useYieldDtfVoteCall",
+      "useYieldDtfVoterState",
+      "useYieldDtfRedeemCall",
+      "useYieldDtfRevenue",
+      "useYieldDtfRedemptionQuote",
+      "useYieldDtfStakeCall",
+      "useYieldDtfStakeHistory",
+      "useYieldDtfStakingApyHistory",
+      "useYieldDtfStakingState",
+      "useYieldDtfState",
+      "useYieldDtfTrades",
+      "useYieldDtfTransactions",
+      "useYieldDtfUnstakeCall",
+      "useYieldDtfWithdrawCall",
+    ];
+    const yieldQueryOptions = [
+      "yieldDtfApyQueryOptions",
+      "yieldDtfBasketQueryOptions",
+      "yieldDtfContractsQueryOptions",
+      "yieldDtfDutchAuctionQueryOptions",
+      "yieldDtfHoldersQueryOptions",
+      "yieldDtfIssuanceQuoteQueryOptions",
+      "yieldDtfListQueryOptions",
+      "yieldDtfMaxIssuableQueryOptions",
+      "yieldDtfGovernanceQueryOptions",
+      "yieldDtfPriceQueryOptions",
+      "yieldDtfProposalQueryOptions",
+      "yieldDtfProposalsQueryOptions",
+      "yieldDtfProposalVotePowerQueryOptions",
+      "yieldDtfVoterStateQueryOptions",
+      "yieldDtfQueryOptions",
+      "yieldDtfRedemptionQuoteQueryOptions",
+      "yieldDtfRevenueQueryOptions",
+      "yieldDtfStakeHistoryQueryOptions",
+      "yieldDtfStakingApyHistoryQueryOptions",
+      "yieldDtfStakingStateQueryOptions",
+      "yieldDtfStateQueryOptions",
+      "yieldDtfTradesQueryOptions",
+      "yieldDtfTransactionsQueryOptions",
+    ];
+
+    for (const exportName of [...yieldHooks, ...yieldQueryOptions]) {
+      expect(typeof publicSurface[exportName]).toBe("function");
+    }
+  });
 });

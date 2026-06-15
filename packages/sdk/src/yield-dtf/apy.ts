@@ -115,6 +115,15 @@ export async function getCollateralYields(chainId: YieldDtfChainId): Promise<Col
     }
 
     const apy = pool.apyMean30d ?? 0;
+    const isLst = symbol === "wsteth" || symbol === "cbeth";
+
+    // LSTs yield the same everywhere; mainnet rates cover other chains.
+    if (isLst) {
+      if (poolChainId === 1 && yields[symbol] === undefined) {
+        yields[symbol] = apy;
+      }
+      continue;
+    }
 
     if (poolChainId === chainId) {
       yields[symbol] = apy;
@@ -122,11 +131,6 @@ export async function getCollateralYields(chainId: YieldDtfChainId): Promise<Col
       if (symbol === "cusdc" || symbol === "cusdt") {
         yields[`${symbol}-vault`] = apy;
       }
-    }
-
-    // LSTs yield the same everywhere; mainnet rates cover other chains.
-    if ((symbol === "wsteth" || symbol === "cbeth") && yields[symbol] === undefined) {
-      yields[symbol] = apy;
     }
   }
 
@@ -177,11 +181,11 @@ export async function getYieldDtfApy(client: DtfClient, params: YieldDtfParams):
     getYieldDtfPrice(client, params),
     getCollateralYields(params.chainId),
   ]);
-  const symbolsByAddress = new Map(dtf.collaterals.map((token) => [token.address, token.symbol]));
+  const symbolsByAddress = new Map(dtf.collaterals.map((token) => [token.address.toLowerCase(), token.symbol]));
 
   return computeYieldDtfApy({
     basket: basket.collaterals.map((collateral) => ({
-      symbol: symbolsByAddress.get(collateral.address) ?? "",
+      symbol: symbolsByAddress.get(collateral.address.toLowerCase()) ?? "",
       share: collateral.share,
     })),
     collateralYields,

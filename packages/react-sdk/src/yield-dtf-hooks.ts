@@ -39,6 +39,7 @@ export function yieldDtfListQueryOptions<TData = MethodResult<YieldMethod<"list"
     () => sdk.yield.list(requireParams(params, "yieldDtfListQueryOptions")),
     params !== undefined,
     options,
+    STATIC_STALE_TIME,
   );
 }
 
@@ -505,7 +506,13 @@ export function useYieldDtfVoteCall(params: Parameters<DtfSdk["yield"]["prepareV
       return undefined;
     }
 
-    return sdk.yield.prepareVote({ chainId, governor, proposalId, support, ...(reason ? { reason } : {}) });
+    return sdk.yield.prepareVote({
+      chainId,
+      governor,
+      proposalId,
+      support,
+      ...(reason !== undefined ? { reason } : {}),
+    });
   }, [chainId, governor, proposalId, support, reason, sdk]);
 }
 
@@ -567,6 +574,31 @@ export function useYieldDtfCancelProposalCall(
 
     return sdk.yield.prepareCancelProposal({ chainId, proposal: { governor, targets, calldatas, description } });
   }, [chainId, governor, targets, calldatas, description, sdk]);
+}
+
+export function useYieldDtfTimelockCancelProposalCall(
+  params: Parameters<DtfSdk["yield"]["prepareTimelockCancelProposal"]>[0] | undefined,
+) {
+  const sdk = useDtfSdk();
+  const chainId = params?.chainId;
+  const timelock = params?.timelock;
+  const proposal = params?.proposal;
+  const governor = proposal?.governor;
+  const targets = proposal?.targets;
+  const calldatas = proposal?.calldatas;
+  const description = proposal?.description;
+
+  return useMemo(() => {
+    if (chainId === undefined || !timelock || !governor || !targets || !calldatas || description === undefined) {
+      return undefined;
+    }
+
+    return sdk.yield.prepareTimelockCancelProposal({
+      chainId,
+      timelock,
+      proposal: { governor, targets, calldatas, description },
+    });
+  }, [chainId, timelock, governor, targets, calldatas, description, sdk]);
 }
 
 export function useYieldDtfSubmitProposalCall(

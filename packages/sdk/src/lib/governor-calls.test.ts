@@ -58,4 +58,21 @@ describe("shared governor calls", () => {
       expect(call.to).toBe(GOVERNOR);
     }
   });
+
+  it("rejects invalid vote support values", () => {
+    expect(() => prepareGovernorVote({ chainId: 1, governor: GOVERNOR, proposalId: 42n, support: 3 })).toThrow(
+      "support must be 0, 1, or 2",
+    );
+  });
+
+  it("rejects proposal payloads with mismatched targets and calldatas", () => {
+    const invalid = { ...proposal, calldatas: [] };
+
+    expect(() => prepareGovernorPropose({ chainId: 1, proposal: invalid })).toThrow(
+      "proposal targets and calldatas must have the same length",
+    );
+    expect(() => prepareGovernorQueue({ chainId: 1, proposal: invalid })).toThrow(
+      "proposal targets and calldatas must have the same length",
+    );
+  });
 });

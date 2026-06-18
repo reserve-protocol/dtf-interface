@@ -1,7 +1,11 @@
 name: Publish Packages
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Build & Test
+    types:
+      - completed
     branches:
       - main
   workflow_dispatch:
@@ -12,6 +16,7 @@ concurrency:
 
 jobs:
   release:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -19,6 +24,9 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - run: corepack enable pnpm
 
@@ -31,7 +39,12 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
+      - name: Validate Manual Release
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: pnpm release:ci
+
+      - name: Build Release Artifacts
+        if: ${{ github.event_name != 'workflow_dispatch' }}
         run: pnpm build
 
       - name: Changeset Release

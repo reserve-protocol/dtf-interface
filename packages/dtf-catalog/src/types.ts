@@ -3,6 +3,7 @@ export type CatalogYieldDTF = {
   readonly decimals: number;
   readonly logo?: string;
   readonly name: string;
+  readonly createdAt: number;
   readonly status: "active" | "unsupported" | "deprecated";
   readonly symbol: string;
   readonly about?: string;

@@ -25,12 +25,15 @@ The package follows the old `@reserve-protocol/rtokens` shape:
       name,
       symbol,
       decimals,
+      createdAt,
       logo,
       status
     }
   }
 }
 ```
+
+`createdAt` is the contract creation Unix timestamp in seconds.
 
 The raw JSON files are also exported:
 
@@ -39,7 +42,7 @@ import baseIndexDtfs from "@reserve-protocol/dtf-catalog/index-dtf/base.json";
 import baseYieldDtfs from "@reserve-protocol/dtf-catalog/yield-dtf/base.json";
 ```
 
-Logos live in `images`. Index DTF logos are WebP files, and Yield DTF logos currently keep the legacy SVG files.
+Logos live in `images` and can be WebP or SVG files.
 
 ## Status
 

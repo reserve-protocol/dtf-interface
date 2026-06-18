@@ -1,0 +1,110 @@
+import type { DtfClient } from "@/client";
+import type { YieldDtfParams } from "@/types/yield-dtf";
+
+import { computeYieldDtfApy, getCollateralYields, getYieldDtfApy, getYieldDtfStakingApyHistory } from "@/yield-dtf/apy";
+import {
+  getYieldDtfDutchAuction,
+  getYieldDtfRevenue,
+  getYieldDtfTrades,
+  prepareYieldDtfBidPlan,
+  prepareYieldDtfClaimRewards,
+  prepareYieldDtfRebalance,
+  prepareYieldDtfRunRevenueAuctions,
+} from "@/yield-dtf/auctions";
+import {
+  getYieldDtf,
+  getYieldDtfBasket,
+  getYieldDtfContracts,
+  getYieldDtfHolders,
+  getYieldDtfPrice,
+  getYieldDtfState,
+  getYieldDtfTransactions,
+  listYieldDtfs,
+} from "@/yield-dtf/dtf/index";
+import {
+  getYieldDtfGovernance,
+  getYieldDtfProposal,
+  getYieldDtfProposals,
+  getYieldDtfProposalVotePower,
+  getYieldDtfVoterState,
+  prepareYieldDtfCancelProposal,
+  prepareYieldDtfExecuteProposal,
+  prepareYieldDtfQueueProposal,
+  prepareYieldDtfSubmitProposal,
+  prepareYieldDtfTimelockCancelProposal,
+  prepareYieldDtfVote,
+} from "@/yield-dtf/governance";
+import {
+  getYieldDtfIssuanceQuote,
+  getYieldDtfMaxIssuable,
+  getYieldDtfRedemptionQuote,
+  prepareYieldDtfIssue,
+  prepareYieldDtfIssuePlan,
+  prepareYieldDtfRedeem,
+  prepareYieldDtfRedeemCustom,
+} from "@/yield-dtf/issuance";
+import { createYieldDtfRef } from "@/yield-dtf/ref";
+import {
+  getYieldDtfStakeHistory,
+  getYieldDtfStakingState,
+  prepareYieldDtfCancelUnstake,
+  prepareYieldDtfStake,
+  prepareYieldDtfStakePlan,
+  prepareYieldDtfUnstake,
+  prepareYieldDtfWithdraw,
+} from "@/yield-dtf/staking";
+
+/** Creates the direct Yield DTF namespace for scripts, bots, CLI, and apps. */
+export function createYieldDtfNamespace(client: DtfClient) {
+  return {
+    ref: (params: YieldDtfParams) => createYieldDtfRef(client, params),
+    get: (params: Parameters<typeof getYieldDtf>[1]) => getYieldDtf(client, params),
+    list: (params: Parameters<typeof listYieldDtfs>[1]) => listYieldDtfs(client, params),
+    getContracts: (params: Parameters<typeof getYieldDtfContracts>[1]) => getYieldDtfContracts(client, params),
+    getState: (params: Parameters<typeof getYieldDtfState>[1]) => getYieldDtfState(client, params),
+    getPrice: (params: Parameters<typeof getYieldDtfPrice>[1]) => getYieldDtfPrice(client, params),
+    getBasket: (params: Parameters<typeof getYieldDtfBasket>[1]) => getYieldDtfBasket(client, params),
+    getHolders: (params: Parameters<typeof getYieldDtfHolders>[1]) => getYieldDtfHolders(client, params),
+    getTransactions: (params: Parameters<typeof getYieldDtfTransactions>[1]) => getYieldDtfTransactions(client, params),
+    getIssuanceQuote: (params: Parameters<typeof getYieldDtfIssuanceQuote>[1]) =>
+      getYieldDtfIssuanceQuote(client, params),
+    getRedemptionQuote: (params: Parameters<typeof getYieldDtfRedemptionQuote>[1]) =>
+      getYieldDtfRedemptionQuote(client, params),
+    getMaxIssuable: (params: Parameters<typeof getYieldDtfMaxIssuable>[1]) => getYieldDtfMaxIssuable(client, params),
+    getStakingState: (params: Parameters<typeof getYieldDtfStakingState>[1]) => getYieldDtfStakingState(client, params),
+    getStakeHistory: (params: Parameters<typeof getYieldDtfStakeHistory>[1]) => getYieldDtfStakeHistory(client, params),
+    prepareIssue: prepareYieldDtfIssue,
+    prepareIssuePlan: prepareYieldDtfIssuePlan,
+    prepareRedeem: prepareYieldDtfRedeem,
+    prepareRedeemCustom: prepareYieldDtfRedeemCustom,
+    prepareStake: prepareYieldDtfStake,
+    prepareStakePlan: prepareYieldDtfStakePlan,
+    prepareUnstake: prepareYieldDtfUnstake,
+    prepareWithdraw: prepareYieldDtfWithdraw,
+    prepareCancelUnstake: prepareYieldDtfCancelUnstake,
+    getGovernance: (params: Parameters<typeof getYieldDtfGovernance>[1]) => getYieldDtfGovernance(client, params),
+    getProposals: (params: Parameters<typeof getYieldDtfProposals>[1]) => getYieldDtfProposals(client, params),
+    getProposal: (params: Parameters<typeof getYieldDtfProposal>[1]) => getYieldDtfProposal(client, params),
+    getVoterState: (params: Parameters<typeof getYieldDtfVoterState>[1]) => getYieldDtfVoterState(client, params),
+    getProposalVotePower: (params: Parameters<typeof getYieldDtfProposalVotePower>[1]) =>
+      getYieldDtfProposalVotePower(client, params),
+    prepareVote: prepareYieldDtfVote,
+    prepareQueueProposal: prepareYieldDtfQueueProposal,
+    prepareExecuteProposal: prepareYieldDtfExecuteProposal,
+    prepareCancelProposal: prepareYieldDtfCancelProposal,
+    prepareTimelockCancelProposal: prepareYieldDtfTimelockCancelProposal,
+    prepareSubmitProposal: prepareYieldDtfSubmitProposal,
+    getRevenue: (params: Parameters<typeof getYieldDtfRevenue>[1]) => getYieldDtfRevenue(client, params),
+    getTrades: (params: Parameters<typeof getYieldDtfTrades>[1]) => getYieldDtfTrades(client, params),
+    getDutchAuction: (params: Parameters<typeof getYieldDtfDutchAuction>[1]) => getYieldDtfDutchAuction(client, params),
+    prepareRunRevenueAuctions: prepareYieldDtfRunRevenueAuctions,
+    prepareRebalance: prepareYieldDtfRebalance,
+    prepareBidPlan: prepareYieldDtfBidPlan,
+    prepareClaimRewards: prepareYieldDtfClaimRewards,
+    getApy: (params: Parameters<typeof getYieldDtfApy>[1]) => getYieldDtfApy(client, params),
+    getStakingApyHistory: (params: Parameters<typeof getYieldDtfStakingApyHistory>[1]) =>
+      getYieldDtfStakingApyHistory(client, params),
+    getCollateralYields,
+    computeApy: computeYieldDtfApy,
+  };
+}

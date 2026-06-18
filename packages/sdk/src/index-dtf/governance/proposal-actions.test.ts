@@ -70,6 +70,20 @@ describe("Index DTF proposal actions", () => {
     ]);
   });
 
+  it("rejects optimistic proposal payloads with mismatched targets and calldatas", () => {
+    expect(() =>
+      prepareIndexDtfSubmitOptimisticProposal({
+        chainId: 8453,
+        proposal: {
+          governance: "0x0000000000000000000000000000000000000001",
+          targets: ["0x0000000000000000000000000000000000000003"],
+          calldatas: [],
+          description: "Optimistic proposal",
+        },
+      }),
+    ).toThrow("proposal targets and calldatas must have the same length");
+  });
+
   it("prepares vote calls with reason params", () => {
     const reasonCall = prepareIndexDtfVoteWithReason({
       chainId: 1,

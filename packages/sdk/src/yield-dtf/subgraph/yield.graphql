@@ -1,0 +1,246 @@
+query GetYieldDtf($id: ID!) {
+  rtoken(id: $id) {
+    id
+    createdTimestamp
+    owners
+    pausers
+    freezers
+    longFreezers
+    rewardTokenSupply
+    rsrExchangeRate
+    rsrStaked
+    rsrStakedUSD
+    basketsNeeded
+    targetUnits
+    token {
+      id
+      name
+      symbol
+      decimals
+      totalSupply
+      holderCount
+      transferCount
+      mintCount
+      burnCount
+    }
+    rewardToken {
+      token {
+        id
+        name
+        symbol
+        decimals
+        totalSupply
+      }
+    }
+    revenueDistribution {
+      id
+      destination
+      rTokenDist
+      rsrDist
+    }
+  }
+}
+
+query ListYieldDtfs($limit: Int!, $offset: Int!) {
+  rtokens(first: $limit, skip: $offset, orderBy: cumulativeUniqueUsers, orderDirection: desc) {
+    id
+    targetUnits
+    rsrStaked
+    basketsNeeded
+    token {
+      id
+      name
+      symbol
+      decimals
+      totalSupply
+      holderCount
+      lastPriceUSD
+    }
+  }
+}
+
+query GetYieldDtfHolders($id: ID!, $limit: Int!, $offset: Int!) {
+  token(id: $id) {
+    holderCount
+    holdersBalance(first: $limit, skip: $offset, orderBy: amount, orderDirection: desc) {
+      account {
+        id
+      }
+      amount
+      transferCount
+      timestamp
+    }
+  }
+}
+
+query GetYieldDtfTransactions($rTokenId: String!, $limit: Int!, $offset: Int!) {
+  entries(where: { rToken: $rTokenId }, orderBy: timestamp, orderDirection: desc, first: $limit, skip: $offset) {
+    id
+    hash
+    type
+    amount
+    amountUSD
+    timestamp
+    from {
+      id
+    }
+    to {
+      id
+    }
+  }
+}
+
+query GetAccountStakeRecords($accountRTokenId: String!, $limit: Int!, $offset: Int!) {
+  accountStakeRecords(
+    where: { account: $accountRTokenId }
+    orderBy: blockNumber
+    orderDirection: asc
+    first: $limit
+    skip: $offset
+  ) {
+    id
+    hash
+    isStake
+    amount
+    amountRaw
+    rsrAmount
+    rsrAmountRaw
+    exchangeRate
+    rsrPriceUSD
+    timestamp
+    blockNumber
+  }
+}
+
+query GetYieldDtfGovernance($id: ID!) {
+  rtoken(id: $id) {
+    owners
+  }
+  governance(id: $id) {
+    proposals
+    proposalsQueued
+    proposalsExecuted
+    proposalsCanceled
+    currentDelegates
+    delegatedVotes
+    totalTokenSupply
+    guardians
+    governanceFrameworks(orderBy: name, orderDirection: desc) {
+      id
+      name
+      contractAddress
+      timelockAddress
+      executionDelay
+      votingDelay
+      votingPeriod
+      proposalThreshold
+      quorumVotes
+      quorumNumerator
+      quorumDenominator
+    }
+  }
+}
+
+query GetYieldDtfProposals($governanceId: String!, $limit: Int!, $offset: Int!) {
+  proposals(
+    where: { governance: $governanceId }
+    orderBy: creationTime
+    orderDirection: desc
+    first: $limit
+    skip: $offset
+  ) {
+    id
+    description
+    creationTime
+    state
+    forWeightedVotes
+    againstWeightedVotes
+    abstainWeightedVotes
+    quorumVotes
+    startBlock
+    endBlock
+    executionETA
+    proposer {
+      address
+    }
+    governanceFramework {
+      name
+      contractAddress
+    }
+  }
+}
+
+query GetYieldDtfProposal($id: ID!) {
+  proposal(id: $id) {
+    id
+    txnHash
+    description
+    creationTime
+    creationBlock
+    state
+    forWeightedVotes
+    againstWeightedVotes
+    abstainWeightedVotes
+    quorumVotes
+    forDelegateVotes
+    againstDelegateVotes
+    abstainDelegateVotes
+    startBlock
+    endBlock
+    queueTime
+    queueTxnHash
+    executionETA
+    executionTime
+    executionTxnHash
+    cancellationTime
+    targets
+    calldatas
+    proposer {
+      address
+    }
+    votes(orderBy: weight, orderDirection: desc, first: 500) {
+      choice
+      weight
+      voter {
+        address
+      }
+    }
+    governanceFramework {
+      name
+      contractAddress
+      timelockAddress
+    }
+  }
+}
+
+query GetYieldDtfTrades($rTokenId: String!, $limit: Int!, $offset: Int!) {
+  trades(where: { rToken: $rTokenId }, orderBy: startedAt, orderDirection: desc, first: $limit, skip: $offset) {
+    id
+    kind
+    auctionId
+    selling
+    sellingTokenSymbol
+    sellingTokenDecimals
+    buying
+    buyingTokenSymbol
+    buyingTokenDecimals
+    amount
+    minBuyAmount
+    boughtAmount
+    worstCasePrice
+    startedAt
+    endAt
+    isSettled
+    settleTxHash
+  }
+}
+
+query GetYieldDtfDailySnapshots($rTokenId: String!, $limit: Int!) {
+  rtokenDailySnapshots(where: { rToken: $rTokenId }, orderBy: timestamp, orderDirection: desc, first: $limit) {
+    timestamp
+    rsrExchangeRate
+    rsrStaked
+    rewardTokenSupply
+    rsrPrice
+  }
+}

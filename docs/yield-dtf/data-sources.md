@@ -24,9 +24,9 @@ Raw Yield subgraph discovery can include unsupported or spam deployments. Produc
 
 ## SDK Boundary
 
-The current SDK does not implement Yield discovery or detail reads. `sdk.yield.get` and `sdk.yield.list` throw `NOT_IMPLEMENTED`.
+The SDK implements Yield discovery/detail reads from the Yield subgraph plus protocol Facade/RPC reads for current state, prices, quotes, staking, governance, auctions, and APY.
 
-Source owner: use `reserve-sdk` and the Yield subgraph as references for future implementation, but verify endpoint and schema details before coding.
+Source owner: use the Yield subgraph, protocol contracts, and Register product flows as references, and verify endpoint/schema details before adding new SDK coverage.
 
 ## Source References
 

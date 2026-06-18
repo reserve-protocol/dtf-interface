@@ -14,7 +14,7 @@ Use this page as the first stop when an AI agent is reading or generating code f
 - React apps should prefer React SDK hooks over direct `useDtfSdk()` calls for UI reads.
 - Both packages prepare transaction calls. They do not connect wallets, switch chains, send transactions, or own toast/confirmation UX.
 - Do not import wallet-client constructors from the SDK. Browser apps use wagmi/connector wallet clients; scripts import wallet helpers directly from `viem`.
-- `sdk.yield` is a placeholder boundary today. Its methods throw `NOT_IMPLEMENTED`.
+- `sdk.yield` covers Yield DTF (formerly RToken) core reads, issuance, staking, governance, auctions/revenue, APY, and proposal builders on chains 1 and 8453.
 
 ## Canonical Example DTF
 
@@ -61,6 +61,19 @@ That address is LCAP from `indexDtfCatalog`.
 - Raw version-sensitive `prepare*` helpers should receive the target DTF version explicitly. Higher-level proposal builders may fetch the DTF version when omitted.
 - Proposal action builders prepare vote, queue, execute, and cancel calls. They do not invalidate queries after a transaction.
 
+## Yield DTF Rules
+
+- Yield DTF = the protocol formerly called RToken. ABIs keep contract-true names (`rTokenAbi`, `stRsrAbi`, `facadeReadAbi`); the API uses Yield DTF naming.
+- There is NO Reserve API for Yield DTFs. Prices and quotes are on-chain via the Facade: `sdk.yield.getPrice` returns `{ low, high, price }` from `FacadeRead.price`.
+- Canonical example: eUSD on mainnet — `{ address: "0xA0d69E286B938e21CBf7E51D71F6A4c8918f482F", chainId: 1 }`.
+- Issuance: quote first (`getIssuanceQuote`), approvals go to the Yield DTF token itself, then `prepareIssue`/`prepareIssuePlan`. Hourly throttles apply — check `getState().issuance.available`.
+- Staking: RSR approval goes to the staking vault (`stToken`); `exchangeRate` is RSR per stRSR and only grows (except seizure events). Unstaking is a two-step queue: `prepareUnstake`, wait `unstakingDelay`, then `prepareWithdraw(account, endId)` where `endId = pendingUnstake.index + 1`.
+- Subgraph BigDecimal fields (holder balances, USD values, exchange rates) are display-class `number`s; raw BigInt fields (transaction amounts, supplies, stake record `*Raw` fields) map to `Amount`. Transaction `type: "burn"` is a furnace melt, not a user redemption.
+- `basketsNeeded / totalSupply` is the basket-units-per-token exchange rate; both are D18 `Amount`s.
+- Governance: `getGovernance().quorum`/`proposalThreshold` are always on-chain vote amounts (never trust subgraph quorum for Yield DTFs). Proposal `state` from `getProposal` is the on-chain governor state. Two cancel paths: `prepareCancelProposal` (proposer, PENDING) vs `prepareTimelockCancelProposal` (guardian, QUEUED).
+- Auctions: `getRevenue().rsrTrader.auctions[].canStart` is already reconciled with pending recollateralization — trust it, don't re-derive. `recollateralization` is null when the read reverts (paused/frozen).
+- APY: `getApy` fetches DefiLlama; `computeApy` is the pure formula. Staker APY is leveraged by supplyUsd/stakedUsd.
+
 ## Renamed Or Removed APIs
 
 - `getFull` / `getFullIndexDtf` / `useFullIndexDtf` / `fullIndexDtfQueryOptions` no longer exist; `get` / `getIndexDtf` / `useIndexDtf` / `indexDtfQueryOptions` are the one name for the full DTF view.
@@ -82,8 +95,10 @@ Start from these source files when docs and types disagree:
 - `packages/sdk/src/index.ts` for exported SDK types, constants, builders, ABIs, and catalog exports.
 - `packages/sdk/src/create-dtf-sdk.ts` for the root namespace shape.
 - `packages/sdk/src/index-dtf/namespace.ts` and `packages/sdk/src/index-dtf/ref.ts` for Index DTF direct/ref APIs.
-- `packages/sdk/src/types/index-dtf.ts` and `packages/sdk/src/types/governance.ts` for data shapes.
+- `packages/sdk/src/yield-dtf/namespace.ts` and `packages/sdk/src/yield-dtf/ref.ts` for Yield DTF direct/ref APIs.
+- `packages/sdk/src/types/index-dtf.ts`, `packages/sdk/src/types/yield-dtf.ts`, and `packages/sdk/src/types/governance.ts` for data shapes.
 - `packages/react-sdk/src/index.ts` for exported React hooks and query options.
+- `packages/react-sdk/src/yield-dtf-hooks.ts` for Yield DTF React hooks and query option builders.
 - `packages/react-sdk/src/query-keys.ts` for shared query-key helpers.
 - `packages/dtf-catalog/src/index.ts` for raw catalog exports like `indexDtfs` and `yieldDtfs`; `packages/sdk/src/index.ts` re-exports them as `indexDtfCatalog` and `yieldDtfCatalog`.
 

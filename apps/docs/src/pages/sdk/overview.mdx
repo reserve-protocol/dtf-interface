@@ -33,7 +33,7 @@ sdk.yield;
 | --------------- | ----------- | ----------------------------------------------------------------------------------------------------------- |
 | `sdk.index`     | implemented | Index DTF reads, proposal builders, deployment builders, transaction calls, vote-lock, rebalances, auctions |
 | `sdk.portfolio` | implemented | Account-level portfolio, history, and transaction views                                                     |
-| `sdk.yield`     | placeholder | Boundary only. Methods throw `NOT_IMPLEMENTED`.                                                             |
+| `sdk.yield`     | implemented | Yield DTF reads, issuance, staking, governance, auctions, APY, and proposal builders; chains 1 + 8453.      |
 | `sdk.client`    | implemented | Low-level Reserve API, viem, subgraph, and explorer clients                                                 |
 
 ## Direct Namespace
@@ -99,7 +99,7 @@ The SDK exports `SdkError` and `isSdkError`.
 import { isSdkError } from "@reserve-protocol/sdk";
 
 try {
-  await sdk.yield.list();
+  await sdk.yield.list({ chainId: 1 });
 } catch (error) {
   if (isSdkError(error)) {
     console.log(error.code, error.message, error.meta);

@@ -1,16 +1,4 @@
-import {
-  bytesToHex,
-  encodeAbiParameters,
-  getAddress,
-  hexToBytes,
-  keccak256,
-  pad,
-  parseAbiParameters,
-  toBytes,
-  zeroHash,
-  type Address,
-  type Hex,
-} from "viem";
+import type { Hex } from "viem";
 
 import type {
   CancelIndexDtfProposalParams,
@@ -22,69 +10,61 @@ import type {
   VoteIndexDtfProposalParams,
 } from "@/types/governance";
 
-import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { getZeroValues } from "@/index-dtf/governance/utils";
 import { prepareContractCall } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
-
-const TIMELOCK_OPERATION_PARAMS = parseAbiParameters("address[], uint256[], bytes[], bytes32, bytes32");
+import {
+  getGovernorTimelockOperationId,
+  hashProposalDescription,
+  prepareGovernorCancel,
+  prepareGovernorExecute,
+  prepareGovernorPropose,
+  prepareGovernorQueue,
+  prepareGovernorVote,
+  prepareGovernorVoteWithReason,
+  prepareGovernorVoteWithReasonAndParams,
+} from "@/lib/governor-calls";
 
 export function prepareIndexDtfVote(params: VoteIndexDtfProposalParams) {
-  return prepareContractCall({
+  return prepareGovernorVote({
     chainId: params.chainId,
-    address: params.governance,
-    abi: dtfIndexGovernanceAbi,
-    functionName: "castVote",
-    args: [BigInt(params.proposalId), params.support] as const,
+    governor: params.governance,
+    proposalId: params.proposalId,
+    support: params.support,
   });
 }
 
 export function prepareIndexDtfVoteWithReason(params: VoteIndexDtfProposalParams & { readonly reason: string }) {
-  return prepareContractCall({
+  return prepareGovernorVoteWithReason({
     chainId: params.chainId,
-    address: params.governance,
-    abi: dtfIndexGovernanceAbi,
-    functionName: "castVoteWithReason",
-    args: [BigInt(params.proposalId), params.support, params.reason] as const,
+    governor: params.governance,
+    proposalId: params.proposalId,
+    support: params.support,
+    reason: params.reason,
   });
 }
 
 export function prepareIndexDtfVoteWithReasonAndParams(
   params: VoteIndexDtfProposalParams & { readonly reason: string; readonly voteParams: Hex },
 ) {
-  return prepareContractCall({
+  return prepareGovernorVoteWithReasonAndParams({
     chainId: params.chainId,
-    address: params.governance,
-    abi: dtfIndexGovernanceAbi,
-    functionName: "castVoteWithReasonAndParams",
-    args: [BigInt(params.proposalId), params.support, params.reason, params.voteParams] as const,
+    governor: params.governance,
+    proposalId: params.proposalId,
+    support: params.support,
+    reason: params.reason,
+    voteParams: params.voteParams,
   });
 }
 
 export function prepareIndexDtfQueueProposal(params: QueueIndexDtfProposalParams) {
-  const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(params.proposal);
-
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.proposal.governance,
-    abi: dtfIndexGovernanceAbi,
-    functionName: "queue",
-    args: [targets, values, calldatas, descriptionHash] as const,
-  });
+  return prepareGovernorQueue({ chainId: params.chainId, proposal: toGovernorPayload(params.proposal) });
 }
 
 export function prepareIndexDtfExecuteProposal(params: ExecuteIndexDtfProposalParams) {
-  const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(params.proposal);
-
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.proposal.governance,
-    abi: dtfIndexGovernanceAbi,
-    functionName: "execute",
-    args: [targets, values, calldatas, descriptionHash] as const,
-  });
+  return prepareGovernorExecute({ chainId: params.chainId, proposal: toGovernorPayload(params.proposal) });
 }
 
 export function prepareIndexDtfCancelProposal(params: CancelIndexDtfProposalParams) {
@@ -105,34 +85,25 @@ export function prepareIndexDtfCancelProposal(params: CancelIndexDtfProposalPara
 }
 
 export function prepareIndexDtfGovernorCancelProposal(params: CancelIndexDtfProposalParams) {
-  const [targets, values, calldatas, descriptionHash] = getProposalTxArgs(params.proposal);
-
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.proposal.governance,
-    abi: dtfIndexGovernanceAbi,
-    functionName: "cancel",
-    args: [targets, values, calldatas, descriptionHash] as const,
-  });
+  return prepareGovernorCancel({ chainId: params.chainId, proposal: toGovernorPayload(params.proposal) });
 }
 
 export function prepareIndexDtfSubmitProposal(params: ProposeIndexDtfProposalParams) {
-  const targets = params.proposal.targets;
-  const calldatas = [...params.proposal.calldatas];
-  const values = getZeroValues(targets.length);
-
-  return prepareContractCall({
-    chainId: params.chainId,
-    address: params.proposal.governance,
-    abi: dtfIndexGovernanceAbi,
-    functionName: "propose",
-    args: [targets, values, calldatas, params.proposal.description] as const,
-  });
+  return prepareGovernorPropose({ chainId: params.chainId, proposal: toGovernorPayload(params.proposal) });
 }
 
 export function prepareIndexDtfSubmitOptimisticProposal(params: SubmitOptimisticIndexDtfProposalParams) {
   const targets = params.proposal.targets;
   const calldatas = [...params.proposal.calldatas];
+
+  if (targets.length !== calldatas.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "proposal targets and calldatas must have the same length",
+      meta: { targets: targets.length, calldatas: calldatas.length },
+    });
+  }
+
   const values = getZeroValues(targets.length);
 
   return prepareContractCall({
@@ -144,21 +115,17 @@ export function prepareIndexDtfSubmitOptimisticProposal(params: SubmitOptimistic
   });
 }
 
-function getProposalTxArgs(
-  proposal: IndexDtfProposalPayload,
-): [readonly Address[], readonly bigint[], readonly Hex[], Hex] {
-  const targets = proposal.targets;
-
-  return [
-    targets,
-    getZeroValues(targets.length),
-    [...proposal.calldatas],
-    hashIndexDtfProposalDescription(proposal.description),
-  ];
+export function hashIndexDtfProposalDescription(description: string): Hex {
+  return hashProposalDescription(description);
 }
 
-export function hashIndexDtfProposalDescription(description: string): Hex {
-  return keccak256(toBytes(description));
+function toGovernorPayload(proposal: IndexDtfProposalPayload) {
+  return {
+    governor: proposal.governance,
+    targets: proposal.targets,
+    calldatas: proposal.calldatas,
+    description: proposal.description,
+  };
 }
 
 function getTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
@@ -170,32 +137,5 @@ function getTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
 }
 
 function calculateLegacyTimelockOperationId(proposal: IndexDtfProposalPayload): Hex {
-  const targets = proposal.targets;
-
-  return keccak256(
-    encodeAbiParameters(TIMELOCK_OPERATION_PARAMS, [
-      targets,
-      getZeroValues(targets.length),
-      [...proposal.calldatas],
-      zeroHash,
-      getTimelockSalt(proposal.governance, proposal.description),
-    ]),
-  );
-}
-
-function getTimelockSalt(governance: Address, description: string): Hex {
-  const governorBytes = hexToBytes(
-    pad(getAddress(governance).toLowerCase() as Hex, {
-      size: 32,
-      dir: "right",
-    }),
-  );
-  const descriptionHashBytes = hexToBytes(keccak256(toBytes(description)));
-  const saltBytes = new Uint8Array(32);
-
-  for (let i = 0; i < saltBytes.length; i++) {
-    saltBytes[i] = governorBytes[i]! ^ descriptionHashBytes[i]!;
-  }
-
-  return bytesToHex(saltBytes);
+  return getGovernorTimelockOperationId(toGovernorPayload(proposal));
 }

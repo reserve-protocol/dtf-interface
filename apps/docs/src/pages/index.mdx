@@ -7,7 +7,7 @@ It has two public packages:
 - `@reserve-protocol/sdk` for scripts, bots, servers, CLIs, and apps that want direct async functions and transaction call builders.
 - `@reserve-protocol/react-sdk` for React apps that want TanStack Query hooks around the same SDK.
 
-The current implemented product surface is Index DTFs. Yield DTF docs are included for protocol context, but the SDK yield namespace is only a placeholder today.
+The SDK covers Index DTFs and Yield DTFs. Yield DTF coverage includes core reads, issuance, staking, governance, auctions, APY, and proposal builders.
 
 ## What The SDK Does
 
@@ -36,9 +36,9 @@ The current implemented product surface is Index DTFs. Yield DTF docs are includ
 
 ## Supported Chains
 
-| Product    | Chains                                                  |
-| ---------- | ------------------------------------------------------- |
-| Index DTFs | Ethereum mainnet `1`, Base `8453`, BSC `56`             |
-| Yield DTFs | Ethereum mainnet `1`, Base `8453` protocol context only |
+| Product    | Chains                                      |
+| ---------- | ------------------------------------------- |
+| Index DTFs | Ethereum mainnet `1`, Base `8453`, BSC `56` |
+| Yield DTFs | Ethereum mainnet `1`, Base `8453`           |
 
 Arbitrum exists in some legacy Reserve surfaces, but it is not part of the current SDK Index DTF chain scope.

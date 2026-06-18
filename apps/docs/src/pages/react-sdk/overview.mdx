@@ -12,10 +12,10 @@ import { DtfSdkProvider, useIndexDtf, useIndexDtfProposal, type IndexDtfFull } f
 
 - `DtfSdkProvider` for SDK config/context.
 - `IndexDtfProvider` for route-scoped `{ address, chainId }` identity.
-- Query hooks for discovery, DTF detail, basket, price, governance, rebalances, revenue, issuance state, vote-lock, and portfolio.
+- Query hooks for Index DTF discovery/detail/governance/rebalances/revenue/vote-lock/portfolio and Yield DTF reads/issuance/staking/governance/auctions/APY.
 - Query option builders for prefetching, SSR-style wiring, custom query clients, and cache access.
 - Stable `dtfQueryKeys` for many core invalidation flows.
-- Proposal action hooks that prepare transaction calls.
+- Selected call hooks that prepare common Index and Yield transaction calls.
 
 ## What It Does Not Provide
 
@@ -62,3 +62,5 @@ const proposal = useIndexDtfProposal(proposalId ? { address, chainId, proposalId
 ```
 
 Passing `options.enabled: false` also disables the query.
+
+Yield DTF hooks follow the same params/options boundary, with dedicated query and call hooks documented in [Yield DTF Hooks](/react-sdk/yield-dtf-hooks).

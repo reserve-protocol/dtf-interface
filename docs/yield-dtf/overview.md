@@ -37,9 +37,9 @@ Unlike Index DTFs, Yield DTFs do not rely on Reserve API as the default source f
 
 ## SDK Boundary
 
-The current SDK has only a placeholder Yield namespace. `sdk.yield.get` and `sdk.yield.list` throw `NOT_IMPLEMENTED` until Yield reads are intentionally added.
+The SDK exposes Yield DTF reads, issuance, staking, governance, auctions, APY, and proposal builders under `sdk.yield` for Ethereum mainnet and Base.
 
-Source owner: existing Yield behavior should be verified from the previous Reserve SDK, Yield subgraph, and public protocol docs before promoting it into implemented SDK docs.
+Source owner: Yield behavior should stay verified against the protocol, Yield subgraph, and Register product flows before new SDK methods are promoted into public docs.
 
 ## Source References
 

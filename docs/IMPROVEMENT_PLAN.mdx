@@ -91,9 +91,47 @@ Ordered by value; nothing here blocks the release of what's above.
 
 5. **`useQueries` interop** (S): RQ v5's `UseQueryOptionsForUseQueries` rejects `DtfQueryOptionsResult` (branded `queryFn`/`placeholderData` variance). If more multi-query consumers appear, export a `forUseQueries()`-shaped builder or adopt RQ's `queryOptions()` branding in `createDtfQueryOptions`.
 6. **Register `use-vote-lock-refresh.ts`** (S): still hand-manages invalidation keys; now that the fallback is an SDK hook with a canonical key, the external-refresh branch can likely invalidate `dtfQueryKeys.index.voteLockVaultState(...)` instead of threading refetch callbacks. Do it when next touching the drawer.
-7. **`sdk.yield` boundary** (L, when Yield DTF work starts): placeholder methods throw `NOT_IMPLEMENTED`; the audit scope was Index-only. When yield work lands, repeat the calldata-fixture pattern from day one.
+7. **`sdk.yield` boundary** (done): the placeholder namespace has been replaced with the implemented Yield DTF surface. Keep repeating the calldata-fixture pattern as new Yield builders land.
 
 ### Watchlist
 
 - The `Number(bigint)` ratio in `votingWeight` rounds above 2^53 — harmless for a percentage, but if anyone ever sorts/compares by it for consensus-critical UI, switch to a Decimal ratio.
 - `normalizeQueryKeyValue` doesn't normalize `number` vs `bigint` for the same value — irrelevant while params are typed, cheap to close if a cache-miss bug ever points there.
+
+---
+
+# Yield DTF SDK
+
+Phase 1 shipped 2026-06-12 on `feat/yield-dtf-phase-1`. Protocol architecture reference: `docs/yield-dtf/PROTOCOL.md`. Behavioral source of truth: Register's `src/state/rtoken/*` and `src/views/yield-dtf/*`.
+
+## Phase 1 — shipped
+
+- ABIs (facade-read/act, r-token, main, st-rsr, st-rsr-votes, basket-handler), facade + RSR addresses for 1/8453, `YieldDtfChainId`.
+- Subgraph codegen target against the deployed `dtf-yield` Goldsky subgraph + phase-1 queries.
+- Core reads: `get` (subgraph identity + on-chain mandate/basket tokens), `list`, `getContracts` (Main components), `getState` (supply/throttles/pauses — protocol >= 3.0 only), `getPrice` (facade), `getBasket` (breakdown/backing/buffer), `getHolders`, `getTransactions`.
+- Issuance: facade callStatic quotes (`getIssuanceQuote`/`getRedemptionQuote`/`getMaxIssuable`), `prepareIssue(+Plan)`, `prepareRedeem`, `prepareRedeemCustom`.
+- Staking: `getStakingState` (incl. pendingUnstakings via the draftEra storage slot `0x109` — no public getter exists), `getStakeHistory`, `prepareStake(+Plan)`, `prepareUnstake`, `prepareWithdraw`, `prepareCancelUnstake`.
+- `createYieldDtfNamespace` + `createYieldDtfRef`; `sdk.yield` placeholder replaced.
+- react-sdk: `dtfQueryKeys.yield.*`, 23 query option builders + hooks with staleTime classes, 13 selected call hooks.
+- Tests: exact-calldata fixtures for every prepare builder, frozen subgraph mapper fixtures, key/staleTime/call-hook tests, live smoke against mainnet eUSD (all 4 passing live).
+
+## Phases 2-4 — SHIPPED (2026-06-12, same branch)
+
+All three remaining phases executed with per-phase adversarial reviews and live validation:
+
+- **Phase 2 (governance)**: shared OZ governor builders extracted to `lib/governor-calls.ts` (index-dtf delegates to them, 120 index tests unchanged); yield governance reads with always-on-chain quorum/threshold (review caught: subgraph `quorumVotes` null for most Alexios frameworks — guaranteed crash — and `proposalThreshold` stored as micro-percent); authoritative on-chain proposal `state()`; voter state; both cancel paths (governor + guardian timelock via shared OZ operation-id math).
+- **Phase 3 (auctions/revenue)**: revenue overview with Register-parity semantics (review caught: reco `sellAmount` decimals, dutch `bidAmount` reverting in exactly the canSettle state, reco read revert tolerance, canStart-during-reco override, tokenToBuy row filtering — plus a zero-address decimals crash caught by live testing); trades history; dutch auction live state; run-auctions/rebalance/bid/claim builders.
+- **Phase 4 (APY + proposing)**: SDK-owned DefiLlama integration (pool map absorbed from Register's CollateralYieldUpdater), pure `computeYieldDtfApy` with golden-number tests, realized staking APY from exchange-rate snapshots; the full proposal-builder set (every governed parameter, roles, baskets, distribution) composing into the shared governor propose.
+- **Validation**: `pnpm --filter @reserve-protocol/sdk validate:yield` — ~170 live checks against eUSD, ETH+ (mainnet), bsdETH (base), all passing. Workspace totals after phases: sdk 250+ tests, react-sdk 58 tests.
+
+### Still open (feature-paced)
+
+- **Register yield migration**: full wave-by-wave plan in `docs/REGISTER_YIELD_IMPLEMENTATION.mdx`. Five SDK prerequisite reads identified there (consumption-driven gap analysis, sweep over-claims corrected): `getConfiguration` (all governed params, HIGH), `getAssets` (AssetRegistry + prices/maxTradeVolume, HIGH), `getBackupBaskets` (MEDIUM), collateral `status()` reads (MEDIUM), `getSupplyHistory` (subgraph token snapshots for charts, MEDIUM).
+- Batch (Gnosis) auction bidding — only dutch bids shipped; batch auctions need the EasyAuction interaction.
+- The `useYieldDtfProposalVotePower` hook key includes `voteStart`; for per-block re-reads use `refetchInterval`, not key-busting.
+
+## Known boundaries
+
+- Protocol 2.x mains (legacy `paused()`) unsupported — all live listed Yield DTFs are >= 3.0.
+- Arbitrum has deployed Yield DTFs but no configured subgraph in the SDK; add `42161` to `YieldDtfChainId` + subgraph URL when needed.
+- `Collateral` subgraph entity has no decimals — `get` does an on-chain ERC20 metadata pass for basket tokens (one extra multicall).

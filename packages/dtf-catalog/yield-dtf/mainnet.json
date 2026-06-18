@@ -5,6 +5,7 @@
     "symbol": "eUSD",
     "logo": "eusd.svg",
     "decimals": 18,
+    "createdAt": 1677113123,
     "about": "The eUSD RToken is a fully collateralized US-dollar stablecoin built on the Reserve Protocol",
     "status": "active"
   },
@@ -14,6 +15,7 @@
     "symbol": "ETH+",
     "logo": "ethplus.svg",
     "decimals": 18,
+    "createdAt": 1681974875,
     "about": "A reward generating Ethereum Liquid Staking Token basket with over-collateralized protection",
     "website": "https://register.app/#/overview?token=0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8",
     "support": {
@@ -30,6 +32,7 @@
     "symbol": "USD3",
     "logo": "usd3.svg",
     "decimals": 18,
+    "createdAt": 1712180087,
     "about": "Earn the DeFi rate any time you're in stables",
     "support": {
       "email": "",
@@ -46,6 +49,7 @@
     "symbol": "dgnETH",
     "logo": "dgneth.svg",
     "decimals": 18,
+    "createdAt": 1718050727,
     "about": "Degen ETH is a high-yield diversified ETH strategy index designed to sustainably outperform LST market yields. Degen ETH uses a two-token model: dgnETH, which is pegged to ETH and backed 1:1 by DeFi yield strategies, and sdgnETH, obtained by depositing dgnETH in a staking vault, which accrues all yield from dgnETH's underlying assets.",
     "website": "https://degeneth.com",
     "support": {
@@ -63,6 +67,7 @@
     "symbol": "hyUSD",
     "logo": "hyusd.svg",
     "decimals": 18,
+    "createdAt": 1682107487,
     "about": "hyUSD is a secure high yield savings flatcoin with up to 6% rewards outpacing inflation in over 100 countries around the world 🌎",
     "website": "https://linktr.ee/hyusd",
     "support": {
@@ -80,6 +85,7 @@
     "symbol": "USDC+",
     "logo": "usdcplus.svg",
     "decimals": 18,
+    "createdAt": 1695140195,
     "about": "USDC PLUS (USDC+): A community governed yield bearing USDC index optimized for yield to holders and overcollateralization protection.",
     "website": "https://register.app/#/overview?token=0xFc0B1EEf20e4c68B3DCF36c4537Cfa7Ce46CA70b",
     "status": "deprecated"
@@ -91,6 +97,7 @@
     "symbol": "rgUSD",
     "logo": "rgusd.svg",
     "decimals": 18,
+    "createdAt": 1710519971,
     "about": "Hold $1 USD peg, and deploy collateral to generate safe, on-chain yield to incentivize liquidity for itself and partners.",
     "status": "deprecated"
   }

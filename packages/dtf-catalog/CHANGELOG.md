@@ -1,5 +1,11 @@
 # @reserve-protocol/dtf-catalog
 
+## 0.1.0
+
+### Minor Changes
+
+- Add `createdAt` timestamps to every catalog entry and add BSC Index DTF logos.
+
 ## 0.0.2
 
 ### Patch Changes

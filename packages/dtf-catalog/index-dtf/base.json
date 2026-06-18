@@ -6,6 +6,7 @@
     "symbol": "LCAP",
     "logo": "lcap.webp",
     "decimals": 18,
+    "createdAt": 1753802435,
     "status": "active",
     "tags": ["Majors", "Bitcoin", "L1"]
   },
@@ -16,6 +17,7 @@
     "symbol": "VLONE",
     "logo": "vlone.webp",
     "decimals": 18,
+    "createdAt": 1760977343,
     "status": "active",
     "tags": ["L1", "Majors"]
   },
@@ -26,6 +28,7 @@
     "symbol": "BGCI",
     "logo": "bgci.webp",
     "decimals": 18,
+    "createdAt": 1739558581,
     "status": "active",
     "tags": ["Majors", "Bitcoin", "L1"]
   },
@@ -36,6 +39,7 @@
     "symbol": "ABX",
     "logo": "abx.webp",
     "decimals": 18,
+    "createdAt": 1739217373,
     "status": "active",
     "tags": ["AI", "RWA", "DeFi", "Memes"]
   },
@@ -46,6 +50,7 @@
     "symbol": "CLX",
     "logo": "clx.webp",
     "decimals": 18,
+    "createdAt": 1739299479,
     "status": "active",
     "tags": ["Memes", "SocialFi"]
   },
@@ -56,6 +61,7 @@
     "symbol": "MVTT10F",
     "logo": "mvtt10f.webp",
     "decimals": 18,
+    "createdAt": 1739559743,
     "status": "active",
     "tags": ["Majors", "L1", "DeFi", "Bitcoin"]
   },
@@ -66,6 +72,7 @@
     "symbol": "VTF",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1739494629,
     "status": "deprecated",
     "tags": ["AI", "Ecosystem", "Memes"]
   },
@@ -76,6 +83,7 @@
     "symbol": "AI",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1739387375,
     "status": "deprecated",
     "tags": ["AI", "Memes"]
   },
@@ -86,6 +94,7 @@
     "symbol": "BDTF",
     "logo": "bdtf.webp",
     "decimals": 18,
+    "createdAt": 1739991521,
     "status": "active",
     "tags": ["Memes", "Ecosystem"]
   },
@@ -96,6 +105,7 @@
     "symbol": "CLUB",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1740728449,
     "status": "deprecated"
   },
   "0xd600e748c17ca237fcb5967fa13d688aff17be78": {
@@ -105,6 +115,7 @@
     "symbol": "MVDA25",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1739559257,
     "status": "deprecated",
     "tags": ["Majors", "L1", "DeFi", "Ecosystem", "Bitcoin"]
   },
@@ -115,6 +126,7 @@
     "symbol": "SBR",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1760448403,
     "status": "deprecated",
     "tags": ["AI", "DeFi", "SocialFi", "RWA", "DeSci", "LST", "Oracles", "Ecosystem", "Memes"]
   },
@@ -125,6 +137,7 @@
     "symbol": "ZINDEX",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1765396307,
     "status": "deprecated",
     "tags": ["SocialFi", "Ecosystem"]
   }

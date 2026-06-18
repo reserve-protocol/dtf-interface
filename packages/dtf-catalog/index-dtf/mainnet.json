@@ -6,6 +6,7 @@
     "symbol": "OPEN",
     "logo": "open.webp",
     "decimals": 18,
+    "createdAt": 1744659395,
     "status": "active",
     "tags": ["Stablecoins", "DeFi", "Majors", "Ecosystem"]
   },
@@ -16,6 +17,7 @@
     "symbol": "BED",
     "logo": "bed.webp",
     "decimals": 18,
+    "createdAt": 1740082055,
     "status": "active",
     "tags": ["Majors", "Bitcoin", "DeFi", "Stablecoins"]
   },
@@ -26,6 +28,7 @@
     "symbol": "SMEL",
     "logo": "smel.webp",
     "decimals": 18,
+    "createdAt": 1740080639,
     "status": "active",
     "tags": ["DeFi", "Stablecoins", "LST"]
   },
@@ -36,6 +39,7 @@
     "symbol": "DFX",
     "logo": "dfx.webp",
     "decimals": 18,
+    "createdAt": 1739989283,
     "status": "active",
     "tags": ["DeFi"]
   },
@@ -46,6 +50,7 @@
     "symbol": "DGI",
     "logo": "dgi.webp",
     "decimals": 18,
+    "createdAt": 1739926919,
     "status": "active",
     "tags": ["DeFi"]
   },
@@ -56,6 +61,7 @@
     "symbol": "PHOTON",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1780690835,
     "status": "active"
   },
   "0x1ec1d815488936ec8add5cb76ac4563ceef09de3": {
@@ -65,6 +71,7 @@
     "symbol": "BUILDOUT",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1781108723,
     "status": "active"
   },
   "0x09A823930FAB5b1FdA6e519b1EE33e7DA9bdA0E5": {
@@ -74,6 +81,7 @@
     "symbol": "ROBOTS",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1781111915,
     "status": "active"
   },
   "0x3CE752A0EB838084562c9d7A0e1dF24A8aE9542D": {
@@ -83,6 +91,7 @@
     "symbol": "POWER",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1781112155,
     "status": "active"
   },
   "0x9429a7332B5a3bCDE2781b65aC1A9EBd9f466e12": {
@@ -92,6 +101,7 @@
     "symbol": "NEOCLOUD",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1781112251,
     "status": "active"
   },
   "0xB394C76A9404b7Eb65841e1551952B97AAE7FD5C": {
@@ -101,6 +111,7 @@
     "symbol": "ENERGY",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1781112335,
     "status": "active"
   },
   "0x9beFcdDdC831198d5805c1690a2Fd3Bbd587845E": {
@@ -110,6 +121,7 @@
     "symbol": "QUANTUM",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1781112419,
     "status": "active"
   },
   "0x8fc660a20b55BE94E7Ded6f47f8e17a2c7813383": {
@@ -119,6 +131,7 @@
     "symbol": "COMPUTE",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1781112647,
     "status": "active"
   },
   "0xe4a10951f962e6cb93cb843a4ef05d2f99db1f94": {
@@ -128,6 +141,7 @@
     "symbol": "ixEdel",
     "logo": "ixedel.webp",
     "decimals": 18,
+    "createdAt": 1768402847,
     "status": "active",
     "tags": ["RWA", "Stablecoins", "Bitcoin"]
   },
@@ -138,6 +152,7 @@
     "symbol": "mvRWA",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1740075311,
     "status": "deprecated",
     "tags": ["RWA"]
   },
@@ -148,6 +163,7 @@
     "symbol": "mvDEFI",
     "logo": "default.webp",
     "decimals": 18,
+    "createdAt": 1739903855,
     "status": "deprecated",
     "tags": ["DeFi"]
   }

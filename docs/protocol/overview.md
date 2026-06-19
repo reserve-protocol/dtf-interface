@@ -1,6 +1,6 @@
 # Reserve Protocol Overview
 
-Reserve is a protocol and product ecosystem for asset-backed onchain tokens called DTFs: Decentralized Token Folios.
+Reserve is a protocol and product ecosystem for asset-backed onchain tokens called DTFs: Decentralized Token Funds.
 
 There are two product families:
 

@@ -29,7 +29,7 @@ Do not copy facts from old docs without checking the source that owns the behavi
 
 ## Canonical Terms
 
-- **DTF**: Decentralized Token Folio, the umbrella product category.
+- **DTF**: Decentralized Token Fund, the umbrella product category.
 - **Index DTF**: Folio-based onchain index fund. Basket is onchain, governance-driven rebalances create auctions.
 - **Yield DTF**: Legacy RToken product. Backed by collateral baskets, uses stRSR staking and revenue distribution.
 - **Folio**: The Index DTF contract/token implementation.

@@ -1,5 +1,11 @@
 # @reserve-protocol/dtf-catalog
 
+## 0.1.1
+
+### Patch Changes
+
+- Update Index DTF catalog metadata and remove placeholder deployments.
+
 ## 0.1.0
 
 ### Minor Changes

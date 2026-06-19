@@ -17,7 +17,7 @@
     "symbol": "PHOTON",
     "logo": "photon.svg",
     "decimals": 18,
-    "createdAt": 1780691026,
+    "createdAt": 1781718876,
     "status": "active"
   },
   "0xd7ce7a841310982acd976d1a6fe7bb6063c5689d": {
@@ -27,7 +27,7 @@
     "symbol": "BUILDOUT",
     "logo": "buildout.svg",
     "decimals": 18,
-    "createdAt": 1781037154,
+    "createdAt": 1781724378,
     "status": "active"
   },
   "0x75617e7653f86f074cc30b9fd4ebf52ba9b62247": {
@@ -37,7 +37,7 @@
     "symbol": "ROBOTS",
     "logo": "robots.svg",
     "decimals": 18,
-    "createdAt": 1781107225,
+    "createdAt": 1781724769,
     "status": "active"
   },
   "0x290bCc0Fd5096cC3261AE2021841c7BC67Cb0f51": {
@@ -47,7 +47,7 @@
     "symbol": "POWER",
     "logo": "power.svg",
     "decimals": 18,
-    "createdAt": 1781107423,
+    "createdAt": 1781725454,
     "status": "active"
   },
   "0xf571Fe3F0d74521Bc7310B111Faea931C748f27B": {
@@ -57,37 +57,7 @@
     "symbol": "NEOCLOUD",
     "logo": "neocloud.svg",
     "decimals": 18,
-    "createdAt": 1781107515,
-    "status": "active"
-  },
-  "0xdBd6bc5e04B5Fd627E0AA67740b06537800fE7DB": {
-    "chainId": 56,
-    "address": "0xdBd6bc5e04B5Fd627E0AA67740b06537800fE7DB",
-    "name": "Reserve AI Energy Generation DTF (BSC)",
-    "symbol": "ENERGY",
-    "logo": "default.webp",
-    "decimals": 18,
-    "createdAt": 1781107777,
-    "status": "active"
-  },
-  "0xf51E0e1Fdd6EA5967a4Ea72fBdAA37C1e3Ba1369": {
-    "chainId": 56,
-    "address": "0xf51E0e1Fdd6EA5967a4Ea72fBdAA37C1e3Ba1369",
-    "name": "Reserve Quantum DTF (BSC)",
-    "symbol": "QUANTUM",
-    "logo": "default.webp",
-    "decimals": 18,
-    "createdAt": 1781107870,
-    "status": "active"
-  },
-  "0xc561439bd5b6a279f61EA2F8a3f0d25D70ff57ad": {
-    "chainId": 56,
-    "address": "0xc561439bd5b6a279f61EA2F8a3f0d25D70ff57ad",
-    "name": "Reserve AI Compute DTF (BSC)",
-    "symbol": "COMPUTE",
-    "logo": "default.webp",
-    "decimals": 18,
-    "createdAt": 1781108072,
+    "createdAt": 1781726065,
     "status": "active"
   }
 }

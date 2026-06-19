@@ -9,6 +9,29 @@ const INDEX_DTF_STATUSES = new Set(["active", "unsupported", "deprecated"]);
 
 type IndexDtfCatalogTestEntry = ReturnType<typeof getIndexDtfCatalogEntries>[number];
 
+const DUPLICATE_SYMBOL_ENTRIES = [
+  {
+    chainId: 1,
+    address: "0x0000000000000000000000000000000000000001",
+    name: "Duplicate Symbol Fixture Ethereum",
+    symbol: "DUPLICATE",
+    logo: "default.webp",
+    decimals: 18,
+    createdAt: 1,
+    status: "active",
+  },
+  {
+    chainId: 56,
+    address: "0x0000000000000000000000000000000000000002",
+    name: "Duplicate Symbol Fixture BSC",
+    symbol: "DUPLICATE",
+    logo: "default.webp",
+    decimals: 18,
+    createdAt: 1,
+    status: "active",
+  },
+] satisfies readonly [IndexDtfCatalogTestEntry, IndexDtfCatalogTestEntry];
+
 describe("Index DTF catalog list", () => {
   const client = createDtfClient();
 
@@ -75,51 +98,52 @@ describe("Index DTF catalog list", () => {
   });
 
   it("resolves duplicate symbols when scoped to a chain", () => {
-    const [first, second] = getDuplicateSymbolEntries();
-
-    for (const dtf of [first, second]) {
-      expect(resolveIndexDtfAlias({ input: dtf.symbol.toLowerCase(), chainId: dtf.chainId })).toMatchObject({
-        address: dtf.address,
-        chainId: dtf.chainId,
-        name: dtf.name,
-        symbol: dtf.symbol,
-      });
-    }
+    withDuplicateSymbolEntries(() => {
+      for (const dtf of DUPLICATE_SYMBOL_ENTRIES) {
+        expect(resolveIndexDtfAlias({ input: dtf.symbol.toLowerCase(), chainId: dtf.chainId })).toMatchObject({
+          address: dtf.address,
+          chainId: dtf.chainId,
+          name: dtf.name,
+          symbol: dtf.symbol,
+        });
+      }
+    });
   });
 
   it("returns ambiguous matches for duplicate symbols without a chain", () => {
-    const duplicateEntries = getDuplicateSymbolEntries();
-    const result = resolveIndexDtfAlias({ input: duplicateEntries[0]!.symbol });
+    withDuplicateSymbolEntries(() => {
+      const result = resolveIndexDtfAlias({ input: DUPLICATE_SYMBOL_ENTRIES[0].symbol });
 
-    expect(result).toEqual({
-      ambiguous: duplicateEntries.map((dtf) => ({
-        address: dtf.address,
-        chainId: dtf.chainId,
-        name: dtf.name,
-        symbol: dtf.symbol,
-        status: dtf.status,
-      })),
+      expect(result).toEqual({
+        ambiguous: DUPLICATE_SYMBOL_ENTRIES.map((dtf) => ({
+          address: dtf.address,
+          chainId: dtf.chainId,
+          name: dtf.name,
+          symbol: dtf.symbol,
+          status: dtf.status,
+        })),
+      });
     });
   });
 });
 
-function getDuplicateSymbolEntries(): readonly [
-  IndexDtfCatalogTestEntry,
-  IndexDtfCatalogTestEntry,
-  ...IndexDtfCatalogTestEntry[],
-] {
-  const entriesBySymbol = new Map<string, IndexDtfCatalogTestEntry[]>();
+function withDuplicateSymbolEntries(run: () => void) {
+  const originalEntries = DUPLICATE_SYMBOL_ENTRIES.map((dtf) => indexDtfCatalog[dtf.chainId][dtf.address]);
 
-  for (const dtf of getIndexDtfCatalogEntries()) {
-    const entries = entriesBySymbol.get(dtf.symbol.toLowerCase()) ?? [];
-    entries.push(dtf);
-    entriesBySymbol.set(dtf.symbol.toLowerCase(), entries);
+  for (const dtf of DUPLICATE_SYMBOL_ENTRIES) {
+    indexDtfCatalog[dtf.chainId][dtf.address] = dtf;
   }
 
-  const duplicateEntries = [...entriesBySymbol.values()].find((entries) => entries.length > 1);
-  if (!duplicateEntries) {
-    throw new Error("Expected the catalog to include at least one duplicate symbol");
+  try {
+    run();
+  } finally {
+    for (const [index, dtf] of DUPLICATE_SYMBOL_ENTRIES.entries()) {
+      const originalEntry = originalEntries[index];
+      if (originalEntry) {
+        indexDtfCatalog[dtf.chainId][dtf.address] = originalEntry;
+      } else {
+        delete indexDtfCatalog[dtf.chainId][dtf.address];
+      }
+    }
   }
-
-  return duplicateEntries as [IndexDtfCatalogTestEntry, IndexDtfCatalogTestEntry, ...IndexDtfCatalogTestEntry[]];
 }

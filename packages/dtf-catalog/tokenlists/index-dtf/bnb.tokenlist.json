@@ -1,0 +1,18 @@
+{
+  "name": "Reserve Index DTFs BNB",
+  "timestamp": "2025-10-30T13:29:32.000Z",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "tokens": [
+    {
+      "chainId": 56,
+      "address": "0x2f8a339b5889ffac4c5a956787cda593b3c36867",
+      "name": "CoinMarketCap 20 Index DTF",
+      "symbol": "CMC20",
+      "decimals": 18
+    }
+  ]
+}

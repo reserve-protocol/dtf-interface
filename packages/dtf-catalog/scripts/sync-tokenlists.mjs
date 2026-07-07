@@ -3,9 +3,11 @@
 //
 // For each index-dtf source list (and its restricted subset) it emits a
 // standard `*.tokenlist.json` under tokenlists/, then validates every list with
-// ajv against @reserve-protocol's copy of the Uniswap schema. Lists with no
-// tokens are skipped because the schema requires at least one token. The list
-// timestamp is derived from the newest token so generation stays deterministic.
+// ajv against @reserve-protocol's copy of the Uniswap schema. Restricted tokens
+// are excluded from the main lists and only appear in the restricted lists.
+// Lists with no tokens are skipped because the schema requires at least one
+// token. The list timestamp is derived from the newest token so generation
+// stays deterministic.
 //
 // Run `node scripts/sync-tokenlists.mjs` to regenerate the token lists.
 // Run `node scripts/sync-tokenlists.mjs --check` to validate them and verify
@@ -28,16 +30,18 @@ for (const chain of ["base", "bnb", "mainnet"]) {
     name: `Reserve Index DTFs ${chainNames[chain]}`,
     source: `index-dtf/${chain}.json`,
     output: `tokenlists/index-dtf/${chain}.tokenlist.json`,
+    include: (token) => !token.restricted,
   });
   specs.push({
     name: `Reserve Restricted DTFs ${chainNames[chain]}`,
     source: `index-dtf/restricted/${chain}.json`,
     output: `tokenlists/index-dtf/restricted/${chain}.tokenlist.json`,
+    include: () => true,
   });
 }
 
-function buildTokenList(name, source) {
-  const entries = Object.values(source);
+function buildTokenList(name, source, include) {
+  const entries = Object.values(source).filter(include);
   if (entries.length === 0) return null;
 
   const newestCreatedAt = Math.max(...entries.map((token) => token.createdAt));
@@ -66,7 +70,7 @@ const stale = [];
 
 for (const spec of specs) {
   const source = JSON.parse(readFileSync(join(packageRoot, spec.source), "utf8"));
-  const list = buildTokenList(spec.name, source);
+  const list = buildTokenList(spec.name, source, spec.include);
   const target = join(packageRoot, spec.output);
 
   if (list && !validate(list)) {

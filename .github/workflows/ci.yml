@@ -47,7 +47,7 @@ jobs:
       - name: Test
         run: pnpm test
 
-  restricted-catalog:
+  catalog-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -64,3 +64,6 @@ jobs:
 
       - name: Check Restricted Token Lists
         run: pnpm --filter @reserve-protocol/dtf-catalog check:restricted
+
+      - name: Validate Token Lists
+        run: pnpm --filter @reserve-protocol/dtf-catalog check:tokenlists

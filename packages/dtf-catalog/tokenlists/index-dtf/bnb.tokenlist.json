@@ -1,0 +1,53 @@
+{
+  "name": "Reserve Index DTFs BNB",
+  "timestamp": "2026-06-17T19:54:25.000Z",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "tokens": [
+    {
+      "chainId": 56,
+      "address": "0x2f8a339b5889ffac4c5a956787cda593b3c36867",
+      "name": "CoinMarketCap 20 Index DTF",
+      "symbol": "CMC20",
+      "decimals": 18
+    },
+    {
+      "chainId": 56,
+      "address": "0xa0fe4e0aeca5479705ce996615b2eacb6b6a10fb",
+      "name": "Reserve Photonics DTF (BSC)",
+      "symbol": "PHOTON",
+      "decimals": 18
+    },
+    {
+      "chainId": 56,
+      "address": "0xd7ce7a841310982acd976d1a6fe7bb6063c5689d",
+      "name": "Reserve AI Infrastructure DTF (BSC)",
+      "symbol": "BUILDOUT",
+      "decimals": 18
+    },
+    {
+      "chainId": 56,
+      "address": "0x75617e7653f86f074cc30b9fd4ebf52ba9b62247",
+      "name": "Reserve Robotics DTF (BSC)",
+      "symbol": "ROBOTS",
+      "decimals": 18
+    },
+    {
+      "chainId": 56,
+      "address": "0x290bCc0Fd5096cC3261AE2021841c7BC67Cb0f51",
+      "name": "Reserve AI Power DTF (BSC)",
+      "symbol": "POWER",
+      "decimals": 18
+    },
+    {
+      "chainId": 56,
+      "address": "0xf571Fe3F0d74521Bc7310B111Faea931C748f27B",
+      "name": "Reserve AI NeoCloud DTF (BSC)",
+      "symbol": "NEOCLOUD",
+      "decimals": 18
+    }
+  ]
+}

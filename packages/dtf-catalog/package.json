@@ -18,6 +18,7 @@
     "dist",
     "index-dtf",
     "yield-dtf",
+    "tokenlists",
     "images"
   ],
   "type": "module",
@@ -34,6 +35,7 @@
     "./images/*": "./images/*",
     "./index-dtf/*": "./index-dtf/*",
     "./yield-dtf/*": "./yield-dtf/*",
+    "./tokenlists/*": "./tokenlists/*",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -43,11 +45,19 @@
     "build": "tsdown",
     "clean": "rm -rf dist *.tsbuildinfo",
     "dev": "tsdown --watch",
+    "sync:restricted": "node scripts/sync-restricted.mjs",
+    "check:restricted": "node scripts/sync-restricted.mjs --check",
+    "sync:logos": "node scripts/sync-logos.mjs",
+    "sync:tokenlists": "node scripts/sync-tokenlists.mjs",
+    "check:tokenlists": "node scripts/sync-tokenlists.mjs --check",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@dtf-interface/tsconfig": "workspace:*",
     "@types/node": "catalog:",
+    "@uniswap/token-lists": "1.0.0-beta.35",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "tsdown": "catalog:",
     "typescript": "catalog:"
   },

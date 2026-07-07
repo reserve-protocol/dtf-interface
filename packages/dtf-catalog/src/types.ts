@@ -36,4 +36,5 @@ export type CatalogYieldDTF = {
 export type CatalogIndexDTF = CatalogYieldDTF & {
   readonly chainId: 1 | 8453 | 56;
   readonly tags?: readonly string[];
+  readonly restricted: boolean;
 };

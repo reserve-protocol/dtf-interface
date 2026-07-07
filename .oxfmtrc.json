@@ -25,6 +25,9 @@
   },
   "ignorePatterns": [
     "**/node_modules/**",
+    "**/index-dtf/restricted/**",
+    "**/index-dtf/logos.json",
+    "**/tokenlists/**",
     "**/dist/**",
     "**/.next/**",
     "**/.turbo/**",

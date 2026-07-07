@@ -46,3 +46,24 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+  catalog-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - run: corepack enable pnpm
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Restricted Token Lists
+        run: pnpm --filter @reserve-protocol/dtf-catalog check:restricted
+
+      - name: Validate Token Lists
+        run: pnpm --filter @reserve-protocol/dtf-catalog check:tokenlists

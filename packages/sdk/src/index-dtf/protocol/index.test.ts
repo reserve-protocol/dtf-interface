@@ -19,6 +19,7 @@ const DUPLICATE_SYMBOL_ENTRIES = [
     decimals: 18,
     createdAt: 1,
     status: "active",
+    restricted: false,
   },
   {
     chainId: 56,
@@ -29,6 +30,7 @@ const DUPLICATE_SYMBOL_ENTRIES = [
     decimals: 18,
     createdAt: 1,
     status: "active",
+    restricted: false,
   },
 ] satisfies readonly [IndexDtfCatalogTestEntry, IndexDtfCatalogTestEntry];
 

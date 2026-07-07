@@ -8,6 +8,7 @@
     "decimals": 18,
     "createdAt": 1753802435,
     "status": "active",
+    "restricted": false,
     "tags": ["Majors", "Bitcoin", "L1"]
   },
   "0xe00cfa595841fb331105b93c19827797c925e3e4": {
@@ -19,6 +20,7 @@
     "decimals": 18,
     "createdAt": 1760977343,
     "status": "active",
+    "restricted": false,
     "tags": ["L1", "Majors"]
   },
   "0x23418de10d422ad71c9d5713a2b8991a9c586443": {
@@ -30,6 +32,7 @@
     "decimals": 18,
     "createdAt": 1739558581,
     "status": "active",
+    "restricted": false,
     "tags": ["Majors", "Bitcoin", "L1"]
   },
   "0xebcda5b80f62dd4dd2a96357b42bb6facbf30267": {
@@ -41,6 +44,7 @@
     "decimals": 18,
     "createdAt": 1739217373,
     "status": "active",
+    "restricted": false,
     "tags": ["AI", "RWA", "DeFi", "Memes"]
   },
   "0x44551ca46fa5592bb572e20043f7c3d54c85cad7": {
@@ -52,6 +56,7 @@
     "decimals": 18,
     "createdAt": 1739299479,
     "status": "active",
+    "restricted": false,
     "tags": ["Memes", "SocialFi"]
   },
   "0xe8b46b116d3bdfa787ce9cf3f5acc78dc7ca380e": {
@@ -63,6 +68,7 @@
     "decimals": 18,
     "createdAt": 1739559743,
     "status": "active",
+    "restricted": false,
     "tags": ["Majors", "L1", "DeFi", "Bitcoin"]
   },
   "0x47686106181b3cefe4eaf94c4c10b48ac750370b": {
@@ -74,6 +80,7 @@
     "decimals": 18,
     "createdAt": 1739494629,
     "status": "deprecated",
+    "restricted": false,
     "tags": ["AI", "Ecosystem", "Memes"]
   },
   "0xfe45eda533e97198d9f3deeda9ae6c147141f6f9": {
@@ -85,6 +92,7 @@
     "decimals": 18,
     "createdAt": 1739387375,
     "status": "deprecated",
+    "restricted": false,
     "tags": ["AI", "Memes"]
   },
   "0xb8753941196692e322846cfee9c14c97ac81928a": {
@@ -96,6 +104,7 @@
     "decimals": 18,
     "createdAt": 1739991521,
     "status": "active",
+    "restricted": false,
     "tags": ["Memes", "Ecosystem"]
   },
   "0xf8ef6e785473e82527908b06023ac3e401ccfdcd": {
@@ -106,7 +115,8 @@
     "logo": "default.webp",
     "decimals": 18,
     "createdAt": 1740728449,
-    "status": "deprecated"
+    "status": "deprecated",
+    "restricted": false
   },
   "0xd600e748c17ca237fcb5967fa13d688aff17be78": {
     "chainId": 8453,
@@ -117,6 +127,7 @@
     "decimals": 18,
     "createdAt": 1739559257,
     "status": "deprecated",
+    "restricted": false,
     "tags": ["Majors", "L1", "DeFi", "Ecosystem", "Bitcoin"]
   },
   "0x89ff8f639d402839205a6bf03cc01bdffa4768b7": {
@@ -128,6 +139,7 @@
     "decimals": 18,
     "createdAt": 1760448403,
     "status": "deprecated",
+    "restricted": false,
     "tags": ["AI", "DeFi", "SocialFi", "RWA", "DeSci", "LST", "Oracles", "Ecosystem", "Memes"]
   },
   "0x160c18476f6f5099f374033fbc695c9234cda495": {
@@ -139,6 +151,7 @@
     "decimals": 18,
     "createdAt": 1765396307,
     "status": "deprecated",
+    "restricted": false,
     "tags": ["SocialFi", "Ecosystem"]
   }
 }

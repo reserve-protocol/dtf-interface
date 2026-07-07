@@ -8,6 +8,7 @@
     "decimals": 18,
     "createdAt": 1744659395,
     "status": "active",
+    "restricted": false,
     "tags": ["Stablecoins", "DeFi", "Majors", "Ecosystem"]
   },
   "0x4e3b170dcbe704b248df5f56d488114ace01b1c5": {
@@ -19,6 +20,7 @@
     "decimals": 18,
     "createdAt": 1740082055,
     "status": "active",
+    "restricted": false,
     "tags": ["Majors", "Bitcoin", "DeFi", "Stablecoins"]
   },
   "0xf91384484f4717314798e8975bcd904a35fc2bf1": {
@@ -30,6 +32,7 @@
     "decimals": 18,
     "createdAt": 1740080639,
     "status": "active",
+    "restricted": false,
     "tags": ["DeFi", "Stablecoins", "LST"]
   },
   "0x188d12eb13a5eadd0867074ce8354b1ad6f4790b": {
@@ -41,6 +44,7 @@
     "decimals": 18,
     "createdAt": 1739989283,
     "status": "active",
+    "restricted": false,
     "tags": ["DeFi"]
   },
   "0x9a1741e151233a82cf69209a2f1bc7442b1fb29c": {
@@ -52,6 +56,7 @@
     "decimals": 18,
     "createdAt": 1739926919,
     "status": "active",
+    "restricted": false,
     "tags": ["DeFi"]
   },
   "0xe4a10951f962e6cb93cb843a4ef05d2f99db1f94": {
@@ -63,6 +68,7 @@
     "decimals": 18,
     "createdAt": 1768402847,
     "status": "active",
+    "restricted": false,
     "tags": ["RWA", "Stablecoins", "Bitcoin"]
   },
   "0xa5cdea03b11042fc10b52af9eca48bb17a2107d2": {
@@ -74,6 +80,7 @@
     "decimals": 18,
     "createdAt": 1740075311,
     "status": "deprecated",
+    "restricted": false,
     "tags": ["RWA"]
   },
   "0x20d81101d254729a6e689418526be31e2c544290": {
@@ -85,6 +92,7 @@
     "decimals": 18,
     "createdAt": 1739903855,
     "status": "deprecated",
+    "restricted": false,
     "tags": ["DeFi"]
   }
 }

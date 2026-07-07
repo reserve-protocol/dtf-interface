@@ -43,6 +43,8 @@
     "build": "tsdown",
     "clean": "rm -rf dist *.tsbuildinfo",
     "dev": "tsdown --watch",
+    "sync:restricted": "node scripts/sync-restricted.mjs",
+    "check:restricted": "node scripts/sync-restricted.mjs --check",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

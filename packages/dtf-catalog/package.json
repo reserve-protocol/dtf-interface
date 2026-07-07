@@ -47,6 +47,7 @@
     "dev": "tsdown --watch",
     "sync:restricted": "node scripts/sync-restricted.mjs",
     "check:restricted": "node scripts/sync-restricted.mjs --check",
+    "sync:logos": "node scripts/sync-logos.mjs",
     "sync:tokenlists": "node scripts/sync-tokenlists.mjs",
     "check:tokenlists": "node scripts/sync-tokenlists.mjs --check",
     "typecheck": "tsc -p tsconfig.json --noEmit"

@@ -12,56 +12,64 @@
       "address": "0x323c03c48660fe31186fa82c289b0766d331ce21",
       "name": "Open Stablecoin Index",
       "symbol": "OPEN",
-      "decimals": 18
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxqD7AIQfxfH57h2mseoNual3tKBRCYyvnS1E8"
     },
     {
       "chainId": 1,
       "address": "0x4e3b170dcbe704b248df5f56d488114ace01b1c5",
       "name": "BTC ETH DCA Index",
       "symbol": "BED",
-      "decimals": 18
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxMTU5lPoRix5rWy10MU6N3YbuCjQ2hleoTVF4"
     },
     {
       "chainId": 1,
       "address": "0xf91384484f4717314798e8975bcd904a35fc2bf1",
       "name": "Imagine The SMEL",
       "symbol": "SMEL",
-      "decimals": 18
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxxi581ZKa2RzUWur86ESst14dTH3KhC5mobYj"
     },
     {
       "chainId": 1,
       "address": "0x188d12eb13a5eadd0867074ce8354b1ad6f4790b",
       "name": "CoinDesk DeFi Select Index",
       "symbol": "DFX",
-      "decimals": 18
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXx5V0tDlhN1x8WsPzKQYEGuJwIpDVehmXl4fqM"
     },
     {
       "chainId": 1,
       "address": "0x9a1741e151233a82cf69209a2f1bc7442b1fb29c",
       "name": "DeFi Growth Index",
       "symbol": "DGI",
-      "decimals": 18
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxx5Z4pEnKa2RzUWur86ESst14dTH3KhC5mobY"
     },
     {
       "chainId": 1,
       "address": "0xe4a10951f962e6cb93cb843a4ef05d2f99db1f94",
       "name": "Sagix Club Edelweiss",
       "symbol": "ixEdel",
-      "decimals": 18
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxjThLW3aFRwh3cEqUL2OHX1kzGKtMAygspxlu"
     },
     {
       "chainId": 1,
       "address": "0xa5cdea03b11042fc10b52af9eca48bb17a2107d2",
       "name": "RWA Index",
       "symbol": "mvRWA",
-      "decimals": 18
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxHWjFtoZo73hGVUOQXrem4RS6TkLaNEnPwBxz"
     },
     {
       "chainId": 1,
       "address": "0x20d81101d254729a6e689418526be31e2c544290",
       "name": "Large Cap DeFi Index",
       "symbol": "mvDEFI",
-      "decimals": 18
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxEPb8hIqGL3YqrVoxUsP7zikIh9mNaO4QBTy8"
     }
   ]
 }

@@ -7,7 +7,8 @@
 // are excluded from the main lists and only appear in the restricted lists.
 // Lists with no tokens are skipped because the schema requires at least one
 // token. The list timestamp is derived from the newest token so generation
-// stays deterministic.
+// stays deterministic. Token logoURIs come from the index-dtf/logos.json
+// snapshot produced by sync:logos.
 //
 // Run `node scripts/sync-tokenlists.mjs` to regenerate the token lists.
 // Run `node scripts/sync-tokenlists.mjs --check` to validate them and verify
@@ -21,6 +22,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const packageRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+const logos = JSON.parse(readFileSync(join(packageRoot, "index-dtf/logos.json"), "utf8"));
+const missingLogos = [];
 
 const chainNames = { base: "Base", bnb: "BNB", mainnet: "Ethereum" };
 
@@ -50,13 +54,18 @@ function buildTokenList(name, source, include) {
     name,
     timestamp: new Date(newestCreatedAt * 1000).toISOString(),
     version: { major: 1, minor: 0, patch: 0 },
-    tokens: entries.map((token) => ({
-      chainId: token.chainId,
-      address: token.address,
-      name: token.name,
-      symbol: token.symbol,
-      decimals: token.decimals,
-    })),
+    tokens: entries.map((token) => {
+      const logoURI = logos[`${token.chainId}:${token.address.toLowerCase()}`];
+      if (!logoURI) missingLogos.push(`${token.symbol} (${token.chainId}:${token.address})`);
+      return {
+        chainId: token.chainId,
+        address: token.address,
+        name: token.name,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        logoURI,
+      };
+    }),
   };
 }
 
@@ -108,6 +117,10 @@ if (check && stale.length > 0) {
       `Run \`pnpm --filter @reserve-protocol/dtf-catalog sync:tokenlists\` and commit the result.`,
   );
   process.exit(1);
+}
+
+if (missingLogos.length > 0) {
+  console.warn(`Missing logoURI for: ${[...new Set(missingLogos)].join(", ")}. Run sync:logos to refresh.`);
 }
 
 if (check) {

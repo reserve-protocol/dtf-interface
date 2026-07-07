@@ -12,7 +12,8 @@
       "address": "0x2f8a339b5889ffac4c5a956787cda593b3c36867",
       "name": "CoinMarketCap 20 Index DTF",
       "symbol": "CMC20",
-      "decimals": 18
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxhO6t9I2BbMt4sV2Y6jmzwPSZ3Hrav0gfieuo"
     }
   ]
 }

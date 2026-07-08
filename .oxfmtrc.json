@@ -35,6 +35,7 @@
     "**/.pnpm-store/**",
     "**/.output/**",
     "**/*.generated.ts",
+    "**/CHANGELOG.md",
     "pnpm-lock.yaml"
   ]
 }

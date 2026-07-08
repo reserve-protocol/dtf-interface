@@ -28,6 +28,8 @@ const missingLogos = [];
 
 const chainNames = { base: "Base", bnb: "BNB", mainnet: "Ethereum" };
 
+const listLogoURI = "https://app.reserve.org/svgs/reserve.svg";
+
 const specs = [];
 for (const chain of ["base", "bnb", "mainnet"]) {
   specs.push({
@@ -52,6 +54,7 @@ function buildTokenList(name, source, include) {
 
   return {
     name,
+    logoURI: listLogoURI,
     timestamp: new Date(newestCreatedAt * 1000).toISOString(),
     version: { major: 1, minor: 0, patch: 0 },
     tokens: entries.map((token) => {

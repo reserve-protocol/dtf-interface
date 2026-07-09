@@ -28,7 +28,8 @@ const missingLogos = [];
 
 const chainNames = { base: "Base", bnb: "BNB", mainnet: "Ethereum" };
 
-const listLogoURI = "https://app.reserve.org/svgs/reserve.svg";
+const listLogoURI =
+  "https://github.com/reserve-protocol/brand-assets/blob/master/assets/Reserve-Monogram-white-blue.png?raw=true";
 
 const specs = [];
 for (const chain of ["base", "bnb", "mainnet"]) {

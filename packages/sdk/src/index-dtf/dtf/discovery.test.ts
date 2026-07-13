@@ -45,7 +45,8 @@ describe("Index DTF discovery", () => {
     const client = createDtfClient({ apiBaseUrl: "https://api.example" });
 
     await expect(getIndexDtfStatus(client, { address: DTF, chainId: 8453 })).resolves.toBe("deprecated");
-    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe("https://api.example/discover/dtfs");
+    // One unpaged scan with an explicit high limit — never a server-capped page.
+    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe("https://api.example/discover/dtfs?limit=1000");
   });
 
   it("matches status by address and chain in one global discovery request", async () => {

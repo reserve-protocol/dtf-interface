@@ -1,5 +1,6 @@
 import type { Address } from "viem";
 
+import { indexDtfs as indexDtfCatalog } from "@reserve-protocol/dtf-catalog";
 import { getAddress } from "viem";
 
 import type { DtfClient } from "@/client";
@@ -24,7 +25,6 @@ import type {
 } from "@/types/index-dtf";
 
 import dtfAbi from "@/index-dtf/abis/dtf-index-abi-v6";
-import { getIndexDtfStatus } from "@/index-dtf/dtf/discovery";
 import {
   mapIndexDtf,
   mapIndexDtfBasketSnapshot,
@@ -33,7 +33,6 @@ import {
   mapIndexDtfPriceHistory,
   type IndexDtfBrandResponse,
 } from "@/index-dtf/dtf/mappers";
-import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 import { GetIndexDtfDocument } from "@/index-dtf/subgraph/dtf.generated";
 import { SdkError } from "@/lib/errors";
 import { getTokensData } from "@/lib/tokens";
@@ -65,11 +64,9 @@ export async function getDtf(client: DtfClient, params: DtfParams): Promise<Inde
 }
 
 export async function getFull(client: DtfClient, params: GetIndexDtfParams): Promise<IndexDtfFull> {
-  const [dtf, market, platformFee, status, brand] = await Promise.all([
+  const [dtf, market, brand] = await Promise.all([
     getDtf(client, params),
     getBasketWithPrice(client, params),
-    getIndexDtfPlatformFee(client, params),
-    getIndexDtfStatus(client, params),
     params.brand ? getBrand(client, params) : undefined,
   ]);
 
@@ -82,8 +79,7 @@ export async function getFull(client: DtfClient, params: GetIndexDtfParams): Pro
       fetchedAt: market.timestamp,
     },
     basket: market.basket,
-    platformFee,
-    status,
+    status: indexDtfCatalog[params.chainId]?.[params.address.toLowerCase()]?.status ?? "active",
     ...(brand ? { brand } : {}),
   };
 }

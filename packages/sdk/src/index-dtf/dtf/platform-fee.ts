@@ -35,6 +35,6 @@ export async function getIndexDtfPlatformFee(
     numerator,
     denominator,
     floor,
-    percent: new Decimal(numerator.toString()).mul(100).div(denominator.toString()).toNumber(),
+    percent: denominator === 0n ? 0 : new Decimal(numerator.toString()).mul(100).div(denominator.toString()).toNumber(),
   };
 }

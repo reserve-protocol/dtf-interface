@@ -136,7 +136,7 @@ describe("Index DTF getters", () => {
     );
   });
 
-  it("includes current status and platform fee in the full Index DTF response", async () => {
+  it("returns market and basket without fee (RPC) or status (REST) subqueries", async () => {
     const dtf = "0x0000000000000000000000000000000000000001";
     const token = "0x0000000000000000000000000000000000000009";
     const registry = "0x0000000000000000000000000000000000000010";
@@ -192,15 +192,11 @@ describe("Index DTF getters", () => {
 
     const full = await getFull(client, { address: dtf, chainId: 1 });
 
-    expect(full.status).toBe("deprecated");
-    expect(full.platformFee).toEqual({
-      registry,
-      recipient,
-      numerator: 15n,
-      denominator: 100n,
-      floor: 0n,
-      percent: 15,
-    });
+    // status is read from the static catalog (this address is unlisted → "active"),
+    // never the REST discover call the mock would answer "deprecated".
+    expect(full.status).toBe("active");
+    expect(full).not.toHaveProperty("platformFee");
+    expect(readContract).not.toHaveBeenCalledWith(expect.objectContaining({ functionName: "getFeeDetails" }));
     expect(full.market).toMatchObject({ price: 10, marketCap: 1000, totalSupply: 100 });
     expect(full.basket[getAddress(token)]?.balance.raw).toBe(1_000_000_000_000_000_000n);
   });

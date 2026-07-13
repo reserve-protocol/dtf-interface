@@ -227,7 +227,6 @@ export type IndexDtfPlatformFee = {
 export type IndexDtfFull = IndexDtf & {
   readonly market: IndexDtfMarket;
   readonly basket: Record<Address, IndexDtfBasketAssetWithPrice>;
-  readonly platformFee: IndexDtfPlatformFee;
   readonly status: DtfStatus;
   readonly brand?: IndexDtfBrand;
 };

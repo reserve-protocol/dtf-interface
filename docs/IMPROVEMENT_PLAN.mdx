@@ -1,4 +1,6 @@
-# DTF SDK Improvement Plan
+# DTF SDK Improvement Plan (historical execution log)
+
+Status: historical. This document preserves the findings and decisions from the previous audit. Test totals, package pins, and the backlog below are point-in-time evidence. Use [`SDK_AUDIT_2026-07-09.md`](./SDK_AUDIT_2026-07-09.md) for the current audit and prioritized integration plan.
 
 Audited 2026-06-11; the P0–P3 roadmap from that audit was **executed the same day** on branch `chore/sdk-audit-improvements` (SDK) with the matching Register migration left uncommitted in `~/projects/register`. This document now records: what shipped, what the audit got wrong (verified during execution), and the next plan.
 
@@ -89,7 +91,7 @@ Ordered by value; nothing here blocks the release of what's above.
 
 ### API health (opportunistic)
 
-5. **`useQueries` interop** (S): RQ v5's `UseQueryOptionsForUseQueries` rejects `DtfQueryOptionsResult` (branded `queryFn`/`placeholderData` variance). If more multi-query consumers appear, export a `forUseQueries()`-shaped builder or adopt RQ's `queryOptions()` branding in `createDtfQueryOptions`.
+5. **`useQueries` interop** (resolved 2026-07-09): `createDtfQueryOptions` now uses TanStack Query's native `queryOptions()` branding, and a compile-time test covers the selector-registry multi-query case.
 6. **Register `use-vote-lock-refresh.ts`** (S): still hand-manages invalidation keys; now that the fallback is an SDK hook with a canonical key, the external-refresh branch can likely invalidate `dtfQueryKeys.index.voteLockVaultState(...)` instead of threading refetch callbacks. Do it when next touching the drawer.
 7. **`sdk.yield` boundary** (done): the placeholder namespace has been replaced with the implemented Yield DTF surface. Keep repeating the calldata-fixture pattern as new Yield builders land.
 

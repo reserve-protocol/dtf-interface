@@ -31,11 +31,11 @@ import {
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
 } from "@/index-dtf/dtf/issuance";
+import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 import {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
   getIndexDtfPendingFeeShares,
-  getIndexDtfPlatformFee,
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
   prepareIndexDtfDistributeFees,
@@ -47,6 +47,7 @@ import {
   getBidQuote,
   getLatestAuction,
   getIndexDtfCurrentRebalance,
+  getIndexDtfRebalanceLiquidity,
   getCompletedRebalance,
   getCompletedRebalances,
   getRebalance,
@@ -171,6 +172,8 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
         chainId,
         ...blockParams(options),
       }),
+    getRebalanceLiquidity: (options: Omit<Parameters<typeof getIndexDtfRebalanceLiquidity>[1], "chainId">) =>
+      getIndexDtfRebalanceLiquidity(client, { ...options, chainId }),
     getActiveAuction: (options?: BlockNumberOption | BlockNumber) =>
       getActiveAuction(client, { address, chainId, ...blockParams(options) }),
     getLatestAuction: (options?: BlockNumberOption | BlockNumber) =>

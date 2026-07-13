@@ -1,4 +1,10 @@
-import type { DefaultError, QueryKey, UseQueryOptions } from "@tanstack/react-query";
+import {
+  queryOptions,
+  type DataTag,
+  type DefaultError,
+  type QueryKey,
+  type UseQueryOptions,
+} from "@tanstack/react-query";
 
 /** Prices, auctions, issuance quotes — data that moves block to block. */
 export const LIVE_STALE_TIME = 10_000;
@@ -20,7 +26,7 @@ export type DtfQueryOptionsResult<TQueryFnData, TData = TQueryFnData> = UseQuery
   TData,
   QueryKey
 > & {
-  readonly queryKey: QueryKey;
+  readonly queryKey: DataTag<QueryKey, TQueryFnData, DefaultError>;
   readonly queryFn: () => Promise<TQueryFnData>;
 };
 
@@ -32,11 +38,14 @@ export function createDtfQueryOptions<TQueryFnData, TData = TQueryFnData>(
   staleTime: number = DEFAULT_STALE_TIME,
 ): DtfQueryOptionsResult<TQueryFnData, TData> {
   return {
-    staleTime,
-    ...options,
-    queryKey,
+    ...queryOptions({
+      staleTime,
+      ...options,
+      queryKey,
+      queryFn,
+      enabled: enabled && options.enabled !== false,
+    }),
     queryFn,
-    enabled: enabled && options.enabled !== false,
   };
 }
 

@@ -2,8 +2,56 @@ import type { DtfSdk } from "@reserve-protocol/sdk";
 
 import type { IndexMethod, MethodParams, MethodResult, PortfolioMethod } from "@/sdk-methods";
 
-import { createDtfQueryOptions, LIVE_STALE_TIME, requireParams, type DtfQueryOptions } from "@/query";
+import {
+  createDtfQueryOptions,
+  LIVE_STALE_TIME,
+  requireParams,
+  STATIC_STALE_TIME,
+  type DtfQueryOptions,
+} from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
+
+export function indexDtfMandateQueryOptions<TData = MethodResult<IndexMethod<"getMandate">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getMandate">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getMandate">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.mandate(params),
+    () => sdk.index.getMandate(requireParams(params, "indexDtfMandateQueryOptions")),
+    params !== undefined,
+    options,
+    STATIC_STALE_TIME,
+  );
+}
+
+export function indexDtfTotalSupplyQueryOptions<TData = MethodResult<IndexMethod<"getTotalSupply">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getTotalSupply">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getTotalSupply">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.totalSupply(params),
+    () => sdk.index.getTotalSupply(requireParams(params, "indexDtfTotalSupplyQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
+export function indexDtfTotalAssetsQueryOptions<TData = MethodResult<IndexMethod<"getTotalAssets">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getTotalAssets">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getTotalAssets">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.totalAssets(params),
+    () => sdk.index.getTotalAssets(requireParams(params, "indexDtfTotalAssetsQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
 
 export function indexDtfStatusQueryOptions<TData = MethodResult<IndexMethod<"getStatus">>>(
   sdk: DtfSdk,
@@ -26,6 +74,19 @@ export function indexDtfExposureQueryOptions<TData = MethodResult<IndexMethod<"g
   return createDtfQueryOptions(
     dtfQueryKeys.index.exposure(params),
     () => sdk.index.getExposure(requireParams(params, "indexDtfExposureQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfHoldersQueryOptions<TData = MethodResult<IndexMethod<"getHolders">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getHolders">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getHolders">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.holders(params),
+    () => sdk.index.getHolders(requireParams(params, "indexDtfHoldersQueryOptions")),
     params !== undefined,
     options,
   );
@@ -71,6 +132,32 @@ export function indexDtfIssuanceStateQueryOptions<TData = MethodResult<IndexMeth
   );
 }
 
+export function indexDtfBidsEnabledQueryOptions<TData = MethodResult<IndexMethod<"getBidsEnabled">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getBidsEnabled">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getBidsEnabled">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.bidsEnabled(params),
+    () => sdk.index.getBidsEnabled(requireParams(params, "indexDtfBidsEnabledQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfRebalanceControlQueryOptions<TData = MethodResult<IndexMethod<"getRebalanceControl">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getRebalanceControl">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getRebalanceControl">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.rebalanceControl(params),
+    () => sdk.index.getRebalanceControl(requireParams(params, "indexDtfRebalanceControlQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
 export function indexDtfRebalancesQueryOptions<TData = MethodResult<IndexMethod<"getRebalances">>>(
   sdk: DtfSdk,
   params: MethodParams<IndexMethod<"getRebalances">> | undefined,
@@ -84,6 +171,19 @@ export function indexDtfRebalancesQueryOptions<TData = MethodResult<IndexMethod<
   );
 }
 
+export function indexDtfRebalanceQueryOptions<TData = MethodResult<IndexMethod<"getRebalance">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getRebalance">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getRebalance">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.rebalance(params),
+    () => sdk.index.getRebalance(requireParams(params, "indexDtfRebalanceQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
 export function indexDtfCurrentRebalanceQueryOptions<TData = MethodResult<IndexMethod<"getCurrentRebalance">>>(
   sdk: DtfSdk,
   params: MethodParams<IndexMethod<"getCurrentRebalance">> | undefined,
@@ -92,6 +192,20 @@ export function indexDtfCurrentRebalanceQueryOptions<TData = MethodResult<IndexM
   return createDtfQueryOptions(
     dtfQueryKeys.index.currentRebalance(params),
     () => sdk.index.getCurrentRebalance(requireParams(params, "indexDtfCurrentRebalanceQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
+export function indexDtfRebalanceLiquidityQueryOptions<TData = MethodResult<IndexMethod<"getRebalanceLiquidity">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getRebalanceLiquidity">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getRebalanceLiquidity">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.rebalanceLiquidity(params),
+    () => sdk.index.getRebalanceLiquidity(requireParams(params, "indexDtfRebalanceLiquidityQueryOptions")),
     params !== undefined,
     options,
     LIVE_STALE_TIME,
@@ -186,6 +300,48 @@ export function indexDtfRebalanceAuctionsQueryOptions<TData = MethodResult<Index
   return createDtfQueryOptions(
     dtfQueryKeys.index.rebalanceAuctions(params),
     () => sdk.index.getRebalanceAuctions(requireParams(params, "indexDtfRebalanceAuctionsQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
+export function indexDtfActiveAuctionQueryOptions<TData = MethodResult<IndexMethod<"getActiveAuction">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getActiveAuction">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getActiveAuction">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.activeAuction(params),
+    () => sdk.index.getActiveAuction(requireParams(params, "indexDtfActiveAuctionQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
+export function indexDtfLatestAuctionQueryOptions<TData = MethodResult<IndexMethod<"getLatestAuction">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getLatestAuction">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getLatestAuction">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.latestAuction(params),
+    () => sdk.index.getLatestAuction(requireParams(params, "indexDtfLatestAuctionQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
+export function indexDtfBidQuoteQueryOptions<TData = MethodResult<IndexMethod<"getBidQuote">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getBidQuote">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getBidQuote">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.bidQuote(params),
+    () => sdk.index.getBidQuote(requireParams(params, "indexDtfBidQuoteQueryOptions")),
     params !== undefined,
     options,
     LIVE_STALE_TIME,

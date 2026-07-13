@@ -278,7 +278,7 @@ export function prepareYieldDtfRunRevenueAuctions(params: YieldDtfRunRevenueAuct
       getAddress(params.trader),
       params.toSettle.map((erc20) => getAddress(erc20)),
       params.toStart.map((erc20) => getAddress(erc20)),
-      new Array<number>(params.toStart.length).fill(params.kind),
+      Array.from({ length: params.toStart.length }, () => params.kind),
     ],
   });
 }

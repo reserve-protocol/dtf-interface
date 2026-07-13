@@ -2,25 +2,16 @@ import { getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
 import type { Amount, Token } from "@/types/common";
-import type { Financials, IndexDtf, PriceControl } from "@/types/index-dtf";
+import type { Financials, IndexDtf, IndexDtfPlatformFee, PriceControl } from "@/types/index-dtf";
 
-import { daoFeeRegistryAbi } from "@/index-dtf/abis/dao-fee-registry";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { getDtf, getPrice } from "@/index-dtf/dtf/index";
+import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 import { prepareContractCall } from "@/lib/contract-call";
 import { Decimal } from "@/lib/decimal";
 import { getTokensData } from "@/lib/tokens";
 import { mapAmount } from "@/lib/utils";
-
-export type IndexDtfPlatformFee = {
-  readonly registry: Address;
-  readonly recipient: Address;
-  readonly numerator: bigint;
-  readonly denominator: bigint;
-  readonly floor: bigint;
-  readonly percent: number;
-};
 
 export type IndexDtfRevenue = {
   readonly financials: Financials;
@@ -87,38 +78,6 @@ export async function getIndexDtfPendingFeeShares(
   });
 
   return mapAmount(raw, 18);
-}
-
-/** Reads the DAO fee registry settings that affect this DTF's revenue split. */
-export async function getIndexDtfPlatformFee(
-  client: DtfClient,
-  params: { readonly address: Address; readonly chainId: IndexDtf["chainId"]; readonly blockNumber?: bigint },
-): Promise<IndexDtfPlatformFee> {
-  const address = getAddress(params.address);
-  const registry = await client.viem.readContract({
-    address,
-    abi: dtfIndexAbi,
-    functionName: "daoFeeRegistry",
-    chainId: params.chainId,
-    blockNumber: params.blockNumber,
-  });
-  const [recipient, numerator, denominator, floor] = await client.viem.readContract({
-    address: registry,
-    abi: daoFeeRegistryAbi,
-    functionName: "getFeeDetails",
-    args: [address],
-    chainId: params.chainId,
-    blockNumber: params.blockNumber,
-  });
-
-  return {
-    registry,
-    recipient,
-    numerator,
-    denominator,
-    floor,
-    percent: new Decimal(numerator.toString()).mul(100).div(denominator.toString()).toNumber(),
-  };
 }
 
 /** Reads live staking-vault reward tokens approved for DTF fee distribution. */

@@ -140,27 +140,15 @@ export async function getIndexDtfStatus(
   params: { readonly address: Address; readonly chainId: SupportedChainId },
 ): Promise<DtfStatus> {
   const address = getAddress(params.address);
-  const limit = 1000;
-  let offset = 0;
+  const items = await fetchDiscoveryItems(client, "/discover/dtfs", {});
+  const item = items.find(
+    (dtf) =>
+      isIndexDiscoveryItem(dtf) &&
+      dtf.chainId === params.chainId &&
+      dtf.address.toLowerCase() === address.toLowerCase(),
+  );
 
-  while (true) {
-    const items = await fetchDiscoveryItems(client, "/discover/dtfs", {
-      chainId: params.chainId,
-      limit,
-      offset,
-    });
-    const item = items.find((dtf) => isIndexDiscoveryItem(dtf) && dtf.address.toLowerCase() === address.toLowerCase());
-
-    if (item) {
-      return item.status ?? "active";
-    }
-
-    if (items.length < limit) {
-      return "active";
-    }
-
-    offset += limit;
-  }
+  return item?.status ?? "active";
 }
 
 /**

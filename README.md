@@ -14,16 +14,17 @@ This SDK is intentionally more opinionated than low-level libraries like viem. I
 
 Implemented SDK product surface:
 
-- Index DTFs: Ethereum mainnet, Base, BSC.
+- Index DTFs on Ethereum mainnet, Base, and BSC: discovery, live/historical reads, issuance, rebalances and auctions, governance, vote-lock, deploy/proposal/transaction builders, and React Query hooks.
+- Yield DTFs on Ethereum mainnet and Base: reads, issuance, staking, governance, auctions/revenue, APY, proposal builders, and React Query hooks.
 - Account portfolio API reads: current portfolio, historical portfolio, and transactions.
-
-Yield DTF catalog entries and subgraph defaults exist for Ethereum mainnet and Base, but `sdk.yield.get` and `sdk.yield.list` are not implemented yet.
+- Curated Index/Yield DTF catalog and token lists.
 
 The core rule is:
 
 > Namespace methods are the public SDK surface. The client holds runtime configuration. Transports stay small. Defaults make the SDK easy to use.
 
 Read [docs/sdk/architecture.md](./docs/sdk/architecture.md) before adding large features.
+The current codebase audit and Register integration order live in [docs/SDK_AUDIT_2026-07-09.md](./docs/SDK_AUDIT_2026-07-09.md).
 
 ## Commands
 
@@ -32,10 +33,11 @@ pnpm install
 pnpm build
 pnpm typecheck
 pnpm test
+pnpm docs:links
 pnpm release:ci
 ```
 
-`pnpm release:ci` runs typecheck, tests, build, docs build, and package dry-runs for the publishable packages.
+`pnpm release:ci` runs typecheck, tests, builds (including the docs site), local documentation-link checks, and package dry-runs for the publishable packages.
 
 ## Quick Example
 

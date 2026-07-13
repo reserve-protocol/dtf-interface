@@ -184,6 +184,12 @@ export const dtfQueryKeys = {
     version: (params?: GetIndexDtfVersionParams) =>
       [...dtfQueryKeys.index.all(), "version", keyParams(params)] as const,
     brand: (params?: DtfParams) => [...dtfQueryKeys.index.all(), "brand", keyParams(params)] as const,
+    mandate: (params?: IndexMethodParams<"getMandate">) =>
+      [...dtfQueryKeys.index.all(), "mandate", keyParams(params)] as const,
+    totalSupply: (params?: IndexMethodParams<"getTotalSupply">) =>
+      [...dtfQueryKeys.index.all(), "total-supply", keyParams(params)] as const,
+    totalAssets: (params?: IndexMethodParams<"getTotalAssets">) =>
+      [...dtfQueryKeys.index.all(), "total-assets", keyParams(params)] as const,
     price: (params?: GetIndexDtfPriceParams) => [...dtfQueryKeys.index.all(), "price", keyParams(params)] as const,
     priceHistory: (params?: GetIndexDtfPriceHistoryParams) =>
       [...dtfQueryKeys.index.all(), "price-history", keyParams(params)] as const,
@@ -191,6 +197,8 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "status", keyParams(params)] as const,
     exposure: (params?: IndexMethodParams<"getExposure">) =>
       [...dtfQueryKeys.index.all(), "exposure", keyParams(params)] as const,
+    holders: (params?: IndexMethodParams<"getHolders">) =>
+      [...dtfQueryKeys.index.all(), "holders", keyParams(params)] as const,
     transactions: (params?: IndexMethodParams<"getTransactions">) =>
       [...dtfQueryKeys.index.all(), "transactions", keyParams(params)] as const,
     revenue: (params?: IndexMethodParams<"getRevenue">) =>
@@ -203,12 +211,26 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "approved-revenue-tokens", keyParams(params)] as const,
     issuanceState: (params?: IndexMethodParams<"getIssuanceState">) =>
       [...dtfQueryKeys.index.all(), "issuance-state", keyParams(params)] as const,
+    bidsEnabled: (params?: IndexMethodParams<"getBidsEnabled">) =>
+      [...dtfQueryKeys.index.all(), "bids-enabled", keyParams(params)] as const,
+    rebalanceControl: (params?: IndexMethodParams<"getRebalanceControl">) =>
+      [...dtfQueryKeys.index.all(), "rebalance-control", keyParams(params)] as const,
     rebalances: (params?: IndexMethodParams<"getRebalances">) =>
       [...dtfQueryKeys.index.all(), "rebalances", keyParams(params)] as const,
+    rebalance: (params?: IndexMethodParams<"getRebalance">) =>
+      [...dtfQueryKeys.index.all(), "rebalance", keyParams(params)] as const,
     currentRebalance: (params?: IndexMethodParams<"getCurrentRebalance">) =>
       [...dtfQueryKeys.index.all(), "current-rebalance", keyParams(params)] as const,
+    rebalanceLiquidity: (params?: IndexMethodParams<"getRebalanceLiquidity">) =>
+      [...dtfQueryKeys.index.all(), "rebalance-liquidity", keyParams(params)] as const,
     rebalanceAuctions: (params?: IndexMethodParams<"getRebalanceAuctions">) =>
       [...dtfQueryKeys.index.all(), "rebalance-auctions", keyParams(params)] as const,
+    activeAuction: (params?: IndexMethodParams<"getActiveAuction">) =>
+      [...dtfQueryKeys.index.all(), "active-auction", keyParams(params)] as const,
+    latestAuction: (params?: IndexMethodParams<"getLatestAuction">) =>
+      [...dtfQueryKeys.index.all(), "latest-auction", keyParams(params)] as const,
+    bidQuote: (params?: IndexMethodParams<"getBidQuote">) =>
+      [...dtfQueryKeys.index.all(), "bid-quote", keyParams(params)] as const,
     completedRebalance: (params?: IndexMethodParams<"getCompletedRebalance">) =>
       [...dtfQueryKeys.index.all(), "completed-rebalance", keyParams(params)] as const,
     completedRebalances: (params?: IndexMethodParams<"getCompletedRebalances">) =>

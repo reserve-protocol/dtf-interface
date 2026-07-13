@@ -55,11 +55,11 @@ import {
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
 } from "@/index-dtf/dtf/issuance";
+import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 import {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
   getIndexDtfPendingFeeShares,
-  getIndexDtfPlatformFee,
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
   prepareIndexDtfDistributeFees,
@@ -68,10 +68,15 @@ import { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 import { createIndexDtfGovernanceNamespace } from "@/index-dtf/governance/namespace";
 import { getIndexDtfCatalogEntries, listIndexDtfs, resolveIndexDtfAlias } from "@/index-dtf/protocol/index";
 import {
+  buildIndexDtfRebalanceLiquidityTrades,
   getActiveAuction,
   getBidQuote,
   getLatestAuction,
   getIndexDtfCurrentRebalance,
+  getIndexDtfExceededOndoLegs,
+  getIndexDtfMaxSafeRebalancePercent,
+  getIndexDtfRebalanceLegSizes,
+  getIndexDtfRebalanceLiquidity,
   getCompletedRebalance,
   getCompletedRebalances,
   getRebalance,
@@ -155,6 +160,12 @@ export function createIndexDtfNamespace(client: DtfClient) {
     getRebalanceAuctions: (params: Parameters<typeof getRebalanceAuctions>[1]) => getRebalanceAuctions(client, params),
     getCurrentRebalance: (params: Parameters<typeof getIndexDtfCurrentRebalance>[1]) =>
       getIndexDtfCurrentRebalance(client, params),
+    getRebalanceLiquidity: (params: Parameters<typeof getIndexDtfRebalanceLiquidity>[1]) =>
+      getIndexDtfRebalanceLiquidity(client, params),
+    buildRebalanceLiquidityTrades: buildIndexDtfRebalanceLiquidityTrades,
+    getRebalanceLegSizes: getIndexDtfRebalanceLegSizes,
+    getMaxSafeRebalancePercent: getIndexDtfMaxSafeRebalancePercent,
+    getExceededOndoLegs: getIndexDtfExceededOndoLegs,
     getActiveAuction: (params: Parameters<typeof getActiveAuction>[1]) => getActiveAuction(client, params),
     getLatestAuction: (params: Parameters<typeof getLatestAuction>[1]) => getLatestAuction(client, params),
     getBidQuote: (params: Parameters<typeof getBidQuote>[1]) => getBidQuote(client, params),

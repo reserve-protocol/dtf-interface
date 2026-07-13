@@ -301,7 +301,7 @@ function proposalHashArgs(
 }
 
 function zeroValues(length: number): readonly bigint[] {
-  return new Array<bigint>(length).fill(0n);
+  return Array.from({ length }, () => 0n);
 }
 
 function validateGovernorVoteSupport(support: number): void {

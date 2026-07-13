@@ -13,6 +13,7 @@ This directory is the shared source-of-truth context for Reserve Protocol work i
 - Start with `register/interface.md` when matching Register product behavior.
 - Start with `decisions.md` when checking recent cross-cutting SDK/Register implementation decisions.
 - Start with `plans/README.md` for pending implementation tracks that are not canonical SDK behavior yet.
+- Start with `SDK_AUDIT_2026-07-09.md` for the current architecture/test/React audit and prioritized Register integration sequence.
 
 ## Source Hierarchy
 

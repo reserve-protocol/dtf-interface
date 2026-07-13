@@ -1,0 +1,5 @@
+# Append-oriented workflow memory is merged by union so parallel branches keep both entries.
+docs/wiki/log.md merge=union
+docs/wiki/decisions.md merge=union
+docs/wiki/progress.md merge=union
+docs/wiki/index.md merge=union

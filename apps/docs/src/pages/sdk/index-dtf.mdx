@@ -30,23 +30,25 @@ const dtfs = await sdk.index.discover({
 
 ## DTF Reads
 
-| Method              | Use                                                             |
-| ------------------- | --------------------------------------------------------------- |
-| `get`               | Full product-shaped Index DTF view with market and basket data. |
-| `getDtf`            | Subgraph DTF metadata.                                          |
-| `getBasket`         | Live RPC basket from `totalAssets()`.                           |
-| `getBasketSnapshot` | Reserve API current or block snapshot basket.                   |
-| `getVersion`        | DTF version from contract.                                      |
-| `getTotalSupply`    | Live total supply. Includes pending fee shares.                 |
-| `getTotalAssets`    | Live total assets.                                              |
-| `getBrand`          | Product brand metadata.                                         |
-| `getMandate`        | DTF mandate string.                                             |
-| `getPrice`          | Current Reserve API price.                                      |
-| `getPrices`         | Batch current prices.                                           |
-| `getPriceHistory`   | Historical Reserve API price points.                            |
-| `getExposure`       | Exposure/analytics data.                                        |
-| `getHolders`        | Holder data.                                                    |
-| `getTransactions`   | Transaction history.                                            |
+| Method              | Use                                                                     |
+| ------------------- | ----------------------------------------------------------------------- |
+| `get`               | Full product-shaped view with market, basket, platform fee, and status. |
+| `getDtf`            | Subgraph DTF metadata.                                                  |
+| `getBasket`         | Live RPC basket from `totalAssets()`.                                   |
+| `getBasketSnapshot` | Reserve API current or block snapshot basket.                           |
+| `getVersion`        | DTF version from contract.                                              |
+| `getTotalSupply`    | Live total supply. Includes pending fee shares.                         |
+| `getTotalAssets`    | Live total assets.                                                      |
+| `getBrand`          | Product brand metadata.                                                 |
+| `getMandate`        | DTF mandate string.                                                     |
+| `getPrice`          | Current Reserve API price.                                              |
+| `getPrices`         | Batch current prices.                                                   |
+| `getPriceHistory`   | Historical Reserve API price points.                                    |
+| `getExposure`       | Exposure/analytics data.                                                |
+| `getHolders`        | Holder data.                                                            |
+| `getTransactions`   | Transaction history.                                                    |
+
+`getBrand` preserves overview media metadata, including `video` and downloadable `files`, in addition to covers, descriptions, profiles, tags, and social links.
 
 ```ts
 const [basket, price] = await Promise.all([
@@ -102,6 +104,18 @@ const plan = sdk.index.prepareMintPlan({
 | `getPlatformFee`           | Platform fee configuration.                        |
 | `getRevenue`               | Revenue view.                                      |
 | `prepareDistributeFees`    | Materialize pending fee shares.                    |
+
+## Rebalance Liquidity And Health
+
+| Method                          | Use                                                               |
+| ------------------------------- | ----------------------------------------------------------------- |
+| `getRebalanceLiquidity`         | Check proposed trades against DEX liquidity and Ondo market data. |
+| `buildRebalanceLiquidityTrades` | Scale surplus and deficit trades to the matched auction total.    |
+| `getRebalanceLegSizes`          | Size the largest single fill exposed by each auction leg.         |
+| `getMaxSafeRebalancePercent`    | Find the highest percent within open Ondo session caps.           |
+| `getExceededOndoLegs`           | Report open Ondo legs above their buffered soft cap.              |
+
+The SDK owns deterministic trade health and the Reserve API boundary. Applications still own debounce timing, retry interaction, warnings, and transaction submission.
 
 ## Ref Equivalents
 

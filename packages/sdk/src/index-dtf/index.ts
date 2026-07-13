@@ -52,11 +52,11 @@ export {
   getIndexDtfBidsEnabled,
   getEffectiveRevenueDistribution as getIndexDtfEffectiveRevenueDistribution,
   getIndexDtfPendingFeeShares,
-  getIndexDtfPlatformFee,
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
   prepareIndexDtfDistributeFees,
 } from "@/index-dtf/dtf/revenue";
+export { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 export { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 export {
   buildIndexDtfDeployFeeRecipients,
@@ -203,15 +203,21 @@ export {
 } from "@/index-dtf/governance/voting";
 export { getIndexDtfCatalogEntries, listIndexDtfs, resolveIndexDtfAlias } from "@/index-dtf/protocol/index";
 export {
+  buildIndexDtfRebalanceLiquidityTrades,
   getActiveAuction as getIndexDtfActiveAuction,
   getBidQuote as getIndexDtfBidQuote,
   getLatestAuction as getIndexDtfLatestAuction,
   getIndexDtfCurrentRebalance,
+  getIndexDtfExceededOndoLegs,
+  getIndexDtfMaxSafeRebalancePercent,
+  getIndexDtfRebalanceLegSizes,
+  getIndexDtfRebalanceLiquidity,
   getCompletedRebalance as getIndexDtfCompletedRebalance,
   getCompletedRebalances as getIndexDtfCompletedRebalances,
   getRebalance as getIndexDtfRebalance,
   getRebalanceAuctions as getIndexDtfRebalanceAuctions,
   getRebalances as getIndexDtfRebalances,
+  INDEX_DTF_ONDO_LIMIT_BUFFER,
   prepareIndexDtfBid,
   prepareIndexDtfCloseAuction,
   prepareIndexDtfEndRebalance,

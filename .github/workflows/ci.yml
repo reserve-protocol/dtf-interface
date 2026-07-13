@@ -44,6 +44,9 @@ jobs:
       - name: Format Check
         run: pnpm format:check
 
+      - name: Documentation Links
+        run: pnpm docs:links
+
       - name: Test
         run: pnpm test
 

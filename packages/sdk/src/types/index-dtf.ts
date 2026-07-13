@@ -7,6 +7,7 @@ import type {
   AuthorityGroup,
   BlockNumber,
   DtfParams,
+  DtfStatus,
   Governance,
   Token,
   TokenWithSnapshot,
@@ -185,6 +186,11 @@ export type IndexDtfBrandSocials = {
   readonly website?: string;
 };
 
+export type IndexDtfBrandFile = {
+  readonly url: string;
+  readonly name: string;
+};
+
 export type IndexDtfBrand = {
   readonly hidden: boolean;
   readonly icon?: string;
@@ -193,6 +199,8 @@ export type IndexDtfBrand = {
   readonly description?: string;
   readonly notesFromCreator?: string;
   readonly prospectus?: string;
+  readonly video?: string;
+  readonly files: readonly IndexDtfBrandFile[];
   readonly tags: readonly string[];
   readonly basketType?: string;
   readonly creator?: IndexDtfBrandProfile;
@@ -207,9 +215,19 @@ export type IndexDtfMarket = {
   readonly fetchedAt: number;
 };
 
+export type IndexDtfPlatformFee = {
+  readonly registry: Address;
+  readonly recipient: Address;
+  readonly numerator: bigint;
+  readonly denominator: bigint;
+  readonly floor: bigint;
+  readonly percent: number;
+};
+
 export type IndexDtfFull = IndexDtf & {
   readonly market: IndexDtfMarket;
   readonly basket: Record<Address, IndexDtfBasketAssetWithPrice>;
+  readonly status: DtfStatus;
   readonly brand?: IndexDtfBrand;
 };
 

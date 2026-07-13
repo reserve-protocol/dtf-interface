@@ -58,11 +58,12 @@ active -> unsupported -> deprecated
 
 ## Publishing
 
-The package is structured for npm publishing, but `"private": true` is set intentionally while the catalog is still being integrated.
+The package is public and released with Changesets. Do not edit its version or changelog by hand.
 
-To publish later:
+Before release, run the catalog consistency checks:
 
-1. Remove `"private": true` from `package.json`.
-2. Set the package version.
-3. Run `pnpm --filter @reserve-protocol/dtf-catalog build`.
-4. Publish with public access.
+```sh
+pnpm --filter @reserve-protocol/dtf-catalog check:restricted
+pnpm --filter @reserve-protocol/dtf-catalog check:tokenlists
+pnpm --filter @reserve-protocol/dtf-catalog build
+```

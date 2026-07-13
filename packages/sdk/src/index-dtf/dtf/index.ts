@@ -1,5 +1,6 @@
 import type { Address } from "viem";
 
+import { indexDtfs as indexDtfCatalog } from "@reserve-protocol/dtf-catalog";
 import { getAddress } from "viem";
 
 import type { DtfClient } from "@/client";
@@ -78,6 +79,7 @@ export async function getFull(client: DtfClient, params: GetIndexDtfParams): Pro
       fetchedAt: market.timestamp,
     },
     basket: market.basket,
+    status: indexDtfCatalog[params.chainId]?.[params.address.toLowerCase()]?.status ?? "active",
     ...(brand ? { brand } : {}),
   };
 }

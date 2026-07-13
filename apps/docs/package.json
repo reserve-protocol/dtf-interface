@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vocs build && node ./scripts/fix-docs-build-output.mjs",
+    "check:sdk-bundle": "node ./scripts/check-sdk-bundle.mjs",
     "clean": "rm -rf dist .vocs",
     "dev": "vocs dev",
     "preview": "vocs preview"

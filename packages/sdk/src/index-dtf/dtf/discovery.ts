@@ -14,6 +14,10 @@ export type DiscoverIndexDtfsParams = {
   readonly sort?: string;
 };
 
+// One unpaged status scan: high enough to cover every listed DTF in a single
+// request, so a server-side default page cap can't silently truncate the scan.
+const STATUS_SCAN_LIMIT = 1000;
+
 export type DiscoverIndexDtfsByChainParams = Omit<DiscoverIndexDtfsParams, "chainId"> & {
   readonly chainId: SupportedChainId;
 };
@@ -140,27 +144,15 @@ export async function getIndexDtfStatus(
   params: { readonly address: Address; readonly chainId: SupportedChainId },
 ): Promise<DtfStatus> {
   const address = getAddress(params.address);
-  const limit = 1000;
-  let offset = 0;
+  const items = await fetchDiscoveryItems(client, "/discover/dtfs", { limit: STATUS_SCAN_LIMIT });
+  const item = items.find(
+    (dtf) =>
+      isIndexDiscoveryItem(dtf) &&
+      dtf.chainId === params.chainId &&
+      dtf.address.toLowerCase() === address.toLowerCase(),
+  );
 
-  while (true) {
-    const items = await fetchDiscoveryItems(client, "/discover/dtfs", {
-      chainId: params.chainId,
-      limit,
-      offset,
-    });
-    const item = items.find((dtf) => isIndexDiscoveryItem(dtf) && dtf.address.toLowerCase() === address.toLowerCase());
-
-    if (item) {
-      return item.status ?? "active";
-    }
-
-    if (items.length < limit) {
-      return "active";
-    }
-
-    offset += limit;
-  }
+  return item?.status ?? "active";
 }
 
 /**

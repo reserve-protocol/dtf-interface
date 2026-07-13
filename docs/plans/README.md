@@ -12,6 +12,8 @@ Do not use `plans/` as proof that an API exists. Check `sdk/api-surface.md` and 
 
 ## Current Plans
 
+The current cross-repository priority order is maintained in [`../SDK_AUDIT_2026-07-09.md`](../SDK_AUDIT_2026-07-09.md). The files below retain flow-specific detail and parity checks.
+
 - `zapper-integration.md`: pending Zapper SDK integration work for quote/deploy/zap transaction surfaces.
 - `register-index-dtf-react-sdk-migration.md`: pending Register migration plan for replacing direct Index DTF data/action sources with SDK/react-sdk surfaces.
 - `optimistic-selectors-sdk-integration.md`: blocked SDK subgraph integration for indexed optimistic selector data after the Index DTF subgraph is deployed and reindexed.

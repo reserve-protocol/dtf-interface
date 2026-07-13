@@ -25,6 +25,7 @@ describe("React SDK public surface", () => {
       "indexDtfPendingFeeSharesQueryOptions",
       "indexDtfPlatformFeeQueryOptions",
       "indexDtfRebalanceAuctionsQueryOptions",
+      "indexDtfRebalanceLiquidityQueryOptions",
     ];
     const newHooks = [
       "useIndexDtfOptimisticGovernance",
@@ -51,6 +52,7 @@ describe("React SDK public surface", () => {
       "useIndexDtfPendingFeeShares",
       "useIndexDtfPlatformFee",
       "useIndexDtfRebalanceAuctions",
+      "useIndexDtfRebalanceLiquidity",
     ];
 
     expect(typeof reactSdk.prepareIndexDtfVote).toBe("function");

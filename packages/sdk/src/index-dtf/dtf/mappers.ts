@@ -49,6 +49,13 @@ export type IndexDtfBrandResponse = {
       readonly description?: string | null;
       readonly notesFromCreator?: string | null;
       readonly prospectus?: string | null;
+      readonly video?: string | null;
+      readonly files?:
+        | readonly {
+            readonly url?: string | null;
+            readonly name?: string | null;
+          }[]
+        | null;
       readonly tags?: readonly string[] | null;
       readonly basketType?: string | null;
     };
@@ -182,11 +189,16 @@ export function mapIndexDtfBrand(response: IndexDtfBrandResponse): IndexDtfBrand
   const description = nonEmpty(dtf?.description);
   const notesFromCreator = nonEmpty(dtf?.notesFromCreator);
   const prospectus = nonEmpty(dtf?.prospectus);
+  const video = nonEmpty(dtf?.video);
   const basketType = nonEmpty(dtf?.basketType);
 
   return {
     hidden,
     tags: dtf?.tags ?? [],
+    files: (dtf?.files ?? []).map((file) => ({
+      url: file.url ?? "",
+      name: file.name ?? "",
+    })),
     socials: mapBrandSocials(socials),
     ...(icon ? { icon } : {}),
     ...(cover ? { cover } : {}),
@@ -194,6 +206,7 @@ export function mapIndexDtfBrand(response: IndexDtfBrandResponse): IndexDtfBrand
     ...(description ? { description } : {}),
     ...(notesFromCreator ? { notesFromCreator } : {}),
     ...(prospectus ? { prospectus } : {}),
+    ...(video ? { video } : {}),
     ...(basketType ? { basketType } : {}),
     ...(mappedCreator ? { creator: mappedCreator } : {}),
     ...(mappedCurator ? { curator: mappedCurator } : {}),

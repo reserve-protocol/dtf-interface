@@ -29,6 +29,7 @@ import { SdkError } from "@/lib/errors";
 
 export * from "@/index-dtf/rebalance/current";
 export * from "@/index-dtf/rebalance/execution";
+export * from "@/index-dtf/rebalance/liquidity";
 export * from "@/index-dtf/rebalance/open-auction";
 export * from "@/index-dtf/rebalance/types";
 

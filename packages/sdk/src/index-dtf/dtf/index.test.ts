@@ -4,7 +4,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GetIndexDtfQuery } from "@/index-dtf/subgraph/dtf.generated";
 
 import { createDtfClient, type DtfClient } from "@/client";
-import { getDtf, getBasket, getBasketSnapshot, getBrand, getPrice, getPriceHistory } from "@/index-dtf/dtf/index";
+import {
+  getDtf,
+  getBasket,
+  getBasketSnapshot,
+  getBrand,
+  getFull,
+  getPrice,
+  getPriceHistory,
+} from "@/index-dtf/dtf/index";
 import { mapIndexDtf } from "@/index-dtf/dtf/mappers";
 
 describe("Index DTF getters", () => {
@@ -128,6 +136,71 @@ describe("Index DTF getters", () => {
     );
   });
 
+  it("returns market and basket without fee (RPC) or status (REST) subqueries", async () => {
+    const dtf = "0x0000000000000000000000000000000000000001";
+    const token = "0x0000000000000000000000000000000000000009";
+    const registry = "0x0000000000000000000000000000000000000010";
+    const recipient = "0x0000000000000000000000000000000000000011";
+    const fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url === "https://example.com/index") {
+        return Response.json({ data: { dtf: createSubgraphDtf() } });
+      }
+
+      if (url.startsWith("https://api.example/current/dtf?")) {
+        return Response.json({
+          price: 10,
+          marketCap: 1000,
+          totalSupply: 100,
+          basket: [
+            {
+              address: token,
+              amount: 1,
+              amountRaw: "1000000000000000000",
+              decimals: 18,
+              price: 10,
+              weight: "100",
+            },
+          ],
+        });
+      }
+
+      if (url === "https://api.example/discover/dtfs") {
+        return Response.json([{ type: "index", address: dtf, chainId: 1, status: "deprecated" }]);
+      }
+
+      throw new Error(`unexpected request: ${url}`);
+    });
+    const readContract = vi.fn(async ({ functionName }: { functionName: string }) => {
+      if (functionName === "totalAssets") return [[token], [1_000_000_000_000_000_000n]];
+      if (functionName === "daoFeeRegistry") return registry;
+      if (functionName === "getFeeDetails") return [recipient, 15n, 100n, 0n];
+      throw new Error(`unexpected contract read: ${functionName}`);
+    });
+    const multicall = vi.fn(async () => ["Token", "TOK", 18]);
+    vi.stubGlobal("fetch", fetch);
+    const client = createDtfClient({
+      apiBaseUrl: "https://api.example",
+      chains: {
+        1: {
+          indexSubgraphUrl: "https://example.com/index",
+          publicClient: { readContract, multicall } as unknown as PublicClient,
+        },
+      },
+    });
+
+    const full = await getFull(client, { address: dtf, chainId: 1 });
+
+    // status is read from the static catalog (this address is unlisted → "active"),
+    // never the REST discover call the mock would answer "deprecated".
+    expect(full.status).toBe("active");
+    expect(full).not.toHaveProperty("platformFee");
+    expect(readContract).not.toHaveBeenCalledWith(expect.objectContaining({ functionName: "getFeeDetails" }));
+    expect(full.market).toMatchObject({ price: 10, marketCap: 1000, totalSupply: 100 });
+    expect(full.basket[getAddress(token)]?.balance.raw).toBe(1_000_000_000_000_000_000n);
+  });
+
   it("fetches block API-backed Index DTF basket snapshots", async () => {
     const fetch = vi.fn(async () =>
       Response.json({
@@ -177,6 +250,11 @@ describe("Index DTF getters", () => {
             description: "CMC20 brand",
             notesFromCreator: "",
             prospectus: "",
+            video: "https://www.youtube.com/watch?v=brand",
+            files: [
+              { url: "https://example.com/factsheet.pdf", name: "Factsheet" },
+              { url: "", name: "" },
+            ],
             tags: ["Majors", "DeFi"],
             basketType: "percentage-based",
           },
@@ -216,6 +294,11 @@ describe("Index DTF getters", () => {
       description: "CMC20 brand",
       tags: ["Majors", "DeFi"],
       basketType: "percentage-based",
+      video: "https://www.youtube.com/watch?v=brand",
+      files: [
+        { url: "https://example.com/factsheet.pdf", name: "Factsheet" },
+        { url: "", name: "" },
+      ],
       creator: {
         name: "ListaDAO",
         icon: "https://example.com/creator.png",

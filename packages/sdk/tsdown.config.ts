@@ -15,4 +15,7 @@ export default defineConfig({
   },
   dts: true,
   format: ["esm", "cjs"],
+  report: false,
+  root: "src",
+  unbundle: true,
 });

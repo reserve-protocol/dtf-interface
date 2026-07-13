@@ -1,0 +1,147 @@
+{
+  "kitVersion": 1,
+  "gate": [
+    "pnpm exec turbo run build --force",
+    "pnpm --filter @reserve-protocol/docs check:sdk-bundle",
+    "pnpm typecheck",
+    "pnpm lint",
+    "pnpm format:check",
+    "pnpm exec turbo run test --force",
+    "pnpm docs:links",
+    "pnpm --filter @reserve-protocol/dtf-catalog check:restricted",
+    "pnpm --filter @reserve-protocol/dtf-catalog check:tokenlists"
+  ],
+  "verify": [
+    {
+      "name": "format",
+      "globs": ["**/*.{ts,tsx,js,jsx,mjs,json,css}"],
+      "commands": ["pnpm format:check"]
+    },
+    {
+      "name": "lint",
+      "globs": ["**/*.{ts,tsx,js,jsx,mjs}"],
+      "commands": ["pnpm lint"]
+    },
+    {
+      "name": "sdk",
+      "globs": [
+        "packages/sdk/src/**",
+        "packages/sdk/package.json",
+        "packages/sdk/tsconfig.json",
+        "packages/sdk/tsdown.config.ts"
+      ],
+      "commands": ["pnpm exec turbo run typecheck test --force --filter=@reserve-protocol/sdk"]
+    },
+    {
+      "name": "sdk-bundle",
+      "globs": ["packages/sdk/src/**", "packages/sdk/package.json", "packages/sdk/tsdown.config.ts"],
+      "commands": ["pnpm bundle:check"]
+    },
+    {
+      "name": "graphql-codegen",
+      "globs": ["packages/sdk/src/**/*.graphql", "packages/sdk/codegen.yml"],
+      "commands": ["pnpm graphql:codegen:check"]
+    },
+    {
+      "name": "react-sdk",
+      "globs": [
+        "packages/react-sdk/src/**",
+        "packages/react-sdk/package.json",
+        "packages/react-sdk/tsconfig.json",
+        "packages/react-sdk/tsdown.config.ts",
+        "packages/react-sdk/vitest.config.ts"
+      ],
+      "commands": ["pnpm exec turbo run typecheck test --force --filter=@reserve-protocol/react-sdk"]
+    },
+    {
+      "name": "catalog",
+      "globs": ["packages/dtf-catalog/**"],
+      "commands": [
+        "pnpm --filter @reserve-protocol/dtf-catalog typecheck",
+        "pnpm --filter @reserve-protocol/dtf-catalog check:restricted",
+        "pnpm --filter @reserve-protocol/dtf-catalog check:tokenlists"
+      ]
+    },
+    {
+      "name": "docs-site",
+      "globs": ["apps/docs/**"],
+      "commands": ["pnpm docs:build"]
+    },
+    {
+      "name": "docs-links",
+      "globs": ["README.md", "docs/**", "packages/*/README.md", "apps/docs/**"],
+      "commands": ["pnpm docs:links"]
+    },
+    {
+      "name": "workspace",
+      "globs": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "turbo.json",
+        "tooling/**",
+        ".github/workflows/**"
+      ],
+      "commands": ["pnpm typecheck", "pnpm exec turbo run test --force"]
+    },
+    {
+      "name": "wiki-lint",
+      "globs": ["docs/wiki/**"],
+      "commands": ["node scripts/llm-workflow/wiki-lint.mjs"]
+    }
+  ],
+  "lenses": {
+    "security": [
+      "packages/sdk/src/client/**",
+      "packages/sdk/src/transports/**",
+      "packages/sdk/src/config/**",
+      "packages/sdk/src/**/*calls*",
+      "packages/sdk/src/**/*builder*",
+      "packages/sdk/src/**/builders.ts",
+      "packages/sdk/src/**/deploy/**",
+      "packages/sdk/src/**/transactions.ts",
+      "packages/sdk/src/**/*governance*",
+      "packages/sdk/src/**/*issuance*",
+      "packages/sdk/src/**/*staking*",
+      "packages/sdk/src/**/*auction*",
+      "packages/sdk/src/**/*propose*",
+      "packages/sdk/src/lib/contract-call.ts",
+      "packages/sdk/src/lib/decimal.ts",
+      "packages/sdk/src/lib/utils.ts",
+      "packages/sdk/src/types/common.ts"
+    ],
+    "product": [
+      "packages/sdk/src/types/**",
+      "packages/sdk/src/**/namespace.ts",
+      "packages/sdk/src/**/ref.ts",
+      "packages/react-sdk/src/**",
+      "packages/dtf-catalog/**",
+      "apps/docs/**",
+      "docs/sdk/**"
+    ],
+    "complexity": [
+      "package.json",
+      "pnpm-workspace.yaml",
+      "turbo.json",
+      "**/*.config.*",
+      ".github/workflows/**",
+      "scripts/**",
+      "skills/**",
+      "packages/sdk/src/client/**",
+      "packages/sdk/src/lib/**",
+      "packages/sdk/src/index.ts",
+      "packages/react-sdk/src/provider.ts",
+      "packages/react-sdk/src/query.ts",
+      "packages/react-sdk/src/query-options.ts",
+      "packages/react-sdk/src/query-keys.ts"
+    ]
+  },
+  "redFlags": {
+    "consoleAllow": []
+  },
+  "wiki": {
+    "ledgerDriftCommits": 15,
+    "domainDriftCommits": 5,
+    "ledgerRowMaxChars": 700
+  }
+}

@@ -45,29 +45,22 @@ describe("Index DTF discovery", () => {
     const client = createDtfClient({ apiBaseUrl: "https://api.example" });
 
     await expect(getIndexDtfStatus(client, { address: DTF, chainId: 8453 })).resolves.toBe("deprecated");
-    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe(
-      "https://api.example/discover/dtfs?chainId=8453&limit=1000&offset=0",
-    );
+    // One unpaged scan with an explicit high limit — never a server-capped page.
+    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe("https://api.example/discover/dtfs?limit=1000");
   });
 
-  it("paginates status lookups before defaulting to active", async () => {
-    const firstPage = Array.from({ length: 1000 }, (_, index) => ({
-      type: "index",
-      address: `0x${(index + 10).toString(16).padStart(40, "0")}`,
-      chainId: 8453,
-      status: "active",
-    }));
-    const fetch = vi
-      .fn()
-      .mockResolvedValueOnce(Response.json(firstPage))
-      .mockResolvedValueOnce(Response.json([{ type: "index", address: DTF, chainId: 8453, status: "deprecated" }]));
+  it("matches status by address and chain in one global discovery request", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json([
+        { type: "index", address: DTF, chainId: 1, status: "deprecated" },
+        { type: "index", address: DTF_B, chainId: 8453, status: "unsupported" },
+      ]),
+    );
     vi.stubGlobal("fetch", fetch);
     const client = createDtfClient({ apiBaseUrl: "https://api.example" });
 
-    await expect(getIndexDtfStatus(client, { address: DTF, chainId: 8453 })).resolves.toBe("deprecated");
-    expect(String((fetch.mock.calls[1] as unknown as [URL])[0])).toBe(
-      "https://api.example/discover/dtfs?chainId=8453&limit=1000&offset=1000",
-    );
+    await expect(getIndexDtfStatus(client, { address: DTF, chainId: 8453 })).resolves.toBe("active");
+    expect(fetch).toHaveBeenCalledOnce();
   });
 
   it("filters chain-scoped discovery to Index DTFs", async () => {

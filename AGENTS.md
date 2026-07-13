@@ -1,47 +1,33 @@
-# DTF SDK Agent Notes
+# Agent Router
 
-Keep code boring and product-shaped.
+Loader, not playbook. Reusable workflow rules live in `skills/` (kit-owned, updated via agent-workflow); project knowledge lives in `docs/wiki/` (project-owned).
 
-## Product Direction
+## Load Order
 
-- Prefer explicit product flow over generic SDK abstractions.
-- Push back when a request adds unnecessary abstraction, compatibility, fallback behavior, or defensive ceremony.
-- Do not add compatibility, input modes, fallback paths, or defensive checks unless there is a concrete product need.
-- If requirements, code standards, or API shape are unclear, ask before inventing a pattern.
-- Trust product invariants that are already guaranteed by the protocol/subgraph model. Do not treat every nullable schema field as a runtime possibility.
+- For staged or code work, read `skills/workflow.md` first.
+- Before writing or reviewing app code, read `skills/code-standards.md`.
+- Before closing a stage, read `skills/review-panel.md` and `skills/wiki.md`.
+- Before user-facing UI work, read `skills/ui-ux.md`.
+- When setting up or changing the visual token system, read `skills/design.md`.
+- Before adding tooling or starting a project surface, read `skills/stack.md`.
+- For project context (product, stack specifics, risks, SDK rules), read `docs/wiki/project.md`.
+- When exploring project knowledge, start at `docs/wiki/index.md` and follow links.
+- At the end of a major workload, read `skills/self-improve.md`.
+- When editing skills or routing, read `skills/writing-great-skills.md`.
 
-## Code Style
+## Default Loop
 
-- Match the developer's review feedback: dumb, explicit, low-abstraction code.
-- Prefer direct inline checks over tiny helpers that only hide one condition, assertion, or parameter shuffle.
-- Keep action functions readable top-to-bottom. Helpers should represent real domain concepts, not hide branching or parameter plumbing.
-- Avoid `...(value === undefined ? {} : { value })` noise when passing object params; use `{ value }` unless omitting the key is required for exact optional typing or serialization behavior.
-- Before finishing meaningful SDK changes, do a simplicity pass. If it looks like LLM-generated framework code, rewrite it simpler.
+- Calibrate first: `skills/workflow.md` § Calibrate: Radius × Size (touch-up / low / medium / high). Radius buys review; size buys ceremony. Touch-up and low ship on scoped verification plus self-review; medium is one heavily reviewed stage; high is a plan of stages.
+- `node scripts/llm-workflow/workflow-start.mjs --stage "<stage>"` for medium/high; implement the smallest complete slice.
+- Inner loop: `node scripts/llm-workflow/scope.mjs --base <base-ref>` (verification commands, required review lenses, red flags, and tier hint for touched files).
+- Stage closeout (medium/high): `node scripts/llm-workflow/scope.mjs --gate` unless the final scoped run was gate-equivalent, one progress row, wiki ingest, and `node scripts/llm-workflow/wiki-lint.mjs` green.
 
-## Data Boundaries
+## Review Budget
 
-- Keep mappers deterministic: raw data shape conversion only. No time, fetching, decoding, or business state derivation.
-- Money rule: on-chain integer amounts are always `Amount { raw: bigint, formatted: string }` via `mapAmount`. Plain `number` is reserved for display-class values: counts, timestamps, durations, percentages, rates, and subgraph BigDecimal analytics.
-- Index DTF governance proposal IDs are unique. They encode the governor plus targets/calldatas and are very long decimal strings, for example `114143694312255605278636846982278574633125503103201258989783472858643695239364`. Do not add DTF membership checks around proposal IDs unless the data model changes.
+Risk-routed lenses only, claims verified before adoption—`skills/review-panel.md` owns the rules.
 
-## API Shape
+## Stop Conditions
 
-- Ref APIs should stay flat where possible: `ref.method()`, `ref.method(id)`, or `ref.method(options)` only when options are optional filters.
-- Namespace/direct APIs should use object params when they require multiple values like `{ address, chainId }`.
-- Keep `index-dtf/namespace.ts` and `index-dtf/ref.ts` as composition roots. When a domain surface grows, give that domain its own `reads.ts`, `builders.ts`, `namespace.ts`, and `ref.ts`, then spread the domain factory into the flat root API.
-- Do not add a generic binder abstraction for namespace/ref composition; explicit domain factories are easier to rewrite.
-
-## Validation
-
-- Do not run build/typecheck/test after simple mechanical edits unless requested.
-- Run validation for complex, risky, or behavior-changing SDK work, and when explicitly requested.
-- Do not remove SDK tests unless explicitly requested. Avoid tests that only duplicate what typecheck or build already catches.
-
-## Releases
-
-- When preparing a new package release, use Changesets. Do not manually edit package versions or changelogs.
-
-## Feedback Loop
-
-- Treat validated review feedback as repo style guidance for future changes.
-- Push back when you disagree or when a requested change seems wrong; do not act as a yes-man.
+- Ask before destructive actions, credentials, new auth assumptions, or architecture changes that widen scope.
+- Stop after three failed attempts on the same symptom and question the architecture.
+- Do not claim completion without fresh verification from this turn.

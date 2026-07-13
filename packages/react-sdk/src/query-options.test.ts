@@ -1,18 +1,30 @@
 import type { DtfSdk } from "@reserve-protocol/sdk";
 
+import { useQueries } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 
 import {
   accountPortfolioHistoryQueryOptions,
   accountPortfolioQueryOptions,
   accountPortfolioTransactionsQueryOptions,
+  indexDtfActiveAuctionQueryOptions,
   indexDtfApprovedRevenueTokensQueryOptions,
+  indexDtfBidQuoteQueryOptions,
+  indexDtfBidsEnabledQueryOptions,
   indexDtfCompletedRebalanceQueryOptions,
   indexDtfCompletedRebalancesQueryOptions,
+  indexDtfHoldersQueryOptions,
+  indexDtfLatestAuctionQueryOptions,
+  indexDtfMandateQueryOptions,
   indexDtfPendingFeeSharesQueryOptions,
   indexDtfPlatformFeeQueryOptions,
   indexDtfRebalanceAuctionsQueryOptions,
+  indexDtfRebalanceControlQueryOptions,
+  indexDtfRebalanceLiquidityQueryOptions,
+  indexDtfRebalanceQueryOptions,
   indexDtfRevenueQueryOptions,
+  indexDtfTotalAssetsQueryOptions,
+  indexDtfTotalSupplyQueryOptions,
 } from "@/index-dtf-query-options";
 import { DEFAULT_STALE_TIME, LIVE_STALE_TIME, STATIC_STALE_TIME } from "@/query";
 import { dtfQueryKeys } from "@/query-keys";
@@ -46,9 +58,12 @@ const DTF = "0x0000000000000000000000000000000000000007";
 type QueryOptionCase = {
   readonly name: string;
   readonly method: keyof DtfSdk["index"];
-  readonly build: (sdk: DtfSdk, params: any) => any;
-  readonly key: (params: any) => unknown;
-  readonly params: any;
+  readonly build: (
+    sdk: DtfSdk,
+    params: never,
+  ) => { readonly enabled?: unknown; readonly queryKey: unknown; readonly queryFn: () => Promise<unknown> };
+  readonly key: (params: never) => unknown;
+  readonly params: unknown;
   readonly result: unknown;
 };
 
@@ -161,6 +176,62 @@ const newReadQueryOptions: readonly QueryOptionCase[] = [
 
 const extraIndexQueryOptions: readonly QueryOptionCase[] = [
   {
+    name: "mandate",
+    method: "getMandate",
+    build: indexDtfMandateQueryOptions,
+    key: dtfQueryKeys.index.mandate,
+    params: { address: DTF, chainId: 1 },
+    result: "Diversified assets",
+  },
+  {
+    name: "total supply",
+    method: "getTotalSupply",
+    build: indexDtfTotalSupplyQueryOptions,
+    key: dtfQueryKeys.index.totalSupply,
+    params: { address: DTF, chainId: 1 },
+    result: 100n,
+  },
+  {
+    name: "total assets",
+    method: "getTotalAssets",
+    build: indexDtfTotalAssetsQueryOptions,
+    key: dtfQueryKeys.index.totalAssets,
+    params: { address: DTF, chainId: 1 },
+    result: { tokens: [TARGET], balances: [100n], balanceByToken: { [TARGET]: 100n } },
+  },
+  {
+    name: "holders",
+    method: "getHolders",
+    build: indexDtfHoldersQueryOptions,
+    key: dtfQueryKeys.index.holders,
+    params: { address: DTF, chainId: 1, limit: 20 },
+    result: { holders: [], totalHolders: 0 },
+  },
+  {
+    name: "bids enabled",
+    method: "getBidsEnabled",
+    build: indexDtfBidsEnabledQueryOptions,
+    key: dtfQueryKeys.index.bidsEnabled,
+    params: { address: DTF, chainId: 1 },
+    result: true,
+  },
+  {
+    name: "rebalance control",
+    method: "getRebalanceControl",
+    build: indexDtfRebalanceControlQueryOptions,
+    key: dtfQueryKeys.index.rebalanceControl,
+    params: { address: DTF, chainId: 1 },
+    result: { weightControl: true, priceControl: 1 },
+  },
+  {
+    name: "rebalance liquidity",
+    method: "getRebalanceLiquidity",
+    build: indexDtfRebalanceLiquidityQueryOptions,
+    key: dtfQueryKeys.index.rebalanceLiquidity,
+    params: { chainId: 1, nativePrice: 3000, trades: [] },
+    result: { market: null, totals: { sellUsd: 0, buyUsd: 0 }, assets: [] },
+  },
+  {
     name: "revenue",
     method: "getRevenue",
     build: indexDtfRevenueQueryOptions,
@@ -193,12 +264,44 @@ const extraIndexQueryOptions: readonly QueryOptionCase[] = [
     result: [TARGET],
   },
   {
+    name: "rebalance",
+    method: "getRebalance",
+    build: indexDtfRebalanceQueryOptions,
+    key: dtfQueryKeys.index.rebalance,
+    params: { address: DTF, chainId: 1, nonce: 1n },
+    result: { id: "rebalance-1" },
+  },
+  {
     name: "rebalance auctions",
     method: "getRebalanceAuctions",
     build: indexDtfRebalanceAuctionsQueryOptions,
     key: dtfQueryKeys.index.rebalanceAuctions,
     params: { chainId: 1, rebalanceId: "rebalance-1" },
     result: [],
+  },
+  {
+    name: "active auction",
+    method: "getActiveAuction",
+    build: indexDtfActiveAuctionQueryOptions,
+    key: dtfQueryKeys.index.activeAuction,
+    params: { address: DTF, chainId: 1 },
+    result: { auctionId: 1n, isActive: true },
+  },
+  {
+    name: "latest auction",
+    method: "getLatestAuction",
+    build: indexDtfLatestAuctionQueryOptions,
+    key: dtfQueryKeys.index.latestAuction,
+    params: { address: DTF, chainId: 1 },
+    result: { auctionId: 1n, isActive: false },
+  },
+  {
+    name: "bid quote",
+    method: "getBidQuote",
+    build: indexDtfBidQuoteQueryOptions,
+    key: dtfQueryKeys.index.bidQuote,
+    params: { address: DTF, chainId: 1, auctionId: 1n, sellToken: TARGET, buyToken: ACCOUNT, maxSellAmount: 10n },
+    result: { sellAmount: 10n, bidAmount: 9n, price: 1n },
   },
   {
     name: "completed rebalance",
@@ -281,12 +384,12 @@ describe("react SDK query options", () => {
     it(`builds ${queryOption.name} query options`, async () => {
       const method = vi.fn(async () => queryOption.result);
       const sdk = { index: { [queryOption.method]: method } } as unknown as DtfSdk;
-      const disabledOptions = queryOption.build(sdk, undefined);
-      const options = queryOption.build(sdk, queryOption.params);
+      const disabledOptions = queryOption.build(sdk, undefined as never);
+      const options = queryOption.build(sdk, queryOption.params as never);
 
       expect(disabledOptions.enabled).toBe(false);
-      expect(disabledOptions.queryKey).toEqual(queryOption.key(undefined));
-      expect(options.queryKey).toEqual(queryOption.key(queryOption.params));
+      expect(disabledOptions.queryKey).toEqual(queryOption.key(undefined as never));
+      expect(options.queryKey).toEqual(queryOption.key(queryOption.params as never));
       await expect(options.queryFn()).resolves.toBe(queryOption.result);
       expect(method).toHaveBeenCalledWith(queryOption.params);
     });
@@ -296,12 +399,12 @@ describe("react SDK query options", () => {
     it(`builds ${queryOption.name} extra query options`, async () => {
       const method = vi.fn(async () => queryOption.result);
       const sdk = { index: { [queryOption.method]: method } } as unknown as DtfSdk;
-      const disabledOptions = queryOption.build(sdk, undefined);
-      const options = queryOption.build(sdk, queryOption.params);
+      const disabledOptions = queryOption.build(sdk, undefined as never);
+      const options = queryOption.build(sdk, queryOption.params as never);
 
       expect(disabledOptions.enabled).toBe(false);
-      expect(disabledOptions.queryKey).toEqual(queryOption.key(undefined));
-      expect(options.queryKey).toEqual(queryOption.key(queryOption.params));
+      expect(disabledOptions.queryKey).toEqual(queryOption.key(undefined as never));
+      expect(options.queryKey).toEqual(queryOption.key(queryOption.params as never));
       await expect(options.queryFn()).resolves.toBe(queryOption.result);
       expect(method).toHaveBeenCalledWith(queryOption.params);
     });
@@ -338,10 +441,27 @@ describe("react SDK query options", () => {
   });
 });
 
+function typecheckUseQueries(sdk: DtfSdk) {
+  return useQueries({
+    queries: [
+      indexDtfSelectorRegistryIsAllowedQueryOptions(sdk, {
+        chainId: 1,
+        registry: REGISTRY,
+        selector: "0xabcdef12",
+        target: TARGET,
+      }),
+    ],
+  });
+}
+
+void typecheckUseQueries;
+
 describe("staleTime defaults", () => {
   const sdk = {
     index: {
+      getMandate: vi.fn(),
       getPrice: vi.fn(),
+      getTotalSupply: vi.fn(),
       getVersion: vi.fn(),
       getProposal: vi.fn(),
     },
@@ -350,10 +470,12 @@ describe("staleTime defaults", () => {
 
   it("applies the live class to price queries", () => {
     expect(indexDtfPriceQueryOptions(sdk, dtfParams).staleTime).toBe(LIVE_STALE_TIME);
+    expect(indexDtfTotalSupplyQueryOptions(sdk, dtfParams).staleTime).toBe(LIVE_STALE_TIME);
   });
 
   it("applies the static class to version queries", () => {
     expect(indexDtfVersionQueryOptions(sdk, dtfParams).staleTime).toBe(STATIC_STALE_TIME);
+    expect(indexDtfMandateQueryOptions(sdk, dtfParams).staleTime).toBe(STATIC_STALE_TIME);
   });
 
   it("applies the default class to governance queries", () => {

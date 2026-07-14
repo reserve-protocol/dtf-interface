@@ -11,7 +11,7 @@
     {
       "chainId": 56,
       "address": "0xa0fe4e0aeca5479705ce996615b2eacb6b6a10fb",
-      "name": "Reserve Photonics DTF (BSC)",
+      "name": "Reserve AI Photonics DTF (BSC)",
       "symbol": "PHOTON",
       "decimals": 18,
       "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxYmQhYtkGhrj2ScsDNeUp3lRftPgCi0ZM65Vz"
@@ -43,7 +43,7 @@
     {
       "chainId": 56,
       "address": "0xf571Fe3F0d74521Bc7310B111Faea931C748f27B",
-      "name": "Reserve AI NeoCloud DTF (BSC)",
+      "name": "Reserve AI Capacity & Neocloud DTF (BSC)",
       "symbol": "NEOCLOUD",
       "decimals": 18,
       "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxSLxvYczdsT15PwoUNnDvJ3hXEatCMQxeHuGm"

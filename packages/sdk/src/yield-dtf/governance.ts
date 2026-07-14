@@ -23,7 +23,7 @@ import {
   prepareTimelockCancel,
   type GovernorProposalPayload,
 } from "@/lib/governor-calls";
-import { getCurrentTime, mapAmount, sameAddress } from "@/lib/utils";
+import { mapAmount, sameAddress } from "@/lib/utils";
 import { yieldGovernanceAbi } from "@/yield-dtf/abis/governance";
 import { yieldGovernanceAnastasiusAbi } from "@/yield-dtf/abis/governance-anastasius";
 import { stRsrVotesAbi } from "@/yield-dtf/abis/st-rsr-votes";
@@ -152,18 +152,22 @@ export async function getYieldDtfProposals(
   });
 
   const summaries = proposals.map((proposal) => mapProposalSummary(proposal, params.chainId));
-  const needsBlockNumber = summaries.some(
-    (summary) =>
-      (summary.state === "PENDING" || summary.state === "ACTIVE") && !isTimepointGovernor(summary.governorName),
+  // Proposal state is live chain state: one latest block serves both clock
+  // domains (timestamp for Anastasius, number for Alexios), fetched once per
+  // request and never the consumer machine's wall clock.
+  const needsTimepoint = summaries.some(
+    (summary) => summary.state === "PENDING" || summary.state === "ACTIVE",
   );
-  const blockNumber = needsBlockNumber ? Number(await client.viem.getPublicClient(params.chainId).getBlockNumber()) : 0;
+  const block = needsTimepoint ? await client.viem.getPublicClient(params.chainId).getBlock() : undefined;
 
   return summaries.map((summary) => ({
     ...summary,
-    state: getYieldDtfProposalState(
-      summary,
-      isTimepointGovernor(summary.governorName) ? getCurrentTime() : blockNumber,
-    ),
+    state: block
+      ? getYieldDtfProposalState(
+          summary,
+          isTimepointGovernor(summary.governorName) ? Number(block.timestamp) : Number(block.number),
+        )
+      : summary.state,
   }));
 }
 
@@ -187,17 +191,22 @@ export function getYieldDtfProposalState(
   >,
   currentTimepoint: number,
 ): YieldDtfProposalState {
-  if (proposal.state === "PENDING") {
-    if (currentTimepoint > proposal.voteEnd) {
-      return "EXPIRED";
-    }
-
-    return currentTimepoint > proposal.voteStart ? "ACTIVE" : "PENDING";
-  }
-
-  if (proposal.state !== "ACTIVE" || currentTimepoint <= proposal.voteEnd) {
+  if (proposal.state !== "PENDING" && proposal.state !== "ACTIVE") {
     return proposal.state;
   }
+
+  if (currentTimepoint <= proposal.voteEnd) {
+    if (proposal.state === "PENDING") {
+      return currentTimepoint > proposal.voteStart ? "ACTIVE" : "PENDING";
+    }
+
+    return "ACTIVE";
+  }
+
+  // WHY: past the deadline OZ Governor.state() derives Succeeded/Defeated from
+  // the vote counts regardless of whether an ACTIVE transition was ever
+  // indexed — a stale PENDING is never EXPIRED (that is a queue-lifecycle
+  // state the subgraph reports directly).
 
   // WHY: OZ GovernorCountingSimple._voteSucceeded requires forVotes STRICTLY
   // over againstVotes (Reserve's Governance.sol keeps it) — a tie is defeated.

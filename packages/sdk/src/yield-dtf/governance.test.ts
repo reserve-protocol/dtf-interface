@@ -163,14 +163,48 @@ describe("getYieldDtfProposalState", () => {
     expect(getYieldDtfProposalState(endedActiveProposal, 200)).toBe("ACTIVE");
   });
 
-  it("activates lagging pending proposals and expires missed ones", () => {
+  it("activates lagging pending proposals within the vote window", () => {
     const pending = { ...endedActiveProposal, state: "PENDING" } as const;
 
     expect(getYieldDtfProposalState(pending, 50)).toBe("PENDING");
     expect(getYieldDtfProposalState(pending, 100)).toBe("PENDING");
     expect(getYieldDtfProposalState(pending, 150)).toBe("ACTIVE");
     expect(getYieldDtfProposalState(pending, 200)).toBe("ACTIVE");
-    expect(getYieldDtfProposalState(pending, 201)).toBe("EXPIRED");
+  });
+
+  it("derives the vote outcome for stale pending proposals past the deadline, never EXPIRED", () => {
+    const pending = { ...endedActiveProposal, state: "PENDING" } as const;
+
+    expect(
+      getYieldDtfProposalState(
+        {
+          ...pending,
+          forWeightedVotes: { raw: 151n, formatted: "151" },
+          againstWeightedVotes: { raw: 50n, formatted: "50" },
+        },
+        201,
+      ),
+    ).toBe("SUCCEEDED");
+    expect(
+      getYieldDtfProposalState(
+        {
+          ...pending,
+          forWeightedVotes: { raw: 150n, formatted: "150" },
+          againstWeightedVotes: { raw: 150n, formatted: "150" },
+        },
+        201,
+      ),
+    ).toBe("DEFEATED");
+    expect(
+      getYieldDtfProposalState(
+        {
+          ...pending,
+          forWeightedVotes: { raw: 50n, formatted: "50" },
+          againstWeightedVotes: { raw: 10n, formatted: "10" },
+        },
+        201,
+      ),
+    ).toBe("QUORUM_NOT_REACHED");
   });
 
   it("keeps terminal states untouched", () => {
@@ -179,8 +213,10 @@ describe("getYieldDtfProposalState", () => {
 });
 
 describe("getYieldDtfProposals", () => {
-  it("resolves lagging timestamp-based proposals without reading the block number", async () => {
-    const getBlockNumber = vi.fn(async () => 1_000n);
+  it("derives timestamp-based proposals from the chain block timestamp, not the local clock", async () => {
+    // voteEnd is ~year 2286 by the machine's wall clock, but the chain says
+    // the deadline already passed — the chain must win.
+    const getBlock = vi.fn(async () => ({ number: 1_000n, timestamp: 20_000_000_000n }));
     const client = createProposalsClient(
       [
         createSubgraphProposal({
@@ -188,20 +224,20 @@ describe("getYieldDtfProposals", () => {
           state: "ACTIVE",
           forWeightedVotes: "150",
           againstWeightedVotes: "150",
-          endBlock: "200",
+          endBlock: "9999999999",
         }),
       ],
-      getBlockNumber,
+      getBlock,
     );
 
     const [proposal] = await getYieldDtfProposals(client, { address: DTF, chainId: 1 });
 
     expect(proposal!.state).toBe("DEFEATED");
-    expect(getBlockNumber).not.toHaveBeenCalled();
+    expect(getBlock).toHaveBeenCalledTimes(1);
   });
 
-  it("resolves lagging block-based proposals against the current block number", async () => {
-    const getBlockNumber = vi.fn(async () => 1_000n);
+  it("resolves lagging block-based proposals against the chain block number", async () => {
+    const getBlock = vi.fn(async () => ({ number: 1_000n, timestamp: 1_000_000n }));
     const client = createProposalsClient(
       [
         createSubgraphProposal({
@@ -221,17 +257,17 @@ describe("getYieldDtfProposals", () => {
           endBlock: "1001",
         }),
       ],
-      getBlockNumber,
+      getBlock,
     );
 
     const proposals = await getYieldDtfProposals(client, { address: DTF, chainId: 1 });
 
     expect(proposals.map((proposal) => proposal.state)).toEqual(["SUCCEEDED", "ACTIVE"]);
-    expect(getBlockNumber).toHaveBeenCalledTimes(1);
+    expect(getBlock).toHaveBeenCalledTimes(1);
   });
 
-  it("derives mixed governor flavors in one list with their native timepoints", async () => {
-    const getBlockNumber = vi.fn(async () => 1_000n);
+  it("derives mixed governor flavors in one list from a single chain read", async () => {
+    const getBlock = vi.fn(async () => ({ number: 1_000n, timestamp: 1_000_000n }));
     const client = createProposalsClient(
       [
         createSubgraphProposal({
@@ -250,17 +286,17 @@ describe("getYieldDtfProposals", () => {
           endBlock: "1001",
         }),
       ],
-      getBlockNumber,
+      getBlock,
     );
 
     const proposals = await getYieldDtfProposals(client, { address: DTF, chainId: 1 });
 
     expect(proposals.map((proposal) => proposal.state)).toEqual(["DEFEATED", "ACTIVE"]);
-    expect(getBlockNumber).toHaveBeenCalledTimes(1);
+    expect(getBlock).toHaveBeenCalledTimes(1);
   });
 
-  it("does not read the block number when block-based proposals are terminal", async () => {
-    const getBlockNumber = vi.fn(async () => 1_000n);
+  it("does not read the chain when every proposal is terminal", async () => {
+    const getBlock = vi.fn(async () => ({ number: 1_000n, timestamp: 1_000_000n }));
     const client = createProposalsClient(
       [
         createSubgraphProposal({
@@ -270,13 +306,13 @@ describe("getYieldDtfProposals", () => {
           endBlock: "999",
         }),
       ],
-      getBlockNumber,
+      getBlock,
     );
 
     const [proposal] = await getYieldDtfProposals(client, { address: DTF, chainId: 1 });
 
     expect(proposal!.state).toBe("EXECUTED");
-    expect(getBlockNumber).not.toHaveBeenCalled();
+    expect(getBlock).not.toHaveBeenCalled();
   });
 });
 
@@ -310,14 +346,14 @@ function createSubgraphProposal(overrides: {
 
 function createProposalsClient(
   proposals: readonly ReturnType<typeof createSubgraphProposal>[],
-  getBlockNumber: () => Promise<bigint>,
+  getBlock: () => Promise<{ number: bigint; timestamp: bigint }>,
 ): DtfClient {
   return {
     subgraph: {
       queryYield: vi.fn(async () => ({ proposals })),
     },
     viem: {
-      getPublicClient: vi.fn(() => ({ getBlockNumber })),
+      getPublicClient: vi.fn(() => ({ getBlock })),
     },
   } as unknown as DtfClient;
 }

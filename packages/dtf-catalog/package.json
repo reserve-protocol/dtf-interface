@@ -1,6 +1,6 @@
 {
   "name": "@reserve-protocol/dtf-catalog",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Curated DTF catalog for yield and index DTFs.",
   "keywords": [
     "catalog",

@@ -23,7 +23,7 @@ import {
   prepareTimelockCancel,
   type GovernorProposalPayload,
 } from "@/lib/governor-calls";
-import { mapAmount, sameAddress } from "@/lib/utils";
+import { getCurrentTime, mapAmount, sameAddress } from "@/lib/utils";
 import { yieldGovernanceAbi } from "@/yield-dtf/abis/governance";
 import { yieldGovernanceAnastasiusAbi } from "@/yield-dtf/abis/governance-anastasius";
 import { stRsrVotesAbi } from "@/yield-dtf/abis/st-rsr-votes";
@@ -151,7 +151,65 @@ export async function getYieldDtfProposals(
     },
   });
 
-  return proposals.map((proposal) => mapProposalSummary(proposal, params.chainId));
+  const summaries = proposals.map((proposal) => mapProposalSummary(proposal, params.chainId));
+  const needsBlockNumber = summaries.some(
+    (summary) =>
+      (summary.state === "PENDING" || summary.state === "ACTIVE") && !isTimepointGovernor(summary.governorName),
+  );
+  const blockNumber = needsBlockNumber ? Number(await client.viem.getPublicClient(params.chainId).getBlockNumber()) : 0;
+
+  return summaries.map((summary) => ({
+    ...summary,
+    state: getYieldDtfProposalState(
+      summary,
+      isTimepointGovernor(summary.governorName) ? getCurrentTime() : blockNumber,
+    ),
+  }));
+}
+
+/**
+ * Derives the summary display state without an on-chain read. The subgraph
+ * state is event-driven and lags time-based transitions (PENDING -> ACTIVE,
+ * ACTIVE -> DEFEATED/QUORUM_NOT_REACHED/SUCCEEDED). `currentTimepoint` must be
+ * in the proposal's native unit: unix seconds for Anastasius, block number for
+ * Alexios.
+ */
+export function getYieldDtfProposalState(
+  proposal: Pick<
+    YieldDtfProposalSummary,
+    | "abstainWeightedVotes"
+    | "againstWeightedVotes"
+    | "forWeightedVotes"
+    | "quorumVotes"
+    | "state"
+    | "voteEnd"
+    | "voteStart"
+  >,
+  currentTimepoint: number,
+): YieldDtfProposalState {
+  if (proposal.state === "PENDING") {
+    if (currentTimepoint > proposal.voteEnd) {
+      return "EXPIRED";
+    }
+
+    return currentTimepoint > proposal.voteStart ? "ACTIVE" : "PENDING";
+  }
+
+  if (proposal.state !== "ACTIVE" || currentTimepoint <= proposal.voteEnd) {
+    return proposal.state;
+  }
+
+  // WHY: OZ GovernorCountingSimple._voteSucceeded requires forVotes STRICTLY
+  // over againstVotes (Reserve's Governance.sol keeps it) — a tie is defeated.
+  if (proposal.forWeightedVotes.raw <= proposal.againstWeightedVotes.raw) {
+    return "DEFEATED";
+  }
+
+  if (proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw < proposal.quorumVotes.raw) {
+    return "QUORUM_NOT_REACHED";
+  }
+
+  return "SUCCEEDED";
 }
 
 export type GetYieldDtfProposalParams = {

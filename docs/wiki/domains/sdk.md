@@ -1,6 +1,6 @@
 ---
 title: Core SDK Domain
-updated: 2026-07-09
+updated: 2026-07-14
 type: domain
 sources:
   - packages/sdk/src/**
@@ -22,6 +22,7 @@ sources:
 ## Invariants
 
 - On-chain integer amounts are `Amount`; display-class values may be numbers.
+- Proposal vote success is OZ strict majority: a for/against tie is DEFEATED. Subgraph proposal state lags time-based transitions, so list/detail state surfaces derive from votes, quorum, and deadline instead of returning the raw field.
 - Index proposal IDs are globally unique and do not need DTF-membership checks.
 - Public call builders require exact calldata and value assertions when changed.
 - GraphQL document changes must regenerate and diff committed generated outputs.

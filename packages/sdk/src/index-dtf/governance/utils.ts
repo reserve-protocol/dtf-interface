@@ -143,10 +143,9 @@ export function getProposalState(proposal: ProposalVoteStateInput, timestamp = g
     } else if (timestamp > proposal.voteEnd) {
       if (isOptimistic) {
         state.state = getOptimisticFinalState(proposal, optimisticVetoThresholdVotes);
-      } else if (
-        proposal.againstWeightedVotes.raw > proposal.forWeightedVotes.raw ||
-        proposal.forWeightedVotes.raw === 0n
-      ) {
+      } else if (proposal.forWeightedVotes.raw <= proposal.againstWeightedVotes.raw) {
+        // WHY: OZ GovernorCountingSimple._voteSucceeded requires forVotes STRICTLY
+        // over againstVotes (FolioGovernor does not override it) — a tie is defeated.
         state.state = "DEFEATED";
       } else if (proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw < quorumVotes) {
         state.state = "QUORUM_NOT_REACHED";

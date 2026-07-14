@@ -3,7 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { DtfClient } from "@/client";
 
-import { getYieldDtfGovernance, getYieldDtfProposal } from "@/yield-dtf/governance";
+import {
+  getYieldDtfGovernance,
+  getYieldDtfProposal,
+  getYieldDtfProposals,
+  getYieldDtfProposalState,
+} from "@/yield-dtf/governance";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const GOVERNOR = "0x0000000000000000000000000000000000000002";
@@ -103,6 +108,219 @@ describe("getYieldDtfProposal", () => {
     await expect(getYieldDtfProposal(client, { chainId: 1, proposalId: "42" })).rejects.toBe(error);
   });
 });
+
+describe("getYieldDtfProposalState", () => {
+  const endedActiveProposal = {
+    state: "ACTIVE",
+    voteStart: 100,
+    voteEnd: 200,
+    forWeightedVotes: { raw: 0n, formatted: "0" },
+    againstWeightedVotes: { raw: 0n, formatted: "0" },
+    abstainWeightedVotes: { raw: 0n, formatted: "0" },
+    quorumVotes: { raw: 100n, formatted: "100" },
+  } as const;
+
+  it("defeats a tie even when quorum is met", () => {
+    expect(
+      getYieldDtfProposalState(
+        {
+          ...endedActiveProposal,
+          forWeightedVotes: { raw: 150n, formatted: "150" },
+          againstWeightedVotes: { raw: 150n, formatted: "150" },
+        },
+        201,
+      ),
+    ).toBe("DEFEATED");
+  });
+
+  it("succeeds when for votes are one wei over against votes", () => {
+    expect(
+      getYieldDtfProposalState(
+        {
+          ...endedActiveProposal,
+          forWeightedVotes: { raw: 151n, formatted: "151" },
+          againstWeightedVotes: { raw: 150n, formatted: "150" },
+        },
+        201,
+      ),
+    ).toBe("SUCCEEDED");
+  });
+
+  it("marks winning votes under quorum as quorum not reached", () => {
+    expect(
+      getYieldDtfProposalState(
+        {
+          ...endedActiveProposal,
+          forWeightedVotes: { raw: 50n, formatted: "50" },
+          againstWeightedVotes: { raw: 10n, formatted: "10" },
+        },
+        201,
+      ),
+    ).toBe("QUORUM_NOT_REACHED");
+  });
+
+  it("keeps active proposals active until the vote deadline passes", () => {
+    expect(getYieldDtfProposalState(endedActiveProposal, 200)).toBe("ACTIVE");
+  });
+
+  it("activates lagging pending proposals and expires missed ones", () => {
+    const pending = { ...endedActiveProposal, state: "PENDING" } as const;
+
+    expect(getYieldDtfProposalState(pending, 50)).toBe("PENDING");
+    expect(getYieldDtfProposalState(pending, 100)).toBe("PENDING");
+    expect(getYieldDtfProposalState(pending, 150)).toBe("ACTIVE");
+    expect(getYieldDtfProposalState(pending, 200)).toBe("ACTIVE");
+    expect(getYieldDtfProposalState(pending, 201)).toBe("EXPIRED");
+  });
+
+  it("keeps terminal states untouched", () => {
+    expect(getYieldDtfProposalState({ ...endedActiveProposal, state: "EXECUTED" }, 201)).toBe("EXECUTED");
+  });
+});
+
+describe("getYieldDtfProposals", () => {
+  it("resolves lagging timestamp-based proposals without reading the block number", async () => {
+    const getBlockNumber = vi.fn(async () => 1_000n);
+    const client = createProposalsClient(
+      [
+        createSubgraphProposal({
+          id: "tie",
+          state: "ACTIVE",
+          forWeightedVotes: "150",
+          againstWeightedVotes: "150",
+          endBlock: "200",
+        }),
+      ],
+      getBlockNumber,
+    );
+
+    const [proposal] = await getYieldDtfProposals(client, { address: DTF, chainId: 1 });
+
+    expect(proposal!.state).toBe("DEFEATED");
+    expect(getBlockNumber).not.toHaveBeenCalled();
+  });
+
+  it("resolves lagging block-based proposals against the current block number", async () => {
+    const getBlockNumber = vi.fn(async () => 1_000n);
+    const client = createProposalsClient(
+      [
+        createSubgraphProposal({
+          id: "succeeded",
+          state: "ACTIVE",
+          governorName: "Governor Alexios",
+          forWeightedVotes: "150",
+          againstWeightedVotes: "10",
+          endBlock: "999",
+        }),
+        createSubgraphProposal({
+          id: "still-active",
+          state: "ACTIVE",
+          governorName: "Governor Alexios",
+          forWeightedVotes: "150",
+          againstWeightedVotes: "10",
+          endBlock: "1001",
+        }),
+      ],
+      getBlockNumber,
+    );
+
+    const proposals = await getYieldDtfProposals(client, { address: DTF, chainId: 1 });
+
+    expect(proposals.map((proposal) => proposal.state)).toEqual(["SUCCEEDED", "ACTIVE"]);
+    expect(getBlockNumber).toHaveBeenCalledTimes(1);
+  });
+
+  it("derives mixed governor flavors in one list with their native timepoints", async () => {
+    const getBlockNumber = vi.fn(async () => 1_000n);
+    const client = createProposalsClient(
+      [
+        createSubgraphProposal({
+          id: "anastasius-tie",
+          state: "ACTIVE",
+          forWeightedVotes: "150",
+          againstWeightedVotes: "150",
+          endBlock: "200",
+        }),
+        createSubgraphProposal({
+          id: "alexios-still-active",
+          state: "ACTIVE",
+          governorName: "Governor Alexios",
+          forWeightedVotes: "150",
+          againstWeightedVotes: "10",
+          endBlock: "1001",
+        }),
+      ],
+      getBlockNumber,
+    );
+
+    const proposals = await getYieldDtfProposals(client, { address: DTF, chainId: 1 });
+
+    expect(proposals.map((proposal) => proposal.state)).toEqual(["DEFEATED", "ACTIVE"]);
+    expect(getBlockNumber).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not read the block number when block-based proposals are terminal", async () => {
+    const getBlockNumber = vi.fn(async () => 1_000n);
+    const client = createProposalsClient(
+      [
+        createSubgraphProposal({
+          id: "executed",
+          state: "EXECUTED",
+          governorName: "Governor Alexios",
+          endBlock: "999",
+        }),
+      ],
+      getBlockNumber,
+    );
+
+    const [proposal] = await getYieldDtfProposals(client, { address: DTF, chainId: 1 });
+
+    expect(proposal!.state).toBe("EXECUTED");
+    expect(getBlockNumber).not.toHaveBeenCalled();
+  });
+});
+
+function createSubgraphProposal(overrides: {
+  readonly id: string;
+  readonly state: string;
+  readonly governorName?: string;
+  readonly forWeightedVotes?: string;
+  readonly againstWeightedVotes?: string;
+  readonly endBlock?: string;
+}) {
+  return {
+    id: overrides.id,
+    description: "Proposal",
+    creationTime: "1000",
+    state: overrides.state,
+    forWeightedVotes: overrides.forWeightedVotes ?? "0",
+    againstWeightedVotes: overrides.againstWeightedVotes ?? "0",
+    abstainWeightedVotes: "0",
+    quorumVotes: "100",
+    startBlock: "100",
+    endBlock: overrides.endBlock ?? "200",
+    executionETA: null,
+    proposer: { address: PROPOSER },
+    governanceFramework: {
+      name: overrides.governorName ?? "Governor Anastasius",
+      contractAddress: GOVERNOR,
+    },
+  };
+}
+
+function createProposalsClient(
+  proposals: readonly ReturnType<typeof createSubgraphProposal>[],
+  getBlockNumber: () => Promise<bigint>,
+): DtfClient {
+  return {
+    subgraph: {
+      queryYield: vi.fn(async () => ({ proposals })),
+    },
+    viem: {
+      getPublicClient: vi.fn(() => ({ getBlockNumber })),
+    },
+  } as unknown as DtfClient;
+}
 
 function createProposalClient(readError: Error): DtfClient {
   return {

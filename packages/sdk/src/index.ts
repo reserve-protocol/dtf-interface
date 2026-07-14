@@ -350,6 +350,7 @@ export {
   getYieldDtfGovernance,
   getYieldDtfProposal,
   getYieldDtfProposals,
+  getYieldDtfProposalState,
   getYieldDtfProposalVotePower,
   getYieldDtfRevenue,
   getYieldDtfApy,

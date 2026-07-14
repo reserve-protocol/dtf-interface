@@ -1,5 +1,11 @@
 # @reserve-protocol/dtf-catalog
 
+## 0.1.3
+
+### Patch Changes
+
+- 1dbc095: Align the PHOTON and NEOCLOUD display names with their canonical product names.
+
 ## 0.1.2
 
 ### Patch Changes

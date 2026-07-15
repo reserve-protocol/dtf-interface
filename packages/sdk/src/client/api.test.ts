@@ -111,7 +111,7 @@ describe("Reserve API helpers", () => {
       const value = String(url);
 
       if (value.includes("nonce=4")) {
-        return Response.json({ nonce: 4, timestamp: 100, auctions: [] });
+        return Response.json([{ nonce: 4, timestamp: 100, auctions: [] }]);
       }
 
       return Response.json([
@@ -140,6 +140,8 @@ describe("Reserve API helpers", () => {
     });
 
     expect(history[0]?.totalRebalancedUsd).toBe(50);
+    // The nonce endpoint returns a single-element array; the client normalizes
+    // it to the singular detail.
     expect(detail.nonce).toBe(4);
     expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe(
       "https://api.example/dtf/rebalance?address=0x0000000000000000000000000000000000000001&chainId=1&skip=10&limit=5",
@@ -147,5 +149,19 @@ describe("Reserve API helpers", () => {
     expect(String((fetch.mock.calls[1] as unknown as [URL])[0])).toBe(
       "https://api.example/dtf/rebalance?address=0x0000000000000000000000000000000000000001&chainId=1&nonce=4",
     );
+  });
+
+  it("throws RECORD_NOT_FOUND when the rebalance detail array is empty", async () => {
+    const fetch = vi.fn(async () => Response.json([]));
+    vi.stubGlobal("fetch", fetch);
+    const client = createDtfClient({ apiBaseUrl: "https://api.example" });
+
+    await expect(
+      client.api.getIndexDtfRebalanceDetail({
+        address: "0x0000000000000000000000000000000000000001",
+        chainId: 1,
+        nonce: 9n,
+      }),
+    ).rejects.toMatchObject({ code: "RECORD_NOT_FOUND" });
   });
 });

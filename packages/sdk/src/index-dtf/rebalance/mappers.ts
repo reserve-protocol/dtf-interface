@@ -95,6 +95,9 @@ export function mapApiCompletedRebalance(rebalance: ApiCompletedRebalance): Inde
 export function mapApiCompletedRebalanceDetail(
   rebalance: ReserveApiIndexDtfRebalanceDetail,
 ): IndexDtfCompletedRebalanceDetail {
+  // WHY: `auctions` is always present in a well-formed response ([] when none
+  // ran — verified against api.reserve.org base/lcap nonces 1-5). A truly-absent
+  // field is malformed, so fail loud rather than mask it as "0 auctions".
   if (!rebalance.auctions) {
     throw new SdkError({
       code: "INVALID_RESPONSE",
@@ -123,6 +126,11 @@ export function mapApiCompletedRebalanceDetail(
     })),
     ...numberField("rebalanceGainLossPercent", rebalance.rebalanceGainLossPercent),
     ...numberField("marketCapAtStart", rebalance.marketCapAtStart),
+    ...numberField("avgPriceImpactPercent", rebalance.avgPriceImpactPercent),
+    ...numberField("totalPriceImpactUsd", rebalance.totalPriceImpactUsd),
+    ...numberField("marketCapRebalanceImpact", rebalance.marketCapRebalanceImpact),
+    ...numberField("trackingBasketDeviation", rebalance.trackingBasketDeviation),
+    ...numberField("nativeBasketDeviation", rebalance.nativeBasketDeviation),
   };
 }
 

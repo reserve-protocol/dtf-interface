@@ -125,7 +125,7 @@ export type GetHistoricalTokenPricesParams = {
   readonly address: Address;
   readonly from: number;
   readonly to: number;
-  readonly interval: "1h" | "1d";
+  readonly interval: "5m" | "1h" | "1d";
 };
 
 export type GetIndexDtfPriceParams = {
@@ -136,7 +136,7 @@ export type GetIndexDtfPriceParams = {
 export type GetIndexDtfPriceHistoryParams = GetIndexDtfPriceParams & {
   readonly from: number;
   readonly to: number;
-  readonly interval: "1h" | "1d";
+  readonly interval: "5m" | "1h" | "1d";
 };
 
 export type GetIndexDtfBasketSnapshotParams = GetIndexDtfPriceParams & {

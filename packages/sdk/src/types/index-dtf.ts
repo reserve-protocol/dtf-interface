@@ -279,7 +279,7 @@ export type GetIndexDtfPricesParams = {
 export type GetIndexDtfPriceHistoryParams = IndexDtfIdentityParams & {
   readonly from: number;
   readonly to: number;
-  readonly interval: "1h" | "1d";
+  readonly interval: "5m" | "1h" | "1d";
 };
 
 export type GetIndexDtfPriceHistoryOptions = Pick<GetIndexDtfPriceHistoryParams, "from" | "interval" | "to">;

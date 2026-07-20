@@ -12,8 +12,8 @@ import { indexDtfPriceHistoryQueryOptions } from "@/query-options";
 export type IndexDtfPerformancePoint = {
   readonly timestamp: number;
   readonly price: number;
-  readonly marketCap?: number;
-  readonly totalSupply?: number;
+  readonly marketCap: number;
+  readonly totalSupply: number;
   readonly basket: IndexDtfPricePoint["basket"];
 };
 

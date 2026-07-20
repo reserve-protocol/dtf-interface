@@ -210,3 +210,18 @@ export {
   useIndexDtfVoteLockState,
   useIndexDtfVoteLockVaultState,
 } from "@/index-dtf-extra-hooks";
+export {
+  composeIndexDtfPerformance,
+  dedupeIndexDtfPricePoints,
+  useIndexDtfPerformance,
+} from "@/index-dtf/use-index-dtf-performance";
+export type {
+  IndexDtfPerformancePoint,
+  UseIndexDtfPerformanceParams,
+} from "@/index-dtf/use-index-dtf-performance";
+export { useAccountBalancePnl } from "@/index-dtf/use-account-balance-pnl";
+export type {
+  AccountBalancePnl,
+  AccountBalancePnlPeriod,
+  UseAccountBalancePnlParams,
+} from "@/index-dtf/use-account-balance-pnl";

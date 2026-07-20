@@ -1,6 +1,6 @@
-import type { DtfClient } from "@/client";
-
 import { describe, expect, it, vi } from "vitest";
+
+import type { DtfClient } from "@/client";
 
 import {
   calculateAccountBalancePnl,
@@ -27,7 +27,10 @@ describe("getIndexDtfAccountBalanceSnapshot", () => {
       before: 1_700_000_100,
     });
 
-    expect(snapshot).toEqual({ balance: { raw: 2_000_000_000_000_000_000n, formatted: "2" }, timestamp: 1_700_000_000 });
+    expect(snapshot).toEqual({
+      balance: { raw: 2_000_000_000_000_000_000n, formatted: "2" },
+      timestamp: 1_700_000_000,
+    });
     expect(queryIndex).toHaveBeenCalledWith(
       expect.objectContaining({
         chainId: 8453,

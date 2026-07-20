@@ -1,7 +1,8 @@
+import { useCallback } from "react";
+
 import type { GetIndexDtfPriceHistoryParams, IndexDtfPricePoint } from "@reserve-protocol/sdk";
 
 import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
 
 import type { DtfQueryOptions } from "@/query";
 
@@ -67,10 +68,7 @@ export function composeIndexDtfPerformance(
  */
 export function useIndexDtfPerformance(
   params: UseIndexDtfPerformanceParams | undefined,
-  options?: Omit<
-    DtfQueryOptions<readonly IndexDtfPricePoint[], readonly IndexDtfPerformancePoint[]>,
-    "select"
-  >,
+  options?: Omit<DtfQueryOptions<readonly IndexDtfPricePoint[], readonly IndexDtfPerformancePoint[]>, "select">,
 ) {
   const sdk = useDtfSdk();
   const currentPrice = params?.currentPrice;
@@ -86,8 +84,7 @@ export function useIndexDtfPerformance(
     : undefined;
 
   const select = useCallback(
-    (points: readonly IndexDtfPricePoint[]) =>
-      composeIndexDtfPerformance(points, currentPrice, currentTotalSupply),
+    (points: readonly IndexDtfPricePoint[]) => composeIndexDtfPerformance(points, currentPrice, currentTotalSupply),
     [currentPrice, currentTotalSupply],
   );
 

@@ -44,10 +44,7 @@ export async function getIndexDtfAccountBalanceSnapshot(
   client: DtfClient,
   params: GetIndexDtfAccountBalanceSnapshotParams,
 ): Promise<IndexDtfAccountBalanceSnapshot | null> {
-  const data = await client.subgraph.queryIndex<
-    SnapshotResponse,
-    { account: string; token: string; before: string }
-  >({
+  const data = await client.subgraph.queryIndex<SnapshotResponse, { account: string; token: string; before: string }>({
     chainId: params.chainId,
     query: SNAPSHOT_QUERY,
     variables: {

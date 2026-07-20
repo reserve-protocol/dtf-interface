@@ -23,7 +23,11 @@ function setup(sdkOverrides: {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   function wrapper({ children }: PropsWithChildren) {
-    return createElement(DtfSdkProvider, { sdk }, createElement(QueryClientProvider, { client: queryClient }, children));
+    return createElement(
+      DtfSdkProvider,
+      { sdk },
+      createElement(QueryClientProvider, { client: queryClient }, children),
+    );
   }
 
   return { wrapper, getPriceHistory };

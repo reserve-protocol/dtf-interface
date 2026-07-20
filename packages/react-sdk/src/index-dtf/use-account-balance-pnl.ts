@@ -1,13 +1,14 @@
+import { useMemo } from "react";
+
 import type { SupportedChainId } from "@reserve-protocol/sdk";
 import type { Address } from "viem";
 
 import { calculateAccountBalancePnl, selectPriceAtMark } from "@reserve-protocol/sdk";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 import { useDtfSdk } from "@/provider";
-import { indexDtfPriceHistoryQueryOptions } from "@/query-options";
 import { dtfQueryKeys } from "@/query-keys";
+import { indexDtfPriceHistoryQueryOptions } from "@/query-options";
 
 const PERIOD_SECONDS = {
   "7d": 7 * 24 * 3_600,

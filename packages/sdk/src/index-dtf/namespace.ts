@@ -32,6 +32,7 @@ import {
 } from "@/index-dtf/dtf/discovery";
 import { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
+import { getIndexDtfAccountBalanceSnapshot } from "@/index-dtf/dtf/account-pnl";
 import { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 import {
   getBasket,
@@ -125,6 +126,8 @@ export function createIndexDtfNamespace(client: DtfClient) {
     getStatuses: (params?: Parameters<typeof getIndexDtfStatuses>[1]) => getIndexDtfStatuses(client, params),
     getExposure: (params: Parameters<typeof getIndexDtfExposure>[1]) => getIndexDtfExposure(client, params),
     getHolders: (params: Parameters<typeof getIndexDtfHolders>[1]) => getIndexDtfHolders(client, params),
+    getAccountBalanceSnapshot: (params: Parameters<typeof getIndexDtfAccountBalanceSnapshot>[1]) =>
+      getIndexDtfAccountBalanceSnapshot(client, params),
     getTransactions: (params: Parameters<typeof getIndexDtfTransactions>[1]) => getIndexDtfTransactions(client, params),
     getBidsEnabled: (params: Parameters<typeof getIndexDtfBidsEnabled>[1]) => getIndexDtfBidsEnabled(client, params),
     getRebalanceControl: (params: Parameters<typeof getIndexDtfRebalanceControl>[1]) =>

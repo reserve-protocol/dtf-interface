@@ -288,35 +288,87 @@ describe("Index DTF getters", () => {
       chainId: 8453,
     });
 
-    expect(brand).toMatchObject({
+    expect(brand).toEqual({
       hidden: false,
-      icon: "https://example.com/icon.png",
-      description: "CMC20 brand",
-      tags: ["Majors", "DeFi"],
-      basketType: "percentage-based",
-      video: "https://www.youtube.com/watch?v=brand",
-      files: [
-        { url: "https://example.com/factsheet.pdf", name: "Factsheet" },
-        { url: "", name: "" },
-      ],
+      dtf: {
+        icon: "https://example.com/icon.png",
+        cover: "",
+        mobileCover: "",
+        video: "https://www.youtube.com/watch?v=brand",
+        description: "CMC20 brand",
+        notesFromCreator: "",
+        prospectus: "",
+        files: [
+          { url: "https://example.com/factsheet.pdf", name: "Factsheet" },
+          { url: "", name: "" },
+        ],
+        tags: ["Majors", "DeFi"],
+        basketType: "percentage-based",
+      },
       creator: {
         name: "ListaDAO",
         icon: "https://example.com/creator.png",
         link: "https://lista.org/",
       },
+      curator: { name: "", icon: "", link: "" },
       socials: {
         twitter: "https://x.com/CoinMarketCap",
+        telegram: "",
+        discord: "",
         website: "https://coinmarketcap.com/charts/cmc20/",
       },
     });
-    expect(brand?.cover).toBeUndefined();
-    expect(brand?.curator).toBeUndefined();
     expect(fetch).toHaveBeenCalledOnce();
 
     const [brandUrl] = fetch.mock.calls[0] as unknown as [URL];
     expect(String(brandUrl)).toBe(
       "https://api.example/folio-manager/read?folio=0x0000000000000000000000000000000000000001&chainId=8453",
     );
+  });
+
+  it("maps a fully-null API brand to the all-defaults shape", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({
+        status: "ok",
+        parsedData: {
+          hidden: false,
+          dtf: {
+            icon: null,
+            cover: null,
+            description: null,
+            files: null,
+            tags: null,
+            basketType: null,
+          },
+        },
+      }),
+    );
+    vi.stubGlobal("fetch", fetch);
+
+    const apiClient = createDtfClient({ apiBaseUrl: "https://api.example" });
+    const brand = await getBrand(apiClient, {
+      address: "0x0000000000000000000000000000000000000001",
+      chainId: 8453,
+    });
+
+    expect(brand).toEqual({
+      hidden: false,
+      dtf: {
+        icon: "",
+        cover: "",
+        mobileCover: "",
+        video: "",
+        description: "",
+        notesFromCreator: "",
+        prospectus: "",
+        files: [],
+        tags: [],
+        basketType: "percentage-based",
+      },
+      creator: { name: "", icon: "", link: "" },
+      curator: { name: "", icon: "", link: "" },
+      socials: { twitter: "", telegram: "", discord: "", website: "" },
+    });
   });
 
   it("fetches and maps API-backed Index DTF price history", async () => {

@@ -5,7 +5,6 @@ import {
   discoverIndexDtfs,
   discoverIndexDtfsByChain,
   discoverIndexDtfsFromSubgraph,
-  getIndexDtfStatus,
 } from "@/index-dtf/dtf/discovery";
 
 const DTF = "0x0000000000000000000000000000000000000001";
@@ -35,32 +34,6 @@ describe("Index DTF discovery", () => {
     expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe(
       "https://api.example/discover/dtfs?brand=true&performance=true",
     );
-  });
-
-  it("returns API status for a known Index DTF", async () => {
-    const fetch = vi.fn(async () =>
-      Response.json([{ type: "index", address: DTF, chainId: 8453, status: "deprecated" }]),
-    );
-    vi.stubGlobal("fetch", fetch);
-    const client = createDtfClient({ apiBaseUrl: "https://api.example" });
-
-    await expect(getIndexDtfStatus(client, { address: DTF, chainId: 8453 })).resolves.toBe("deprecated");
-    // One unpaged scan with an explicit high limit — never a server-capped page.
-    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe("https://api.example/discover/dtfs?limit=1000");
-  });
-
-  it("matches status by address and chain in one global discovery request", async () => {
-    const fetch = vi.fn(async () =>
-      Response.json([
-        { type: "index", address: DTF, chainId: 1, status: "deprecated" },
-        { type: "index", address: DTF_B, chainId: 8453, status: "unsupported" },
-      ]),
-    );
-    vi.stubGlobal("fetch", fetch);
-    const client = createDtfClient({ apiBaseUrl: "https://api.example" });
-
-    await expect(getIndexDtfStatus(client, { address: DTF, chainId: 8453 })).resolves.toBe("active");
-    expect(fetch).toHaveBeenCalledOnce();
   });
 
   it("filters chain-scoped discovery to Index DTFs", async () => {
@@ -193,15 +166,6 @@ describe("Index DTF discovery", () => {
     expect(currentRequests).toBe(2);
   });
 
-  it("treats missing discovery status as active like Register", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => Response.json([])),
-    );
-    const client = createDtfClient({ apiBaseUrl: "https://api.example" });
-
-    await expect(getIndexDtfStatus(client, { address: DTF, chainId: 8453 })).resolves.toBe("active");
-  });
 });
 
 function subgraphDtf(id: string, symbol: string) {

@@ -53,19 +53,6 @@ export function indexDtfTotalAssetsQueryOptions<TData = MethodResult<IndexMethod
   );
 }
 
-export function indexDtfStatusQueryOptions<TData = MethodResult<IndexMethod<"getStatus">>>(
-  sdk: DtfSdk,
-  params: MethodParams<IndexMethod<"getStatus">> | undefined,
-  options?: DtfQueryOptions<MethodResult<IndexMethod<"getStatus">>, TData>,
-) {
-  return createDtfQueryOptions(
-    dtfQueryKeys.index.status(params),
-    () => sdk.index.getStatus(requireParams(params, "indexDtfStatusQueryOptions")),
-    params !== undefined,
-    options,
-  );
-}
-
 export function indexDtfExposureQueryOptions<TData = MethodResult<IndexMethod<"getExposure">>>(
   sdk: DtfSdk,
   params: MethodParams<IndexMethod<"getExposure">> | undefined,

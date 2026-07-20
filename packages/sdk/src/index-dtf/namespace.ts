@@ -28,9 +28,9 @@ import {
   discoverIndexDtfs,
   discoverIndexDtfsByChain,
   discoverIndexDtfsFromSubgraph,
-  getIndexDtfStatus,
   getIndexDtfStatuses,
 } from "@/index-dtf/dtf/discovery";
+import { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 import { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 import {
@@ -121,7 +121,7 @@ export function createIndexDtfNamespace(client: DtfClient) {
     getPrice: (params: GetIndexDtfPriceParams) => getPrice(client, params),
     getPrices: (params: Parameters<typeof getPrices>[1]) => getPrices(client, params),
     getPriceHistory: (params: GetIndexDtfPriceHistoryParams) => getPriceHistory(client, params),
-    getStatus: (params: Parameters<typeof getIndexDtfStatus>[1]) => getIndexDtfStatus(client, params),
+    getStatus: getIndexDtfStatus,
     getStatuses: (params?: Parameters<typeof getIndexDtfStatuses>[1]) => getIndexDtfStatuses(client, params),
     getExposure: (params: Parameters<typeof getIndexDtfExposure>[1]) => getIndexDtfExposure(client, params),
     getHolders: (params: Parameters<typeof getIndexDtfHolders>[1]) => getIndexDtfHolders(client, params),

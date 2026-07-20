@@ -9,7 +9,7 @@ import type {
   GetIndexDtfPriceHistoryOptions,
 } from "@/types/index-dtf";
 
-import { getIndexDtfStatus } from "@/index-dtf/dtf/discovery";
+import { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 import {
   getBasket,
@@ -99,7 +99,7 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
     getPrice: () => getPrice(client, { address, chainId }),
     getPriceHistory: (options: GetIndexDtfPriceHistoryOptions) =>
       getPriceHistory(client, { ...options, address, chainId }),
-    getStatus: () => getIndexDtfStatus(client, { address, chainId }),
+    getStatus: () => getIndexDtfStatus({ address, chainId }),
     getExposure: (options: Omit<Parameters<typeof getIndexDtfExposure>[1], "address" | "chainId"> = {}) =>
       getIndexDtfExposure(client, { ...options, address, chainId }),
     getTransactions: (options: Omit<Parameters<typeof getIndexDtfTransactions>[1], "address" | "chainId"> = {}) =>

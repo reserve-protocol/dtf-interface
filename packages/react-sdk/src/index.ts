@@ -112,7 +112,6 @@ export {
   indexDtfRebalanceQueryOptions,
   indexDtfRebalancesQueryOptions,
   indexDtfRevenueQueryOptions,
-  indexDtfStatusQueryOptions,
   indexDtfTransactionsQueryOptions,
   indexDtfTotalAssetsQueryOptions,
   indexDtfTotalSupplyQueryOptions,

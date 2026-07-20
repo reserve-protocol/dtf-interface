@@ -1,6 +1,5 @@
 import type { Address } from "viem";
 
-import { indexDtfs as indexDtfCatalog } from "@reserve-protocol/dtf-catalog";
 import { getAddress } from "viem";
 
 import type { DtfClient } from "@/client";
@@ -33,6 +32,7 @@ import {
   mapIndexDtfPriceHistory,
   type IndexDtfBrandResponse,
 } from "@/index-dtf/dtf/mappers";
+import { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 import { GetIndexDtfDocument } from "@/index-dtf/subgraph/dtf.generated";
 import { SdkError } from "@/lib/errors";
 import { getTokensData } from "@/lib/tokens";
@@ -79,7 +79,7 @@ export async function getFull(client: DtfClient, params: GetIndexDtfParams): Pro
       fetchedAt: market.timestamp,
     },
     basket: market.basket,
-    status: indexDtfCatalog[params.chainId]?.[params.address.toLowerCase()]?.status ?? "active",
+    status: getIndexDtfStatus(params),
     ...(brand ? { brand } : {}),
   };
 }

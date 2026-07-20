@@ -27,7 +27,6 @@ import {
   indexDtfRebalanceQueryOptions,
   indexDtfRebalancesQueryOptions,
   indexDtfRevenueQueryOptions,
-  indexDtfStatusQueryOptions,
   indexDtfTransactionsQueryOptions,
   indexDtfTotalAssetsQueryOptions,
   indexDtfTotalSupplyQueryOptions,
@@ -60,12 +59,10 @@ export function useIndexDtfTotalAssets<TData = MethodResult<IndexMethod<"getTota
   return useQuery(indexDtfTotalAssetsQueryOptions(sdk, params, options));
 }
 
-export function useIndexDtfStatus<TData = MethodResult<IndexMethod<"getStatus">>>(
-  params: MethodParams<IndexMethod<"getStatus">> | undefined,
-  options?: DtfQueryOptions<MethodResult<IndexMethod<"getStatus">>, TData>,
-) {
+/** Sync catalog lookup — no fetch; DTFs absent from the catalog are active. */
+export function useIndexDtfStatus(params: MethodParams<IndexMethod<"getStatus">> | undefined) {
   const sdk = useDtfSdk();
-  return useQuery(indexDtfStatusQueryOptions(sdk, params, options));
+  return params ? sdk.index.getStatus(params) : "active";
 }
 
 export function useIndexDtfExposure<TData = MethodResult<IndexMethod<"getExposure">>>(

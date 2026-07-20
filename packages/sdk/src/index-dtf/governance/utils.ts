@@ -131,7 +131,10 @@ export function getProposalState(proposal: ProposalVoteStateInput, timestamp = g
       state.state = "ACTIVE";
       state.deadline = proposal.voteEnd - timestamp;
     } else {
-      state.state = "EXPIRED";
+      // WHY: past the deadline FolioGovernor.state() derives Defeated/Succeeded
+      // from the vote counts even if the ACTIVE transition was never indexed —
+      // a stale PENDING is never EXPIRED (that is a queue-lifecycle state).
+      state.state = getStandardFinalState(proposal);
     }
   } else if (proposal.state === "ACTIVE") {
     if (optimisticTransitioned) {
@@ -141,17 +144,9 @@ export function getProposalState(proposal: ProposalVoteStateInput, timestamp = g
     } else if (optimisticVetoReached) {
       state.state = "DEFEATED";
     } else if (timestamp > proposal.voteEnd) {
-      if (isOptimistic) {
-        state.state = getOptimisticFinalState(proposal, optimisticVetoThresholdVotes);
-      } else if (proposal.forWeightedVotes.raw <= proposal.againstWeightedVotes.raw) {
-        // WHY: OZ GovernorCountingSimple._voteSucceeded requires forVotes STRICTLY
-        // over againstVotes (FolioGovernor does not override it) — a tie is defeated.
-        state.state = "DEFEATED";
-      } else if (proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw < quorumVotes) {
-        state.state = "QUORUM_NOT_REACHED";
-      } else {
-        state.state = "SUCCEEDED";
-      }
+      state.state = isOptimistic
+        ? getOptimisticFinalState(proposal, optimisticVetoThresholdVotes)
+        : getStandardFinalState(proposal);
     } else {
       state.deadline = proposal.voteEnd - timestamp;
     }
@@ -265,6 +260,20 @@ export function getOptimisticVetoThresholdVotes(
   const vetoThresholdVotes = (optimistic.vetoThreshold * optimistic.snapshotSupply.raw) / D18;
 
   return vetoThresholdVotes === 0n ? 1n : vetoThresholdVotes;
+}
+
+function getStandardFinalState(proposal: ProposalVoteStateInput): ProposalState {
+  // WHY: OZ GovernorCountingSimple._voteSucceeded requires forVotes STRICTLY
+  // over againstVotes (FolioGovernor does not override it) — a tie is defeated.
+  if (proposal.forWeightedVotes.raw <= proposal.againstWeightedVotes.raw) {
+    return "DEFEATED";
+  }
+
+  if (proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw < proposal.quorumVotes.raw) {
+    return "QUORUM_NOT_REACHED";
+  }
+
+  return "SUCCEEDED";
 }
 
 function getOptimisticFinalState(

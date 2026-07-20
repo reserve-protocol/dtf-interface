@@ -69,3 +69,62 @@ describe("getProposalState standard vote outcomes", () => {
     ).toMatchObject({ state: "QUORUM_NOT_REACHED" });
   });
 });
+
+const STALE_PENDING_PROPOSAL = {
+  ...ENDED_STANDARD_PROPOSAL,
+  state: "PENDING",
+} as const;
+
+describe("getProposalState stale PENDING past the deadline", () => {
+  it("keeps a stale pending proposal active at the vote end boundary", () => {
+    expect(
+      getProposalState(
+        {
+          ...STALE_PENDING_PROPOSAL,
+          forWeightedVotes: { raw: 150n, formatted: "150" },
+          againstWeightedVotes: { raw: 150n, formatted: "150" },
+        },
+        200,
+      ),
+    ).toMatchObject({ state: "ACTIVE" });
+  });
+
+  it("succeeds after the deadline when for votes win and quorum is met", () => {
+    expect(
+      getProposalState(
+        {
+          ...STALE_PENDING_PROPOSAL,
+          forWeightedVotes: { raw: 150n, formatted: "150" },
+          againstWeightedVotes: { raw: 10n, formatted: "10" },
+        },
+        201,
+      ),
+    ).toMatchObject({ state: "SUCCEEDED" });
+  });
+
+  it("defeats a tie after the deadline", () => {
+    expect(
+      getProposalState(
+        {
+          ...STALE_PENDING_PROPOSAL,
+          forWeightedVotes: { raw: 150n, formatted: "150" },
+          againstWeightedVotes: { raw: 150n, formatted: "150" },
+        },
+        201,
+      ),
+    ).toMatchObject({ state: "DEFEATED" });
+  });
+
+  it("marks winning votes under quorum as quorum not reached after the deadline", () => {
+    expect(
+      getProposalState(
+        {
+          ...STALE_PENDING_PROPOSAL,
+          forWeightedVotes: { raw: 50n, formatted: "50" },
+          againstWeightedVotes: { raw: 10n, formatted: "10" },
+        },
+        201,
+      ),
+    ).toMatchObject({ state: "QUORUM_NOT_REACHED" });
+  });
+});

@@ -86,6 +86,7 @@ export {
   useIndexDtfList,
   useIndexDtfPrice,
   useIndexDtfPriceHistory,
+  usePrefetchIndexDtfPriceHistory,
   useIndexDtfVersion,
 } from "@/hooks";
 export {
@@ -100,6 +101,7 @@ export {
   indexDtfCompletedRebalancesQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
   indexDtfExposureQueryOptions,
+  indexDtfAccountBalanceSnapshotQueryOptions,
   indexDtfHoldersQueryOptions,
   indexDtfIssuanceStateQueryOptions,
   indexDtfLatestAuctionQueryOptions,
@@ -191,6 +193,7 @@ export {
   useAccountPortfolio,
   useIndexDtfCurrentRebalance,
   useIndexDtfExposure,
+  useIndexDtfAccountBalanceSnapshot,
   useIndexDtfHolders,
   useIndexDtfIssuanceState,
   useIndexDtfLatestAuction,
@@ -215,13 +218,4 @@ export {
   dedupeIndexDtfPricePoints,
   useIndexDtfPerformance,
 } from "@/index-dtf/use-index-dtf-performance";
-export type {
-  IndexDtfPerformancePoint,
-  UseIndexDtfPerformanceParams,
-} from "@/index-dtf/use-index-dtf-performance";
-export { useAccountBalancePnl } from "@/index-dtf/use-account-balance-pnl";
-export type {
-  AccountBalancePnl,
-  AccountBalancePnlPeriod,
-  UseAccountBalancePnlParams,
-} from "@/index-dtf/use-account-balance-pnl";
+export type { IndexDtfPerformancePoint, UseIndexDtfPerformanceParams } from "@/index-dtf/use-index-dtf-performance";

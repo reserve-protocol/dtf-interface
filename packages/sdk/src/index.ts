@@ -141,7 +141,6 @@ export {
   getIndexDtfExposure,
   getIndexDtfGuardians,
   getIndexDtfCatalogEntries,
-  calculateAccountBalancePnl,
   getIndexDtfAccountBalanceSnapshot,
   selectPriceAtMark,
   getIndexDtfHolders,

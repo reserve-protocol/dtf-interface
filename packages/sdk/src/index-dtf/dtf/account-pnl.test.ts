@@ -2,11 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { DtfClient } from "@/client";
 
-import {
-  calculateAccountBalancePnl,
-  getIndexDtfAccountBalanceSnapshot,
-  selectPriceAtMark,
-} from "@/index-dtf/dtf/account-pnl";
+import { getIndexDtfAccountBalanceSnapshot, selectPriceAtMark } from "@/index-dtf/dtf/account-pnl";
 
 const ACCOUNT = "0x00000000000000000000000000000000000000A1";
 const DTF = "0x00000000000000000000000000000000000000D1";
@@ -56,22 +52,5 @@ describe("selectPriceAtMark", () => {
   it("is null when every point is zero or the window is empty", () => {
     expect(selectPriceAtMark([{ price: 0 }, { price: 0 }])).toBeNull();
     expect(selectPriceAtMark([])).toBeNull();
-  });
-});
-
-describe("calculateAccountBalancePnl", () => {
-  it("is the value diff against the position's worth at the mark", () => {
-    expect(calculateAccountBalancePnl({ snapshotBalance: 2, priceAtMark: 10, currentValue: 25 })).toBe(5);
-  });
-
-  it("hides when the wallet was not holding at the mark", () => {
-    expect(calculateAccountBalancePnl({ snapshotBalance: null, priceAtMark: 10, currentValue: 25 })).toBeNull();
-    expect(calculateAccountBalancePnl({ snapshotBalance: 0, priceAtMark: 10, currentValue: 25 })).toBeNull();
-  });
-
-  it("hides when an input is unavailable — never fabricates from a 0 price", () => {
-    expect(calculateAccountBalancePnl({ snapshotBalance: 2, priceAtMark: 0, currentValue: 25 })).toBeNull();
-    expect(calculateAccountBalancePnl({ snapshotBalance: 2, priceAtMark: null, currentValue: 25 })).toBeNull();
-    expect(calculateAccountBalancePnl({ snapshotBalance: 2, priceAtMark: 10, currentValue: undefined })).toBeNull();
   });
 });

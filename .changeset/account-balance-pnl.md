@@ -3,4 +3,4 @@
 "@reserve-protocol/react-sdk": minor
 ---
 
-Account balance PnL reads: `getIndexDtfAccountBalanceSnapshot` (carry-forward daily balance snapshot at a mark) plus the pure `selectPriceAtMark`/`calculateAccountBalancePnl` helpers, and `useAccountBalancePnl({ account, dtf, chainId, period })` composing snapshot × price-at-mark against the current position value. `pnl: null` means hide (not holding at the mark or an input unavailable) — never a fabricated figure.
+Account-balance snapshot primitives: `getIndexDtfAccountBalanceSnapshot` (carry-forward daily balance at a mark) with the `selectPriceAtMark` data-hygiene helper, exposed through `useIndexDtfAccountBalanceSnapshot` on the hook layer, plus `usePrefetchIndexDtfPriceHistory` so apps can warm sibling price-history windows without touching the sdk client. Product metrics (e.g. a week-ago PnL) compose these app-side — the SDK deliberately ships no PnL semantics.

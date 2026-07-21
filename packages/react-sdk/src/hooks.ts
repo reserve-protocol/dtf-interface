@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 import type {
   BuildIndexDtfBasketProposalParams,
   BuildIndexDtfBasketSettingsProposalParams,
@@ -21,7 +23,7 @@ import type {
   ListIndexDtfsParams,
 } from "@reserve-protocol/sdk";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useDtfSdk } from "@/provider";
 import {
@@ -118,6 +120,25 @@ export function useIndexDtfPriceHistory<TData = readonly IndexDtfPricePoint[]>(
   const sdk = useDtfSdk();
 
   return useQuery(indexDtfPriceHistoryQueryOptions(sdk, params, options));
+}
+
+/**
+ * Prefetch a price-history window under its canonical key (e.g. the chart's
+ * sibling time ranges) — the hook-layer primitive so apps never reach for the
+ * sdk client directly.
+ */
+export function usePrefetchIndexDtfPriceHistory() {
+  const sdk = useDtfSdk();
+  const queryClient = useQueryClient();
+
+  return useCallback(
+    (params: GetIndexDtfPriceHistoryParams, staleTime?: number) =>
+      queryClient.prefetchQuery({
+        ...indexDtfPriceHistoryQueryOptions(sdk, params),
+        ...(staleTime !== undefined ? { staleTime } : {}),
+      }),
+    [queryClient, sdk],
+  );
 }
 
 export function useBuildIndexDtfBasketProposal<TData = BuiltIndexDtfBasketProposal>(

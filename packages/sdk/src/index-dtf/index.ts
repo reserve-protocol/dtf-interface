@@ -38,11 +38,7 @@ export {
 export { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 export { getAssetList as getIndexDtfAssetList } from "@/client/api/assets";
 export { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
-export {
-  calculateAccountBalancePnl,
-  getIndexDtfAccountBalanceSnapshot,
-  selectPriceAtMark,
-} from "@/index-dtf/dtf/account-pnl";
+export { getIndexDtfAccountBalanceSnapshot, selectPriceAtMark } from "@/index-dtf/dtf/account-pnl";
 export { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 export {
   getIndexDtfIssuanceState,

@@ -14,6 +14,7 @@ import {
   indexDtfCompletedRebalanceQueryOptions,
   indexDtfCompletedRebalancesQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
+  indexDtfAccountBalanceSnapshotQueryOptions,
   indexDtfExposureQueryOptions,
   indexDtfHoldersQueryOptions,
   indexDtfIssuanceStateQueryOptions,
@@ -79,6 +80,14 @@ export function useIndexDtfHolders<TData = MethodResult<IndexMethod<"getHolders"
 ) {
   const sdk = useDtfSdk();
   return useQuery(indexDtfHoldersQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfAccountBalanceSnapshot<TData = MethodResult<IndexMethod<"getAccountBalanceSnapshot">>>(
+  params: MethodParams<IndexMethod<"getAccountBalanceSnapshot">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getAccountBalanceSnapshot">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfAccountBalanceSnapshotQueryOptions(sdk, params, options));
 }
 
 export function useIndexDtfTransactions<TData = MethodResult<IndexMethod<"getTransactions">>>(

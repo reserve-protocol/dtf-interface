@@ -75,25 +75,3 @@ export function selectPriceAtMark(points: readonly { readonly price: number }[])
 
   return null;
 }
-
-/**
- * Position value now minus its value at the mark (snapshot balance × price
- * then). Deliberately a plain value diff — deposits/withdrawals inside the
- * window show up in it. null = hide: the wallet wasn't holding at the mark, or
- * an input is unavailable.
- */
-export function calculateAccountBalancePnl(inputs: {
-  readonly snapshotBalance: number | null;
-  readonly priceAtMark: number | null | undefined;
-  readonly currentValue: number | undefined;
-}): number | null {
-  const { snapshotBalance, priceAtMark, currentValue } = inputs;
-  if (snapshotBalance === null || snapshotBalance <= 0) {
-    return null;
-  }
-  if (!priceAtMark || priceAtMark <= 0 || currentValue === undefined) {
-    return null;
-  }
-
-  return currentValue - snapshotBalance * priceAtMark;
-}

@@ -100,7 +100,9 @@ Use them for previewing proposal payloads before submit.
 
 ## Select Option
 
-All hooks support `select`.
+Ordinary query hooks support `select`. Two exceptions: `useIndexDtfStatus` is a
+synchronous catalog lookup (no query options), and `useIndexDtfPerformance`
+reserves `select` for its own live-point composition.
 
 ```tsx
 const symbol = useIndexDtf(

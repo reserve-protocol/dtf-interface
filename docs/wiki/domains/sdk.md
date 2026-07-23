@@ -23,10 +23,10 @@ sources:
 ## Invariants
 
 - On-chain integer amounts are `Amount`; display-class values may be numbers.
-- Proposal vote success is OZ strict majority: a for/against tie is DEFEATED. Subgraph proposal state lags time-based transitions, so list/detail state surfaces derive from votes, quorum, and deadline instead of returning the raw field.
-- Index proposal IDs are globally unique and do not need DTF-membership checks.
+- Proposal vote success is OZ strict majority for both products: a for/against tie is DEFEATED. Subgraph proposal state lags time-based transitions, so proposal-state surfaces derive from votes, quorum, and deadline instead of returning the raw field — except Yield proposal detail, which reads authoritative governor state (last bullet).
+- Index DTF proposal IDs are globally unique and do not need DTF-membership checks.
 - Public call builders require exact calldata and value assertions when changed.
-- GraphQL generated output must match the configured deployed schemas; ordinary CI and `release:ci` rerun codegen and reject drift.
+- GraphQL-generated output must match the configured deployed schemas; ordinary CI and `release:ci` rerun codegen and reject drift.
 - Account balance snapshots bind through both the namespace and DTF ref. `selectPriceAtMark(points, mark?)` requires timestamped points, never selects a future or non-positive price when a mark is provided, and preserves latest-positive selection when it is omitted.
 - Yield proposal lists combine indexed vote totals with the latest chain-native timepoint, so they can be eventually consistent near `voteEnd`; proposal detail reads authoritative governor state.
 

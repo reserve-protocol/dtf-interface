@@ -1,4 +1,4 @@
-import { createElement, type PropsWithChildren } from "react";
+import { act, createElement, type PropsWithChildren } from "react";
 
 // @vitest-environment jsdom
 import type { DtfSdk, IndexDtfPricePoint } from "@reserve-protocol/sdk";
@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { usePrefetchIndexDtfPriceHistory } from "@/hooks";
 import {
   composeIndexDtfPerformance,
   dedupeIndexDtfPricePoints,
@@ -42,6 +43,14 @@ describe("composeIndexDtfPerformance", () => {
     const composed = composeIndexDtfPerformance(points, 2, 100);
     expect(composed).toHaveLength(2);
     expect(composed[1]).toMatchObject({ price: 2, marketCap: 200, totalSupply: 100 });
+
+    const zeroSupply = composeIndexDtfPerformance(points, 2, 0);
+    expect(zeroSupply).toHaveLength(2);
+    expect(zeroSupply[1]).toMatchObject({ price: 2, marketCap: 0, totalSupply: 0 });
+
+    const zeroPrice = composeIndexDtfPerformance(points, 0, 100);
+    expect(zeroPrice).toHaveLength(2);
+    expect(zeroPrice[1]).toMatchObject({ price: 0, marketCap: 0, totalSupply: 100 });
   });
 });
 
@@ -71,6 +80,35 @@ describe("useIndexDtfPerformance", () => {
     expect(result.current.data?.map((p) => p.price)).toEqual([1.5, 2, 3]);
     // The shared cache entry stays the raw array — currentPrice is not in the
     // key and never pollutes it.
+    expect(queryClient.getQueryData(dtfQueryKeys.index.priceHistory(params))).toEqual(raw);
+  });
+
+  it("prefetches price history under the canonical key with the requested freshness", async () => {
+    const raw = [point(1, 1)];
+    const sdk = { index: { getPriceHistory: vi.fn(async () => raw) } } as unknown as DtfSdk;
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const prefetchQuery = vi.spyOn(queryClient, "prefetchQuery");
+
+    function wrapper({ children }: PropsWithChildren) {
+      return createElement(
+        DtfSdkProvider,
+        { sdk },
+        createElement(QueryClientProvider, { client: queryClient }, children),
+      );
+    }
+
+    const params = { address: ADDRESS, chainId: 8453, from: 0, to: 10, interval: "1h" } as const;
+    const { result } = renderHook(() => usePrefetchIndexDtfPriceHistory(), { wrapper });
+
+    await act(() => result.current(params, 60_000));
+
+    expect(prefetchQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: dtfQueryKeys.index.priceHistory(params),
+        staleTime: 60_000,
+      }),
+    );
+    expect(sdk.index.getPriceHistory).toHaveBeenCalledWith(params);
     expect(queryClient.getQueryData(dtfQueryKeys.index.priceHistory(params))).toEqual(raw);
   });
 });

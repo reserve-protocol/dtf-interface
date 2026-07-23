@@ -1,4 +1,4 @@
-import { getAddress } from "viem";
+import { getAddress, type Address } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { getIndexDtfStatus } from "@/index-dtf/dtf/status";
@@ -22,5 +22,9 @@ describe("getIndexDtfStatus", () => {
 
   it("scopes the lookup to the requested chain", () => {
     expect(getIndexDtfStatus({ address: DEPRECATED_BASE, chainId: 1 })).toBe("active");
+  });
+
+  it("rejects malformed addresses instead of reporting an active product", () => {
+    expect(() => getIndexDtfStatus({ address: "not-an-address" as Address, chainId: 8453 })).toThrow();
   });
 });

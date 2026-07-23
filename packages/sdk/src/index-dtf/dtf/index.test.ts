@@ -13,7 +13,7 @@ import {
   getPrice,
   getPriceHistory,
 } from "@/index-dtf/dtf/index";
-import { mapIndexDtf } from "@/index-dtf/dtf/mappers";
+import { mapIndexDtf, mapIndexDtfBrand } from "@/index-dtf/dtf/mappers";
 
 describe("Index DTF getters", () => {
   afterEach(() => {
@@ -369,6 +369,18 @@ describe("Index DTF getters", () => {
       curator: { name: "", icon: "", link: "" },
       socials: { twitter: "", telegram: "", discord: "", website: "" },
     });
+  });
+
+  it("normalizes unit-based brand basket types", () => {
+    const brand = mapIndexDtfBrand({
+      status: "ok",
+      parsedData: {
+        hidden: false,
+        dtf: { basketType: " Unit-Based " },
+      },
+    });
+
+    expect(brand?.dtf.basketType).toBe("unit-based");
   });
 
   it("fetches and maps API-backed Index DTF price history", async () => {

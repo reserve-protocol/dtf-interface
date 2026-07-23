@@ -24,15 +24,14 @@ import {
   prepareIndexDtfDeployPlan,
   prepareIndexDtfDeployStakingToken,
 } from "@/index-dtf/deploy/index";
+import { getIndexDtfAccountBalanceSnapshot } from "@/index-dtf/dtf/account-pnl";
 import {
   discoverIndexDtfs,
   discoverIndexDtfsByChain,
   discoverIndexDtfsFromSubgraph,
   getIndexDtfStatuses,
 } from "@/index-dtf/dtf/discovery";
-import { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
-import { getIndexDtfAccountBalanceSnapshot } from "@/index-dtf/dtf/account-pnl";
 import { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 import {
   getBasket,
@@ -65,6 +64,7 @@ import {
   getIndexDtfRevenue,
   prepareIndexDtfDistributeFees,
 } from "@/index-dtf/dtf/revenue";
+import { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 import { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 import { createIndexDtfGovernanceNamespace } from "@/index-dtf/governance/namespace";
 import { getIndexDtfCatalogEntries, listIndexDtfs, resolveIndexDtfAlias } from "@/index-dtf/protocol/index";

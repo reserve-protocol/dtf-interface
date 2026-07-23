@@ -11,11 +11,25 @@ describe("getIndexDtfExposure", () => {
   it("checksums token addresses and preserves the exposure/collateral market caps", async () => {
     const get = vi.fn(async () => [
       {
-        native: { symbol: "AAPL", name: "Apple", logo: "a.svg", caip2: "eip155:1", coingeckoId: "apple", marketCap: 3_000_000 },
+        native: {
+          symbol: "AAPL",
+          name: "Apple",
+          logo: "a.svg",
+          caip2: "eip155:1",
+          coingeckoId: "apple",
+          marketCap: 3_000_000,
+        },
         totalWeight: 0.4,
         marketCap: 500,
         tokens: [
-          { address: TOKEN, symbol: "uAAPL", weight: 0.4, marketCap: 500, underlyingMarketCap: 3_000_000, bridge: { id: "b", name: "Bridge", url: "u", description: "d", logo: "l", risks: [], wrappedVersion: true } },
+          {
+            address: TOKEN,
+            symbol: "uAAPL",
+            weight: 0.4,
+            marketCap: 500,
+            underlyingMarketCap: 3_000_000,
+            bridge: { id: "b", name: "Bridge", url: "u", description: "d", logo: "l", risks: [], wrappedVersion: true },
+          },
         ],
       },
     ]);

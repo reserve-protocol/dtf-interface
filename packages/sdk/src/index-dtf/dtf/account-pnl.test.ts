@@ -45,12 +45,40 @@ describe("getIndexDtfAccountBalanceSnapshot", () => {
 });
 
 describe("selectPriceAtMark", () => {
-  it("takes the last point with a real price", () => {
-    expect(selectPriceAtMark([{ price: 1.1 }, { price: 1.2 }, { price: 0 }])).toBe(1.2);
+  it("takes the latest real price at or before the mark regardless of input order", () => {
+    expect(
+      selectPriceAtMark(
+        [
+          { timestamp: 300, price: 1.3 },
+          { timestamp: 100, price: 1.1 },
+          { timestamp: 200, price: 1.2 },
+          { timestamp: 250, price: 0 },
+        ],
+        250,
+      ),
+    ).toBe(1.2);
   });
 
   it("is null when every point is zero or the window is empty", () => {
-    expect(selectPriceAtMark([{ price: 0 }, { price: 0 }])).toBeNull();
-    expect(selectPriceAtMark([])).toBeNull();
+    expect(
+      selectPriceAtMark(
+        [
+          { timestamp: 100, price: 0 },
+          { timestamp: 200, price: 0 },
+        ],
+        200,
+      ),
+    ).toBeNull();
+    expect(selectPriceAtMark([], 200)).toBeNull();
+  });
+
+  it("keeps the one-argument call compatible by selecting the latest real price", () => {
+    expect(
+      selectPriceAtMark([
+        { timestamp: 100, price: 1.1 },
+        { timestamp: 300, price: 1.3 },
+        { timestamp: 200, price: 1.2 },
+      ]),
+    ).toBe(1.3);
   });
 });

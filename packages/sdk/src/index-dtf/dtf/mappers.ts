@@ -197,7 +197,7 @@ export function mapIndexDtfBrand(response: IndexDtfBrandResponse): IndexDtfBrand
         name: file.name ?? "",
       })),
       tags: dtf?.tags ?? [],
-      basketType: dtf?.basketType === "unit-based" ? "unit-based" : "percentage-based",
+      basketType: nonEmpty(dtf?.basketType)?.toLowerCase() === "unit-based" ? "unit-based" : "percentage-based",
     },
     creator: mapBrandProfile(creator),
     curator: mapBrandProfile(curator),

@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createDtfClient } from "@/client";
-
 import { getPriceHistory } from "@/index-dtf/dtf";
 
 const DTF = "0x0000000000000000000000000000000000000001";

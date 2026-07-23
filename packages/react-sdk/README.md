@@ -37,7 +37,7 @@ import { useIndexDtfPrice } from "@reserve-protocol/react-sdk";
 const price = useIndexDtfPrice({ address, chainId });
 ```
 
-Core read surfaces expose matching `*QueryOptions` exports for loaders, prefetching, `useQueries`, and direct query-client use. Required params accept `undefined` and disable the query. Query keys normalize addresses, bigints, object order, and omitted values.
+Query-backed core reads expose matching `*QueryOptions` exports for loaders, prefetching, `useQueries`, and direct query-client use. Required params accept `undefined` and disable the query. Query keys normalize addresses, bigints, object order, and omitted values. `useIndexDtfStatus` is a synchronous catalog lookup, so it returns the status directly and has no query options or cache key.
 
 Freshness defaults:
 
@@ -45,7 +45,7 @@ Freshness defaults:
 - normal governance/account state: 30 seconds;
 - identity, brand, version, catalog, and immutable decode data: 5 minutes.
 
-All hooks accept TanStack Query options, including `select` and an explicit `staleTime` override.
+Query-backed hooks accept TanStack Query options, including `select` and an explicit `staleTime` override. `useIndexDtfPerformance` owns its `select` composition to preserve the raw price-history cache, but accepts the remaining query options.
 
 ## Bundle shape
 

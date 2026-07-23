@@ -152,12 +152,11 @@ export async function getYieldDtfProposals(
   });
 
   const summaries = proposals.map((proposal) => mapProposalSummary(proposal, params.chainId));
-  // Proposal state is live chain state: one latest block serves both clock
-  // domains (timestamp for Anastasius, number for Alexios), fetched once per
-  // request and never the consumer machine's wall clock.
-  const needsTimepoint = summaries.some(
-    (summary) => summary.state === "PENDING" || summary.state === "ACTIVE",
-  );
+  // One latest block serves both clock domains (timestamp for Anastasius,
+  // number for Alexios), fetched once per request. Vote totals remain indexed,
+  // so list state is eventually consistent near the deadline; detail reads the
+  // authoritative governor state.
+  const needsTimepoint = summaries.some((summary) => summary.state === "PENDING" || summary.state === "ACTIVE");
   const block = needsTimepoint ? await client.viem.getPublicClient(params.chainId).getBlock() : undefined;
 
   return summaries.map((summary) => ({

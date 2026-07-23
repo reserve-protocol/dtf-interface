@@ -64,14 +64,18 @@ export async function getIndexDtfAccountBalanceSnapshot(
   };
 }
 
-/** Last point at/before the mark with a real price — windows can carry leading zero-price rows. */
-export function selectPriceAtMark(points: readonly { readonly price: number }[]): number | null {
-  for (let i = points.length - 1; i >= 0; i--) {
-    const price = points[i]!.price;
-    if (price > 0) {
-      return price;
+/** Latest real price at or before the requested unix-second mark. */
+export function selectPriceAtMark(
+  points: readonly { readonly price: number; readonly timestamp: number }[],
+  mark = Number.POSITIVE_INFINITY,
+): number | null {
+  let selected: { readonly price: number; readonly timestamp: number } | undefined;
+
+  for (const point of points) {
+    if (point.timestamp <= mark && point.price > 0 && (!selected || point.timestamp > selected.timestamp)) {
+      selected = point;
     }
   }
 
-  return null;
+  return selected?.price ?? null;
 }

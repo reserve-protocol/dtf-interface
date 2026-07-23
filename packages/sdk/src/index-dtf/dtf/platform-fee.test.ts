@@ -10,10 +10,7 @@ const REGISTRY = "0x0000000000000000000000000000000000000002";
 const RECIPIENT = "0x0000000000000000000000000000000000000003";
 
 function createClient(feeDetails: readonly [string, bigint, bigint, bigint]): DtfClient {
-  const readContract = vi
-    .fn()
-    .mockResolvedValueOnce(REGISTRY)
-    .mockResolvedValueOnce(feeDetails);
+  const readContract = vi.fn().mockResolvedValueOnce(REGISTRY).mockResolvedValueOnce(feeDetails);
   return { viem: { readContract } } as unknown as DtfClient;
 }
 

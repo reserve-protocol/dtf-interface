@@ -1,11 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createDtfClient } from "@/client";
-import {
-  discoverIndexDtfs,
-  discoverIndexDtfsByChain,
-  discoverIndexDtfsFromSubgraph,
-} from "@/index-dtf/dtf/discovery";
+import { discoverIndexDtfs, discoverIndexDtfsByChain, discoverIndexDtfsFromSubgraph } from "@/index-dtf/dtf/discovery";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const TOKEN = "0x0000000000000000000000000000000000000002";
@@ -165,7 +161,6 @@ describe("Index DTF discovery", () => {
     await expect(discoverIndexDtfsFromSubgraph(client, { chainId: 8453 })).resolves.toHaveLength(1);
     expect(currentRequests).toBe(2);
   });
-
 });
 
 function subgraphDtf(id: string, symbol: string) {

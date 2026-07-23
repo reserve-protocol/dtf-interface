@@ -23,8 +23,6 @@ describe("getCompletedRebalance", () => {
     expect(detail.totalRebalancedUsd).toBe(50);
     expect(detail.avgPriceImpactPercent).toBe(0.3);
     expect(detail.auctions).toEqual([]);
-    expect(getIndexDtfRebalanceDetail).toHaveBeenCalledWith(
-      expect.objectContaining({ chainId: 1, nonce: 4 }),
-    );
+    expect(getIndexDtfRebalanceDetail).toHaveBeenCalledWith(expect.objectContaining({ chainId: 1, nonce: 4 }));
   });
 });

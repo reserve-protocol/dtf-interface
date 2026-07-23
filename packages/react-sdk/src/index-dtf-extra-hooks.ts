@@ -82,6 +82,7 @@ export function useIndexDtfHolders<TData = MethodResult<IndexMethod<"getHolders"
   return useQuery(indexDtfHoldersQueryOptions(sdk, params, options));
 }
 
+/** Reads the latest indexed account balance snapshot at or before a unix-second mark. */
 export function useIndexDtfAccountBalanceSnapshot<TData = MethodResult<IndexMethod<"getAccountBalanceSnapshot">>>(
   params: MethodParams<IndexMethod<"getAccountBalanceSnapshot">> | undefined,
   options?: DtfQueryOptions<MethodResult<IndexMethod<"getAccountBalanceSnapshot">>, TData>,

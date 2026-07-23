@@ -125,16 +125,16 @@ export function getProposalState(proposal: ProposalVoteStateInput, timestamp = g
       state.state = "CANCELED";
     } else if (optimisticVetoReached) {
       state.state = "DEFEATED";
-    } else if (timestamp > proposal.voteEnd && isOptimistic) {
-      state.state = getOptimisticFinalState(proposal, optimisticVetoThresholdVotes);
-    } else if (timestamp <= proposal.voteEnd) {
-      state.state = "ACTIVE";
-      state.deadline = proposal.voteEnd - timestamp;
-    } else {
+    } else if (timestamp > proposal.voteEnd) {
       // WHY: past the deadline FolioGovernor.state() derives Defeated/Succeeded
       // from the vote counts even if the ACTIVE transition was never indexed —
       // a stale PENDING is never EXPIRED (that is a queue-lifecycle state).
-      state.state = getStandardFinalState(proposal);
+      state.state = isOptimistic
+        ? getOptimisticFinalState(proposal, optimisticVetoThresholdVotes)
+        : getStandardFinalState(proposal);
+    } else {
+      state.state = "ACTIVE";
+      state.deadline = proposal.voteEnd - timestamp;
     }
   } else if (proposal.state === "ACTIVE") {
     if (optimisticTransitioned) {

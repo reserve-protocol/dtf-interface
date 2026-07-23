@@ -1,6 +1,5 @@
-import type { Address } from "viem";
-
 import { indexDtfs } from "@reserve-protocol/dtf-catalog";
+import { getAddress, type Address } from "viem";
 
 import type { SupportedChainId } from "@/config";
 import type { DtfStatus } from "@/types/common";
@@ -15,7 +14,7 @@ export type GetIndexDtfStatusParams = {
  * the catalog are active.
  */
 export function getIndexDtfStatus(params: GetIndexDtfStatusParams): DtfStatus {
-  const address = params.address.toLowerCase();
+  const address = getAddress(params.address).toLowerCase();
   const entries = Object.entries(indexDtfs[params.chainId] ?? {});
   const entry = entries.find(([key]) => key.toLowerCase() === address)?.[1];
 

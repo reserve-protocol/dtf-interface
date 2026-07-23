@@ -22,9 +22,10 @@ export type UseIndexDtfPerformanceParams = GetIndexDtfPriceHistoryParams & {
   readonly currentTotalSupply?: number;
 };
 
-// The API occasionally returns duplicated rows for the same timestamp; keep the
-// last occurrence. Input is expected in ascending timestamp order (API
-// contract) — the fast path returns it untouched.
+/**
+ * Keeps the last API row for each timestamp. API input is expected in
+ * ascending order; already-unique input preserves that order without sorting.
+ */
 export function dedupeIndexDtfPricePoints<T extends { readonly timestamp: number }>(points: readonly T[]): T[] {
   const byTimestamp = new Map<number, T>();
   for (const point of points) {
@@ -36,6 +37,7 @@ export function dedupeIndexDtfPricePoints<T extends { readonly timestamp: number
   return [...byTimestamp.values()].sort((a, b) => a.timestamp - b.timestamp);
 }
 
+/** Composes deduped history with a live point when both live inputs are defined. */
 export function composeIndexDtfPerformance(
   points: readonly IndexDtfPricePoint[],
   currentPrice?: number,
@@ -47,7 +49,7 @@ export function composeIndexDtfPerformance(
 
   // Live point needs both inputs — its marketCap is derived, and a point
   // without one would understate the freshest value instead of extending it.
-  if (currentPrice && currentTotalSupply && (!last || now > last.timestamp)) {
+  if (currentPrice !== undefined && currentTotalSupply !== undefined && (!last || now > last.timestamp)) {
     series.push({
       timestamp: now,
       price: currentPrice,
@@ -62,9 +64,9 @@ export function composeIndexDtfPerformance(
 
 /**
  * Price history composed for display: deduped by timestamp, with a live point
- * appended when `currentPrice` is provided and extends the series. The cache
- * entry stays the raw point array under the canonical price-history key —
- * composition happens in `select`, after the cache.
+ * appended when both live inputs are defined and extend the series. Zero is a
+ * valid resolved value. The cache entry stays the raw point array under the
+ * canonical price-history key — composition happens in `select`, after cache.
  */
 export function useIndexDtfPerformance(
   params: UseIndexDtfPerformanceParams | undefined,

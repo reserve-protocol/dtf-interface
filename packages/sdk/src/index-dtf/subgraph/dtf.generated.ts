@@ -1155,6 +1155,7 @@ export type Dtf_OrderBy =
   | 'stToken__id'
   | 'stToken__optimisticDelegatedVotes'
   | 'stToken__optimisticDelegatedVotesRaw'
+  | 'stToken__tokenJar'
   | 'stToken__totalDelegates'
   | 'stToken__totalOptimisticDelegates'
   | 'timestamp'
@@ -1641,6 +1642,7 @@ export type Delegate_OrderBy =
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__tokenJar'
   | 'token__totalDelegates'
   | 'token__totalOptimisticDelegates'
   | 'votes';
@@ -2188,6 +2190,7 @@ export type Governance_OrderBy =
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__tokenJar'
   | 'token__totalDelegates'
   | 'token__totalOptimisticDelegates'
   | 'version'
@@ -2406,6 +2409,7 @@ export type Lock_OrderBy =
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__tokenJar'
   | 'token__totalDelegates'
   | 'token__totalOptimisticDelegates'
   | 'unlockTime';
@@ -4094,6 +4098,7 @@ export type RewardClaim_OrderBy =
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__tokenJar'
   | 'token__totalDelegates'
   | 'token__totalOptimisticDelegates'
   | 'txnHash';
@@ -4185,6 +4190,7 @@ export type StakingTokenRewards_OrderBy =
   | 'stToken__id'
   | 'stToken__optimisticDelegatedVotes'
   | 'stToken__optimisticDelegatedVotesRaw'
+  | 'stToken__tokenJar'
   | 'stToken__totalDelegates'
   | 'stToken__totalOptimisticDelegates';
 
@@ -4281,6 +4287,26 @@ export type StakingToken_Filter = {
   or?: InputMaybe<Array<InputMaybe<StakingToken_Filter>>>;
   rewards_?: InputMaybe<StakingTokenRewards_Filter>;
   token?: InputMaybe<Scalars['String']['input']>;
+  tokenJar?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_contains?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_ends_with?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_gt?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_gte?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  tokenJar_lt?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_lte?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_not?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_not_contains?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  tokenJar_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_starts_with?: InputMaybe<Scalars['String']['input']>;
+  tokenJar_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   token_?: InputMaybe<Token_Filter>;
   token_contains?: InputMaybe<Scalars['String']['input']>;
   token_contains_nocase?: InputMaybe<Scalars['String']['input']>;
@@ -4374,6 +4400,7 @@ export type StakingToken_OrderBy =
   | 'optimisticDelegatedVotesRaw'
   | 'rewards'
   | 'token'
+  | 'tokenJar'
   | 'token__address'
   | 'token__burnCount'
   | 'token__cumulativeHolderCount'
@@ -6049,6 +6076,7 @@ export type UnstakingManager_OrderBy =
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__tokenJar'
   | 'token__totalDelegates'
   | 'token__totalOptimisticDelegates';
 

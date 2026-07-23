@@ -20,17 +20,18 @@ const dtfs = useDiscoverDtfs({
 
 ## DTF Detail
 
-| Hook                      | Core SDK method             |
-| ------------------------- | --------------------------- |
-| `useIndexDtf`             | `sdk.index.get`             |
-| `useIndexDtfBasket`       | `sdk.index.getBasket`       |
-| `useIndexDtfVersion`      | `sdk.index.getVersion`      |
-| `useIndexDtfBrand`        | `sdk.index.getBrand`        |
-| `useIndexDtfMandate`      | `sdk.index.getMandate`      |
-| `useIndexDtfTotalSupply`  | `sdk.index.getTotalSupply`  |
-| `useIndexDtfTotalAssets`  | `sdk.index.getTotalAssets`  |
-| `useIndexDtfPrice`        | `sdk.index.getPrice`        |
-| `useIndexDtfPriceHistory` | `sdk.index.getPriceHistory` |
+| Hook                      | Core SDK method                      |
+| ------------------------- | ------------------------------------ |
+| `useIndexDtf`             | `sdk.index.get`                      |
+| `useIndexDtfBasket`       | `sdk.index.getBasket`                |
+| `useIndexDtfVersion`      | `sdk.index.getVersion`               |
+| `useIndexDtfBrand`        | `sdk.index.getBrand`                 |
+| `useIndexDtfMandate`      | `sdk.index.getMandate`               |
+| `useIndexDtfTotalSupply`  | `sdk.index.getTotalSupply`           |
+| `useIndexDtfTotalAssets`  | `sdk.index.getTotalAssets`           |
+| `useIndexDtfPrice`        | `sdk.index.getPrice`                 |
+| `useIndexDtfPriceHistory` | `sdk.index.getPriceHistory`          |
+| `useIndexDtfPerformance`  | composed `sdk.index.getPriceHistory` |
 
 ```tsx
 const basket = useIndexDtfBasket({ address, chainId });
@@ -39,34 +40,37 @@ const price = useIndexDtfPrice({ address, chainId });
 
 ## Product And Analytics Reads
 
-| Hook                               | Core SDK method                      |
-| ---------------------------------- | ------------------------------------ |
-| `useIndexDtfStatus`                | `sdk.index.getStatus`                |
-| `useIndexDtfExposure`              | `sdk.index.getExposure`              |
-| `useIndexDtfHolders`               | `sdk.index.getHolders`               |
-| `useIndexDtfTransactions`          | `sdk.index.getTransactions`          |
-| `useIndexDtfRevenue`               | `sdk.index.getRevenue`               |
-| `useIndexDtfPlatformFee`           | `sdk.index.getPlatformFee`           |
-| `useIndexDtfPendingFeeShares`      | `sdk.index.getPendingFeeShares`      |
-| `useIndexDtfApprovedRevenueTokens` | `sdk.index.getApprovedRevenueTokens` |
-| `useIndexDtfIssuanceState`         | `sdk.index.getIssuanceState`         |
-| `useIndexDtfBidsEnabled`           | `sdk.index.getBidsEnabled`           |
-| `useIndexDtfRebalanceControl`      | `sdk.index.getRebalanceControl`      |
-| `useIndexDtfRebalances`            | `sdk.index.getRebalances`            |
-| `useIndexDtfRebalance`             | `sdk.index.getRebalance`             |
-| `useIndexDtfCurrentRebalance`      | `sdk.index.getCurrentRebalance`      |
-| `useIndexDtfRebalanceLiquidity`    | `sdk.index.getRebalanceLiquidity`    |
-| `useIndexDtfRebalanceAuctions`     | `sdk.index.getRebalanceAuctions`     |
-| `useIndexDtfActiveAuction`         | `sdk.index.getActiveAuction`         |
-| `useIndexDtfLatestAuction`         | `sdk.index.getLatestAuction`         |
-| `useIndexDtfBidQuote`              | `sdk.index.getBidQuote`              |
-| `useIndexDtfCompletedRebalance`    | `sdk.index.getCompletedRebalance`    |
-| `useIndexDtfCompletedRebalances`   | `sdk.index.getCompletedRebalances`   |
-| `useIndexDtfVoteLockState`         | `sdk.index.getVoteLockState`         |
-| `useIndexDtfVoteLockVaultState`    | `sdk.index.getVoteLockVaultState`    |
-| `useAccountPortfolio`              | `sdk.portfolio.get`                  |
-| `useAccountPortfolioHistory`       | `sdk.portfolio.getHistory`           |
-| `useAccountPortfolioTransactions`  | `sdk.portfolio.getTransactions`      |
+| Hook                                | Core SDK method                       |
+| ----------------------------------- | ------------------------------------- |
+| `useIndexDtfStatus`                 | `sdk.index.getStatus`                 |
+| `useIndexDtfExposure`               | `sdk.index.getExposure`               |
+| `useIndexDtfHolders`                | `sdk.index.getHolders`                |
+| `useIndexDtfAccountBalanceSnapshot` | `sdk.index.getAccountBalanceSnapshot` |
+| `useIndexDtfTransactions`           | `sdk.index.getTransactions`           |
+| `useIndexDtfRevenue`                | `sdk.index.getRevenue`                |
+| `useIndexDtfPlatformFee`            | `sdk.index.getPlatformFee`            |
+| `useIndexDtfPendingFeeShares`       | `sdk.index.getPendingFeeShares`       |
+| `useIndexDtfApprovedRevenueTokens`  | `sdk.index.getApprovedRevenueTokens`  |
+| `useIndexDtfIssuanceState`          | `sdk.index.getIssuanceState`          |
+| `useIndexDtfBidsEnabled`            | `sdk.index.getBidsEnabled`            |
+| `useIndexDtfRebalanceControl`       | `sdk.index.getRebalanceControl`       |
+| `useIndexDtfRebalances`             | `sdk.index.getRebalances`             |
+| `useIndexDtfRebalance`              | `sdk.index.getRebalance`              |
+| `useIndexDtfCurrentRebalance`       | `sdk.index.getCurrentRebalance`       |
+| `useIndexDtfRebalanceLiquidity`     | `sdk.index.getRebalanceLiquidity`     |
+| `useIndexDtfRebalanceAuctions`      | `sdk.index.getRebalanceAuctions`      |
+| `useIndexDtfActiveAuction`          | `sdk.index.getActiveAuction`          |
+| `useIndexDtfLatestAuction`          | `sdk.index.getLatestAuction`          |
+| `useIndexDtfBidQuote`               | `sdk.index.getBidQuote`               |
+| `useIndexDtfCompletedRebalance`     | `sdk.index.getCompletedRebalance`     |
+| `useIndexDtfCompletedRebalances`    | `sdk.index.getCompletedRebalances`    |
+| `useIndexDtfVoteLockState`          | `sdk.index.getVoteLockState`          |
+| `useIndexDtfVoteLockVaultState`     | `sdk.index.getVoteLockVaultState`     |
+| `useAccountPortfolio`               | `sdk.portfolio.get`                   |
+| `useAccountPortfolioHistory`        | `sdk.portfolio.getHistory`            |
+| `useAccountPortfolioTransactions`   | `sdk.portfolio.getTransactions`       |
+
+`useIndexDtfStatus` is synchronous and returns the catalog status directly. Query-backed hooks accept TanStack Query options; `useIndexDtfPerformance` reserves `select` for its raw-cache-preserving composition. Use `usePrefetchIndexDtfPriceHistory` to warm canonical price-history keys.
 
 ```tsx
 const issuance = useIndexDtfIssuanceState(
@@ -96,7 +100,9 @@ Use them for previewing proposal payloads before submit.
 
 ## Select Option
 
-All hooks support `select`.
+Ordinary query hooks support `select`. Two exceptions: `useIndexDtfStatus` is a
+synchronous catalog lookup (no query options), and `useIndexDtfPerformance`
+reserves `select` for its own live-point composition.
 
 ```tsx
 const symbol = useIndexDtf(

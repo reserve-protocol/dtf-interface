@@ -86,6 +86,7 @@ export {
   useIndexDtfList,
   useIndexDtfPrice,
   useIndexDtfPriceHistory,
+  usePrefetchIndexDtfPriceHistory,
   useIndexDtfVersion,
 } from "@/hooks";
 export {
@@ -100,6 +101,7 @@ export {
   indexDtfCompletedRebalancesQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
   indexDtfExposureQueryOptions,
+  indexDtfAccountBalanceSnapshotQueryOptions,
   indexDtfHoldersQueryOptions,
   indexDtfIssuanceStateQueryOptions,
   indexDtfLatestAuctionQueryOptions,
@@ -112,7 +114,6 @@ export {
   indexDtfRebalanceQueryOptions,
   indexDtfRebalancesQueryOptions,
   indexDtfRevenueQueryOptions,
-  indexDtfStatusQueryOptions,
   indexDtfTransactionsQueryOptions,
   indexDtfTotalAssetsQueryOptions,
   indexDtfTotalSupplyQueryOptions,
@@ -192,6 +193,7 @@ export {
   useAccountPortfolio,
   useIndexDtfCurrentRebalance,
   useIndexDtfExposure,
+  useIndexDtfAccountBalanceSnapshot,
   useIndexDtfHolders,
   useIndexDtfIssuanceState,
   useIndexDtfLatestAuction,
@@ -211,3 +213,9 @@ export {
   useIndexDtfVoteLockState,
   useIndexDtfVoteLockVaultState,
 } from "@/index-dtf-extra-hooks";
+export {
+  composeIndexDtfPerformance,
+  dedupeIndexDtfPricePoints,
+  useIndexDtfPerformance,
+} from "@/index-dtf/use-index-dtf-performance";
+export type { IndexDtfPerformancePoint, UseIndexDtfPerformanceParams } from "@/index-dtf/use-index-dtf-performance";

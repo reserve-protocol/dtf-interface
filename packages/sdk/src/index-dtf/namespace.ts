@@ -24,11 +24,11 @@ import {
   prepareIndexDtfDeployPlan,
   prepareIndexDtfDeployStakingToken,
 } from "@/index-dtf/deploy/index";
+import { getIndexDtfAccountBalanceSnapshot } from "@/index-dtf/dtf/account-pnl";
 import {
   discoverIndexDtfs,
   discoverIndexDtfsByChain,
   discoverIndexDtfsFromSubgraph,
-  getIndexDtfStatus,
   getIndexDtfStatuses,
 } from "@/index-dtf/dtf/discovery";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
@@ -64,6 +64,7 @@ import {
   getIndexDtfRevenue,
   prepareIndexDtfDistributeFees,
 } from "@/index-dtf/dtf/revenue";
+import { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 import { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 import { createIndexDtfGovernanceNamespace } from "@/index-dtf/governance/namespace";
 import { getIndexDtfCatalogEntries, listIndexDtfs, resolveIndexDtfAlias } from "@/index-dtf/protocol/index";
@@ -121,10 +122,12 @@ export function createIndexDtfNamespace(client: DtfClient) {
     getPrice: (params: GetIndexDtfPriceParams) => getPrice(client, params),
     getPrices: (params: Parameters<typeof getPrices>[1]) => getPrices(client, params),
     getPriceHistory: (params: GetIndexDtfPriceHistoryParams) => getPriceHistory(client, params),
-    getStatus: (params: Parameters<typeof getIndexDtfStatus>[1]) => getIndexDtfStatus(client, params),
+    getStatus: getIndexDtfStatus,
     getStatuses: (params?: Parameters<typeof getIndexDtfStatuses>[1]) => getIndexDtfStatuses(client, params),
     getExposure: (params: Parameters<typeof getIndexDtfExposure>[1]) => getIndexDtfExposure(client, params),
     getHolders: (params: Parameters<typeof getIndexDtfHolders>[1]) => getIndexDtfHolders(client, params),
+    getAccountBalanceSnapshot: (params: Parameters<typeof getIndexDtfAccountBalanceSnapshot>[1]) =>
+      getIndexDtfAccountBalanceSnapshot(client, params),
     getTransactions: (params: Parameters<typeof getIndexDtfTransactions>[1]) => getIndexDtfTransactions(client, params),
     getBidsEnabled: (params: Parameters<typeof getIndexDtfBidsEnabled>[1]) => getIndexDtfBidsEnabled(client, params),
     getRebalanceControl: (params: Parameters<typeof getIndexDtfRebalanceControl>[1]) =>

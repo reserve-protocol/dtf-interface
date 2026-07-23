@@ -265,7 +265,8 @@ export type YieldDtfProposalState =
   | "SUCCEEDED"
   | "QUEUED"
   | "EXPIRED"
-  | "EXECUTED";
+  | "EXECUTED"
+  | "QUORUM_NOT_REACHED";
 
 export type YieldDtfProposalSummary = {
   readonly id: string;

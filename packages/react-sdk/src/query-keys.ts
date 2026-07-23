@@ -193,12 +193,12 @@ export const dtfQueryKeys = {
     price: (params?: GetIndexDtfPriceParams) => [...dtfQueryKeys.index.all(), "price", keyParams(params)] as const,
     priceHistory: (params?: GetIndexDtfPriceHistoryParams) =>
       [...dtfQueryKeys.index.all(), "price-history", keyParams(params)] as const,
-    status: (params?: IndexMethodParams<"getStatus">) =>
-      [...dtfQueryKeys.index.all(), "status", keyParams(params)] as const,
     exposure: (params?: IndexMethodParams<"getExposure">) =>
       [...dtfQueryKeys.index.all(), "exposure", keyParams(params)] as const,
     holders: (params?: IndexMethodParams<"getHolders">) =>
       [...dtfQueryKeys.index.all(), "holders", keyParams(params)] as const,
+    accountBalanceSnapshot: (params?: IndexMethodParams<"getAccountBalanceSnapshot">) =>
+      [...dtfQueryKeys.index.all(), "account-balance-snapshot", keyParams(params)] as const,
     transactions: (params?: IndexMethodParams<"getTransactions">) =>
       [...dtfQueryKeys.index.all(), "transactions", keyParams(params)] as const,
     revenue: (params?: IndexMethodParams<"getRevenue">) =>

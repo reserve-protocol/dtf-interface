@@ -9,7 +9,7 @@ import type {
   GetIndexDtfPriceHistoryOptions,
 } from "@/types/index-dtf";
 
-import { getIndexDtfStatus } from "@/index-dtf/dtf/discovery";
+import { getIndexDtfAccountBalanceSnapshot } from "@/index-dtf/dtf/account-pnl";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 import {
   getBasket,
@@ -40,6 +40,7 @@ import {
   getIndexDtfRevenue,
   prepareIndexDtfDistributeFees,
 } from "@/index-dtf/dtf/revenue";
+import { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 import { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 import { createIndexDtfGovernanceRef } from "@/index-dtf/governance/ref";
 import {
@@ -99,9 +100,12 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
     getPrice: () => getPrice(client, { address, chainId }),
     getPriceHistory: (options: GetIndexDtfPriceHistoryOptions) =>
       getPriceHistory(client, { ...options, address, chainId }),
-    getStatus: () => getIndexDtfStatus(client, { address, chainId }),
+    getStatus: () => getIndexDtfStatus({ address, chainId }),
     getExposure: (options: Omit<Parameters<typeof getIndexDtfExposure>[1], "address" | "chainId"> = {}) =>
       getIndexDtfExposure(client, { ...options, address, chainId }),
+    getAccountBalanceSnapshot: (
+      options: Omit<Parameters<typeof getIndexDtfAccountBalanceSnapshot>[1], "dtf" | "chainId">,
+    ) => getIndexDtfAccountBalanceSnapshot(client, { ...options, dtf: address, chainId }),
     getTransactions: (options: Omit<Parameters<typeof getIndexDtfTransactions>[1], "address" | "chainId"> = {}) =>
       getIndexDtfTransactions(client, { ...options, address, chainId }),
     getBidsEnabled: (options?: BlockNumberOption | BlockNumber) =>

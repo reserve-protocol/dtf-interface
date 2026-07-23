@@ -1,6 +1,6 @@
 ---
 title: Decisions
-updated: 2026-07-09
+updated: 2026-07-22
 type: decision
 ---
 
@@ -26,7 +26,7 @@ A consumer module trace showed that a direct price read retains unrelated Zod sc
 
 ## 2026-07-09 — Current DTF is the route aggregate
 
-Platform fee and status belong on the full/current DTF route model so Register does not mount one updater per field. Focused hooks remain for consumers that only need one value. Status must reuse batch/discovery data rather than scan paginated discovery per DTF. Rebalance health calculations and the Reserve API liquidity boundary belong in the SDK; interaction timing, retry UI, warnings, and Zapper support checks stay in Register.
+Platform fee and status belong on the full/current DTF route model so Register does not mount one updater per field. Focused hooks remain for consumers that only need one value. Single-DTF status is a synchronous chain-scoped `@reserve-protocol/dtf-catalog` lookup with absent entries treated as active; bulk/list status remains a Reserve API discovery projection. Rebalance health calculations and the Reserve API liquidity boundary belong in the SDK; interaction timing, retry UI, warnings, and Zapper support checks stay in Register.
 
 ## 2026-07-09 — Preserve modules, keep the root API
 

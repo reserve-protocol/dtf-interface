@@ -2,7 +2,7 @@ import type { PublicClient } from "viem";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { createDtfClient } from "@/client";
+import { createDtfClient, type DtfClient } from "@/client";
 import { createIndexDtfNamespace, createIndexDtfRef } from "@/index-dtf/index";
 
 describe("Index DTF namespace", () => {
@@ -61,6 +61,33 @@ describe("Index DTF namespace", () => {
       balances: [1_000_000n],
     });
     expect(readContract).toHaveBeenCalledTimes(3);
+  });
+
+  it("binds account balance snapshots to the ref DTF identity", async () => {
+    const queryIndex = vi.fn(async () => ({
+      accountBalanceDailySnapshots: [{ amount: "2000000000000000000", timestamp: "1700000000" }],
+    }));
+    const dtf = createIndexDtfRef({ subgraph: { queryIndex } } as unknown as DtfClient, {
+      address: "0x0000000000000000000000000000000000000001",
+      chainId: 8453,
+    });
+
+    await expect(
+      dtf.getAccountBalanceSnapshot({
+        account: "0x0000000000000000000000000000000000000002",
+        before: 1_700_000_100,
+      }),
+    ).resolves.toMatchObject({ balance: { raw: 2_000_000_000_000_000_000n }, timestamp: 1_700_000_000 });
+    expect(queryIndex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chainId: 8453,
+        variables: {
+          account: "0x0000000000000000000000000000000000000002",
+          token: "0x0000000000000000000000000000000000000001",
+          before: "1700000100",
+        },
+      }),
+    );
   });
 
   it("binds ref proposal vote calls to the ref chain", () => {

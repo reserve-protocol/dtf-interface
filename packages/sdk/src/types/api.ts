@@ -70,7 +70,9 @@ export type ReserveApiIndexDtfRebalanceHistoryItem = {
 export type ReserveApiIndexDtfRebalanceDetail = {
   readonly nonce: number;
   readonly timestamp: number;
-  readonly auctions?: readonly {
+  // Always present in a well-formed response ([] when no auctions ran); a
+  // truly-absent field is malformed and the mapper fails loud on it.
+  readonly auctions: readonly {
     readonly startTime: number;
     readonly endTime: number;
     readonly bids: readonly {
@@ -102,6 +104,11 @@ export type ReserveApiIndexDtfRebalanceDetail = {
   readonly rebalanceGainLossPercent?: number | null;
   readonly marketCapAtStart?: number | null;
   readonly rebalanceAccuracy?: number | null;
+  readonly avgPriceImpactPercent?: number | null;
+  readonly totalPriceImpactUsd?: number | null;
+  readonly marketCapRebalanceImpact?: number | null;
+  readonly trackingBasketDeviation?: number | null;
+  readonly nativeBasketDeviation?: number | null;
   readonly isNative?: boolean | null;
 };
 
@@ -125,7 +132,7 @@ export type GetHistoricalTokenPricesParams = {
   readonly address: Address;
   readonly from: number;
   readonly to: number;
-  readonly interval: "1h" | "1d";
+  readonly interval: "5m" | "1h" | "1d";
 };
 
 export type GetIndexDtfPriceParams = {
@@ -136,7 +143,7 @@ export type GetIndexDtfPriceParams = {
 export type GetIndexDtfPriceHistoryParams = GetIndexDtfPriceParams & {
   readonly from: number;
   readonly to: number;
-  readonly interval: "1h" | "1d";
+  readonly interval: "5m" | "1h" | "1d";
 };
 
 export type GetIndexDtfBasketSnapshotParams = GetIndexDtfPriceParams & {

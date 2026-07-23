@@ -1,6 +1,6 @@
 ---
 title: Project
-updated: 2026-07-09
+updated: 2026-07-22
 type: context
 ---
 
@@ -15,8 +15,8 @@ Start with `docs/README.md`, then `docs/sdk/architecture.md` and `docs/sdk/api-s
 ## Stack Specifics
 
 - pnpm/Turbo monorepo on Node 24; TypeScript 6, viem, Zod, GraphQL Codegen, Vitest, React 18/19, TanStack Query 5, tsdown, and Vocs.
-- Normal closeout commands are owned by `llm-workflow.config.json`. `pnpm release:ci` is the publication check and additionally dry-runs package tarballs.
-- Generated GraphQL documents are committed. Run `pnpm graphql:codegen` after GraphQL document or codegen changes.
+- Normal closeout commands are owned by `llm-workflow.config.json`. `pnpm release:ci` is the publication check: it adds live-schema GraphQL freshness and package tarball dry-runs to the compile, test, docs, bundle, and catalog gates.
+- Generated GraphQL documents are committed. Run `pnpm graphql:codegen` after GraphQL document or codegen changes; ordinary CI and the publication gate reject stale generated output against the configured deployed schemas.
 - Releases use Changesets. Never edit package versions or changelogs by hand.
 
 ## Safety Rules

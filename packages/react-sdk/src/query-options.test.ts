@@ -7,6 +7,7 @@ import {
   accountPortfolioHistoryQueryOptions,
   accountPortfolioQueryOptions,
   accountPortfolioTransactionsQueryOptions,
+  indexDtfAccountBalanceSnapshotQueryOptions,
   indexDtfActiveAuctionQueryOptions,
   indexDtfApprovedRevenueTokensQueryOptions,
   indexDtfBidQuoteQueryOptions,
@@ -206,6 +207,14 @@ const extraIndexQueryOptions: readonly QueryOptionCase[] = [
     key: dtfQueryKeys.index.holders,
     params: { address: DTF, chainId: 1, limit: 20 },
     result: { holders: [], totalHolders: 0 },
+  },
+  {
+    name: "account balance snapshot",
+    method: "getAccountBalanceSnapshot",
+    build: indexDtfAccountBalanceSnapshotQueryOptions,
+    key: dtfQueryKeys.index.accountBalanceSnapshot,
+    params: { account: ACCOUNT, dtf: DTF, chainId: 1, before: 1_700_000_000 },
+    result: { balance: { raw: 1n, formatted: "0.000000000000000001" }, timestamp: 1_700_000_000 },
   },
   {
     name: "bids enabled",

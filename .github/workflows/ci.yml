@@ -44,6 +44,9 @@ jobs:
       - name: Format Check
         run: pnpm format:check
 
+      - name: GraphQL Codegen Check
+        run: pnpm graphql:codegen:check
+
       - name: Documentation Links
         run: pnpm docs:links
 

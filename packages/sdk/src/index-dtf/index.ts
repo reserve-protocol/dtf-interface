@@ -33,11 +33,12 @@ export {
   discoverIndexDtfs,
   discoverIndexDtfsByChain,
   discoverIndexDtfsFromSubgraph,
-  getIndexDtfStatus,
   getIndexDtfStatuses,
 } from "@/index-dtf/dtf/discovery";
+export { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 export { getAssetList as getIndexDtfAssetList } from "@/client/api/assets";
 export { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
+export { getIndexDtfAccountBalanceSnapshot, selectPriceAtMark } from "@/index-dtf/dtf/account-pnl";
 export { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 export {
   getIndexDtfIssuanceState,
@@ -283,8 +284,10 @@ export {
 } from "@/index-dtf/vote-lock/index";
 
 export type * from "@/index-dtf/dtf/discovery";
+export type * from "@/index-dtf/dtf/status";
 export type { Asset, GetAssetListParams } from "@/types/api";
 export type * from "@/index-dtf/dtf/exposure";
+export type * from "@/index-dtf/dtf/account-pnl";
 export type * from "@/index-dtf/dtf/holders";
 export type * from "@/index-dtf/dtf/issuance";
 export type * from "@/index-dtf/dtf/revenue";

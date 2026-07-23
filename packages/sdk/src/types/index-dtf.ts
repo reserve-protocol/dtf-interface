@@ -174,16 +174,16 @@ export type IndexDtfPricePoint = {
 };
 
 export type IndexDtfBrandProfile = {
-  readonly name?: string;
-  readonly icon?: string;
-  readonly link?: string;
+  readonly name: string;
+  readonly icon: string;
+  readonly link: string;
 };
 
 export type IndexDtfBrandSocials = {
-  readonly twitter?: string;
-  readonly telegram?: string;
-  readonly discord?: string;
-  readonly website?: string;
+  readonly twitter: string;
+  readonly telegram: string;
+  readonly discord: string;
+  readonly website: string;
 };
 
 export type IndexDtfBrandFile = {
@@ -191,20 +191,26 @@ export type IndexDtfBrandFile = {
   readonly name: string;
 };
 
+export type IndexDtfBasketType = "percentage-based" | "unit-based";
+
+// Display-ready shape: every field present, absent API values coerced to ""
+// defaults so consumers store it as-is without a mapping layer.
 export type IndexDtfBrand = {
   readonly hidden: boolean;
-  readonly icon?: string;
-  readonly cover?: string;
-  readonly mobileCover?: string;
-  readonly description?: string;
-  readonly notesFromCreator?: string;
-  readonly prospectus?: string;
-  readonly video?: string;
-  readonly files: readonly IndexDtfBrandFile[];
-  readonly tags: readonly string[];
-  readonly basketType?: string;
-  readonly creator?: IndexDtfBrandProfile;
-  readonly curator?: IndexDtfBrandProfile;
+  readonly dtf: {
+    readonly icon: string;
+    readonly cover: string;
+    readonly mobileCover: string;
+    readonly video: string;
+    readonly description: string;
+    readonly notesFromCreator: string;
+    readonly prospectus: string;
+    readonly files: readonly IndexDtfBrandFile[];
+    readonly tags: readonly string[];
+    readonly basketType: IndexDtfBasketType;
+  };
+  readonly creator: IndexDtfBrandProfile;
+  readonly curator: IndexDtfBrandProfile;
   readonly socials: IndexDtfBrandSocials;
 };
 
@@ -279,7 +285,7 @@ export type GetIndexDtfPricesParams = {
 export type GetIndexDtfPriceHistoryParams = IndexDtfIdentityParams & {
   readonly from: number;
   readonly to: number;
-  readonly interval: "1h" | "1d";
+  readonly interval: "5m" | "1h" | "1d";
 };
 
 export type GetIndexDtfPriceHistoryOptions = Pick<GetIndexDtfPriceHistoryParams, "from" | "interval" | "to">;

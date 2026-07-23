@@ -116,6 +116,11 @@ export type IndexDtfCompletedRebalanceDetail = IndexDtfCompletedRebalance & {
   readonly auctions: readonly IndexDtfCompletedRebalanceAuction[];
   readonly rebalanceGainLossPercent?: number;
   readonly marketCapAtStart?: number;
+  readonly avgPriceImpactPercent?: number;
+  readonly totalPriceImpactUsd?: number;
+  readonly marketCapRebalanceImpact?: number;
+  readonly trackingBasketDeviation?: number;
+  readonly nativeBasketDeviation?: number;
 };
 
 export type IndexDtfCurrentRebalance = Rebalance & {

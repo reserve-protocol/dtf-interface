@@ -118,6 +118,7 @@ export {
   getYieldDtfGovernance,
   getYieldDtfProposal,
   getYieldDtfProposals,
+  getYieldDtfProposalState,
   getYieldDtfProposalVotePower,
   getYieldDtfVoterState,
   isTimepointGovernor,

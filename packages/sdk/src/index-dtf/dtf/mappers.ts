@@ -181,35 +181,27 @@ export function mapIndexDtfBrand(response: IndexDtfBrandResponse): IndexDtfBrand
   }
 
   const { curator, creator, dtf, hidden, socials } = response.parsedData;
-  const mappedCreator = mapBrandProfile(creator);
-  const mappedCurator = mapBrandProfile(curator);
-  const icon = nonEmpty(dtf?.icon);
-  const cover = nonEmpty(dtf?.cover);
-  const mobileCover = nonEmpty(dtf?.mobileCover);
-  const description = nonEmpty(dtf?.description);
-  const notesFromCreator = nonEmpty(dtf?.notesFromCreator);
-  const prospectus = nonEmpty(dtf?.prospectus);
-  const video = nonEmpty(dtf?.video);
-  const basketType = nonEmpty(dtf?.basketType);
 
   return {
     hidden,
-    tags: dtf?.tags ?? [],
-    files: (dtf?.files ?? []).map((file) => ({
-      url: file.url ?? "",
-      name: file.name ?? "",
-    })),
+    dtf: {
+      icon: nonEmpty(dtf?.icon) ?? "",
+      cover: nonEmpty(dtf?.cover) ?? "",
+      mobileCover: nonEmpty(dtf?.mobileCover) ?? "",
+      video: nonEmpty(dtf?.video) ?? "",
+      description: nonEmpty(dtf?.description) ?? "",
+      notesFromCreator: nonEmpty(dtf?.notesFromCreator) ?? "",
+      prospectus: nonEmpty(dtf?.prospectus) ?? "",
+      files: (dtf?.files ?? []).map((file) => ({
+        url: file.url ?? "",
+        name: file.name ?? "",
+      })),
+      tags: dtf?.tags ?? [],
+      basketType: nonEmpty(dtf?.basketType)?.toLowerCase() === "unit-based" ? "unit-based" : "percentage-based",
+    },
+    creator: mapBrandProfile(creator),
+    curator: mapBrandProfile(curator),
     socials: mapBrandSocials(socials),
-    ...(icon ? { icon } : {}),
-    ...(cover ? { cover } : {}),
-    ...(mobileCover ? { mobileCover } : {}),
-    ...(description ? { description } : {}),
-    ...(notesFromCreator ? { notesFromCreator } : {}),
-    ...(prospectus ? { prospectus } : {}),
-    ...(video ? { video } : {}),
-    ...(basketType ? { basketType } : {}),
-    ...(mappedCreator ? { creator: mappedCreator } : {}),
-    ...(mappedCurator ? { curator: mappedCurator } : {}),
   };
 }
 
@@ -385,22 +377,12 @@ function mapTokenSnapshot(token: {
   };
 }
 
-function mapBrandProfile(profile: IndexDtfBrandResponseProfile | undefined): IndexDtfBrandProfile | undefined {
-  if (!profile) {
-    return undefined;
-  }
-
-  const name = nonEmpty(profile.name);
-  const icon = nonEmpty(profile.icon);
-  const link = nonEmpty(profile.link);
-
-  return name || icon || link
-    ? {
-        ...(name ? { name } : {}),
-        ...(icon ? { icon } : {}),
-        ...(link ? { link } : {}),
-      }
-    : undefined;
+function mapBrandProfile(profile: IndexDtfBrandResponseProfile | undefined): IndexDtfBrandProfile {
+  return {
+    name: nonEmpty(profile?.name) ?? "",
+    icon: nonEmpty(profile?.icon) ?? "",
+    link: nonEmpty(profile?.link) ?? "",
+  };
 }
 
 function mapBrandSocials(socials?: {
@@ -409,20 +391,11 @@ function mapBrandSocials(socials?: {
   readonly discord?: string | null;
   readonly website?: string | null;
 }): IndexDtfBrandSocials {
-  if (!socials) {
-    return {};
-  }
-
-  const twitter = nonEmpty(socials.twitter);
-  const telegram = nonEmpty(socials.telegram);
-  const discord = nonEmpty(socials.discord);
-  const website = nonEmpty(socials.website);
-
   return {
-    ...(twitter ? { twitter } : {}),
-    ...(telegram ? { telegram } : {}),
-    ...(discord ? { discord } : {}),
-    ...(website ? { website } : {}),
+    twitter: nonEmpty(socials?.twitter) ?? "",
+    telegram: nonEmpty(socials?.telegram) ?? "",
+    discord: nonEmpty(socials?.discord) ?? "",
+    website: nonEmpty(socials?.website) ?? "",
   };
 }
 

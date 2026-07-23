@@ -14,6 +14,7 @@ import {
   indexDtfCompletedRebalanceQueryOptions,
   indexDtfCompletedRebalancesQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
+  indexDtfAccountBalanceSnapshotQueryOptions,
   indexDtfExposureQueryOptions,
   indexDtfHoldersQueryOptions,
   indexDtfIssuanceStateQueryOptions,
@@ -27,7 +28,6 @@ import {
   indexDtfRebalanceQueryOptions,
   indexDtfRebalancesQueryOptions,
   indexDtfRevenueQueryOptions,
-  indexDtfStatusQueryOptions,
   indexDtfTransactionsQueryOptions,
   indexDtfTotalAssetsQueryOptions,
   indexDtfTotalSupplyQueryOptions,
@@ -60,12 +60,10 @@ export function useIndexDtfTotalAssets<TData = MethodResult<IndexMethod<"getTota
   return useQuery(indexDtfTotalAssetsQueryOptions(sdk, params, options));
 }
 
-export function useIndexDtfStatus<TData = MethodResult<IndexMethod<"getStatus">>>(
-  params: MethodParams<IndexMethod<"getStatus">> | undefined,
-  options?: DtfQueryOptions<MethodResult<IndexMethod<"getStatus">>, TData>,
-) {
+/** Sync catalog lookup — no fetch; DTFs absent from the catalog are active. */
+export function useIndexDtfStatus(params: MethodParams<IndexMethod<"getStatus">> | undefined) {
   const sdk = useDtfSdk();
-  return useQuery(indexDtfStatusQueryOptions(sdk, params, options));
+  return params ? sdk.index.getStatus(params) : "active";
 }
 
 export function useIndexDtfExposure<TData = MethodResult<IndexMethod<"getExposure">>>(
@@ -82,6 +80,15 @@ export function useIndexDtfHolders<TData = MethodResult<IndexMethod<"getHolders"
 ) {
   const sdk = useDtfSdk();
   return useQuery(indexDtfHoldersQueryOptions(sdk, params, options));
+}
+
+/** Reads the latest indexed account balance snapshot at or before a unix-second mark. */
+export function useIndexDtfAccountBalanceSnapshot<TData = MethodResult<IndexMethod<"getAccountBalanceSnapshot">>>(
+  params: MethodParams<IndexMethod<"getAccountBalanceSnapshot">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getAccountBalanceSnapshot">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfAccountBalanceSnapshotQueryOptions(sdk, params, options));
 }
 
 export function useIndexDtfTransactions<TData = MethodResult<IndexMethod<"getTransactions">>>(

@@ -57,7 +57,8 @@ Deprecated/unsupported DTFs disable auction surfaces. Factsheet/performance hide
 Register container/page data uses:
 
 - Index subgraph for DTF metadata, governance, roles, vote-lock, fee recipient history.
-- Reserve API for current basket/price, brand, discovery/status, exposure, historical charts, vote-lock positions.
+- Reserve API for current basket/price, brand, discovery/bulk status, exposure, historical charts, vote-lock positions.
+- `@reserve-protocol/dtf-catalog` through the SDK for synchronous single-route status.
 - RPC for live `totalAssets`, `totalSupply`, `rebalanceControl`, platform fee registry, staking vault state, proposal/gov actions.
 
 See `protocol/data-sources.md` for source ownership.

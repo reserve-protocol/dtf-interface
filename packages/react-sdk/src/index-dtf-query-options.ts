@@ -53,19 +53,6 @@ export function indexDtfTotalAssetsQueryOptions<TData = MethodResult<IndexMethod
   );
 }
 
-export function indexDtfStatusQueryOptions<TData = MethodResult<IndexMethod<"getStatus">>>(
-  sdk: DtfSdk,
-  params: MethodParams<IndexMethod<"getStatus">> | undefined,
-  options?: DtfQueryOptions<MethodResult<IndexMethod<"getStatus">>, TData>,
-) {
-  return createDtfQueryOptions(
-    dtfQueryKeys.index.status(params),
-    () => sdk.index.getStatus(requireParams(params, "indexDtfStatusQueryOptions")),
-    params !== undefined,
-    options,
-  );
-}
-
 export function indexDtfExposureQueryOptions<TData = MethodResult<IndexMethod<"getExposure">>>(
   sdk: DtfSdk,
   params: MethodParams<IndexMethod<"getExposure">> | undefined,
@@ -74,6 +61,21 @@ export function indexDtfExposureQueryOptions<TData = MethodResult<IndexMethod<"g
   return createDtfQueryOptions(
     dtfQueryKeys.index.exposure(params),
     () => sdk.index.getExposure(requireParams(params, "indexDtfExposureQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfAccountBalanceSnapshotQueryOptions<
+  TData = MethodResult<IndexMethod<"getAccountBalanceSnapshot">>,
+>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getAccountBalanceSnapshot">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getAccountBalanceSnapshot">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.accountBalanceSnapshot(params),
+    () => sdk.index.getAccountBalanceSnapshot(requireParams(params, "indexDtfAccountBalanceSnapshotQueryOptions")),
     params !== undefined,
     options,
   );

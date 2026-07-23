@@ -17,7 +17,7 @@ const dtf = sdk.index.ref({ address, chainId });
 | `sdk.index.list(params?)`                | `@reserve-protocol/dtf-catalog`      | Curated static catalog                     |
 | `sdk.index.getCatalogEntries(params?)`   | catalog                              | Raw catalog entries                        |
 | `sdk.index.resolveAlias(params)`         | catalog                              | Resolve ticker/name/address-like aliases   |
-| `sdk.index.getStatus(params)`            | Reserve API discovery                | Product listing status                     |
+| `sdk.index.getStatus(params)`            | `@reserve-protocol/dtf-catalog`      | Synchronous route/product status           |
 | `sdk.index.getStatuses(params?)`         | Reserve API discovery                | Bulk status map                            |
 
 ```ts
@@ -30,23 +30,26 @@ const dtfs = await sdk.index.discover({
 
 ## DTF Reads
 
-| Method              | Use                                                                     |
-| ------------------- | ----------------------------------------------------------------------- |
-| `get`               | Full product-shaped view with market, basket, platform fee, and status. |
-| `getDtf`            | Subgraph DTF metadata.                                                  |
-| `getBasket`         | Live RPC basket from `totalAssets()`.                                   |
-| `getBasketSnapshot` | Reserve API current or block snapshot basket.                           |
-| `getVersion`        | DTF version from contract.                                              |
-| `getTotalSupply`    | Live total supply. Includes pending fee shares.                         |
-| `getTotalAssets`    | Live total assets.                                                      |
-| `getBrand`          | Product brand metadata.                                                 |
-| `getMandate`        | DTF mandate string.                                                     |
-| `getPrice`          | Current Reserve API price.                                              |
-| `getPrices`         | Batch current prices.                                                   |
-| `getPriceHistory`   | Historical Reserve API price points.                                    |
-| `getExposure`       | Exposure/analytics data.                                                |
-| `getHolders`        | Holder data.                                                            |
-| `getTransactions`   | Transaction history.                                                    |
+| Method                      | Use                                                                     |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `get`                       | Full product-shaped view with market, basket, platform fee, and status. |
+| `getDtf`                    | Subgraph DTF metadata.                                                  |
+| `getBasket`                 | Live RPC basket from `totalAssets()`.                                   |
+| `getBasketSnapshot`         | Reserve API current or block snapshot basket.                           |
+| `getVersion`                | DTF version from contract.                                              |
+| `getTotalSupply`            | Live total supply. Includes pending fee shares.                         |
+| `getTotalAssets`            | Live total assets.                                                      |
+| `getBrand`                  | Product brand metadata.                                                 |
+| `getMandate`                | DTF mandate string.                                                     |
+| `getPrice`                  | Current Reserve API price.                                              |
+| `getPrices`                 | Batch current prices.                                                   |
+| `getPriceHistory`           | Historical Reserve API price points.                                    |
+| `getExposure`               | Exposure/analytics data.                                                |
+| `getHolders`                | Holder data.                                                            |
+| `getAccountBalanceSnapshot` | Latest indexed account balance at or before a mark.                     |
+| `getTransactions`           | Transaction history.                                                    |
+
+`getStatus` validates its address, reads the chain-scoped catalog, and treats DTFs absent from the catalog as active. `getStatuses` remains an asynchronous Reserve API discovery projection for bulk/list screens.
 
 `getBrand` preserves overview media metadata, including `video` and downloadable `files`, in addition to covers, descriptions, profiles, tags, and social links.
 

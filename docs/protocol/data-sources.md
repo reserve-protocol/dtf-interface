@@ -9,7 +9,8 @@ Reserve integrations should route reads by ownership, not convenience. A compose
 | Live basket assets and balances    | RPC `totalAssets()`                           | Basket is live onchain state                            |
 | Live share supply                  | RPC `totalSupply()`                           | Includes pending fee shares                             |
 | Current price and basket valuation | Reserve API `/current/dtf`, `/current/dtfs`   | API aggregates prices and weights                       |
-| Discovery/status/listing           | Reserve API `/discover/dtf`, `/discover/dtfs` | Product listing and status are curated there            |
+| Discovery/listing and bulk status  | Reserve API `/discover/dtf`, `/discover/dtfs` | API owns current list rows and batch status             |
+| Single-DTF route status            | `@reserve-protocol/dtf-catalog`               | Synchronous curated status; absent entries are active   |
 | Historical price/performance       | Reserve API historical endpoints              | API owns analytics windows                              |
 | Governance metadata                | Index subgraph                                | Historical proposals, governances, roles                |
 | Live proposal state                | RPC governor reads                            | Subgraph state can lag or be event-only                 |

@@ -1,6 +1,6 @@
 ---
 title: Log
-updated: 2026-07-14
+updated: 2026-07-22
 type: log
 ---
 
@@ -23,3 +23,7 @@ Append-only chronological record: lessons, corrections, friction. Newest section
 
 - Governance hardening (Register audit Z18/Z22 follow-through): Index `getProposalState` treated a for/against tie as SUCCEEDED; both FolioGovernor (OZ 5.1.0 GovernorCountingSimpleUpgradeable) and Yield Governance.sol (vendored GovernorCountingSimple) require forVotes strictly over againstVotes, so ties now resolve DEFEATED. Yield proposal lists previously returned raw subgraph state, which lags time-based transitions; `getYieldDtfProposalState` now derives PENDING/ACTIVE resolution summary-level (bigint votes, quorum, native timepoint), fetching the block number only when a non-terminal Alexios proposal needs it. Lesson: subgraph state is event-driven everywhere — any list surface showing proposal state needs a derivation, not the raw field.
 - The open-auction builder tests fully mocked dtf-rebalance-lib, so nothing proved its zero-price/zero-supply guards surfaced through `prepareIndexDtfOpenAuctionArgs`. An unmocked integration spec now pins those throws and one golden exact-calldata fixture for a fixed two-token rebalance snapshot. Lib errors intentionally pass through raw (no SdkError wrap): messages like "auction launcher MUST closeRebalance" carry operator instructions that must not be reshaped.
+
+## 2026-07-22
+
+- Multi-repo SDK/Register work exposed avoidable approval churn when only Register was writable. Start those sessions with both repositories as writable workspace roots (or their parent as the workspace); sibling read-only inspection does not need escalation, and write-heavy SDK verification should be batched into the release gate.

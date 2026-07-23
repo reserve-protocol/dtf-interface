@@ -30,7 +30,12 @@ Best-effort behavior should be explicit:
 
 ## Status
 
-Product status values include active/deprecated/unsupported depending on API data.
+Product status values are active/deprecated/unsupported. The two public reads serve different shapes:
+
+- `getStatus({ address, chainId })` is a synchronous, chain-scoped catalog lookup. It validates the address and treats a DTF absent from the catalog as active.
+- `getStatuses(params?)` projects statuses from asynchronous Reserve API aggregate discovery for bulk/list screens.
+
+The catalog and API should agree for curated entries, but consumers must choose by use case rather than treating the two methods as aliases.
 
 Register behavior:
 

@@ -90,7 +90,7 @@ The SDK should prepare approval calls, not send them.
 | User balances               | RPC ERC20 `balanceOf`                                  |
 | Allowances                  | RPC ERC20 `allowance`                                  |
 | Current prices/display      | Reserve API                                            |
-| Deprecated/sell-only status | Reserve API discovery/status                           |
+| Deprecated/sell-only status | SDK catalog-backed single-DTF status                   |
 
 ## SDK Scope
 

@@ -1,5 +1,26 @@
 # @reserve-protocol/react-sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- 1baaff1: Account-balance snapshot primitives: `getIndexDtfAccountBalanceSnapshot` (carry-forward daily balance at a mark) on the namespace and bound ref, with `selectPriceAtMark(points, mark?)` selecting the latest positive timestamped price at or before an optional mark while preserving its one-argument behavior. The read is exposed through `useIndexDtfAccountBalanceSnapshot`, plus `usePrefetchIndexDtfPriceHistory` lets apps warm sibling price-history windows without touching the SDK client. Product metrics (e.g. a week-ago PnL) compose these app-side — the SDK deliberately ships no PnL semantics.
+- 49aeb87: `useIndexDtfPerformance` — price history composed for display: deduped by timestamp, with a live point appended when `currentPrice` + `currentTotalSupply` are provided (marketCap derived). The cache entry stays the raw point array under the canonical price-history key; composition happens after the cache, so other consumers of the key keep the raw contract.
+- 0453499: Breaking: `getIndexDtfStatus` is now a synchronous catalog lookup — `getIndexDtfStatus({ address, chainId }): DtfStatus` validates the address and reads `@reserve-protocol/dtf-catalog` directly (case-insensitive address match, absent entries are `active`) instead of scanning the `/discover/dtfs` endpoint. The plural `getIndexDtfStatuses` remains an asynchronous Reserve API discovery projection for bulk/list screens. `useIndexDtfStatus({ address, chainId })` returns the singular status directly with no react-query involved; `indexDtfStatusQueryOptions` and the `dtfQueryKeys.index.status` key are removed.
+
+### Patch Changes
+
+- Updated dependencies [1baaff1]
+- Updated dependencies [1df9528]
+- Updated dependencies [c51c120]
+- Updated dependencies [c51c120]
+- Updated dependencies [c51c120]
+- Updated dependencies [c51c120]
+- Updated dependencies [c51c120]
+- Updated dependencies [0453499]
+- Updated dependencies [6bd2e17]
+  - @reserve-protocol/sdk@0.5.0
+
 ## 0.4.1
 
 ### Patch Changes

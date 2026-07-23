@@ -1,5 +1,22 @@
 # @reserve-protocol/sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- 1baaff1: Account-balance snapshot primitives: `getIndexDtfAccountBalanceSnapshot` (carry-forward daily balance at a mark) on the namespace and bound ref, with `selectPriceAtMark(points, mark?)` selecting the latest positive timestamped price at or before an optional mark while preserving its one-argument behavior. The read is exposed through `useIndexDtfAccountBalanceSnapshot`, plus `usePrefetchIndexDtfPriceHistory` lets apps warm sibling price-history windows without touching the SDK client. Product metrics (e.g. a week-ago PnL) compose these app-side — the SDK deliberately ships no PnL semantics.
+- 1df9528: Breaking: `IndexDtfBrand` is now the display-ready shape consumers can store directly — `{ hidden, dtf: { icon, cover, mobileCover, video, description, notesFromCreator, prospectus, files, tags, basketType }, creator, curator, socials }`. Every field is always present: absent API values coerce to `""`, `files` is always `{ url, name }[]`, `tags` always `string[]`, and `basketType` narrows to `"percentage-based" | "unit-based"` (defaulting `"percentage-based"`). App-side brand mapping layers are no longer needed.
+- c51c120: Typed the Index DTF exposure API contract to match the live response: `period` accepts `ytd`, `underlyingMarketCap` is exposed, and native/bridge metadata is fully typed instead of `unknown` — no more consumer-side casts.
+- c51c120: Breaking: `getIndexDtfPlatformFee` now throws `SdkError` (`INVALID_RESPONSE`) when the DAO fee registry returns a zero denominator, instead of fabricating a confident 0% fee. A real 0% (zero numerator over a positive denominator) is unaffected; consumers should treat the error as "fee unavailable".
+- c51c120: `getIndexDtfPriceHistory` interval accepts `"5m"`, the granularity the API serves for the 24h range — previously the union only declared `1h | 1d` and forced a cast.
+- c51c120: Breaking: `ReserveApiIndexDtfRebalanceDetail.auctions` is now required (`[]` when no auctions ran); a truly-absent field is treated as a malformed response and fails loud. Completed-rebalance detail reads now work end-to-end: the single-element-array envelope from `/dtf/rebalance` is normalized inside the client (`RECORD_NOT_FOUND` on empty), and `IndexDtfCompletedRebalanceDetail` carries the analytics fields the detail surface renders (avgPriceImpactPercent, totalPriceImpactUsd, marketCapRebalanceImpact, tracking/native basket deviation).
+- 0453499: Breaking: `getIndexDtfStatus` is now a synchronous catalog lookup — `getIndexDtfStatus({ address, chainId }): DtfStatus` validates the address and reads `@reserve-protocol/dtf-catalog` directly (case-insensitive address match, absent entries are `active`) instead of scanning the `/discover/dtfs` endpoint. The plural `getIndexDtfStatuses` remains an asynchronous Reserve API discovery projection for bulk/list screens. `useIndexDtfStatus({ address, chainId })` returns the singular status directly with no react-query involved; `indexDtfStatusQueryOptions` and the `dtfQueryKeys.index.status` key are removed.
+- 6bd2e17: Match OZ Governor strict-majority semantics in Index DTF proposal state derivation (a for/against tie is now DEFEATED, not SUCCEEDED) and derive lagging Yield DTF proposal list states (ACTIVE past the vote deadline now resolves to DEFEATED/QUORUM_NOT_REACHED/SUCCEEDED) via the new getYieldDtfProposalState. Breaking: the `YieldDtfProposalState` union gained `"QUORUM_NOT_REACHED"` — exhaustive switches over it must handle the new member.
+
+### Patch Changes
+
+- c51c120: A proposal stuck in subgraph PENDING past its vote deadline now derives the vote outcome (DEFEATED / QUORUM_NOT_REACHED / SUCCEEDED) like a stale ACTIVE, matching Governor.state() semantics — it is never reported as EXPIRED. Applies to both Index DTF (`getProposalState`) and Yield DTF (`getYieldDtfProposalState`). Yield proposal reads also derive the current timepoint from the chain (block timestamp or number per governor version) instead of the consumer machine's clock.
+
 ## 0.4.1
 
 ### Patch Changes

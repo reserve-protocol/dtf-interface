@@ -26,7 +26,7 @@
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish",
-    "release:ci": "pnpm typecheck && pnpm test && pnpm build && pnpm --filter @reserve-protocol/docs check:sdk-bundle && pnpm docs:links && pnpm --filter @reserve-protocol/dtf-catalog pack --dry-run && pnpm --filter @reserve-protocol/sdk pack --dry-run && pnpm --filter @reserve-protocol/react-sdk pack --dry-run",
+    "release:ci": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm graphql:codegen:check && pnpm test && pnpm build && pnpm --filter @reserve-protocol/docs check:sdk-bundle && pnpm docs:links && pnpm --filter @reserve-protocol/dtf-catalog check:restricted && pnpm --filter @reserve-protocol/dtf-catalog check:tokenlists && pnpm --filter @reserve-protocol/dtf-catalog pack --dry-run && pnpm --filter @reserve-protocol/sdk pack --dry-run && pnpm --filter @reserve-protocol/react-sdk pack --dry-run",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
   },

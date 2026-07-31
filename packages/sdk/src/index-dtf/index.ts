@@ -280,6 +280,7 @@ export {
   prepareVoteLockRemoveRewardToken,
   prepareVoteLockSetRewardRatio,
   prepareVoteLockSetUnstakingDelay,
+  prepareVoteLockRedeem,
   prepareVoteLockWithdraw,
 } from "@/index-dtf/vote-lock/index";
 

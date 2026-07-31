@@ -119,6 +119,8 @@ export {
   indexDtfTotalSupplyQueryOptions,
   indexDtfVoteLockStateQueryOptions,
   indexDtfVoteLockVaultStateQueryOptions,
+  indexDtfVoteLockPreviewDepositQueryOptions,
+  indexDtfVoteLockPreviewRedeemQueryOptions,
 } from "@/index-dtf-query-options";
 export {
   useYieldDtf,
@@ -212,6 +214,8 @@ export {
   useIndexDtfTotalSupply,
   useIndexDtfVoteLockState,
   useIndexDtfVoteLockVaultState,
+  useIndexDtfVoteLockPreviewDeposit,
+  useIndexDtfVoteLockPreviewRedeem,
 } from "@/index-dtf-extra-hooks";
 export {
   composeIndexDtfPerformance,

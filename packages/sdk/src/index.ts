@@ -323,6 +323,7 @@ export {
   prepareVoteLockRemoveRewardToken,
   prepareVoteLockSetRewardRatio,
   prepareVoteLockSetUnstakingDelay,
+  prepareVoteLockRedeem,
   prepareVoteLockWithdraw,
   resolveIndexDtfAlias,
   selectorRegistryAbi,

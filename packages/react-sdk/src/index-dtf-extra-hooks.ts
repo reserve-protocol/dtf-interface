@@ -33,6 +33,8 @@ import {
   indexDtfTotalSupplyQueryOptions,
   indexDtfVoteLockStateQueryOptions,
   indexDtfVoteLockVaultStateQueryOptions,
+  indexDtfVoteLockPreviewDepositQueryOptions,
+  indexDtfVoteLockPreviewRedeemQueryOptions,
 } from "@/index-dtf-query-options";
 import { useDtfSdk } from "@/provider";
 
@@ -249,6 +251,22 @@ export function useIndexDtfVoteLockVaultState<TData = MethodResult<IndexMethod<"
 ) {
   const sdk = useDtfSdk();
   return useQuery(indexDtfVoteLockVaultStateQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfVoteLockPreviewDeposit<TData = MethodResult<IndexMethod<"readVoteLockPreviewDeposit">>>(
+  params: MethodParams<IndexMethod<"readVoteLockPreviewDeposit">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"readVoteLockPreviewDeposit">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfVoteLockPreviewDepositQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfVoteLockPreviewRedeem<TData = MethodResult<IndexMethod<"readVoteLockPreviewRedeem">>>(
+  params: MethodParams<IndexMethod<"readVoteLockPreviewRedeem">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"readVoteLockPreviewRedeem">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfVoteLockPreviewRedeemQueryOptions(sdk, params, options));
 }
 
 export function useAccountPortfolio<TData = MethodResult<PortfolioMethod<"get">>>(

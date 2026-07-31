@@ -190,6 +190,26 @@ export function prepareVoteLockWithdraw(params: {
   });
 }
 
+/**
+ * Prepares a staking-vault `redeem` call that starts an unlock when delay is
+ * enabled. Shares-denominated counterpart of `prepareVoteLockWithdraw` —
+ * correct for self-appreciating vaults where shares ≠ assets.
+ */
+export function prepareVoteLockRedeem(params: {
+  readonly stToken: Address;
+  readonly chainId: SupportedChainId;
+  readonly shares: bigint;
+  readonly account: Address;
+}) {
+  return prepareContractCall({
+    chainId: params.chainId,
+    address: params.stToken,
+    abi: dtfIndexStakingVaultAbi,
+    functionName: "redeem",
+    args: [params.shares, params.account, params.account] as const,
+  });
+}
+
 /** Prepares a staking-vault reward claim call. */
 export function prepareVoteLockClaimRewards(params: {
   readonly stToken: Address;

@@ -32,17 +32,18 @@ The SDK exposes raw read helpers for vote-lock contracts.
 
 ## Builders
 
-| Method                              | Use                                                         |
-| ----------------------------------- | ----------------------------------------------------------- |
-| `prepareVoteLockDeposit`            | Deposit underlying into a vote-lock vault.                  |
-| `prepareVoteLockDepositPlan`        | Deposit plan with optional underlying approval.             |
-| `prepareVoteLockDelegate`           | Delegate normal voting power.                               |
-| `prepareVoteLockDelegateOptimistic` | Delegate optimistic voting power.                           |
-| `prepareVoteLockWithdraw`           | Start or execute withdraw flow depending on vault behavior. |
-| `prepareVoteLockClaimRewards`       | Claim reward tokens.                                        |
-| `prepareVoteLockClaimLock`          | Claim an unstaking lock.                                    |
-| `prepareVoteLockCancelLock`         | Cancel an unstaking lock.                                   |
-| `prepareVoteLockPoke`               | Poke reward/account accounting.                             |
+| Method                              | Use                                                                                                                             |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `prepareVoteLockDeposit`            | Deposit underlying into a vote-lock vault.                                                                                      |
+| `prepareVoteLockDepositPlan`        | Deposit plan with optional underlying approval.                                                                                 |
+| `prepareVoteLockDelegate`           | Delegate normal voting power.                                                                                                   |
+| `prepareVoteLockDelegateOptimistic` | Delegate optimistic voting power.                                                                                               |
+| `prepareVoteLockWithdraw`           | Start or execute withdraw flow depending on vault behavior.                                                                     |
+| `prepareVoteLockRedeem`             | Shares-denominated unlock (`redeem`). Correct for every vault (legacy 1:1 and self-appreciating); Register uses it universally. |
+| `prepareVoteLockClaimRewards`       | Claim reward tokens.                                                                                                            |
+| `prepareVoteLockClaimLock`          | Claim an unstaking lock.                                                                                                        |
+| `prepareVoteLockCancelLock`         | Cancel an unstaking lock.                                                                                                       |
+| `prepareVoteLockPoke`               | Poke reward/account accounting.                                                                                                 |
 
 ```ts
 const plan = sdk.index.prepareVoteLockDepositPlan({

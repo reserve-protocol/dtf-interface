@@ -31,10 +31,10 @@ Users must delegate voting power for votes to count.
 
 Unlock behavior:
 
-1. User chooses amount to unlock.
-2. Register checks `amount <= maxWithdraw`.
-3. User calls `withdraw(amount, account, account)` to begin unlock.
-4. Rewards stop according to vault behavior.
+1. User chooses the share amount to unlock (input/balance are vault shares).
+2. Register checks `shares <= balanceOf(account)` and quotes the underlying out via `previewRedeem(shares)`.
+3. User calls `redeem(shares, account, account)` to begin unlock (`prepareVoteLockRedeem`). This is the universal path for every vault — legacy 1:1 and self-appreciating alike; the contract converts shares to underlying at the current rate and escrows that fixed underlying amount.
+4. Rewards stop according to vault behavior; the escrowed amount no longer appreciates.
 5. User waits unlock delay.
 6. User returns to claim/withdraw unlocked underlying when available.
 

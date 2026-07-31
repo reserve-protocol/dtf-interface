@@ -331,6 +331,41 @@ describe("dtfQueryKeys", () => {
       },
     ]);
   });
+
+  it("normalizes bigint amounts in vote-lock preview keys", () => {
+    expect(
+      dtfQueryKeys.index.voteLockPreviewDeposit({
+        stToken: "0x000000000000000000000000000000000000000A",
+        chainId: 56,
+        amount: 10n ** 18n,
+      }),
+    ).toEqual([
+      "dtf",
+      "index",
+      "vote-lock-preview-deposit",
+      {
+        stToken: "0x000000000000000000000000000000000000000a",
+        chainId: 56,
+        amount: "1000000000000000000",
+      },
+    ]);
+    expect(
+      dtfQueryKeys.index.voteLockPreviewRedeem({
+        stToken: "0x000000000000000000000000000000000000000A",
+        chainId: 56,
+        shares: 5n,
+      }),
+    ).toEqual([
+      "dtf",
+      "index",
+      "vote-lock-preview-redeem",
+      {
+        stToken: "0x000000000000000000000000000000000000000a",
+        chainId: 56,
+        shares: "5",
+      },
+    ]);
+  });
 });
 
 function createDtfKeyFixture() {

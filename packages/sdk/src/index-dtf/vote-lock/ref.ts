@@ -52,6 +52,7 @@ import {
   prepareVoteLockDeposit,
   prepareVoteLockDepositPlan,
   prepareVoteLockPoke,
+  prepareVoteLockRedeem,
   prepareVoteLockRemoveRewardToken,
   prepareVoteLockSetRewardRatio,
   prepareVoteLockSetUnstakingDelay,
@@ -160,6 +161,8 @@ export function createIndexDtfVoteLockRef(client: DtfClient, params: DtfParams) 
     ) => prepareVoteLockDelegateOptimistic({ ...call, chainId }),
     prepareVoteLockPoke: (call: Omit<Parameters<typeof prepareVoteLockPoke>[0], "chainId">) =>
       prepareVoteLockPoke({ ...call, chainId }),
+    prepareVoteLockRedeem: (call: Omit<Parameters<typeof prepareVoteLockRedeem>[0], "chainId">) =>
+      prepareVoteLockRedeem({ ...call, chainId }),
     prepareVoteLockRemoveRewardToken: (call: Omit<Parameters<typeof prepareVoteLockRemoveRewardToken>[0], "chainId">) =>
       prepareVoteLockRemoveRewardToken({ ...call, chainId }),
     prepareVoteLockSetRewardRatio: (call: Omit<Parameters<typeof prepareVoteLockSetRewardRatio>[0], "chainId">) =>

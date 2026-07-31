@@ -240,6 +240,38 @@ export function indexDtfVoteLockVaultStateQueryOptions<TData = MethodResult<Inde
   );
 }
 
+export function indexDtfVoteLockPreviewDepositQueryOptions<
+  TData = MethodResult<IndexMethod<"readVoteLockPreviewDeposit">>,
+>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"readVoteLockPreviewDeposit">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"readVoteLockPreviewDeposit">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.voteLockPreviewDeposit(params),
+    () => sdk.index.readVoteLockPreviewDeposit(requireParams(params, "indexDtfVoteLockPreviewDepositQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
+export function indexDtfVoteLockPreviewRedeemQueryOptions<
+  TData = MethodResult<IndexMethod<"readVoteLockPreviewRedeem">>,
+>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"readVoteLockPreviewRedeem">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"readVoteLockPreviewRedeem">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.voteLockPreviewRedeem(params),
+    () => sdk.index.readVoteLockPreviewRedeem(requireParams(params, "indexDtfVoteLockPreviewRedeemQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
 export function accountPortfolioQueryOptions<TData = MethodResult<PortfolioMethod<"get">>>(
   sdk: DtfSdk,
   params: MethodParams<PortfolioMethod<"get">> | undefined,

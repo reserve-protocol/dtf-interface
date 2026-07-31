@@ -40,6 +40,14 @@ export type VoteLockState = {
   readonly delegate: Address;
   readonly optimisticDelegate: Address | null;
   readonly maxWithdraw: Amount;
+  /** Vault share balance of the account. */
+  readonly shareBalance: Amount;
+  /**
+   * Underlying assets per one share unit (`convertToAssets(10^decimals)`) — 1 for legacy 1:1 vaults,
+   * above 1 for self-appreciating vaults. Display-only: exact conversions must use
+   * `previewRedeem`/`maxWithdraw`, not rate multiplication (rounding).
+   */
+  readonly exchangeRate: Amount;
   readonly optimisticVotingPower: Amount | null;
   readonly hasOptimisticVotingPower: boolean;
   readonly unstakingDelay: bigint;
@@ -67,6 +75,8 @@ type VoteLockStateMulticallResults = readonly [
   VoteLockMulticallResult<bigint>,
   VoteLockMulticallResult<bigint>,
   VoteLockMulticallResult<Address>,
+  VoteLockMulticallResult<bigint>,
+  VoteLockMulticallResult<bigint>,
   VoteLockMulticallResult<bigint>,
   VoteLockMulticallResult<bigint>,
   VoteLockMulticallResult<Address>,
@@ -210,6 +220,19 @@ async function readVoteLockState(
         {
           address: stToken,
           abi: dtfIndexStakingVaultAbi,
+          functionName: "balanceOf",
+          args: [account],
+        },
+        {
+          address: stToken,
+          abi: dtfIndexStakingVaultAbi,
+          functionName: "convertToAssets",
+          // StakingVault has no ERC4626 decimals offset, so share decimals == underlying decimals.
+          args: [10n ** BigInt(underlying.decimals)],
+        },
+        {
+          address: stToken,
+          abi: dtfIndexStakingVaultAbi,
           functionName: "unstakingDelay",
         },
         {
@@ -226,6 +249,8 @@ async function readVoteLockState(
     allowanceResult,
     delegateResult,
     maxWithdrawResult,
+    shareBalanceResult,
+    exchangeRateResult,
     unstakingDelayResult,
     unstakingManagerResult,
   ] = results;
@@ -234,6 +259,8 @@ async function readVoteLockState(
   if (allowanceResult.status === "failure") throw allowanceResult.error;
   if (delegateResult.status === "failure") throw delegateResult.error;
   if (maxWithdrawResult.status === "failure") throw maxWithdrawResult.error;
+  if (shareBalanceResult.status === "failure") throw shareBalanceResult.error;
+  if (exchangeRateResult.status === "failure") throw exchangeRateResult.error;
   if (unstakingDelayResult.status === "failure") throw unstakingDelayResult.error;
   if (unstakingManagerResult.status === "failure") throw unstakingManagerResult.error;
 
@@ -246,6 +273,8 @@ async function readVoteLockState(
     delegate: delegateResult.result,
     optimisticDelegate,
     maxWithdraw: mapAmount(maxWithdrawResult.result, underlying.decimals),
+    shareBalance: mapAmount(shareBalanceResult.result, underlying.decimals),
+    exchangeRate: mapAmount(exchangeRateResult.result, underlying.decimals),
     optimisticVotingPower: optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower),
     hasOptimisticVotingPower: (optimisticVotingPower ?? 0n) > 0n,
     unstakingDelay: unstakingDelayResult.result,

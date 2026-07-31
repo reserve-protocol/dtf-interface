@@ -239,6 +239,10 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "vote-lock-state", keyParams(params)] as const,
     voteLockVaultState: (params?: IndexMethodParams<"getVoteLockVaultState">) =>
       [...dtfQueryKeys.index.all(), "vote-lock-vault-state", keyParams(params)] as const,
+    voteLockPreviewDeposit: (params?: IndexMethodParams<"readVoteLockPreviewDeposit">) =>
+      [...dtfQueryKeys.index.all(), "vote-lock-preview-deposit", keyParams(params)] as const,
+    voteLockPreviewRedeem: (params?: IndexMethodParams<"readVoteLockPreviewRedeem">) =>
+      [...dtfQueryKeys.index.all(), "vote-lock-preview-redeem", keyParams(params)] as const,
     governance: {
       all: () => [...dtfQueryKeys.index.all(), "governance"] as const,
       proposalList: (params?: GetIndexDtfProposalsParams) =>

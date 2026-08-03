@@ -17,3 +17,4 @@ One line per page. Agents: start here, follow links, keep this list current on i
 
 - [[sdk]] — core reads, mapping, namespaces/refs, and prepared-call boundary
 - [[react-sdk]] — providers, query keys/options/hooks, and performance rules
+- [[tooling]] — operational scripts and agent skills for protocol review

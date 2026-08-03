@@ -1,0 +1,33 @@
+{
+  "name": "@reserve-protocol/tooling",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Operational tooling and agent skills for DTF review workflows.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reserve-protocol/dtf-interface",
+    "directory": "packages/tooling"
+  },
+  "type": "module",
+  "scripts": {
+    "clean": "rm -rf *.tsbuildinfo",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "validate:rebalance": "tsx src/rebalance-validation/cli.ts"
+  },
+  "dependencies": {
+    "@reserve-protocol/sdk": "workspace:*",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@dtf-interface/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "tsx": "^4.20.6",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

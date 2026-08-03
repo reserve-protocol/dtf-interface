@@ -27,3 +27,8 @@ Append-only chronological record: lessons, corrections, friction. Newest section
 ## 2026-07-22
 
 - Multi-repo SDK/Register work exposed avoidable approval churn when only Register was writable. Start those sessions with both repositories as writable workspace roots (or their parent as the workspace); sibling read-only inspection does not need escalation, and write-heavy SDK verification should be batched into the release gate.
+
+## 2026-08-03
+
+- DTF rebalance validation moved into `packages/tooling` (an earlier prototype lived in Register and was dropped as out of scope there). Two lessons from running it against the live CMC20 August 2026 proposal: `weight.spot` is D27 per *share*, not per whole share, so trade sizing that treats it as whole-token units per share reports the entire basket as a sell; and `POST /rebalance/liquidity` returns `priceImpact` already in percent and signed by direction, so treating it as a fraction reports 11.6% impact as 1152%. Both were invisible to unit tests and only surfaced against real data — validate new checks against a known proposal, not just fixtures.
+- Disaster-class checks in that package deliberately use non-Reserve data (DEXScreener pool prices, CoinGecko listings). Proposals are built from the Reserve API, so an API-vs-calldata comparison is self-consistent by construction and cannot catch a wrong price or a look-alike token address.

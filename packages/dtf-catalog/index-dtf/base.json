@@ -153,5 +153,17 @@
     "status": "deprecated",
     "restricted": false,
     "tags": ["SocialFi", "Ecosystem"]
+  },
+  "0xcef8db49e456f872e288e1c042f916e9ced7c781": {
+    "chainId": 8453,
+    "address": "0xcef8db49e456f872e288e1c042f916e9ced7c781",
+    "name": "Reserve Magnificent 7 DTF (Base)",
+    "symbol": "MAG7",
+    "logo": "mag7.svg",
+    "decimals": 18,
+    "createdAt": 1785872761,
+    "status": "active",
+    "restricted": false,
+    "tags": ["RWA"]
   }
 }

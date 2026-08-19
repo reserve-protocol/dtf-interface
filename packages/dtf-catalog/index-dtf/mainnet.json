@@ -19,7 +19,7 @@
     "logo": "bed.webp",
     "decimals": 18,
     "createdAt": 1740082055,
-    "status": "active",
+    "status": "deprecated",
     "restricted": false,
     "tags": ["Majors", "Bitcoin", "DeFi", "Stablecoins"]
   },
@@ -31,7 +31,7 @@
     "logo": "smel.webp",
     "decimals": 18,
     "createdAt": 1740080639,
-    "status": "active",
+    "status": "deprecated",
     "restricted": false,
     "tags": ["DeFi", "Stablecoins", "LST"]
   },

@@ -1,5 +1,11 @@
 # @reserve-protocol/dtf-catalog
 
+## 0.1.4
+
+### Patch Changes
+
+- 472e6c2: Mark the mainnet Index DTFs BED (BTC ETH DCA Index) and SMEL (Imagine The SMEL) as `deprecated`, matching their onchain deprecation.
+
 ## 0.1.3
 
 ### Patch Changes

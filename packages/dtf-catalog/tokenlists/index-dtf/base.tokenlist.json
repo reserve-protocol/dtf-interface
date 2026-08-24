@@ -1,7 +1,7 @@
 {
   "name": "Reserve Index DTFs Base",
   "logoURI": "https://github.com/reserve-protocol/brand-assets/blob/master/assets/Reserve-Monogram-white-blue.png?raw=true",
-  "timestamp": "2025-12-10T19:51:47.000Z",
+  "timestamp": "2026-08-20T12:25:03.000Z",
   "version": {
     "major": 1,
     "minor": 0,
@@ -111,6 +111,14 @@
       "symbol": "ZINDEX",
       "decimals": 18,
       "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxkoaTf2cxf5YKldLsOuTopPF8NbnAw2VgImZv"
+    },
+    {
+      "chainId": 8453,
+      "address": "0xcef8db49e456f872e288e1c042f916e9ced7c781",
+      "name": "Reserve Magnificent 7 DTF (Base)",
+      "symbol": "MAG7",
+      "decimals": 18,
+      "logoURI": "https://l5394zf57b.ufs.sh/f/mupND8QUUvXxzqKDLfYQHYMkBg1Lxv2Gn7Nsbhq6KaVwfopl"
     }
   ]
 }

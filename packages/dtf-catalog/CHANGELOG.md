@@ -1,5 +1,11 @@
 # @reserve-protocol/dtf-catalog
 
+## 0.1.5
+
+### Patch Changes
+
+- 6a0b7e8: Add MAG7 (Reserve Magnificent 7 DTF) on Base to the Index DTF catalog, with logo.
+
 ## 0.1.4
 
 ### Patch Changes

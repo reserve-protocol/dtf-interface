@@ -1,5 +1,12 @@
 # @reserve-protocol/sdk
 
+## 0.5.3
+
+### Patch Changes
+
+- Updated dependencies [6a0b7e8]
+  - @reserve-protocol/dtf-catalog@0.1.5
+
 ## 0.5.2
 
 ### Patch Changes

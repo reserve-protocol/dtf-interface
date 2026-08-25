@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createDtfClient } from "@/client";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
 import {
   buildInitialBasket,
   getBasketSharesFromUnits,
@@ -202,6 +203,87 @@ describe("buildIndexDtfBasketProposal", () => {
           tokenParams.price.low < tokenParams.price.high,
       ),
     ).toBe(true);
+  });
+
+  it("builds a v6 startRebalance proposal with the next nonce and deadline", async () => {
+    const proposal = await buildIndexDtfBasketProposal(testClient({ version: "6.0.0", rebalanceNonce: 7n }), {
+      address: DTF,
+      chainId: 1,
+      governance: GOVERNANCE,
+      supply: parseEther("1"),
+      currentBalances: {
+        [USDC]: parseUnits("1", 6),
+        [DAI]: 0n,
+      },
+      prices: {
+        [USDC]: 1,
+        [DAI]: 1,
+      },
+      priceErrors: {
+        [USDC]: 0.5,
+        [DAI]: 0.5,
+      },
+      weightControl: true,
+      basket: {
+        type: "shares",
+        tokens: [
+          { address: USDC, share: "50" },
+          { address: DAI, share: "50" },
+        ],
+      },
+      auctionLauncherWindow: 3600,
+      ttl: 10_800,
+      deadline: 2_000_000_000,
+    });
+
+    const decoded = decodeFunctionData({
+      abi: folioArtifactAbi,
+      data: proposal.calldatas[0]!,
+    });
+
+    expect(proposal.context).toMatchObject({
+      version: "6.0.0",
+      rebalanceNonce: 8n,
+      deadline: 2_000_000_000n,
+    });
+    expect(decoded.functionName).toBe("startRebalance");
+    expect(decoded.args[0]).toBe(8n);
+    expect(decoded.args[3]).toBe(3600n);
+    expect(decoded.args[4]).toBe(10_800n);
+    expect(decoded.args[5]).toBe(2_000_000_000n);
+  });
+
+  it("requires a deadline for v6 basket proposals", async () => {
+    await expect(
+      buildIndexDtfBasketProposal(testClient({ version: "6.0.0" }), {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        supply: parseEther("1"),
+        currentBalances: { [USDC]: parseUnits("1", 6) },
+        prices: { [USDC]: 1 },
+        priceErrors: { [USDC]: 0.5 },
+        weightControl: true,
+        basket: { type: "shares", tokens: [{ address: USDC, share: "100" }] },
+      }),
+    ).rejects.toThrow("deadline is required");
+  });
+
+  it("rejects one-token v6 rebalances", async () => {
+    await expect(
+      buildIndexDtfBasketProposal(testClient({ version: "6.0.0" }), {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        supply: parseEther("1"),
+        currentBalances: { [USDC]: parseUnits("1", 6) },
+        prices: { [USDC]: 1 },
+        priceErrors: { [USDC]: 0.5 },
+        weightControl: true,
+        deadline: 2_000_000_000,
+        basket: { type: "shares", tokens: [{ address: USDC, share: "100" }] },
+      }),
+    ).rejects.toThrow("Rebalance must include at least two tokens");
   });
 
   it("builds tracking rebalance args from unit input", async () => {
@@ -433,11 +515,16 @@ describe("buildIndexDtfBasketProposal", () => {
   });
 });
 
-function testClient() {
+function testClient(options: { readonly version?: "5.0.0" | "6.0.0"; readonly rebalanceNonce?: bigint } = {}) {
   return createDtfClient({
     chains: {
       1: {
         publicClient: {
+          readContract: vi.fn(async ({ functionName }: { functionName: string }) => {
+            if (functionName === "version") return options.version ?? "5.0.0";
+            if (functionName === "getRebalanceNonce") return options.rebalanceNonce ?? 0n;
+            throw new Error(`Unexpected read: ${functionName}`);
+          }),
           multicall: vi.fn(async ({ contracts }: { contracts: unknown[] }) => {
             const tokens = [USDC, DAI, WBTC];
             const metadata: Record<string, readonly [string, string, number]> = {

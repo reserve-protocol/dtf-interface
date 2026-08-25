@@ -34,7 +34,8 @@ This file collects facts that are easy to get wrong. Check it before changing SD
 - `reserve-index-dtf` source may be ahead of live deployed versions.
 - Current SDK write builders support v5 and v6 ABI targets. Do not assume every deployed DTF uses the latest ABI.
 - Older docs and comments can mention v3 or v4 signatures. Verify against the ABI/version being encoded.
-- `startRebalance`, `openAuction`, and `bid` signatures have changed across versions.
+- `startRebalance`, `openAuction`, and `bid` signatures have changed across versions. V6 `startRebalance` requires the expected next nonce, an execution deadline, and at least two rebalance tokens.
+- V6 `setFeeRecipients` replaces both tables at once. Callers must preserve the full immutable recipient table; the high-level revenue-distribution proposal is therefore v5-only for now.
 
 ## Subgraph Mismatches
 

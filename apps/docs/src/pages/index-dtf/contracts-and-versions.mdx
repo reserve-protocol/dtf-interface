@@ -10,9 +10,11 @@ Current SDK settings/proposal write builders support `5.0.0` and `6.0.0` ABI tar
 
 Version-specific areas include:
 
+- basket rebalance proposals
 - allowlist settings
 - self-fee settings
 - auction length settings
+- mutable and immutable fee-recipient tables
 
 ## Why This Matters
 
@@ -25,12 +27,18 @@ startRebalance(address[] newTokens, BasketRange[] newLimits, Prices[] newPrices,
 SDK/Register ABIs can use newer signatures like:
 
 ```solidity
+// v5
 startRebalance(TokenRebalanceParams[] tokens, RebalanceLimits limits, ...)
+
+// v6
+startRebalance(uint256 rebalanceNonce, TokenRebalanceParams[] tokens, RebalanceLimits limits, ..., uint256 deadline)
 ```
 
-Use SDK builders unless you have a specific reason to hand-encode a call.
+Use SDK builders unless you have a specific reason to hand-encode a call. The v6 basket proposal builder reads the current rebalance nonce, encodes the next nonce, and requires an explicit Unix-seconds `deadline` so a stale proposal cannot start a rebalance.
 
-Current rebalance/open-auction and issuance helpers are v5-shaped unless the specific function explicitly accepts a version. Do not assume every write helper supports every deployed Folio version.
+Raw v6 fee-recipient calls require both the mutable and full immutable tables. The higher-level revenue-distribution proposal remains v5-only until the SDK can read and preserve the immutable table.
+
+Open-auction and issuance helpers remain version-sensitive. Do not assume every write helper supports every deployed Folio version.
 
 ## Address Normalization
 

@@ -6,6 +6,7 @@ import type { IndexDtfCall } from "@/types/governance";
 import type { IndexDtf } from "@/types/index-dtf";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
 import {
   DEFAULT_AUCTION_LAUNCHER_WINDOW,
   buildIndexDtfStartRebalance,
@@ -19,9 +20,9 @@ import {
   type IndexDtfBasketSharesInput,
   type IndexDtfBasketTokenInput,
   type IndexDtfBasketUnitsInput,
-  type StartRebalanceArgsV5,
+  type IndexDtfStartRebalanceVersion,
 } from "@/index-dtf/dtf/basket/index";
-import { getDtf } from "@/index-dtf/dtf/index";
+import { getDtf, getVersion } from "@/index-dtf/dtf/index";
 import { prepareContractCall } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
 
@@ -45,12 +46,15 @@ export type BuildIndexDtfBasketProposalParams = BuildIndexDtfStartRebalanceParam
   readonly auctionLauncherWindow?: number | bigint;
   readonly permissionlessWindow?: number | bigint;
   readonly ttl?: number | bigint;
+  readonly deadline?: number | bigint;
 };
 
 export type BuiltIndexDtfBasketProposalContext = BuiltIndexDtfStartRebalance & {
   readonly chainId: DtfParams["chainId"];
   readonly auctionLauncherWindow: bigint;
   readonly ttl: bigint;
+  readonly rebalanceNonce?: bigint;
+  readonly deadline?: bigint;
 };
 
 export type BuiltIndexDtfBasketProposal = {
@@ -67,15 +71,27 @@ export async function buildIndexDtfBasketProposal(
 ): Promise<BuiltIndexDtfBasketProposal> {
   const windows = getRebalanceWindows(params);
   validateBasketTokenAddresses(params);
-  const dtf = await getDtfForProposal(client, params);
+  const [dtf, version] = await Promise.all([
+    getDtfForProposal(client, params),
+    getBasketProposalVersion(client, params),
+  ]);
+  const v6Context =
+    version === "6.0.0"
+      ? {
+          deadline: getRequiredDeadline(params.deadline),
+          rebalanceNonce: await getNextRebalanceNonce(client, params),
+        }
+      : {};
   const rebalance = await buildIndexDtfStartRebalance(client, {
     ...params,
+    version,
     ...(dtf ? { dtf } : {}),
   });
   const context: BuiltIndexDtfBasketProposalContext = {
     ...rebalance,
     chainId: params.chainId,
     ...windows,
+    ...v6Context,
   };
   const authority = getProposalAuthority(params, dtf);
   const call = prepareIndexDtfBasketRebalance(context);
@@ -90,14 +106,41 @@ export async function buildIndexDtfBasketProposal(
 }
 
 function prepareIndexDtfBasketRebalance(context: BuiltIndexDtfBasketProposalContext): IndexDtfCall {
-  const args = getStartRebalanceArgs(context);
+  const tokens = context.startRebalanceArgs.tokens.map((token) => ({
+    ...token,
+    token: getAddress(token.token as Address),
+  }));
+
+  if (context.version === "6.0.0") {
+    if (context.rebalanceNonce === undefined || context.deadline === undefined) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: "rebalanceNonce and deadline are required for Index DTF 6.0.0",
+      });
+    }
+
+    return prepareContractCall({
+      chainId: context.chainId,
+      address: context.address,
+      abi: folioArtifactAbi,
+      functionName: "startRebalance",
+      args: [
+        context.rebalanceNonce,
+        tokens,
+        context.startRebalanceArgs.limits,
+        context.auctionLauncherWindow,
+        context.ttl,
+        context.deadline,
+      ] as const,
+    });
+  }
 
   return prepareContractCall({
     chainId: context.chainId,
     address: context.address,
     abi: dtfIndexAbi,
     functionName: "startRebalance",
-    args,
+    args: [tokens, context.startRebalanceArgs.limits, context.auctionLauncherWindow, context.ttl] as const,
   });
 }
 
@@ -116,18 +159,44 @@ async function getDtfForProposal(
   return getDtf(client, params);
 }
 
-function getStartRebalanceArgs(context: BuiltIndexDtfBasketProposalContext) {
-  const startRebalanceArgs = context.startRebalanceArgs as StartRebalanceArgsV5;
+async function getBasketProposalVersion(
+  client: DtfClient,
+  params: BuildIndexDtfBasketProposalParams,
+): Promise<IndexDtfStartRebalanceVersion> {
+  const version = params.version ?? (await getVersion(client, params));
 
-  return [
-    startRebalanceArgs.tokens.map((token) => ({
-      ...token,
-      token: getAddress(token.token as Address),
-    })),
-    startRebalanceArgs.limits,
-    context.auctionLauncherWindow,
-    context.ttl,
-  ] as const;
+  if (version !== "5.0.0" && version !== "6.0.0") {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `Unsupported Index DTF basket proposal version: ${version}`,
+      meta: { version },
+    });
+  }
+
+  return version;
+}
+
+async function getNextRebalanceNonce(client: DtfClient, params: DtfParams): Promise<bigint> {
+  const nonce = await client.viem.readContract({
+    chainId: params.chainId,
+    address: getAddress(params.address),
+    abi: folioArtifactAbi,
+    functionName: "getRebalanceNonce",
+    blockNumber: params.blockNumber,
+  });
+
+  return nonce + 1n;
+}
+
+function getRequiredDeadline(deadline: number | bigint | undefined): bigint {
+  if (deadline === undefined) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "deadline is required to build an Index DTF 6.0.0 basket proposal",
+    });
+  }
+
+  return toSeconds(deadline, "deadline", { allowZero: false });
 }
 
 function getProposalAuthority(

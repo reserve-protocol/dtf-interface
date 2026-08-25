@@ -1,6 +1,6 @@
 ---
 title: Decisions
-updated: 2026-07-22
+updated: 2026-08-25
 type: decision
 ---
 
@@ -31,3 +31,7 @@ Platform fee and status belong on the full/current DTF route model so Register d
 ## 2026-07-09 — Preserve modules, keep the root API
 
 Preserve-modules output reduced a direct price-reader bundle from 538.08 kB to 15.41 kB without adding public subpaths or changing imports. The consumer bundle gate asserts that price reads stay below budget and do not retain Zod, rebalance-lib, or Decimal. Viem remains expected address/encoding weight.
+
+## 2026-08-25 — Publish only reviewed main commits
+
+Package publishing runs directly on pushes to `main` or manual dispatches selecting `main`, checks out the triggering SHA, and reruns `release:ci` before Changesets. Never publish by checking out `workflow_run.head_sha`: a successful fork workflow can otherwise move untrusted code into the write- and OIDC-enabled release context.

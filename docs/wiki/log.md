@@ -1,6 +1,6 @@
 ---
 title: Log
-updated: 2026-07-22
+updated: 2026-08-25
 type: log
 ---
 
@@ -27,3 +27,7 @@ Append-only chronological record: lessons, corrections, friction. Newest section
 ## 2026-07-22
 
 - Multi-repo SDK/Register work exposed avoidable approval churn when only Register was writable. Start those sessions with both repositories as writable workspace roots (or their parent as the workspace); sibling read-only inspection does not need escalation, and write-heavy SDK verification should be batched into the release gate.
+
+## 2026-08-25
+
+- The release workflow's `workflow_run` checkout allowed a successful fork workflow to select code executed with repository write permissions and npm OIDC. Publishing now starts only from `main` pushes or manual `main` dispatches, while the existing Changesets v1 release-PR and trusted-publishing flow remains unchanged.

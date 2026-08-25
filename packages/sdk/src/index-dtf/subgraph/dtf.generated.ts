@@ -332,6 +332,7 @@ export type Account_Filter = {
   mintings_?: InputMaybe<Minting_Filter>;
   or?: InputMaybe<Array<InputMaybe<Account_Filter>>>;
   rewardClaims_?: InputMaybe<RewardClaim_Filter>;
+  stakingPositions_?: InputMaybe<StakingPosition_Filter>;
   transferFrom_?: InputMaybe<TransferEvent_Filter>;
   transferTo_?: InputMaybe<TransferEvent_Filter>;
 };
@@ -343,6 +344,7 @@ export type Account_OrderBy =
   | 'locks'
   | 'mintings'
   | 'rewardClaims'
+  | 'stakingPositions'
   | 'transferFrom'
   | 'transferTo';
 
@@ -1152,12 +1154,19 @@ export type Dtf_OrderBy =
   | 'stToken__currentOptimisticDelegates'
   | 'stToken__delegatedVotes'
   | 'stToken__delegatedVotesRaw'
+  | 'stToken__exchangeRate'
+  | 'stToken__exchangeRateBlock'
+  | 'stToken__exchangeRateTimestamp'
   | 'stToken__id'
   | 'stToken__optimisticDelegatedVotes'
   | 'stToken__optimisticDelegatedVotesRaw'
+  | 'stToken__rewardHalfLife'
+  | 'stToken__rewardRatio'
   | 'stToken__tokenJar'
+  | 'stToken__totalAssets'
   | 'stToken__totalDelegates'
   | 'stToken__totalOptimisticDelegates'
+  | 'stToken__unstakingDelay'
   | 'timestamp'
   | 'token'
   | 'token__address'
@@ -1639,12 +1648,19 @@ export type Delegate_OrderBy =
   | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
   | 'token__tokenJar'
+  | 'token__totalAssets'
   | 'token__totalDelegates'
   | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay'
   | 'votes';
 
 export type Event_Filter = {
@@ -2187,12 +2203,19 @@ export type Governance_OrderBy =
   | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
   | 'token__tokenJar'
+  | 'token__totalAssets'
   | 'token__totalDelegates'
   | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay'
   | 'version'
   | 'votingDelay'
   | 'votingPeriod';
@@ -2406,12 +2429,19 @@ export type Lock_OrderBy =
   | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
   | 'token__tokenJar'
+  | 'token__totalAssets'
   | 'token__totalDelegates'
   | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay'
   | 'unlockTime';
 
 export type Minting_Filter = {
@@ -4095,13 +4125,805 @@ export type RewardClaim_OrderBy =
   | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
   | 'token__tokenJar'
+  | 'token__totalAssets'
   | 'token__totalDelegates'
   | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay'
   | 'txnHash';
+
+export type StakingPositionDailySnapshot_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  account?: InputMaybe<Scalars['String']['input']>;
+  account_?: InputMaybe<Account_Filter>;
+  account_contains?: InputMaybe<Scalars['String']['input']>;
+  account_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_ends_with?: InputMaybe<Scalars['String']['input']>;
+  account_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_gt?: InputMaybe<Scalars['String']['input']>;
+  account_gte?: InputMaybe<Scalars['String']['input']>;
+  account_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  account_lt?: InputMaybe<Scalars['String']['input']>;
+  account_lte?: InputMaybe<Scalars['String']['input']>;
+  account_not?: InputMaybe<Scalars['String']['input']>;
+  account_not_contains?: InputMaybe<Scalars['String']['input']>;
+  account_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  account_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  account_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  account_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_starts_with?: InputMaybe<Scalars['String']['input']>;
+  account_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  and?: InputMaybe<Array<InputMaybe<StakingPositionDailySnapshot_Filter>>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<StakingPositionDailySnapshot_Filter>>>;
+  position?: InputMaybe<Scalars['String']['input']>;
+  position_?: InputMaybe<StakingPosition_Filter>;
+  position_contains?: InputMaybe<Scalars['String']['input']>;
+  position_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_ends_with?: InputMaybe<Scalars['String']['input']>;
+  position_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_gt?: InputMaybe<Scalars['String']['input']>;
+  position_gte?: InputMaybe<Scalars['String']['input']>;
+  position_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  position_lt?: InputMaybe<Scalars['String']['input']>;
+  position_lte?: InputMaybe<Scalars['String']['input']>;
+  position_not?: InputMaybe<Scalars['String']['input']>;
+  position_not_contains?: InputMaybe<Scalars['String']['input']>;
+  position_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  position_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  position_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  position_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_starts_with?: InputMaybe<Scalars['String']['input']>;
+  position_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  principal?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  principal_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_not?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  realizedRewards?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  realizedRewards_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_not?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  shares?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  shares_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_not?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  token?: InputMaybe<Scalars['String']['input']>;
+  token_?: InputMaybe<StakingToken_Filter>;
+  token_contains?: InputMaybe<Scalars['String']['input']>;
+  token_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_gt?: InputMaybe<Scalars['String']['input']>;
+  token_gte?: InputMaybe<Scalars['String']['input']>;
+  token_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_lt?: InputMaybe<Scalars['String']['input']>;
+  token_lte?: InputMaybe<Scalars['String']['input']>;
+  token_not?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  totalDeposited?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalDeposited_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalWithdrawn?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalWithdrawn_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+};
+
+export type StakingPositionDailySnapshot_OrderBy =
+  | 'account'
+  | 'account__id'
+  | 'blockNumber'
+  | 'id'
+  | 'position'
+  | 'position__blockNumber'
+  | 'position__depositCount'
+  | 'position__id'
+  | 'position__principal'
+  | 'position__realizedRewards'
+  | 'position__shares'
+  | 'position__timestamp'
+  | 'position__totalDeposited'
+  | 'position__totalWithdrawn'
+  | 'position__withdrawCount'
+  | 'principal'
+  | 'realizedRewards'
+  | 'shares'
+  | 'timestamp'
+  | 'token'
+  | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
+  | 'token__delegatedVotes'
+  | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
+  | 'token__id'
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
+  | 'token__tokenJar'
+  | 'token__totalAssets'
+  | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay'
+  | 'totalDeposited'
+  | 'totalWithdrawn';
+
+export type StakingPositionRecordType =
+  | 'DEPOSIT'
+  /**  UnstakingManager.cancelLock re-depositing a pending unlock (Deposit.sender == unstakingManager); not new capital  */
+  | 'LOCK_CANCEL'
+  | 'TRANSFER_IN'
+  | 'TRANSFER_OUT'
+  | 'WITHDRAW';
+
+export type StakingPositionRecord_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  account?: InputMaybe<Scalars['String']['input']>;
+  account_?: InputMaybe<Account_Filter>;
+  account_contains?: InputMaybe<Scalars['String']['input']>;
+  account_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_ends_with?: InputMaybe<Scalars['String']['input']>;
+  account_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_gt?: InputMaybe<Scalars['String']['input']>;
+  account_gte?: InputMaybe<Scalars['String']['input']>;
+  account_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  account_lt?: InputMaybe<Scalars['String']['input']>;
+  account_lte?: InputMaybe<Scalars['String']['input']>;
+  account_not?: InputMaybe<Scalars['String']['input']>;
+  account_not_contains?: InputMaybe<Scalars['String']['input']>;
+  account_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  account_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  account_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  account_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_starts_with?: InputMaybe<Scalars['String']['input']>;
+  account_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  and?: InputMaybe<Array<InputMaybe<StakingPositionRecord_Filter>>>;
+  assets?: InputMaybe<Scalars['BigInt']['input']>;
+  assets_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  assets_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  assets_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  assets_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  assets_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  assets_not?: InputMaybe<Scalars['BigInt']['input']>;
+  assets_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  counterparty?: InputMaybe<Scalars['String']['input']>;
+  counterparty_?: InputMaybe<Account_Filter>;
+  counterparty_contains?: InputMaybe<Scalars['String']['input']>;
+  counterparty_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  counterparty_ends_with?: InputMaybe<Scalars['String']['input']>;
+  counterparty_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  counterparty_gt?: InputMaybe<Scalars['String']['input']>;
+  counterparty_gte?: InputMaybe<Scalars['String']['input']>;
+  counterparty_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  counterparty_lt?: InputMaybe<Scalars['String']['input']>;
+  counterparty_lte?: InputMaybe<Scalars['String']['input']>;
+  counterparty_not?: InputMaybe<Scalars['String']['input']>;
+  counterparty_not_contains?: InputMaybe<Scalars['String']['input']>;
+  counterparty_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  counterparty_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  counterparty_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  counterparty_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  counterparty_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  counterparty_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  counterparty_starts_with?: InputMaybe<Scalars['String']['input']>;
+  counterparty_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  exchangeRate?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRate_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_not?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  hash?: InputMaybe<Scalars['String']['input']>;
+  hash_contains?: InputMaybe<Scalars['String']['input']>;
+  hash_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  hash_ends_with?: InputMaybe<Scalars['String']['input']>;
+  hash_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  hash_gt?: InputMaybe<Scalars['String']['input']>;
+  hash_gte?: InputMaybe<Scalars['String']['input']>;
+  hash_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  hash_lt?: InputMaybe<Scalars['String']['input']>;
+  hash_lte?: InputMaybe<Scalars['String']['input']>;
+  hash_not?: InputMaybe<Scalars['String']['input']>;
+  hash_not_contains?: InputMaybe<Scalars['String']['input']>;
+  hash_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  hash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  hash_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  hash_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  hash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  hash_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  hash_starts_with?: InputMaybe<Scalars['String']['input']>;
+  hash_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  logIndex?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_gt?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_gte?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  logIndex_lt?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_lte?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_not?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<StakingPositionRecord_Filter>>>;
+  position?: InputMaybe<Scalars['String']['input']>;
+  position_?: InputMaybe<StakingPosition_Filter>;
+  position_contains?: InputMaybe<Scalars['String']['input']>;
+  position_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_ends_with?: InputMaybe<Scalars['String']['input']>;
+  position_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_gt?: InputMaybe<Scalars['String']['input']>;
+  position_gte?: InputMaybe<Scalars['String']['input']>;
+  position_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  position_lt?: InputMaybe<Scalars['String']['input']>;
+  position_lte?: InputMaybe<Scalars['String']['input']>;
+  position_not?: InputMaybe<Scalars['String']['input']>;
+  position_not_contains?: InputMaybe<Scalars['String']['input']>;
+  position_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  position_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  position_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  position_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  position_starts_with?: InputMaybe<Scalars['String']['input']>;
+  position_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  principalDelta?: InputMaybe<Scalars['BigInt']['input']>;
+  principalDelta_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  principalDelta_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  principalDelta_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  principalDelta_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  principalDelta_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  principalDelta_not?: InputMaybe<Scalars['BigInt']['input']>;
+  principalDelta_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  realizedRewards?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  realizedRewards_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_not?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  shares?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  shares_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_not?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  token?: InputMaybe<Scalars['String']['input']>;
+  token_?: InputMaybe<StakingToken_Filter>;
+  token_contains?: InputMaybe<Scalars['String']['input']>;
+  token_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_gt?: InputMaybe<Scalars['String']['input']>;
+  token_gte?: InputMaybe<Scalars['String']['input']>;
+  token_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_lt?: InputMaybe<Scalars['String']['input']>;
+  token_lte?: InputMaybe<Scalars['String']['input']>;
+  token_not?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<StakingPositionRecordType>;
+  type_in?: InputMaybe<Array<StakingPositionRecordType>>;
+  type_not?: InputMaybe<StakingPositionRecordType>;
+  type_not_in?: InputMaybe<Array<StakingPositionRecordType>>;
+};
+
+export type StakingPositionRecord_OrderBy =
+  | 'account'
+  | 'account__id'
+  | 'assets'
+  | 'blockNumber'
+  | 'counterparty'
+  | 'counterparty__id'
+  | 'exchangeRate'
+  | 'hash'
+  | 'id'
+  | 'logIndex'
+  | 'position'
+  | 'position__blockNumber'
+  | 'position__depositCount'
+  | 'position__id'
+  | 'position__principal'
+  | 'position__realizedRewards'
+  | 'position__shares'
+  | 'position__timestamp'
+  | 'position__totalDeposited'
+  | 'position__totalWithdrawn'
+  | 'position__withdrawCount'
+  | 'principalDelta'
+  | 'realizedRewards'
+  | 'shares'
+  | 'timestamp'
+  | 'token'
+  | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
+  | 'token__delegatedVotes'
+  | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
+  | 'token__id'
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
+  | 'token__tokenJar'
+  | 'token__totalAssets'
+  | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay'
+  | 'type';
+
+export type StakingPosition_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  account?: InputMaybe<Scalars['String']['input']>;
+  account_?: InputMaybe<Account_Filter>;
+  account_contains?: InputMaybe<Scalars['String']['input']>;
+  account_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_ends_with?: InputMaybe<Scalars['String']['input']>;
+  account_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_gt?: InputMaybe<Scalars['String']['input']>;
+  account_gte?: InputMaybe<Scalars['String']['input']>;
+  account_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  account_lt?: InputMaybe<Scalars['String']['input']>;
+  account_lte?: InputMaybe<Scalars['String']['input']>;
+  account_not?: InputMaybe<Scalars['String']['input']>;
+  account_not_contains?: InputMaybe<Scalars['String']['input']>;
+  account_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  account_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  account_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  account_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  account_starts_with?: InputMaybe<Scalars['String']['input']>;
+  account_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  and?: InputMaybe<Array<InputMaybe<StakingPosition_Filter>>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  dailySnapshots_?: InputMaybe<StakingPositionDailySnapshot_Filter>;
+  depositCount?: InputMaybe<Scalars['Int']['input']>;
+  depositCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  depositCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  depositCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  depositCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  depositCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  depositCount_not?: InputMaybe<Scalars['Int']['input']>;
+  depositCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<StakingPosition_Filter>>>;
+  principal?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  principal_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_not?: InputMaybe<Scalars['BigInt']['input']>;
+  principal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  realizedRewards?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  realizedRewards_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_not?: InputMaybe<Scalars['BigInt']['input']>;
+  realizedRewards_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  records_?: InputMaybe<StakingPositionRecord_Filter>;
+  shares?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  shares_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_not?: InputMaybe<Scalars['BigInt']['input']>;
+  shares_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  token?: InputMaybe<Scalars['String']['input']>;
+  token_?: InputMaybe<StakingToken_Filter>;
+  token_contains?: InputMaybe<Scalars['String']['input']>;
+  token_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_gt?: InputMaybe<Scalars['String']['input']>;
+  token_gte?: InputMaybe<Scalars['String']['input']>;
+  token_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_lt?: InputMaybe<Scalars['String']['input']>;
+  token_lte?: InputMaybe<Scalars['String']['input']>;
+  token_not?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  totalDeposited?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalDeposited_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalDeposited_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalWithdrawn?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalWithdrawn_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalWithdrawn_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  withdrawCount?: InputMaybe<Scalars['Int']['input']>;
+  withdrawCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  withdrawCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  withdrawCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  withdrawCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  withdrawCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  withdrawCount_not?: InputMaybe<Scalars['Int']['input']>;
+  withdrawCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+};
+
+export type StakingPosition_OrderBy =
+  | 'account'
+  | 'account__id'
+  | 'blockNumber'
+  | 'dailySnapshots'
+  | 'depositCount'
+  | 'id'
+  | 'principal'
+  | 'realizedRewards'
+  | 'records'
+  | 'shares'
+  | 'timestamp'
+  | 'token'
+  | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
+  | 'token__delegatedVotes'
+  | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
+  | 'token__id'
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
+  | 'token__tokenJar'
+  | 'token__totalAssets'
+  | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay'
+  | 'totalDeposited'
+  | 'totalWithdrawn'
+  | 'withdrawCount';
+
+export type StakingTokenExchangeRateDailySnapshot_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<StakingTokenExchangeRateDailySnapshot_Filter>>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRate?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRate_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_not?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<StakingTokenExchangeRateDailySnapshot_Filter>>>;
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  token?: InputMaybe<Scalars['String']['input']>;
+  token_?: InputMaybe<StakingToken_Filter>;
+  token_contains?: InputMaybe<Scalars['String']['input']>;
+  token_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_gt?: InputMaybe<Scalars['String']['input']>;
+  token_gte?: InputMaybe<Scalars['String']['input']>;
+  token_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_lt?: InputMaybe<Scalars['String']['input']>;
+  token_lte?: InputMaybe<Scalars['String']['input']>;
+  token_not?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  totalAssets?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalAssets_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalSupply?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalSupply_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+};
+
+export type StakingTokenExchangeRateDailySnapshot_OrderBy =
+  | 'blockNumber'
+  | 'exchangeRate'
+  | 'id'
+  | 'timestamp'
+  | 'token'
+  | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
+  | 'token__delegatedVotes'
+  | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
+  | 'token__id'
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
+  | 'token__tokenJar'
+  | 'token__totalAssets'
+  | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay'
+  | 'totalAssets'
+  | 'totalSupply';
+
+export type StakingTokenExchangeRateSnapshot_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<StakingTokenExchangeRateSnapshot_Filter>>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRate?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRate_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_not?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<StakingTokenExchangeRateSnapshot_Filter>>>;
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  token?: InputMaybe<Scalars['String']['input']>;
+  token_?: InputMaybe<StakingToken_Filter>;
+  token_contains?: InputMaybe<Scalars['String']['input']>;
+  token_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_gt?: InputMaybe<Scalars['String']['input']>;
+  token_gte?: InputMaybe<Scalars['String']['input']>;
+  token_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_lt?: InputMaybe<Scalars['String']['input']>;
+  token_lte?: InputMaybe<Scalars['String']['input']>;
+  token_not?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with?: InputMaybe<Scalars['String']['input']>;
+  token_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  totalAssets?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalAssets_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalSupply?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalSupply_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalSupply_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+};
+
+export type StakingTokenExchangeRateSnapshot_OrderBy =
+  | 'blockNumber'
+  | 'exchangeRate'
+  | 'id'
+  | 'timestamp'
+  | 'token'
+  | 'token__currentDelegates'
+  | 'token__currentOptimisticDelegates'
+  | 'token__delegatedVotes'
+  | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
+  | 'token__id'
+  | 'token__optimisticDelegatedVotes'
+  | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
+  | 'token__tokenJar'
+  | 'token__totalAssets'
+  | 'token__totalDelegates'
+  | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay'
+  | 'totalAssets'
+  | 'totalSupply';
 
 export type StakingTokenRewards_Filter = {
   /** Filter for the block changed event. */
@@ -4187,12 +5009,19 @@ export type StakingTokenRewards_OrderBy =
   | 'stToken__currentOptimisticDelegates'
   | 'stToken__delegatedVotes'
   | 'stToken__delegatedVotesRaw'
+  | 'stToken__exchangeRate'
+  | 'stToken__exchangeRateBlock'
+  | 'stToken__exchangeRateTimestamp'
   | 'stToken__id'
   | 'stToken__optimisticDelegatedVotes'
   | 'stToken__optimisticDelegatedVotesRaw'
+  | 'stToken__rewardHalfLife'
+  | 'stToken__rewardRatio'
   | 'stToken__tokenJar'
+  | 'stToken__totalAssets'
   | 'stToken__totalDelegates'
-  | 'stToken__totalOptimisticDelegates';
+  | 'stToken__totalOptimisticDelegates'
+  | 'stToken__unstakingDelay';
 
 export type StakingToken_Filter = {
   /** Filter for the block changed event. */
@@ -4233,6 +5062,32 @@ export type StakingToken_Filter = {
   delegatedVotes_not_in?: InputMaybe<Array<Scalars['BigDecimal']['input']>>;
   delegates_?: InputMaybe<Delegate_Filter>;
   dtfs_?: InputMaybe<Dtf_Filter>;
+  exchangeRate?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateBlock?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateBlock_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateBlock_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRateBlock_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateBlock_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateBlock_not?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRateDailySnapshots_?: InputMaybe<StakingTokenExchangeRateDailySnapshot_Filter>;
+  exchangeRateSnapshots_?: InputMaybe<StakingTokenExchangeRateSnapshot_Filter>;
+  exchangeRateTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateTimestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRateTimestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateTimestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateTimestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRateTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRate_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exchangeRate_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_not?: InputMaybe<Scalars['BigInt']['input']>;
+  exchangeRate_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   governance?: InputMaybe<Scalars['String']['input']>;
   governance_?: InputMaybe<Governance_Filter>;
   governance_contains?: InputMaybe<Scalars['String']['input']>;
@@ -4285,6 +5140,23 @@ export type StakingToken_Filter = {
   optimisticDelegatedVotes_not?: InputMaybe<Scalars['BigDecimal']['input']>;
   optimisticDelegatedVotes_not_in?: InputMaybe<Array<Scalars['BigDecimal']['input']>>;
   or?: InputMaybe<Array<InputMaybe<StakingToken_Filter>>>;
+  positions_?: InputMaybe<StakingPosition_Filter>;
+  rewardHalfLife?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardHalfLife_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardHalfLife_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardHalfLife_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  rewardHalfLife_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardHalfLife_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardHalfLife_not?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardHalfLife_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  rewardRatio?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardRatio_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardRatio_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardRatio_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  rewardRatio_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardRatio_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardRatio_not?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardRatio_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   rewards_?: InputMaybe<StakingTokenRewards_Filter>;
   token?: InputMaybe<Scalars['String']['input']>;
   tokenJar?: InputMaybe<Scalars['String']['input']>;
@@ -4327,6 +5199,14 @@ export type StakingToken_Filter = {
   token_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   token_starts_with?: InputMaybe<Scalars['String']['input']>;
   token_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  totalAssets?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalAssets_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalAssets_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   totalDelegates?: InputMaybe<Scalars['BigInt']['input']>;
   totalDelegates_gt?: InputMaybe<Scalars['BigInt']['input']>;
   totalDelegates_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -4364,6 +5244,35 @@ export type StakingToken_Filter = {
   underlying_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   underlying_starts_with?: InputMaybe<Scalars['String']['input']>;
   underlying_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  unstakingDelay?: InputMaybe<Scalars['BigInt']['input']>;
+  unstakingDelay_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  unstakingDelay_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  unstakingDelay_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  unstakingDelay_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  unstakingDelay_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  unstakingDelay_not?: InputMaybe<Scalars['BigInt']['input']>;
+  unstakingDelay_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  unstakingManager?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_?: InputMaybe<UnstakingManager_Filter>;
+  unstakingManager_contains?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_ends_with?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_gt?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_gte?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  unstakingManager_lt?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_lte?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_not?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_not_contains?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  unstakingManager_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_starts_with?: InputMaybe<Scalars['String']['input']>;
+  unstakingManager_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StakingToken_OrderBy =
@@ -4374,6 +5283,11 @@ export type StakingToken_OrderBy =
   | 'delegatedVotesRaw'
   | 'delegates'
   | 'dtfs'
+  | 'exchangeRate'
+  | 'exchangeRateBlock'
+  | 'exchangeRateDailySnapshots'
+  | 'exchangeRateSnapshots'
+  | 'exchangeRateTimestamp'
   | 'governance'
   | 'governance__id'
   | 'governance__isOptimistic'
@@ -4398,6 +5312,9 @@ export type StakingToken_OrderBy =
   | 'legacyGovernance'
   | 'optimisticDelegatedVotes'
   | 'optimisticDelegatedVotesRaw'
+  | 'positions'
+  | 'rewardHalfLife'
+  | 'rewardRatio'
   | 'rewards'
   | 'token'
   | 'tokenJar'
@@ -4415,6 +5332,7 @@ export type StakingToken_OrderBy =
   | 'token__totalSupply'
   | 'token__transferCount'
   | 'token__type'
+  | 'totalAssets'
   | 'totalDelegates'
   | 'totalOptimisticDelegates'
   | 'underlying'
@@ -4431,7 +5349,10 @@ export type StakingToken_OrderBy =
   | 'underlying__totalMinted'
   | 'underlying__totalSupply'
   | 'underlying__transferCount'
-  | 'underlying__type';
+  | 'underlying__type'
+  | 'unstakingDelay'
+  | 'unstakingManager'
+  | 'unstakingManager__id';
 
 export type TimelockOperationByTx_Filter = {
   /** Filter for the block changed event. */
@@ -6073,12 +6994,19 @@ export type UnstakingManager_OrderBy =
   | 'token__currentOptimisticDelegates'
   | 'token__delegatedVotes'
   | 'token__delegatedVotesRaw'
+  | 'token__exchangeRate'
+  | 'token__exchangeRateBlock'
+  | 'token__exchangeRateTimestamp'
   | 'token__id'
   | 'token__optimisticDelegatedVotes'
   | 'token__optimisticDelegatedVotesRaw'
+  | 'token__rewardHalfLife'
+  | 'token__rewardRatio'
   | 'token__tokenJar'
+  | 'token__totalAssets'
   | 'token__totalDelegates'
-  | 'token__totalOptimisticDelegates';
+  | 'token__totalOptimisticDelegates'
+  | 'token__unstakingDelay';
 
 export type Version_Filter = {
   /** Filter for the block changed event. */

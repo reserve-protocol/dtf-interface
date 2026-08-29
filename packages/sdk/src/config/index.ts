@@ -14,14 +14,26 @@ export const SUPPORTED_CHAINS: Record<SupportedChainId, Chain> = {
 
 export const supportedChainIds = [mainnet.id, base.id, bsc.id] as const satisfies readonly SupportedChainId[];
 
+// Keyless endpoints, ordered by measured reliability under concurrent load
+// (register's validate-rpcs skill, 2026-08-28). Undocumented hosts stay second.
 export const DEFAULT_RPC_URLS: Record<SupportedChainId, readonly string[]> = {
-  [mainnet.id]: ["https://ethereum-rpc.publicnode.com/", "https://mainnet.gateway.tenderly.co/"],
-  [base.id]: ["https://base-rpc.publicnode.com", "https://base.gateway.tenderly.co"],
+  [mainnet.id]: [
+    "https://eth.drpc.org",
+    "https://mainnet.rpc.sentio.xyz",
+    "https://ethereum-rpc.publicnode.com",
+    "https://eth-mainnet.public.blastapi.io",
+  ],
+  [base.id]: [
+    "https://base.rpc.sentio.xyz",
+    "https://base-rpc.publicnode.com",
+    "https://base-mainnet.public.blastapi.io",
+    "https://base.public.blockpi.network/v1/rpc/public",
+  ],
   [bsc.id]: [
-    "https://bsc-dataseed2.binance.org",
-    "https://bsc-dataseed3.ninicoin.io",
-    "https://bsc-dataseed4.defibit.io",
     "https://bsc-rpc.publicnode.com",
+    "https://bsc.rpc.sentio.xyz",
+    "https://bsc-dataseed.bnbchain.org",
+    "https://bsc-dataseed2.binance.org",
   ],
 };
 

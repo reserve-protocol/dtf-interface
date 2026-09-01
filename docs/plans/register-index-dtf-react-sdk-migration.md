@@ -36,7 +36,7 @@ Register still has Arbitrum in wagmi for older app behavior, but `dtfSdkChains` 
 
 Implemented in core SDK:
 
-- `sdk.index.discover`, `discoverByChain`, `discoverFromSubgraph`, `list`.
+- `sdk.index.discover`, `discoverFromSubgraph`, `list`.
 - `sdk.index.get`, `getDtf`, `getBasket`, `getBasketSnapshot`, `getVersion`, `getTotalSupply`, `getTotalAssets`, `getBrand`, `getMandate`, `getPrice`, `getPrices`, `getPriceHistory`.
 - `sdk.index.getStatus`, `getStatuses`, `getExposure`, `getHolders`, `getTransactions`.
 - `sdk.index.getBidsEnabled`, `getRebalanceControl`, `getPendingFeeShares`, `getApprovedRevenueTokens`, `getPlatformFee`, `getRevenue`.

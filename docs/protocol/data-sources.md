@@ -38,8 +38,7 @@ Common Index endpoints:
 - `GET /current/dtf?address={address}&chainId={chainId}`
 - `GET /current/dtfs?addresses={addresses}&chainId={chainId}`
 - `GET /current/prices?chainId={chainId}&tokens={tokens}`
-- `GET /discover/dtf?chainId={chainId}` (deprecated — use `/discover/dtfs`)
-- `GET /discover/dtfs`
+- `GET /discover/dtfs?chainId={chainId}`
 - `GET /dtf/daos`
 - historical DTF, price, exposure, and rebalance analytics endpoints
 

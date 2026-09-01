@@ -25,12 +25,7 @@ import {
   prepareIndexDtfDeployStakingToken,
 } from "@/index-dtf/deploy/index";
 import { getIndexDtfAccountBalanceSnapshot } from "@/index-dtf/dtf/account-pnl";
-import {
-  discoverIndexDtfs,
-  discoverIndexDtfsByChain,
-  discoverIndexDtfsFromSubgraph,
-  getIndexDtfStatuses,
-} from "@/index-dtf/dtf/discovery";
+import { discoverIndexDtfs, discoverIndexDtfsFromSubgraph, getIndexDtfStatuses } from "@/index-dtf/dtf/discovery";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 import { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 import {
@@ -102,9 +97,6 @@ export function createIndexDtfNamespace(client: DtfClient) {
   return {
     ref: (params: DtfParams) => createIndexDtfRef(client, params),
     discover: (params?: Parameters<typeof discoverIndexDtfs>[1]) => discoverIndexDtfs(client, params),
-    /** @deprecated Use `discover` and filter by `chainId`/`status` — see `discoverIndexDtfsByChain`. */
-    discoverByChain: (params: Parameters<typeof discoverIndexDtfsByChain>[1]) =>
-      discoverIndexDtfsByChain(client, params),
     discoverFromSubgraph: (params: Parameters<typeof discoverIndexDtfsFromSubgraph>[1]) =>
       discoverIndexDtfsFromSubgraph(client, params),
     list: (params?: ListIndexDtfsParams) => listIndexDtfs(client, params),

@@ -26,6 +26,7 @@ export async function buildIndexDtfStartRebalance(
   params: BuildIndexDtfStartRebalanceParams,
 ): Promise<BuiltIndexDtfStartRebalance> {
   const address = getAddress(params.address);
+  const version = params.version ?? "5.0.0";
   const inputTokens = params.basket.tokens.map((token) => ({ ...token, address: getAddress(token.address) }));
   assertUniqueAddresses(inputTokens.map((token) => token.address));
   assertValidBasketAddresses(inputTokens.map((token) => token.address));
@@ -69,6 +70,7 @@ export async function buildIndexDtfStartRebalance(
   return {
     address,
     chainId: params.chainId,
+    version,
     tokens: pricedTokens,
     assets: pricedTokens.map((token, index) => ({
       token,
@@ -81,6 +83,7 @@ export async function buildIndexDtfStartRebalance(
     weightControl,
     deferWeights: params.deferWeights ?? false,
     startRebalanceArgs: buildStartRebalanceArgs({
+      version,
       tokens: pricedTokens,
       supply,
       balances,

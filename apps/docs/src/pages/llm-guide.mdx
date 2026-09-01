@@ -58,6 +58,7 @@ That address is LCAP from `indexDtfCatalog`.
 - Always pass `call.chainId` through to simulation and wallet layers when supported.
 - Use SDK builders for versioned writes instead of hand-encoding ABI calldata.
 - DTF settings builders often need `version: "5.0.0" | "6.0.0"`; read it with `sdk.index.getVersion({ address, chainId })`.
+- V6 basket proposals require an explicit Unix-seconds `deadline`; the SDK reads the current rebalance nonce and encodes the next nonce.
 - Raw version-sensitive `prepare*` helpers should receive the target DTF version explicitly. Higher-level proposal builders may fetch the DTF version when omitted.
 - Proposal action builders prepare vote, queue, execute, and cancel calls. They do not invalidate queries after a transaction.
 

@@ -24,6 +24,7 @@ import {
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const ACCOUNT = "0x0000000000000000000000000000000000000002";
+const IMMUTABLE_ACCOUNT = "0x0000000000000000000000000000000000000003";
 
 describe("Index DTF call builders", () => {
   it("encodes simple setter calls", () => {
@@ -74,6 +75,34 @@ describe("Index DTF call builders", () => {
     expect(decodeFunctionData({ abi: indexDtfV6WriteAbi, data: newCall.data }).functionName).toBe(
       "setMaxAuctionLength",
     );
+  });
+
+  it("encodes v6 mutable and immutable fee recipient tables", () => {
+    const call = prepareIndexDtfSetFeeRecipients({
+      address: DTF,
+      chainId: 1,
+      version: "6.0.0",
+      recipients: [{ recipient: ACCOUNT, portion: 600000000000000000n }],
+      immutableRecipients: [{ recipient: IMMUTABLE_ACCOUNT, portion: 400000000000000000n }],
+    });
+    const decoded = decodeFunctionData({ abi: indexDtfV6WriteAbi, data: call.data });
+
+    expect(decoded.functionName).toBe("setFeeRecipients");
+    expect(decoded.args).toEqual([
+      [{ recipient: ACCOUNT, portion: 600000000000000000n }],
+      [{ recipient: IMMUTABLE_ACCOUNT, portion: 400000000000000000n }],
+    ]);
+  });
+
+  it("requires the immutable fee recipient table for v6", () => {
+    expect(() =>
+      prepareIndexDtfSetFeeRecipients({
+        address: DTF,
+        chainId: 1,
+        version: "6.0.0",
+        recipients: [{ recipient: ACCOUNT, portion: 1n }],
+      }),
+    ).toThrow("immutableRecipients is required");
   });
 
   it("keeps unchanged no-arg calls available on older versions", () => {

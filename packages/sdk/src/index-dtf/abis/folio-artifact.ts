@@ -311,7 +311,13 @@ export const folioArtifact = {
     {
       type: "function",
       name: "emergencyCloseTrustedFill",
-      inputs: [],
+      inputs: [
+        {
+          name: "trustedFill",
+          type: "address",
+          internalType: "address",
+        },
+      ],
       outputs: [],
       stateMutability: "nonpayable",
     },
@@ -362,6 +368,19 @@ export const folioArtifact = {
     {
       type: "function",
       name: "folioFeeForSelf",
+      inputs: [],
+      outputs: [
+        {
+          name: "",
+          type: "uint256",
+          internalType: "uint256",
+        },
+      ],
+      stateMutability: "view",
+    },
+    {
+      type: "function",
+      name: "folioPendingMintFeeShares",
       inputs: [],
       outputs: [
         {
@@ -595,6 +614,19 @@ export const folioArtifact = {
     },
     {
       type: "function",
+      name: "getRebalanceNonce",
+      inputs: [],
+      outputs: [
+        {
+          name: "",
+          type: "uint256",
+          internalType: "uint256",
+        },
+      ],
+      stateMutability: "view",
+    },
+    {
+      type: "function",
       name: "getRoleAdmin",
       inputs: [
         {
@@ -731,6 +763,30 @@ export const folioArtifact = {
     },
     {
       type: "function",
+      name: "immutableFeeRecipients",
+      inputs: [
+        {
+          name: "",
+          type: "uint256",
+          internalType: "uint256",
+        },
+      ],
+      outputs: [
+        {
+          name: "recipient",
+          type: "address",
+          internalType: "address",
+        },
+        {
+          name: "portion",
+          type: "uint96",
+          internalType: "uint96",
+        },
+      ],
+      stateMutability: "view",
+    },
+    {
+      type: "function",
       name: "initialize",
       inputs: [
         {
@@ -777,6 +833,23 @@ export const folioArtifact = {
             },
             {
               name: "feeRecipients",
+              type: "tuple[]",
+              internalType: "struct IFolio.FeeRecipient[]",
+              components: [
+                {
+                  name: "recipient",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "portion",
+                  type: "uint96",
+                  internalType: "uint96",
+                },
+              ],
+            },
+            {
+              name: "immutableFeeRecipients",
               type: "tuple[]",
               internalType: "struct IFolio.FeeRecipient[]",
               components: [
@@ -902,6 +975,19 @@ export const folioArtifact = {
           name: "",
           type: "bool",
           internalType: "bool",
+        },
+      ],
+      stateMutability: "view",
+    },
+    {
+      type: "function",
+      name: "lastFolioFeePoke",
+      inputs: [],
+      outputs: [
+        {
+          name: "",
+          type: "uint256",
+          internalType: "uint256",
         },
       ],
       stateMutability: "view",
@@ -1282,6 +1368,23 @@ export const folioArtifact = {
             },
           ],
         },
+        {
+          name: "_immutableRecipients",
+          type: "tuple[]",
+          internalType: "struct IFolio.FeeRecipient[]",
+          components: [
+            {
+              name: "recipient",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "portion",
+              type: "uint96",
+              internalType: "uint96",
+            },
+          ],
+        },
       ],
       outputs: [],
       stateMutability: "nonpayable",
@@ -1425,6 +1528,11 @@ export const folioArtifact = {
       name: "startRebalance",
       inputs: [
         {
+          name: "rebalanceNonce",
+          type: "uint256",
+          internalType: "uint256",
+        },
+        {
           name: "tokens",
           type: "tuple[]",
           internalType: "struct IFolio.TokenRebalanceParams[]",
@@ -1514,6 +1622,11 @@ export const folioArtifact = {
         },
         {
           name: "ttl",
+          type: "uint256",
+          internalType: "uint256",
+        },
+        {
+          name: "deadline",
           type: "uint256",
           internalType: "uint256",
         },
@@ -2042,6 +2155,31 @@ export const folioArtifact = {
           type: "uint256",
           indexed: false,
           internalType: "uint256",
+        },
+      ],
+      anonymous: false,
+    },
+    {
+      type: "event",
+      name: "ImmutableFeeRecipientsSet",
+      inputs: [
+        {
+          name: "recipients",
+          type: "tuple[]",
+          indexed: false,
+          internalType: "struct IFolio.FeeRecipient[]",
+          components: [
+            {
+              name: "recipient",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "portion",
+              type: "uint96",
+              internalType: "uint96",
+            },
+          ],
         },
       ],
       anonymous: false,
@@ -2597,12 +2735,7 @@ export const folioArtifact = {
     },
     {
       type: "error",
-      name: "Folio__BalanceNotRemovable",
-      inputs: [],
-    },
-    {
-      type: "error",
-      name: "Folio__BasketModificationFailed",
+      name: "Folio__DeadlineExpired",
       inputs: [],
     },
     {
@@ -2638,6 +2771,11 @@ export const folioArtifact = {
     {
       type: "error",
       name: "Folio__FolioFeeTooHigh",
+      inputs: [],
+    },
+    {
+      type: "error",
+      name: "Folio__ImmutableFeeRecipientRemoved",
       inputs: [],
     },
     {
@@ -2698,6 +2836,11 @@ export const folioArtifact = {
     },
     {
       type: "error",
+      name: "Folio__InvalidRebalanceNonce",
+      inputs: [],
+    },
+    {
+      type: "error",
       name: "Folio__InvalidRegistry",
       inputs: [],
     },
@@ -2713,6 +2856,11 @@ export const folioArtifact = {
     },
     {
       type: "error",
+      name: "Folio__InvalidTrustedFill",
+      inputs: [],
+    },
+    {
+      type: "error",
       name: "Folio__InvalidWeights",
       inputs: [],
     },
@@ -2724,6 +2872,11 @@ export const folioArtifact = {
     {
       type: "error",
       name: "Folio__MixedAtomicSwaps",
+      inputs: [],
+    },
+    {
+      type: "error",
+      name: "Folio__NotInRebalance",
       inputs: [],
     },
     {
@@ -2779,11 +2932,6 @@ export const folioArtifact = {
     {
       type: "error",
       name: "Folio__ZeroInitialShares",
-      inputs: [],
-    },
-    {
-      type: "error",
-      name: "Folo__NotInRebalance",
       inputs: [],
     },
     {

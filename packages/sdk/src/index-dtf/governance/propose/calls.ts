@@ -130,19 +130,41 @@ export function prepareIndexDtfSetSelfFee(params: PrepareIndexDtfPercentageCallP
 export function prepareIndexDtfSetFeeRecipients(
   params: PrepareIndexDtfCallParams & {
     readonly recipients: readonly IndexDtfFeeRecipient[];
+    readonly immutableRecipients?: readonly IndexDtfFeeRecipient[];
   },
 ): IndexDtfCall {
+  const recipients = params.recipients.map(normalizeFeeRecipient);
+
+  if (params.version === "6.0.0") {
+    if (params.immutableRecipients === undefined) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: "immutableRecipients is required for Index DTF 6.0.0 fee recipient calls",
+      });
+    }
+
+    return prepareContractCall({
+      chainId: params.chainId,
+      address: params.address,
+      abi: indexDtfV6WriteAbi,
+      functionName: "setFeeRecipients",
+      args: [recipients, params.immutableRecipients.map(normalizeFeeRecipient)] as const,
+    });
+  }
+
+  if (params.immutableRecipients?.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "immutable fee recipients are only supported by Index DTF 6.0.0",
+    });
+  }
+
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: getIndexDtfWriteAbi(params.version),
+    abi: indexDtfV5WriteAbi,
     functionName: "setFeeRecipients",
-    args: [
-      params.recipients.map((recipient) => ({
-        recipient: recipient.recipient,
-        portion: recipient.portion,
-      })),
-    ] as never,
+    args: [recipients] as const,
   });
 }
 
@@ -456,6 +478,13 @@ export function prepareIndexDtfTimelockExecuteBatch(
     ] as const,
     ...(params.value === undefined ? {} : { value: params.value }),
   });
+}
+
+function normalizeFeeRecipient(recipient: IndexDtfFeeRecipient) {
+  return {
+    recipient: recipient.recipient,
+    portion: recipient.portion,
+  };
 }
 
 function encodePercent(percentage: number): bigint {

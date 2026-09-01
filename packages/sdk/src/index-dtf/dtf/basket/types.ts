@@ -114,12 +114,17 @@ export type BuildIndexDtfInitialBasketParams = {
   readonly initialShares: bigint;
 };
 
+export type IndexDtfStartRebalanceVersion = "5.0.0" | "6.0.0";
+
 export type StartRebalanceArgsV5 = {
   readonly tokens: readonly TokenRebalanceParams[];
   readonly limits: RebalanceLimits;
 };
 
+export type StartRebalanceArgsV6 = StartRebalanceArgsV5;
+
 export type BuildIndexDtfStartRebalanceArgsParams = {
+  readonly version?: IndexDtfStartRebalanceVersion;
   readonly tokens: readonly IndexDtfBasketToken[];
   readonly supply: bigint;
   readonly balances: readonly bigint[];
@@ -131,6 +136,7 @@ export type BuildIndexDtfStartRebalanceArgsParams = {
 };
 
 export type BuildIndexDtfStartRebalanceParams = DtfParams & {
+  readonly version?: IndexDtfStartRebalanceVersion;
   readonly basket: IndexDtfBasketInput;
   readonly dtf?: IndexDtf;
   readonly supply?: bigint;
@@ -156,10 +162,11 @@ export type BuiltIndexDtfStartRebalanceAsset = {
 export type BuiltIndexDtfStartRebalance = {
   readonly address: Address;
   readonly chainId: DtfParams["chainId"];
+  readonly version: IndexDtfStartRebalanceVersion;
   readonly tokens: readonly IndexDtfBasketToken[];
   readonly assets: readonly BuiltIndexDtfStartRebalanceAsset[];
   readonly supply: bigint;
   readonly weightControl: boolean;
   readonly deferWeights: boolean;
-  readonly startRebalanceArgs: StartRebalanceArgsV5;
+  readonly startRebalanceArgs: StartRebalanceArgsV5 | StartRebalanceArgsV6;
 };

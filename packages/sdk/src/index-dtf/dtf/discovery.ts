@@ -92,7 +92,13 @@ export async function discoverIndexDtfs(
   return response.filter(isIndexDiscoveryItem).map(mapDiscoveryItem);
 }
 
-/** Discovers Index DTFs from the chain-scoped Reserve API endpoint. */
+/**
+ * Discovers Index DTFs from the chain-scoped Reserve API endpoint.
+ *
+ * @deprecated `/discover/dtf` is a popularity-filtered browse view that omits
+ * supported DTFs and is slated for removal. Use `discoverIndexDtfs` and filter
+ * by `chainId`/`status` instead.
+ */
 export async function discoverIndexDtfsByChain(
   client: DtfClient,
   params: DiscoverIndexDtfsByChainParams,

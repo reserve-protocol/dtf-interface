@@ -102,6 +102,7 @@ export function createIndexDtfNamespace(client: DtfClient) {
   return {
     ref: (params: DtfParams) => createIndexDtfRef(client, params),
     discover: (params?: Parameters<typeof discoverIndexDtfs>[1]) => discoverIndexDtfs(client, params),
+    /** @deprecated Use `discover` and filter by `chainId`/`status` — see `discoverIndexDtfsByChain`. */
     discoverByChain: (params: Parameters<typeof discoverIndexDtfsByChain>[1]) =>
       discoverIndexDtfsByChain(client, params),
     discoverFromSubgraph: (params: Parameters<typeof discoverIndexDtfsFromSubgraph>[1]) =>

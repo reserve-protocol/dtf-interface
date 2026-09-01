@@ -12,7 +12,7 @@ const dtf = sdk.index.ref({ address, chainId });
 | Method                                   | Source                               | Use                                        |
 | ---------------------------------------- | ------------------------------------ | ------------------------------------------ |
 | `sdk.index.discover(params?)`            | Reserve API aggregate discovery      | Cross-chain or filtered product discovery  |
-| `sdk.index.discoverByChain(params)`      | Reserve API chain endpoint           | Chain-scoped Index DTF discovery           |
+| `sdk.index.discoverByChain(params)`      | Reserve API chain endpoint           | Deprecated — use `discover` + `chainId`    |
 | `sdk.index.discoverFromSubgraph(params)` | Index subgraph plus price enrichment | Fresh deploy discovery or indexed DTF list |
 | `sdk.index.list(params?)`                | `@reserve-protocol/dtf-catalog`      | Curated static catalog                     |
 | `sdk.index.getCatalogEntries(params?)`   | catalog                              | Raw catalog entries                        |

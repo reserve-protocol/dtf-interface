@@ -14,10 +14,6 @@ export type DiscoverIndexDtfsParams = {
   readonly sort?: string;
 };
 
-export type DiscoverIndexDtfsByChainParams = Omit<DiscoverIndexDtfsParams, "chainId"> & {
-  readonly chainId: SupportedChainId;
-};
-
 export type IndexDtfDiscoveryItem = {
   readonly address: Address;
   readonly chainId: SupportedChainId;
@@ -31,8 +27,6 @@ export type IndexDtfDiscoveryItem = {
   readonly performance?: readonly DtfPerformancePoint[];
   readonly brand?: DtfBrand;
 };
-
-type DiscoveryPath = "/discover/dtf" | "/discover/dtfs";
 
 type RawDiscoveryItem = Omit<IndexDtfDiscoveryItem, "address" | "basket" | "chainId" | "status"> & {
   readonly address: string;
@@ -87,24 +81,14 @@ export async function discoverIndexDtfs(
   client: DtfClient,
   params: DiscoverIndexDtfsParams = {},
 ): Promise<readonly IndexDtfDiscoveryItem[]> {
-  const response = await fetchDiscoveryItems(client, "/discover/dtfs", params);
-
-  return response.filter(isIndexDiscoveryItem).map(mapDiscoveryItem);
-}
-
-/** Discovers Index DTFs from the chain-scoped Reserve API endpoint. */
-export async function discoverIndexDtfsByChain(
-  client: DtfClient,
-  params: DiscoverIndexDtfsByChainParams,
-): Promise<readonly IndexDtfDiscoveryItem[]> {
-  const response = await fetchDiscoveryItems(client, "/discover/dtf", params);
+  const response = await fetchDiscoveryItems(client, params);
 
   return response.filter(isIndexDiscoveryItem).map(mapDiscoveryItem);
 }
 
 /**
  * Discovers freshly indexed Index DTFs from the subgraph and enriches them with
- * current Reserve API pricing. Curated `/discover/dtf` can lag new deploys.
+ * current Reserve API pricing. Curated discovery can lag new deploys.
  */
 export async function discoverIndexDtfsFromSubgraph(
   client: DtfClient,
@@ -194,13 +178,9 @@ function isIndexDiscoveryItem(item: RawDiscoveryItem): boolean {
   return item.type === undefined || item.type === "index";
 }
 
-function fetchDiscoveryItems(
-  client: DtfClient,
-  path: DiscoveryPath,
-  params: DiscoverIndexDtfsParams,
-): Promise<readonly RawDiscoveryItem[]> {
+function fetchDiscoveryItems(client: DtfClient, params: DiscoverIndexDtfsParams): Promise<readonly RawDiscoveryItem[]> {
   return client.api.get<readonly RawDiscoveryItem[]>({
-    path,
+    path: "/discover/dtfs",
     query: {
       chainId: params.chainId,
       brand: params.brand,

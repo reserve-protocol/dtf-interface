@@ -4,20 +4,20 @@ Reserve integrations should route reads by ownership, not convenience. A compose
 
 ## Index DTF Source Rules
 
-| Data                               | Source                                        | Why                                                     |
-| ---------------------------------- | --------------------------------------------- | ------------------------------------------------------- |
-| Live basket assets and balances    | RPC `totalAssets()`                           | Basket is live onchain state                            |
-| Live share supply                  | RPC `totalSupply()`                           | Includes pending fee shares                             |
-| Current price and basket valuation | Reserve API `/current/dtf`, `/current/dtfs`   | API aggregates prices and weights                       |
-| Discovery/listing and bulk status  | Reserve API `/discover/dtf`, `/discover/dtfs` | API owns current list rows and batch status             |
-| Single-DTF route status            | `@reserve-protocol/dtf-catalog`               | Synchronous curated status; absent entries are active   |
-| Historical price/performance       | Reserve API historical endpoints              | API owns analytics windows                              |
-| Governance metadata                | Index subgraph                                | Historical proposals, governances, roles                |
-| Live proposal state                | RPC governor reads                            | Subgraph state can lag or be event-only                 |
-| Rebalance history                  | Index subgraph and Reserve API analytics      | Subgraph indexes events; API computes product analytics |
-| Active rebalance/auction           | RPC `getRebalance()` and contract reads       | Must be current                                         |
-| Vote-lock positions/APR            | Reserve API `/dtf/daos`                       | API aggregates user-facing DAO stats                    |
-| Holder counts/transfers            | Index subgraph token/account entities         | Transfer-derived indexed history                        |
+| Data                               | Source                                      | Why                                                     |
+| ---------------------------------- | ------------------------------------------- | ------------------------------------------------------- |
+| Live basket assets and balances    | RPC `totalAssets()`                         | Basket is live onchain state                            |
+| Live share supply                  | RPC `totalSupply()`                         | Includes pending fee shares                             |
+| Current price and basket valuation | Reserve API `/current/dtf`, `/current/dtfs` | API aggregates prices and weights                       |
+| Discovery/listing and bulk status  | Reserve API `/discover/dtfs`                | API owns current list rows and batch status             |
+| Single-DTF route status            | `@reserve-protocol/dtf-catalog`             | Synchronous curated status; absent entries are active   |
+| Historical price/performance       | Reserve API historical endpoints            | API owns analytics windows                              |
+| Governance metadata                | Index subgraph                              | Historical proposals, governances, roles                |
+| Live proposal state                | RPC governor reads                          | Subgraph state can lag or be event-only                 |
+| Rebalance history                  | Index subgraph and Reserve API analytics    | Subgraph indexes events; API computes product analytics |
+| Active rebalance/auction           | RPC `getRebalance()` and contract reads     | Must be current                                         |
+| Vote-lock positions/APR            | Reserve API `/dtf/daos`                     | API aggregates user-facing DAO stats                    |
+| Holder counts/transfers            | Index subgraph token/account entities       | Transfer-derived indexed history                        |
 
 ## Yield DTF Source Rules
 
@@ -38,8 +38,7 @@ Common Index endpoints:
 - `GET /current/dtf?address={address}&chainId={chainId}`
 - `GET /current/dtfs?addresses={addresses}&chainId={chainId}`
 - `GET /current/prices?chainId={chainId}&tokens={tokens}`
-- `GET /discover/dtf?chainId={chainId}`
-- `GET /discover/dtfs`
+- `GET /discover/dtfs?chainId={chainId}`
 - `GET /dtf/daos`
 - historical DTF, price, exposure, and rebalance analytics endpoints
 

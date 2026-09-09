@@ -243,6 +243,11 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "vote-lock-preview-deposit", keyParams(params)] as const,
     voteLockPreviewRedeem: (params?: IndexMethodParams<"readVoteLockPreviewRedeem">) =>
       [...dtfQueryKeys.index.all(), "vote-lock-preview-redeem", keyParams(params)] as const,
+    voteLockDaos: () => [...dtfQueryKeys.index.all(), "vote-lock-daos"] as const,
+    voteLockTotals: (params?: IndexMethodParams<"getVoteLockTotals">) =>
+      [...dtfQueryKeys.index.all(), "vote-lock-totals", keyParams(params)] as const,
+    voteLockLifetimeTotals: (params?: IndexMethodParams<"getVoteLockLifetimeTotals">) =>
+      [...dtfQueryKeys.index.all(), "vote-lock-lifetime-totals", keyParams(params)] as const,
     governance: {
       all: () => [...dtfQueryKeys.index.all(), "governance"] as const,
       proposalList: (params?: GetIndexDtfProposalsParams) =>
@@ -252,6 +257,12 @@ export const dtfQueryKeys = {
           keyParams(indexDtfProposalsKeyParams(params)),
         ] as const,
       proposals: (params?: GetIndexDtfProposalsParams) => dtfQueryKeys.index.governance.proposalList(params),
+      proposalFeed: (params?: IndexMethodParams<"getProposalFeed">) =>
+        [...dtfQueryKeys.index.governance.all(), "proposal-feed", keyParams(params)] as const,
+      topVoters: (params?: IndexMethodParams<"getTopVoters">) =>
+        [...dtfQueryKeys.index.governance.all(), "top-voters", keyParams(params)] as const,
+      activity: (params?: IndexMethodParams<"getGovernanceActivity">) =>
+        [...dtfQueryKeys.index.governance.all(), "activity", keyParams(params)] as const,
       proposal: (params?: GetIndexDtfProposalParams) =>
         [...dtfQueryKeys.index.governance.all(), "proposal", keyParams(params)] as const,
       proposalDecode: (params?: DecodeIndexDtfProposalParams) =>
@@ -357,6 +368,14 @@ export const dtfQueryKeys = {
     apy: (params?: YieldMethodParams<"getApy">) => [...dtfQueryKeys.yield.all(), "apy", keyParams(params)] as const,
     stakingApyHistory: (params?: YieldMethodParams<"getStakingApyHistory">) =>
       [...dtfQueryKeys.yield.all(), "staking-apy-history", keyParams(params)] as const,
+    proposalFeed: (params?: YieldMethodParams<"getProposalFeed">) =>
+      [...dtfQueryKeys.yield.all(), "proposal-feed", keyParams(params)] as const,
+    topVoters: (params?: YieldMethodParams<"getTopVoters">) =>
+      [...dtfQueryKeys.yield.all(), "top-voters", keyParams(params)] as const,
+    governanceActivity: (params?: YieldMethodParams<"getGovernanceActivity">) =>
+      [...dtfQueryKeys.yield.all(), "governance-activity", keyParams(params)] as const,
+    protocolStakingTotals: (params?: YieldMethodParams<"getProtocolStakingTotals">) =>
+      [...dtfQueryKeys.yield.all(), "protocol-staking-totals", keyParams(params)] as const,
   },
   portfolio: {
     all: () => [...dtfQueryKeys.all, "portfolio"] as const,

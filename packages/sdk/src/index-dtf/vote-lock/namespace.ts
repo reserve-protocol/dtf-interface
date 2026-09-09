@@ -3,7 +3,9 @@ import type { DtfClient } from "@/client";
 import {
   getVoteLockDao,
   getVoteLockDaos,
+  getVoteLockLifetimeTotals,
   getVoteLockState,
+  getVoteLockTotals,
   getVoteLockVaultState,
   readVoteLockAllRewardTokens,
   readVoteLockAsset,
@@ -66,6 +68,9 @@ export function createIndexDtfVoteLockNamespace(client: DtfClient) {
       getVoteLockVaultState(client, params),
     getVoteLockDao: (params: Parameters<typeof getVoteLockDao>[1]) => getVoteLockDao(client, params),
     getVoteLockDaos: () => getVoteLockDaos(client),
+    getVoteLockTotals: (params?: Parameters<typeof getVoteLockTotals>[1]) => getVoteLockTotals(client, params),
+    getVoteLockLifetimeTotals: (params?: Parameters<typeof getVoteLockLifetimeTotals>[1]) =>
+      getVoteLockLifetimeTotals(client, params),
     readVoteLockAllRewardTokens: (params: Parameters<typeof readVoteLockAllRewardTokens>[1]) =>
       readVoteLockAllRewardTokens(client, params),
     readVoteLockUnderlyingBalance: (params: Parameters<typeof readVoteLockUnderlyingBalance>[1]) =>

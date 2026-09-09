@@ -1,8 +1,21 @@
 export { createYieldDtfNamespace } from "@/yield-dtf/namespace";
 export { createYieldDtfRef } from "@/yield-dtf/ref";
+export {
+  getYieldDtfGovernanceActivity,
+  getYieldDtfProposalFeed,
+  getYieldDtfTopVoters,
+} from "@/yield-dtf/governance-feed";
+export { getYieldDtfProtocolStakingTotals } from "@/yield-dtf/protocol-staking";
+export { mapYieldDtfProposalSummary, withYieldDtfProposalListStates } from "@/yield-dtf/governance";
 export type { YieldDtfRef } from "@/yield-dtf/ref";
 
-export { FACADE_ACT_ADDRESS, FACADE_READ_ADDRESS, RSR_ADDRESS, requireYieldDtfChainId } from "@/yield-dtf/config";
+export {
+  FACADE_ACT_ADDRESS,
+  FACADE_READ_ADDRESS,
+  RSR_ADDRESS,
+  requireYieldDtfChainId,
+  yieldDtfChainIds,
+} from "@/yield-dtf/config";
 export type { YieldDtfChainId } from "@/yield-dtf/config";
 
 export { basketHandlerAbi } from "@/yield-dtf/abis/basket-handler";

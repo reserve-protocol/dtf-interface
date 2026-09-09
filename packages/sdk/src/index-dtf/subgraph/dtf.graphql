@@ -189,6 +189,9 @@ query GetIndexDtfProposals($governanceIds: [ID!]!, $limit: Int = 100) {
         id
         token {
           id
+          token {
+            decimals
+          }
         }
         timelock {
           id
@@ -213,6 +216,9 @@ query GetAllIndexDtfProposals($limit: Int = 100, $offset: Int = 0, $where: Propo
     forWeightedVotes
     abstainWeightedVotes
     againstWeightedVotes
+    forDelegateVotes
+    againstDelegateVotes
+    abstainDelegateVotes
     executionETA
     executionTime
     quorumVotes
@@ -227,6 +233,10 @@ query GetAllIndexDtfProposals($limit: Int = 100, $offset: Int = 0, $where: Propo
       id
       token {
         id
+        token {
+          decimals
+        }
+        ...GovernedIndexDtfs
       }
       timelock {
         id
@@ -337,6 +347,9 @@ query GetIndexDtfProposal($proposalId: ID!, $dtfId: ID!) {
       optimisticSelectorRegistry
       token {
         id
+        token {
+          decimals
+        }
       }
       timelock {
         id
@@ -381,6 +394,9 @@ query GetIndexDtfProposalVotingSnapshot($proposalId: ID!) {
       id
       token {
         id
+        token {
+          decimals
+        }
       }
     }
     votes {
@@ -573,5 +589,219 @@ query GetIndexDtfRebalanceAuctions($rebalanceId: String!) {
       timestamp
       transactionHash
     }
+  }
+}
+
+fragment GovernedIndexDtfs on StakingToken {
+  dtfs {
+    id
+    token {
+      symbol
+      name
+    }
+    ownerGovernance {
+      id
+    }
+    tradingGovernance {
+      id
+    }
+    legacyAdmins
+    legacyAuctionApprovers
+  }
+}
+
+query GetIndexDtfTopVoters($limit: Int = 20) {
+  delegates(first: $limit, orderBy: numberVotes, orderDirection: desc, where: { numberVotes_gt: 0 }) {
+    address
+    numberVotes
+    numberOptimisticVotes
+    delegatedVotesRaw
+    tokenHoldersRepresentedAmount
+    token {
+      id
+      token {
+        symbol
+        name
+        decimals
+      }
+      underlying {
+        id
+        symbol
+        name
+        decimals
+      }
+      ...GovernedIndexDtfs
+    }
+  }
+}
+
+query GetIndexDtfVoteLockVaults($limit: Int = 1000, $cursor: ID = "") {
+  stakingTokens(first: $limit, orderBy: id, orderDirection: asc, where: { id_gt: $cursor }) {
+    id
+    totalAssets
+    token {
+      symbol
+      name
+      decimals
+      totalSupply
+    }
+    underlying {
+      id
+      symbol
+      name
+      decimals
+    }
+    ...GovernedIndexDtfs
+  }
+}
+
+query GetIndexDtfOpenUnstakeLocks($limit: Int = 1000, $cursor: ID = "") {
+  locks(
+    first: $limit
+    orderBy: id
+    orderDirection: asc
+    where: { id_gt: $cursor, claimedTimestamp: null, cancelledTimestamp: null }
+  ) {
+    id
+    amount
+    token {
+      id
+    }
+  }
+}
+
+query GetIndexDtfStakingPositions($limit: Int = 1000, $cursor: ID = "") {
+  stakingPositions(first: $limit, orderBy: id, orderDirection: asc, where: { id_gt: $cursor }) {
+    id
+    totalDeposited
+    totalWithdrawn
+    token {
+      id
+      token {
+        symbol
+        name
+        decimals
+      }
+      underlying {
+        id
+        symbol
+        name
+        decimals
+      }
+    }
+  }
+}
+
+query GetIndexDtfGovernanceActivity($limit: Int = 50) {
+  votes(first: $limit, orderBy: blockTime, orderDirection: desc) {
+    choice
+    weight
+    blockTime
+    txnHash
+    voter {
+      address
+    }
+    proposal {
+      id
+      governance {
+        id
+        token {
+          id
+          token {
+            decimals
+          }
+          ...GovernedIndexDtfs
+        }
+      }
+    }
+  }
+  proposals(first: $limit, orderBy: creationTime, orderDirection: desc) {
+    id
+    txnHash
+    creationTime
+    proposer {
+      address
+    }
+    governance {
+      ...ActivityGovernance
+    }
+  }
+  queued: proposals(first: $limit, orderBy: queueTime, orderDirection: desc, where: { queueTime_not: null }) {
+    id
+    queueTime
+    queueTxnHash
+    queueAccount {
+      id
+    }
+    governance {
+      ...ActivityGovernance
+    }
+  }
+  executed: proposals(first: $limit, orderBy: executionTime, orderDirection: desc, where: { executionTime_not: null }) {
+    id
+    executionTime
+    executionTxnHash
+    executionAccount {
+      id
+    }
+    governance {
+      ...ActivityGovernance
+    }
+  }
+  canceled: proposals(
+    first: $limit
+    orderBy: cancellationTime
+    orderDirection: desc
+    where: { cancellationTime_not: null }
+  ) {
+    id
+    cancellationTime
+    cancellationTxnHash
+    cancellationAccount {
+      id
+    }
+    governance {
+      ...ActivityGovernance
+      timelock {
+        id
+      }
+    }
+  }
+  stakingPositionRecords(
+    first: $limit
+    orderBy: timestamp
+    orderDirection: desc
+    where: { type_in: [DEPOSIT, WITHDRAW] }
+  ) {
+    type
+    assets
+    timestamp
+    hash
+    account {
+      id
+    }
+    token {
+      id
+      token {
+        symbol
+        name
+        decimals
+      }
+      underlying {
+        id
+        symbol
+        name
+        decimals
+      }
+      ...GovernedIndexDtfs
+    }
+  }
+}
+
+fragment ActivityGovernance on Governance {
+  id
+  token {
+    id
+    ...GovernedIndexDtfs
   }
 }

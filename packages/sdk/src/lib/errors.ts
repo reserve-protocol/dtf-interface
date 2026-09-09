@@ -1,6 +1,7 @@
 export type SdkErrorCode =
   | "INVALID_INPUT"
   | "INVALID_RESPONSE"
+  | "LIMIT_EXCEEDED"
   | "NOT_CONFIGURED"
   | "NOT_IMPLEMENTED"
   | "RECORD_NOT_FOUND"

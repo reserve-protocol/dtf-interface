@@ -73,6 +73,7 @@ const createChallengedConfirmationResponse = () => ({
       optimisticSelectorRegistry: null,
       token: {
         id: "0x0000000000000000000000000000000000000007",
+        token: { decimals: 18 },
       },
       timelock: {
         id: "0x0000000000000000000000000000000000000006",
@@ -116,6 +117,7 @@ describe("Index DTF governance proposals", () => {
           id: "0x0000000000000000000000000000000000000001",
           token: {
             id: "0x0000000000000000000000000000000000000007",
+            token: { decimals: 18 },
           },
           timelock: {
             id: "0x0000000000000000000000000000000000000006",
@@ -207,6 +209,7 @@ describe("Index DTF governance proposals", () => {
           optimisticSelectorRegistry: null,
           token: {
             id: "0x0000000000000000000000000000000000000007",
+            token: { decimals: 18 },
           },
           timelock: {
             id: "0x0000000000000000000000000000000000000006",
@@ -398,6 +401,7 @@ describe("Index DTF governance proposals", () => {
           optimisticSelectorRegistry: null,
           token: {
             id: "0x0000000000000000000000000000000000000007",
+            token: { decimals: 18 },
           },
           timelock: {
             id: "0x0000000000000000000000000000000000000006",
@@ -503,6 +507,7 @@ describe("Index DTF governance proposals", () => {
           optimisticSelectorRegistry: null,
           token: {
             id: "0x0000000000000000000000000000000000000007",
+            token: { decimals: 18 },
           },
           timelock: {
             id: "0x0000000000000000000000000000000000000006",
@@ -571,6 +576,7 @@ describe("Index DTF governance proposals", () => {
           id: "0x0000000000000000000000000000000000000001",
           token: {
             id: "0x0000000000000000000000000000000000000007",
+            token: { decimals: 18 },
           },
         },
         votes: [
@@ -679,6 +685,7 @@ describe("Index DTF governance proposals", () => {
           optimisticSelectorRegistry: null,
           token: {
             id: "0x0000000000000000000000000000000000000007",
+            token: { decimals: 18 },
           },
           timelock: {
             id: "0x0000000000000000000000000000000000000006",
@@ -1499,6 +1506,7 @@ function createProposalSummary({
       id: governance,
       token: {
         id: governance,
+        token: { decimals: 18 },
       },
       timelock: {
         id: timelock,

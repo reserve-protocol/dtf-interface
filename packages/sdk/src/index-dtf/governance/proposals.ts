@@ -353,10 +353,11 @@ function getProposalCount(governances: readonly { readonly proposalCount: string
   return governances.reduce((count, governance) => count + Number(governance.proposalCount), 0);
 }
 
-function withProposalSummaryState(
-  proposals: readonly ParsedIndexDtfProposalSummary[],
+/** Applies the time-derived vote state and challenge links to parsed summaries. */
+export function withProposalSummaryState<T extends ParsedIndexDtfProposalSummary>(
+  proposals: readonly T[],
   timestamp = getCurrentTime(),
-): readonly IndexDtfProposalSummary[] {
+): readonly (T & Pick<IndexDtfProposalSummary, "state" | "votingState">)[] {
   const proposalsWithVoteState = proposals.map((proposal) => withVoteState(proposal, timestamp));
   const proposalsWithChallengeState = withChallengeState(proposalsWithVoteState);
 

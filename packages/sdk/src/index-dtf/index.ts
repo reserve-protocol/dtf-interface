@@ -78,6 +78,10 @@ export {
 } from "@/index-dtf/deploy/index";
 
 export { getDelegates as getIndexDtfDelegates } from "@/index-dtf/governance/delegates";
+export { getGovernanceActivity as getIndexDtfGovernanceActivity } from "@/index-dtf/governance/activity";
+export { getProposalFeed as getIndexDtfProposalFeed } from "@/index-dtf/governance/proposal-feed";
+export { getTopVoters as getIndexDtfTopVoters } from "@/index-dtf/governance/top-voters";
+export { withProposalSummaryState as withIndexDtfProposalSummaryState } from "@/index-dtf/governance/proposals";
 export { getGuardians as getIndexDtfGuardians } from "@/index-dtf/governance/guardians";
 export { getLegacyVoteLocks as getIndexDtfLegacyVoteLocks } from "@/index-dtf/governance/legacy-vote-lock";
 export { daoFeeRegistryAbi } from "@/index-dtf/abis/dao-fee-registry";
@@ -229,6 +233,8 @@ export {
 export {
   getVoteLockDao as getIndexDtfVoteLockDao,
   getVoteLockDaos as getIndexDtfVoteLockDaos,
+  getVoteLockLifetimeTotals as getIndexDtfVoteLockLifetimeTotals,
+  getVoteLockTotals as getIndexDtfVoteLockTotals,
   getVoteLockState as getIndexDtfVoteLockState,
   getVoteLockVaultState as getIndexDtfVoteLockVaultState,
   readVoteLockAllRewardTokens,

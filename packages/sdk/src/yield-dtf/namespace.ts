@@ -35,6 +35,11 @@ import {
   prepareYieldDtfVote,
 } from "@/yield-dtf/governance";
 import {
+  getYieldDtfGovernanceActivity,
+  getYieldDtfProposalFeed,
+  getYieldDtfTopVoters,
+} from "@/yield-dtf/governance-feed";
+import {
   getYieldDtfIssuanceQuote,
   getYieldDtfMaxIssuable,
   getYieldDtfRedemptionQuote,
@@ -43,6 +48,7 @@ import {
   prepareYieldDtfRedeem,
   prepareYieldDtfRedeemCustom,
 } from "@/yield-dtf/issuance";
+import { getYieldDtfProtocolStakingTotals } from "@/yield-dtf/protocol-staking";
 import { createYieldDtfRef } from "@/yield-dtf/ref";
 import {
   getYieldDtfStakeHistory,
@@ -85,6 +91,13 @@ export function createYieldDtfNamespace(client: DtfClient) {
     getGovernance: (params: Parameters<typeof getYieldDtfGovernance>[1]) => getYieldDtfGovernance(client, params),
     getProposals: (params: Parameters<typeof getYieldDtfProposals>[1]) => getYieldDtfProposals(client, params),
     getProposal: (params: Parameters<typeof getYieldDtfProposal>[1]) => getYieldDtfProposal(client, params),
+    getProposalFeed: (params?: Parameters<typeof getYieldDtfProposalFeed>[1]) =>
+      getYieldDtfProposalFeed(client, params),
+    getTopVoters: (params?: Parameters<typeof getYieldDtfTopVoters>[1]) => getYieldDtfTopVoters(client, params),
+    getGovernanceActivity: (params?: Parameters<typeof getYieldDtfGovernanceActivity>[1]) =>
+      getYieldDtfGovernanceActivity(client, params),
+    getProtocolStakingTotals: (params?: Parameters<typeof getYieldDtfProtocolStakingTotals>[1]) =>
+      getYieldDtfProtocolStakingTotals(client, params),
     getVoterState: (params: Parameters<typeof getYieldDtfVoterState>[1]) => getYieldDtfVoterState(client, params),
     getProposalVotePower: (params: Parameters<typeof getYieldDtfProposalVotePower>[1]) =>
       getYieldDtfProposalVotePower(client, params),

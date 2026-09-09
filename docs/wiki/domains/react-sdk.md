@@ -1,6 +1,6 @@
 ---
 title: React SDK Domain
-updated: 2026-07-22
+updated: 2026-09-08
 type: domain
 sources:
   - packages/react-sdk/src/**
@@ -20,6 +20,7 @@ sources:
 - Freshness is explicit: live 10s, ordinary 30s, static 5m unless the source needs a documented exception.
 - `useIndexDtfStatus` is the deliberate exception: a synchronous catalog lookup with no query key or options.
 - `useIndexDtfPerformance` owns `select` so the canonical history cache stays raw; explicit zero price/supply values still append a live point. Account snapshots and price-history prefetch use the same canonical keys as their ordinary read hooks.
+- `governance-overview-hooks.ts` wraps the cross-DTF governance reads (Index and Yield) plus `useIndexDtfVoteLockDaos`. Their params are optional, so the queries are always enabled; `useIndexDtfVoteLockLifetimeTotals` sits at the static tier because it walks every staking position page.
 
 ## Performance
 

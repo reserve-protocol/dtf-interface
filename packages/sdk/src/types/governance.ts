@@ -3,7 +3,7 @@ import type { Address, Hex } from "viem";
 import type { SupportedChainId } from "@/config";
 import type { ContractCall } from "@/lib/contract-call";
 import type { DtfParams } from "@/types/common";
-import type { Amount } from "@/types/common";
+import type { Amount, Token } from "@/types/common";
 import type { IndexDtf } from "@/types/index-dtf";
 
 export type IndexDtfGovernanceInput = Address | readonly Address[];
@@ -227,9 +227,11 @@ export type IndexDtfProposalList = {
   readonly proposalCount: number;
 };
 
+export type IndexDtfVoteChoice = "FOR" | "AGAINST" | "ABSTAIN";
+
 export type IndexDtfProposalVote = {
   readonly voter: Address;
-  readonly choice: string;
+  readonly choice: IndexDtfVoteChoice;
   readonly weight: Amount;
 };
 
@@ -433,3 +435,112 @@ export type CancelIndexDtfProposalParams = IndexDtfProposalActionParams;
 export type ProposeIndexDtfProposalParams = IndexDtfProposalActionParams;
 
 export type SubmitOptimisticIndexDtfProposalParams = IndexDtfProposalActionParams;
+
+// --- Cross-DTF governance reads (governance dashboard) ---
+
+export type IndexDtfChainScope = {
+  /** Index DTF chains to read. Default: every supported chain. */
+  readonly chainIds?: readonly SupportedChainId[];
+};
+
+export type GovernedIndexDtf = {
+  readonly address: Address;
+  readonly chainId: SupportedChainId;
+  readonly symbol: string;
+  readonly name: string;
+};
+
+export type GetIndexDtfProposalFeedParams = IndexDtfChainScope & {
+  /** Max proposals per chain, newest first. Default: every indexed proposal (10k ceiling). */
+  readonly limit?: number;
+};
+
+export type IndexDtfProposalFeedItem = Omit<IndexDtfProposalSummary, "dtf"> & {
+  /** The DTF an owner/trading governance controls, or every DTF staked through the vault for a vault DAO governance. */
+  readonly dtfs: readonly GovernedIndexDtf[];
+  /** Distinct voters per choice, same fields as the proposal detail. */
+  readonly forDelegateVotes: number;
+  readonly againstDelegateVotes: number;
+  readonly abstainDelegateVotes: number;
+};
+
+export type GetIndexDtfTopVotersParams = IndexDtfChainScope & {
+  /** Max voters returned across all chains. Default 20. */
+  readonly limit?: number;
+};
+
+export type IndexDtfTopVoter = {
+  readonly chainId: SupportedChainId;
+  readonly address: Address;
+  readonly stToken: Token;
+  readonly underlying: Token;
+  readonly numberVotes: number;
+  readonly numberOptimisticVotes: number;
+  readonly delegatedVotes: Amount;
+  readonly tokenHoldersRepresented: number;
+  readonly dtfs: readonly GovernedIndexDtf[];
+};
+
+export type GetIndexDtfVoteLockTotalsParams = IndexDtfChainScope;
+
+export type IndexDtfVoteLockTotals = {
+  readonly chainId: SupportedChainId;
+  readonly stToken: Token;
+  readonly underlying: Token;
+  /** Underlying currently held by the vault (`totalAssets`). */
+  readonly staked: Amount;
+  readonly shareSupply: Amount;
+  /** Underlying sitting in unstaking locks that are not yet claimed or cancelled. */
+  readonly pendingUnstake: Amount;
+  readonly pendingUnstakeCount: number;
+  readonly dtfs: readonly GovernedIndexDtf[];
+};
+
+export type IndexDtfVoteLockLifetimeTotals = {
+  readonly chainId: SupportedChainId;
+  readonly stToken: Token;
+  readonly underlying: Token;
+  readonly lifetimeDeposited: Amount;
+  readonly lifetimeWithdrawn: Amount;
+  readonly positionCount: number;
+};
+
+export type GetIndexDtfGovernanceActivityParams = IndexDtfChainScope & {
+  /** Max events returned across all chains. Default 50. */
+  readonly limit?: number;
+};
+
+type IndexDtfGovernanceActivityBase = {
+  readonly chainId: SupportedChainId;
+  readonly timestamp: number;
+  readonly txnHash: Hex;
+  /** Who acted. Guardian cancellations go through the timelock, so that row carries the timelock address. */
+  readonly account: Address;
+  readonly dtfs: readonly GovernedIndexDtf[];
+};
+
+export type IndexDtfGovernanceVoteActivity = IndexDtfGovernanceActivityBase & {
+  readonly type: "vote";
+  readonly governance: Address;
+  readonly proposalId: string;
+  readonly choice: IndexDtfVoteChoice;
+  readonly weight: Amount;
+};
+
+export type IndexDtfGovernanceProposalActivity = IndexDtfGovernanceActivityBase & {
+  readonly type: "proposal-created" | "proposal-queued" | "proposal-executed" | "proposal-canceled";
+  readonly governance: Address;
+  readonly proposalId: string;
+};
+
+export type IndexDtfGovernanceStakeActivity = IndexDtfGovernanceActivityBase & {
+  readonly type: "stake" | "unstake";
+  readonly stToken: Token;
+  readonly underlying: Token;
+  readonly amount: Amount;
+};
+
+export type IndexDtfGovernanceActivity =
+  | IndexDtfGovernanceVoteActivity
+  | IndexDtfGovernanceProposalActivity
+  | IndexDtfGovernanceStakeActivity;

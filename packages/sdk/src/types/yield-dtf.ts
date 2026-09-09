@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address, Hex } from "viem";
 
 import type { Amount, Token } from "@/types/common";
 import type { YieldDtfChainId } from "@/yield-dtf/config";
@@ -318,3 +318,95 @@ export type YieldDtfVoterState = {
   readonly isSelfDelegated: boolean;
   readonly stTokenBalance: Amount;
 };
+
+// --- Cross-DTF governance reads (governance dashboard) ---
+
+export type YieldDtfChainScope = {
+  /** Yield DTF chains to read. Default: every chain with Yield coverage. */
+  readonly chainIds?: readonly YieldDtfChainId[];
+};
+
+export type GovernedYieldDtf = {
+  readonly address: Address;
+  readonly chainId: YieldDtfChainId;
+  readonly symbol: string;
+  readonly name: string;
+};
+
+export type GetYieldDtfProposalFeedParams = YieldDtfChainScope & {
+  /** Max proposals per chain, newest first. Default: every indexed proposal (10k ceiling). */
+  readonly limit?: number;
+};
+
+export type YieldDtfProposalFeedItem = YieldDtfProposalSummary & {
+  readonly rToken: GovernedYieldDtf;
+  /** Distinct voters per choice, same fields as the proposal detail. */
+  readonly forDelegateVotes: number;
+  readonly againstDelegateVotes: number;
+  readonly abstainDelegateVotes: number;
+};
+
+export type GetYieldDtfTopVotersParams = YieldDtfChainScope & {
+  /** Max voters returned across all chains. Default 20. */
+  readonly limit?: number;
+};
+
+export type YieldDtfTopVoter = {
+  readonly chainId: YieldDtfChainId;
+  readonly address: Address;
+  readonly rToken: GovernedYieldDtf;
+  readonly numberVotes: number;
+  readonly delegatedVotes: Amount;
+  readonly tokenHoldersRepresented: number;
+};
+
+export type GetYieldDtfProtocolStakingTotalsParams = YieldDtfChainScope;
+
+export type YieldDtfProtocolStakingTotals = {
+  readonly chainId: YieldDtfChainId;
+  /** RSR currently staked across every Yield DTF on the chain. */
+  readonly rsrStaked: Amount;
+  readonly rsrStakedUsd: number;
+  readonly lifetimeRsrStaked: Amount;
+  readonly lifetimeRsrUnstaked: Amount;
+  readonly rTokenCount: number;
+};
+
+export type GetYieldDtfGovernanceActivityParams = YieldDtfChainScope & {
+  /** Max events returned across all chains. Default 50. */
+  readonly limit?: number;
+};
+
+type YieldDtfGovernanceActivityBase = {
+  readonly chainId: YieldDtfChainId;
+  readonly timestamp: number;
+  readonly txnHash: Hex;
+  readonly rToken: GovernedYieldDtf;
+};
+
+export type YieldDtfGovernanceVoteActivity = YieldDtfGovernanceActivityBase & {
+  readonly type: "vote";
+  readonly account: Address;
+  readonly proposalId: string;
+  readonly choice: YieldDtfProposalVote["choice"];
+  readonly weight: Amount;
+};
+
+/** The Yield subgraph does not index who queued, executed, or cancelled, so lifecycle rows carry the proposer only. */
+export type YieldDtfGovernanceProposalActivity = YieldDtfGovernanceActivityBase & {
+  readonly type: "proposal-created" | "proposal-queued" | "proposal-executed" | "proposal-canceled";
+  readonly proposer: Address;
+  readonly proposalId: string;
+};
+
+export type YieldDtfGovernanceStakeActivity = YieldDtfGovernanceActivityBase & {
+  readonly type: "stake" | "unstake";
+  readonly account: Address;
+  readonly rsrAmount: Amount;
+  readonly stRsrAmount: Amount;
+};
+
+export type YieldDtfGovernanceActivity =
+  | YieldDtfGovernanceVoteActivity
+  | YieldDtfGovernanceProposalActivity
+  | YieldDtfGovernanceStakeActivity;

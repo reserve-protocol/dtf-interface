@@ -1,6 +1,6 @@
 ---
 title: Core SDK Domain
-updated: 2026-07-22
+updated: 2026-09-08
 type: domain
 sources:
   - packages/sdk/src/**
@@ -19,12 +19,15 @@ sources:
 - RPC, subgraph, Reserve API, explorer, and catalog boundaries stay visible in their domain modules.
 - Single-DTF status is a synchronous, validated catalog lookup; bulk `getStatuses` stays Reserve API-backed for list screens. They are related product views, not aliases.
 - Mappers convert raw source shapes only. Business state, time, and network calls remain outside mappers.
+- Cross-DTF governance reads (`getProposalFeed`, `getTopVoters`, `getGovernanceActivity`, `getVoteLockTotals`, `getVoteLockLifetimeTotals` on Index; the first three plus `getProtocolStakingTotals` on Yield) fan one subgraph document out per chain, merge, sort newest-first, and slice. Optional `chainIds`/`limit` are the only params; feed `limit` caps each chain, voter and activity `limit` caps the merged result. `lib/subgraph-pages.ts` pages time-ordered windows by `first`/`skip` and walks whole entities by `id` cursor; a walk past 10k rows throws `LIMIT_EXCEEDED` instead of returning a partial sum (graph-node answers deep `skip` with empty data, silently).
 
 ## Invariants
 
-- On-chain integer amounts are `Amount`; display-class values may be numbers.
+- On-chain integer amounts are `Amount`; display-class values may be numbers. Vote weights, quorum, and veto thresholds are denominated in the vote-lock share token, whose decimals the proposal documents carry (Base has six-decimal vaults).
 - Proposal vote success is OZ strict majority for both products: a for/against tie is DEFEATED. Subgraph proposal state lags time-based transitions, so proposal-state surfaces derive from votes, quorum, and deadline instead of returning the raw field — except Yield proposal detail, which reads authoritative governor state (last bullet).
 - Index DTF proposal IDs are globally unique and do not need DTF-membership checks.
+- Governance→DTF attribution (`governance/vault-context.ts`): a DTF's owner or trading governance, current or legacy (`legacyAdmins`, `legacyAuctionApprovers`), controls that one DTF; a vault's own DAO governance (no such match) controls every DTF on the vault. Vaults without an indexed `underlying` are skipped, never invented.
+- Activity feeds fetch each lifecycle transition ordered by its own timestamp (aliased root fields in one document), so an old proposal executed today still surfaces. The Index subgraph records the caller for queue, execute, and governor cancels but not guardian cancels (they run through the timelock), so that row carries the timelock address. Yield lifecycle rows carry only the proposer because that subgraph indexes no lifecycle callers.
 - Public call builders require exact calldata and value assertions when changed.
 - GraphQL-generated output must match the configured deployed schemas; ordinary CI and `release:ci` rerun codegen and reject drift.
 - Account balance snapshots bind through both the namespace and DTF ref. `selectPriceAtMark(points, mark?)` requires timestamped points, never selects a future or non-positive price when a mark is provided, and preserves latest-positive selection when it is omitted.

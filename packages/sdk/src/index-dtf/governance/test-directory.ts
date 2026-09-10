@@ -10,7 +10,7 @@ export const TEST_DIRECTORY = {
     {
       id: "0x00000000000000000000000000000000000000a1",
       token: { symbol: "AAA", name: "Triple A" },
-      stToken: { id: TEST_VAULT },
+      stToken: { id: TEST_VAULT, governance: { id: TEST_DAO_GOVERNANCE }, legacyGovernance: [] },
       ownerGovernance: { id: TEST_OWNER_GOVERNANCE },
       tradingGovernance: null,
       legacyAdmins: [],
@@ -19,7 +19,7 @@ export const TEST_DIRECTORY = {
     {
       id: "0x00000000000000000000000000000000000000b2",
       token: { symbol: "BBB", name: "Triple B" },
-      stToken: { id: TEST_VAULT },
+      stToken: { id: TEST_VAULT, governance: { id: TEST_DAO_GOVERNANCE }, legacyGovernance: [] },
       ownerGovernance: null,
       tradingGovernance: null,
       legacyAdmins: [],

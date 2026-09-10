@@ -600,6 +600,10 @@ query GetIndexDtfDirectory($limit: Int = 1000, $cursor: ID = "") {
     }
     stToken {
       id
+      governance {
+        id
+      }
+      legacyGovernance
     }
     ownerGovernance {
       id

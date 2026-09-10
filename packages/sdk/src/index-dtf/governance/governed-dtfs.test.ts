@@ -11,12 +11,13 @@ const OWNER = "0x00000000000000000000000000000000000000ab";
 const TRADING = "0x00000000000000000000000000000000000000ef";
 const LEGACY_OWNER = "0x0000000000000000000000000000000000000099";
 const VAULT_DAO = "0x00000000000000000000000000000000000000cd";
+const OLD_VAULT_DAO = "0x00000000000000000000000000000000000000ce";
 
 const dtfs = [
   {
     id: "0x00000000000000000000000000000000000000a1",
     token: { symbol: "AAA", name: "Triple A" },
-    stToken: { id: CURRENT_VAULT },
+    stToken: { id: CURRENT_VAULT, governance: { id: VAULT_DAO }, legacyGovernance: [OLD_VAULT_DAO] },
     ownerGovernance: { id: OWNER },
     tradingGovernance: { id: TRADING },
     legacyAdmins: [LEGACY_OWNER],
@@ -25,7 +26,7 @@ const dtfs = [
   {
     id: "0x00000000000000000000000000000000000000b2",
     token: { symbol: "BBB", name: "Triple B" },
-    stToken: { id: CURRENT_VAULT },
+    stToken: { id: CURRENT_VAULT, governance: { id: VAULT_DAO }, legacyGovernance: [] },
     ownerGovernance: null,
     tradingGovernance: null,
     legacyAdmins: [],
@@ -65,18 +66,19 @@ describe("governed DTF directory", () => {
     ]);
   });
 
-  it("keeps attribution for a governance whose DTF migrated to another vault", async () => {
+  it("resolves a vault DAO governance, current or legacy, to every DTF that vault governs", async () => {
     const directory = await load();
 
-    // The proposal lives on the old vault, which no longer lists any DTF.
+    expect(directory.forGovernance(VAULT_DAO).map((dtf) => dtf.symbol)).toEqual(["AAA", "BBB"]);
+    // AAA migrated vaults: its old vault's DAO governance still resolves to AAA, even though that vault lists no DTF.
+    expect(directory.forGovernance(OLD_VAULT_DAO).map((dtf) => dtf.symbol)).toEqual(["AAA"]);
     expect(directory.forVault(OLD_VAULT)).toEqual([]);
-    expect(directory.forGovernanceOrVault(LEGACY_OWNER, OLD_VAULT).map((dtf) => dtf.symbol)).toEqual(["AAA"]);
   });
 
-  it("falls back to every DTF on the vault for a vault DAO governance", async () => {
+  it("returns nothing for a governance no DTF has ever named", async () => {
     const directory = await load();
 
-    expect(directory.forGovernanceOrVault(VAULT_DAO, CURRENT_VAULT).map((dtf) => dtf.symbol)).toEqual(["AAA", "BBB"]);
-    expect(directory.forGovernanceOrVault(VAULT_DAO, OLD_VAULT)).toEqual([]);
+    expect(directory.forGovernance("0x0000000000000000000000000000000000000001")).toEqual([]);
+    expect(directory.forVault(CURRENT_VAULT).map((dtf) => dtf.symbol)).toEqual(["AAA", "BBB"]);
   });
 });

@@ -66,7 +66,7 @@ async function getChainActivity(
     account: getAddress(account),
     governance: getAddress(proposal.governance.id),
     proposalId: proposal.id,
-    dtfs: directory.forGovernanceOrVault(proposal.governance.id, proposal.governance.token.id),
+    dtfs: directory.forGovernance(proposal.governance.id),
   });
 
   return [
@@ -108,7 +108,7 @@ function mapVote(
     proposalId: vote.proposal.id,
     choice: vote.choice,
     weight: mapAmount(vote.weight, governance.token.token.decimals),
-    dtfs: directory.forGovernanceOrVault(governance.id, governance.token.id),
+    dtfs: directory.forGovernance(governance.id),
   };
 }
 

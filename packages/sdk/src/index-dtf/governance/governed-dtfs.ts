@@ -4,22 +4,21 @@ import type { DtfClient } from "@/client";
 import type { SupportedChainId } from "@/config";
 import type { GovernedIndexDtf } from "@/types/governance";
 
+import { getDtfProposalGovernanceIds } from "@/index-dtf/governance/utils";
 import { GetIndexDtfDirectoryDocument } from "@/index-dtf/subgraph/dtf.generated";
 import { walkSubgraphById } from "@/lib/subgraph-pages";
 
 export type GovernedDtfDirectory = {
-  /** DTFs a governance controls as owner or trading governance, current or legacy. */
+  /** DTFs whose proposals a governance can carry: owner, trading, and vault governances, current or legacy. */
   readonly forGovernance: (governanceId: string) => readonly GovernedIndexDtf[];
   /** DTFs currently staked through a vote-lock vault. */
   readonly forVault: (stToken: string) => readonly GovernedIndexDtf[];
-  /** Direct governance match first; a vault DAO governance (no direct match) resolves to every DTF on its vault. */
-  readonly forGovernanceOrVault: (governanceId: string, stToken: string) => readonly GovernedIndexDtf[];
 };
 
 /**
- * Resolves governance and vault addresses to DTFs from the DTF side of the
- * subgraph, so proposals from a governance a DTF has since replaced, or on a
- * vault it has since migrated away from, still attribute to that DTF.
+ * Reverse index of `getDtfProposalGovernanceIds` over every DTF on a chain, so a
+ * proposal's governance resolves to its DTF even after the DTF replaced that
+ * governance or migrated to another vault.
  */
 export async function loadGovernedDtfDirectory(
   client: DtfClient,
@@ -50,27 +49,20 @@ export async function loadGovernedDtfDirectory(
       symbol: dtf.token.symbol,
       name: dtf.token.name,
     };
-    const governances = [
-      dtf.ownerGovernance?.id,
-      dtf.tradingGovernance?.id,
-      ...dtf.legacyAdmins,
-      ...dtf.legacyAuctionApprovers,
-    ];
-    for (const governance of new Set(governances)) {
-      if (governance) add(byGovernance, governance, ref);
+    const governanceIds = getDtfProposalGovernanceIds({
+      ...dtf,
+      stToken: dtf.stToken ?? { governance: null, legacyGovernance: [] },
+    });
+    for (const governanceId of governanceIds) {
+      add(byGovernance, governanceId, ref);
     }
-    if (dtf.stToken) add(byVault, dtf.stToken.id, ref);
+    if (dtf.stToken) {
+      add(byVault, dtf.stToken.id, ref);
+    }
   }
 
-  const forGovernance = (governanceId: string) => byGovernance.get(governanceId.toLowerCase()) ?? [];
-  const forVault = (stToken: string) => byVault.get(stToken.toLowerCase()) ?? [];
-
   return {
-    forGovernance,
-    forVault,
-    forGovernanceOrVault: (governanceId, stToken) => {
-      const direct = forGovernance(governanceId);
-      return direct.length > 0 ? direct : forVault(stToken);
-    },
+    forGovernance: (governanceId) => byGovernance.get(governanceId.toLowerCase()) ?? [],
+    forVault: (stToken) => byVault.get(stToken.toLowerCase()) ?? [],
   };
 }

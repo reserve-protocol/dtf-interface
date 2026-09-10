@@ -51,7 +51,7 @@ async function getChainProposalFeed(
 
   const parsed = proposals.map((proposal) => ({
     ...mapIndexDtfProposalSummary(proposal, chainId),
-    dtfs: directory.forGovernanceOrVault(proposal.governance.id, proposal.governance.token.id),
+    dtfs: directory.forGovernance(proposal.governance.id),
     forDelegateVotes: Number(proposal.forDelegateVotes),
     againstDelegateVotes: Number(proposal.againstDelegateVotes),
     abstainDelegateVotes: Number(proposal.abstainDelegateVotes),

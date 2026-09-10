@@ -7531,7 +7531,7 @@ export type GetIndexDtfDirectoryQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfDirectoryQuery = { dtfs: Array<{ id: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, token: { symbol: string, name: string }, stToken?: { id: string } | null, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null }> };
+export type GetIndexDtfDirectoryQuery = { dtfs: Array<{ id: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, token: { symbol: string, name: string }, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string } | null } | null, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null }> };
 
 export type GetIndexDtfTopVotersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -8248,6 +8248,10 @@ export const GetIndexDtfDirectoryDocument = new TypedDocumentString(`
     }
     stToken {
       id
+      governance {
+        id
+      }
+      legacyGovernance
     }
     ownerGovernance {
       id

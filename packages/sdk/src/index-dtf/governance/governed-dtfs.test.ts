@@ -75,6 +75,29 @@ describe("governed DTF directory", () => {
     expect(directory.forVault(OLD_VAULT)).toEqual([]);
   });
 
+  it("shares one walk per client and chain across concurrent reads", async () => {
+    const queryIndex = vi.fn(async () => ({ dtfs }));
+    const client = { subgraph: { queryIndex } } as unknown as DtfClient;
+
+    const [first, second] = await Promise.all([
+      loadGovernedDtfDirectory(client, 1),
+      loadGovernedDtfDirectory(client, 1),
+    ]);
+    await loadGovernedDtfDirectory(client, 8453);
+
+    expect(first).toBe(second);
+    expect(queryIndex).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not keep a failed walk", async () => {
+    const queryIndex = vi.fn().mockRejectedValueOnce(new Error("subgraph down")).mockResolvedValue({ dtfs });
+    const client = { subgraph: { queryIndex } } as unknown as DtfClient;
+
+    await expect(loadGovernedDtfDirectory(client, 56)).rejects.toThrow("subgraph down");
+    await expect(loadGovernedDtfDirectory(client, 56)).resolves.toBeDefined();
+    expect(queryIndex).toHaveBeenCalledTimes(2);
+  });
+
   it("returns nothing for a governance no DTF has ever named", async () => {
     const directory = await load();
 

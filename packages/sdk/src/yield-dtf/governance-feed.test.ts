@@ -82,8 +82,8 @@ describe("Yield DTF proposal feed", () => {
     const feed = await getYieldDtfProposalFeed(client, { chainIds: [8453] });
 
     expect(feed).toHaveLength(1001);
-    expect(queryYield.mock.calls.map((call) => call[0].variables)).toEqual([
-      { limit: 1000, offset: 0 },
+    expect(queryYield.mock.calls.map((call) => call[0].variables)).toMatchObject([
+      { limit: 1000, offset: 0, where: { creationTime_gte: expect.any(String) } },
       { limit: 1000, offset: 1000 },
     ]);
     expect(getBlock).not.toHaveBeenCalled();

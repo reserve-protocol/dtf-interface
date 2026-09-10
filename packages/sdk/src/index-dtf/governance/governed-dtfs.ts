@@ -15,15 +15,37 @@ export type GovernedDtfDirectory = {
   readonly forVault: (stToken: string) => readonly GovernedIndexDtf[];
 };
 
+/** Reads that mount together share one directory walk per chain for this long. */
+const DIRECTORY_TTL_MS = 60_000;
+
+type DirectoryEntry = { readonly expires: number; readonly directory: Promise<GovernedDtfDirectory> };
+const directories = new WeakMap<DtfClient, Map<SupportedChainId, DirectoryEntry>>();
+
 /**
  * Reverse index of `getDtfProposalGovernanceIds` over every DTF on a chain, so a
  * proposal's governance resolves to its DTF even after the DTF replaced that
- * governance or migrated to another vault.
+ * governance or migrated to another vault. Memoized per client and chain for
+ * `DIRECTORY_TTL_MS`; a failed walk is not kept.
  */
-export async function loadGovernedDtfDirectory(
-  client: DtfClient,
-  chainId: SupportedChainId,
-): Promise<GovernedDtfDirectory> {
+export function loadGovernedDtfDirectory(client: DtfClient, chainId: SupportedChainId): Promise<GovernedDtfDirectory> {
+  const perChain = directories.get(client) ?? new Map<SupportedChainId, DirectoryEntry>();
+  directories.set(client, perChain);
+  const cached = perChain.get(chainId);
+
+  if (cached && cached.expires > Date.now()) {
+    return cached.directory;
+  }
+
+  const directory = walkGovernedDtfDirectory(client, chainId).catch((error: unknown) => {
+    perChain.delete(chainId);
+    throw error;
+  });
+  perChain.set(chainId, { expires: Date.now() + DIRECTORY_TTL_MS, directory });
+
+  return directory;
+}
+
+async function walkGovernedDtfDirectory(client: DtfClient, chainId: SupportedChainId): Promise<GovernedDtfDirectory> {
   const dtfs = await walkSubgraphById(async (cursor, pageSize) => {
     const data = await client.subgraph.queryIndex({
       chainId,

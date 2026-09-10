@@ -10,6 +10,7 @@ import { dtfQueryKeys } from "@/query-keys";
 
 // Cross-DTF governance reads for dashboards and explorers. Every read takes
 // optional params (chain scope, limit), so the queries are always enabled.
+// Proposal feeds are the heaviest reads and indexed data, so they sit at the static tier.
 
 // --- Index DTF ---
 
@@ -23,6 +24,7 @@ export function indexDtfProposalFeedQueryOptions<TData = MethodResult<IndexMetho
     () => sdk.index.getProposalFeed(params),
     true,
     options,
+    STATIC_STALE_TIME,
   );
 }
 
@@ -149,6 +151,7 @@ export function yieldDtfProposalFeedQueryOptions<TData = MethodResult<YieldMetho
     () => sdk.yield.getProposalFeed(params),
     true,
     options,
+    STATIC_STALE_TIME,
   );
 }
 

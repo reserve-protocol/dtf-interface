@@ -45,10 +45,11 @@ describe("governance overview query options", () => {
     expect(sdk.index.getGovernanceActivity).toHaveBeenCalledWith({ chainIds: [8453], limit: 5 });
   });
 
-  it("caches lifetime totals at the static tier and the rest at the default tier", () => {
+  it("caches lifetime totals and proposal feeds at the static tier and the rest at the default tier", () => {
     const sdk = createSdk();
 
     expect(indexDtfVoteLockLifetimeTotalsQueryOptions(sdk).staleTime).toBe(STATIC_STALE_TIME);
+    expect(indexDtfProposalFeedQueryOptions(sdk).staleTime).toBe(STATIC_STALE_TIME);
     expect(indexDtfVoteLockDaosQueryOptions(sdk).staleTime).toBe(DEFAULT_STALE_TIME);
     expect(yieldDtfProtocolStakingTotalsQueryOptions(sdk).staleTime).toBe(DEFAULT_STALE_TIME);
   });

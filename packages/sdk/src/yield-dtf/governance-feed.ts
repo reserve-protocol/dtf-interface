@@ -13,14 +13,15 @@ import type {
 } from "@/types/yield-dtf";
 import type { YieldDtfChainId } from "@/yield-dtf/config";
 
-import { fetchSubgraphPages, SUBGRAPH_MAX_ROWS } from "@/lib/subgraph-pages";
-import { mapAmount } from "@/lib/utils";
+import { dedupeById, fetchSubgraphPages, resolveSubgraphTimeRange, SUBGRAPH_MAX_ROWS } from "@/lib/subgraph-pages";
+import { getCurrentTime, mapAmount } from "@/lib/utils";
 import { yieldDtfChainIds } from "@/yield-dtf/config";
 import { mapYieldDtfProposalSummary, withYieldDtfProposalListStates } from "@/yield-dtf/governance";
 import {
   GetYieldDtfGovernanceActivityDocument,
   GetYieldDtfProposalFeedDocument,
   GetYieldDtfTopVotersDocument,
+  type Proposal_Filter,
 } from "@/yield-dtf/subgraph/yield.generated";
 
 const DEFAULT_TOP_VOTER_LIMIT = 20;
@@ -31,25 +32,30 @@ type SubgraphGovernedRToken = {
   readonly token: { readonly symbol: string; readonly name: string };
 };
 
-/** Reads indexed Yield DTF proposals across chains, newest first, with derived list state. `limit` caps each chain. */
+/** Reads Yield DTF proposals created inside a time window across chains, newest first, with derived list state. `limit` caps each chain. */
 export async function getYieldDtfProposalFeed(
   client: DtfClient,
   params: GetYieldDtfProposalFeedParams = {},
 ): Promise<readonly YieldDtfProposalFeedItem[]> {
   const limit = params.limit ?? SUBGRAPH_MAX_ROWS;
+  const range = resolveSubgraphTimeRange(params, getCurrentTime());
+  const where: Proposal_Filter = {
+    creationTime_gte: String(range.since),
+    ...(range.until === undefined ? {} : { creationTime_lte: String(range.until) }),
+  };
   const chains = await Promise.all(
     (params.chainIds ?? yieldDtfChainIds).map(async (chainId) => {
       const proposals = await fetchSubgraphPages(async (offset, pageSize) => {
         const data = await client.subgraph.queryYield({
           chainId,
           query: GetYieldDtfProposalFeedDocument,
-          variables: { limit: pageSize, offset },
+          variables: { limit: pageSize, offset, where },
         });
 
         return data.proposals;
       }, limit);
 
-      const summaries = proposals.map((proposal) => ({
+      const summaries = dedupeById(proposals).map((proposal) => ({
         ...mapYieldDtfProposalSummary(proposal, chainId),
         rToken: mapGovernedYieldDtf(proposal.governance.rToken, chainId),
         forDelegateVotes: Number(proposal.forDelegateVotes),

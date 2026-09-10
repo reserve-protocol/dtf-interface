@@ -29,6 +29,34 @@ export async function fetchSubgraphPages<T>(
   return rows;
 }
 
+export type SubgraphTimeRange = {
+  /** Unix seconds, inclusive. */
+  readonly since?: number;
+  /** Unix seconds, inclusive. */
+  readonly until?: number;
+};
+
+const DEFAULT_RANGE_SECONDS = 60 * 24 * 3600;
+
+/** Resolves a creation-time range; `since` defaults to the last 60 days so unbounded reads are opt-in. */
+export function resolveSubgraphTimeRange(range: SubgraphTimeRange, now: number): { since: number; until?: number } {
+  const since = range.since ?? now - DEFAULT_RANGE_SECONDS;
+  if (range.until !== undefined && range.until < since) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `Time range end ${range.until} is before its start ${since}.`,
+      meta: { since, until: range.until },
+    });
+  }
+  return range.until === undefined ? { since } : { since, until: range.until };
+}
+
+/** Drops rows that repeat when a `skip` walk shifts because a row landed mid-walk. */
+export function dedupeById<T extends { readonly id: string }>(rows: readonly T[]): T[] {
+  const seen = new Set<string>();
+  return rows.filter((row) => (seen.has(row.id) ? false : (seen.add(row.id), true)));
+}
+
 /** Validates a `first`/`skip` window before any request goes out. */
 export function assertSubgraphWindow(limit: number): void {
   if (!Number.isInteger(limit) || limit < 1 || limit > SUBGRAPH_MAX_ROWS) {

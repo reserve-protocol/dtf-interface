@@ -6333,6 +6333,7 @@ export type GetYieldDtfDailySnapshotsQuery = { rtokenDailySnapshots: Array<{ tim
 export type GetYieldDtfProposalFeedQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<Proposal_Filter>;
 }>;
 
 
@@ -6673,12 +6674,13 @@ export const GetYieldDtfDailySnapshotsDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<GetYieldDtfDailySnapshotsQuery, GetYieldDtfDailySnapshotsQueryVariables>;
 export const GetYieldDtfProposalFeedDocument = new TypedDocumentString(`
-    query GetYieldDtfProposalFeed($limit: Int = 1000, $offset: Int = 0) {
+    query GetYieldDtfProposalFeed($limit: Int = 1000, $offset: Int = 0, $where: Proposal_filter) {
   proposals(
     first: $limit
     skip: $offset
     orderBy: creationTime
     orderDirection: desc
+    where: $where
   ) {
     id
     description

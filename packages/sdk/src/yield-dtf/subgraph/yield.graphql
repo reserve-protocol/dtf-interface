@@ -245,8 +245,8 @@ query GetYieldDtfDailySnapshots($rTokenId: String!, $limit: Int!) {
   }
 }
 
-query GetYieldDtfProposalFeed($limit: Int = 1000, $offset: Int = 0) {
-  proposals(first: $limit, skip: $offset, orderBy: creationTime, orderDirection: desc) {
+query GetYieldDtfProposalFeed($limit: Int = 1000, $offset: Int = 0, $where: Proposal_filter) {
+  proposals(first: $limit, skip: $offset, orderBy: creationTime, orderDirection: desc, where: $where) {
     id
     description
     creationTime

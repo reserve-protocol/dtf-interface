@@ -334,7 +334,10 @@ export type GovernedYieldDtf = {
 };
 
 export type GetYieldDtfProposalFeedParams = YieldDtfChainScope & {
-  /** Max proposals per chain, newest first. Default: every indexed proposal (10k ceiling). */
+  /** Creation-time window, unix seconds inclusive. `since` defaults to the last 60 days. */
+  readonly since?: number;
+  readonly until?: number;
+  /** Max proposals per chain inside the window, newest first. Default: the 10k ceiling. */
   readonly limit?: number;
 };
 

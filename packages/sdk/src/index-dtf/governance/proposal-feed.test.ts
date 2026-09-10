@@ -96,7 +96,11 @@ describe("Index DTF proposal feed", () => {
     expect(feed[1]!.votingState.quorum).toBe(true);
     const proposalCalls = queryIndex.mock.calls.filter((call) => call[0].query === GetAllIndexDtfProposalsDocument);
     expect(proposalCalls).toHaveLength(2);
-    expect(proposalCalls[0]![0]).toMatchObject({ chainId: 1, variables: { limit: 1000, offset: 0 } });
+    // Default window: the last 60 days.
+    expect(proposalCalls[0]![0]).toMatchObject({
+      chainId: 1,
+      variables: { limit: 1000, offset: 0, where: { creationTime_gte: String(NOW - 60 * 24 * 3600) } },
+    });
   });
 
   it("pages past 1000 proposals by default", async () => {
@@ -117,10 +121,36 @@ describe("Index DTF proposal feed", () => {
 
     expect(feed).toHaveLength(1001);
     const proposalCalls = queryIndex.mock.calls.filter((call) => call[0].query === GetAllIndexDtfProposalsDocument);
-    expect(proposalCalls.map((call) => call[0].variables)).toEqual([
+    expect(proposalCalls.map((call) => call[0].variables)).toMatchObject([
       { limit: 1000, offset: 0 },
       { limit: 1000, offset: 1000 },
     ]);
+  });
+
+  it("passes an explicit creation-time range and drops rows repeated by a shifted page", async () => {
+    const queryIndex = vi.fn(async ({ query, variables }: { query: unknown; variables: { offset: number } }) => {
+      if (isDirectoryQuery(query)) return TEST_DIRECTORY;
+      // A proposal landed between pages: the last row of page one reappears at the top of page two.
+      return {
+        proposals:
+          variables.offset === 0
+            ? Array.from({ length: 1000 }, (_, index) => createProposal({ id: `p-${index}` }))
+            : [createProposal({ id: "p-999" }), createProposal({ id: "p-tail" })],
+      };
+    });
+    const client = { subgraph: { queryIndex } } as unknown as DtfClient;
+
+    const feed = await getProposalFeed(client, { chainIds: [8453], since: 100, until: 900 });
+
+    expect(feed).toHaveLength(1001);
+    expect(new Set(feed.map((row) => row.id)).size).toBe(1001);
+    const proposalCalls = queryIndex.mock.calls.filter((call) => call[0].query === GetAllIndexDtfProposalsDocument);
+    expect(proposalCalls[0]![0]).toMatchObject({
+      variables: { where: { creationTime_gte: "100", creationTime_lte: "900" } },
+    });
+    await expect(getProposalFeed(client, { chainIds: [8453], since: 900, until: 100 })).rejects.toMatchObject({
+      code: "INVALID_INPUT",
+    });
   });
 
   it("rejects a window past the ceiling before querying", async () => {

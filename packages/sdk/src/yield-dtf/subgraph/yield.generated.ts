@@ -6330,6 +6330,36 @@ export type GetYieldDtfDailySnapshotsQueryVariables = Exact<{
 
 export type GetYieldDtfDailySnapshotsQuery = { rtokenDailySnapshots: Array<{ timestamp: string, rsrExchangeRate: string, rsrStaked: string, rewardTokenSupply: string, rsrPrice: string }> };
 
+export type GetYieldDtfProposalFeedQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<Proposal_Filter>;
+}>;
+
+
+export type GetYieldDtfProposalFeedQuery = { proposals: Array<{ id: string, description: string, creationTime: string, state: ProposalState, forWeightedVotes: string, againstWeightedVotes: string, abstainWeightedVotes: string, quorumVotes: string, forDelegateVotes: string, againstDelegateVotes: string, abstainDelegateVotes: string, startBlock: string, endBlock: string, executionETA?: string | null, proposer: { address: string }, governanceFramework: { name: string, contractAddress: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }> };
+
+export type GetYieldDtfTopVotersQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetYieldDtfTopVotersQuery = { delegates: Array<{ address: string, numberVotes: number, delegatedVotesRaw: string, tokenHoldersRepresentedAmount: number, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }> };
+
+export type GetYieldDtfProtocolStakingTotalsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetYieldDtfProtocolStakingTotalsQuery = { protocols: Array<{ rsrStaked: string, rsrStakedUSD: string, totalRsrStaked: string, totalRsrUnstaked: string, rTokenCount: number }> };
+
+export type GetYieldDtfGovernanceActivityQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetYieldDtfGovernanceActivityQuery = { votes: Array<{ choice: VoteChoice, weight: string, blockTime: string, txnHash: string, voter: { address: string }, proposal: { id: string, governance: { rToken: { id: string, token: { symbol: string, name: string } } } } }>, proposals: Array<{ id: string, txnHash: string, creationTime: string, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, queued: Array<{ id: string, queueTime?: string | null, queueTxnHash?: string | null, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, executed: Array<{ id: string, executionTime?: string | null, executionTxnHash?: string | null, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, canceled: Array<{ id: string, cancellationTime?: string | null, cancellationTxnHash?: string | null, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, entries: Array<{ type: string, hash: string, timestamp: string, amount?: string | null, stAmount?: string | null, from: { id: string }, rToken?: { id: string, token: { symbol: string, name: string } } | null }> };
+
+export type YieldActivityGovernanceFragment = { rToken: { id: string, token: { symbol: string, name: string } } };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -6348,7 +6378,17 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
-
+export const YieldActivityGovernanceFragmentDoc = new TypedDocumentString(`
+    fragment YieldActivityGovernance on Governance {
+  rToken {
+    id
+    token {
+      symbol
+      name
+    }
+  }
+}
+    `, {"fragmentName":"YieldActivityGovernance"}) as unknown as TypedDocumentString<YieldActivityGovernanceFragment, unknown>;
 export const GetYieldDtfDocument = new TypedDocumentString(`
     query GetYieldDtf($id: ID!) {
   rtoken(id: $id) {
@@ -6633,3 +6673,188 @@ export const GetYieldDtfDailySnapshotsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetYieldDtfDailySnapshotsQuery, GetYieldDtfDailySnapshotsQueryVariables>;
+export const GetYieldDtfProposalFeedDocument = new TypedDocumentString(`
+    query GetYieldDtfProposalFeed($limit: Int = 1000, $offset: Int = 0, $where: Proposal_filter) {
+  proposals(
+    first: $limit
+    skip: $offset
+    orderBy: creationTime
+    orderDirection: desc
+    where: $where
+  ) {
+    id
+    description
+    creationTime
+    state
+    forWeightedVotes
+    againstWeightedVotes
+    abstainWeightedVotes
+    quorumVotes
+    forDelegateVotes
+    againstDelegateVotes
+    abstainDelegateVotes
+    startBlock
+    endBlock
+    executionETA
+    proposer {
+      address
+    }
+    governanceFramework {
+      name
+      contractAddress
+    }
+    governance {
+      rToken {
+        id
+        token {
+          symbol
+          name
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetYieldDtfProposalFeedQuery, GetYieldDtfProposalFeedQueryVariables>;
+export const GetYieldDtfTopVotersDocument = new TypedDocumentString(`
+    query GetYieldDtfTopVoters($limit: Int = 20) {
+  delegates(
+    first: $limit
+    orderBy: numberVotes
+    orderDirection: desc
+    where: {numberVotes_gt: 0}
+  ) {
+    address
+    numberVotes
+    delegatedVotesRaw
+    tokenHoldersRepresentedAmount
+    governance {
+      rToken {
+        id
+        token {
+          symbol
+          name
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetYieldDtfTopVotersQuery, GetYieldDtfTopVotersQueryVariables>;
+export const GetYieldDtfProtocolStakingTotalsDocument = new TypedDocumentString(`
+    query GetYieldDtfProtocolStakingTotals {
+  protocols(first: 1) {
+    rsrStaked
+    rsrStakedUSD
+    totalRsrStaked
+    totalRsrUnstaked
+    rTokenCount
+  }
+}
+    `) as unknown as TypedDocumentString<GetYieldDtfProtocolStakingTotalsQuery, GetYieldDtfProtocolStakingTotalsQueryVariables>;
+export const GetYieldDtfGovernanceActivityDocument = new TypedDocumentString(`
+    query GetYieldDtfGovernanceActivity($limit: Int = 50) {
+  votes(first: $limit, orderBy: blockTime, orderDirection: desc) {
+    choice
+    weight
+    blockTime
+    txnHash
+    voter {
+      address
+    }
+    proposal {
+      id
+      governance {
+        ...YieldActivityGovernance
+      }
+    }
+  }
+  proposals(first: $limit, orderBy: creationTime, orderDirection: desc) {
+    id
+    txnHash
+    creationTime
+    proposer {
+      address
+    }
+    governance {
+      ...YieldActivityGovernance
+    }
+  }
+  queued: proposals(
+    first: $limit
+    orderBy: queueTime
+    orderDirection: desc
+    where: {queueTime_not: null}
+  ) {
+    id
+    queueTime
+    queueTxnHash
+    proposer {
+      address
+    }
+    governance {
+      ...YieldActivityGovernance
+    }
+  }
+  executed: proposals(
+    first: $limit
+    orderBy: executionTime
+    orderDirection: desc
+    where: {executionTime_not: null}
+  ) {
+    id
+    executionTime
+    executionTxnHash
+    proposer {
+      address
+    }
+    governance {
+      ...YieldActivityGovernance
+    }
+  }
+  canceled: proposals(
+    first: $limit
+    orderBy: cancellationTime
+    orderDirection: desc
+    where: {cancellationTime_not: null}
+  ) {
+    id
+    cancellationTime
+    cancellationTxnHash
+    proposer {
+      address
+    }
+    governance {
+      ...YieldActivityGovernance
+    }
+  }
+  entries(
+    first: $limit
+    orderBy: timestamp
+    orderDirection: desc
+    where: {type_in: ["STAKE", "UNSTAKE"], rToken_not: null}
+  ) {
+    type
+    hash
+    timestamp
+    amount
+    stAmount
+    from {
+      id
+    }
+    rToken {
+      id
+      token {
+        symbol
+        name
+      }
+    }
+  }
+}
+    fragment YieldActivityGovernance on Governance {
+  rToken {
+    id
+    token {
+      symbol
+      name
+    }
+  }
+}`) as unknown as TypedDocumentString<GetYieldDtfGovernanceActivityQuery, GetYieldDtfGovernanceActivityQueryVariables>;

@@ -1,3 +1,4 @@
+export * from "@/index-dtf/governance/activity";
 export * from "@/index-dtf/governance/delegates";
 export * from "@/index-dtf/governance/decoder";
 export * from "@/index-dtf/governance/guardians";
@@ -5,6 +6,8 @@ export * from "@/index-dtf/governance/legacy-vote-lock";
 export * from "@/index-dtf/governance/optimistic";
 export * from "@/index-dtf/governance/proposal-actions";
 export * from "@/index-dtf/governance/propose/index";
+export * from "@/index-dtf/governance/proposal-feed";
 export * from "@/index-dtf/governance/proposals";
 export * from "@/index-dtf/governance/selector-registry";
+export * from "@/index-dtf/governance/top-voters";
 export * from "@/index-dtf/governance/voting";

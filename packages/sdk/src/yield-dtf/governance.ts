@@ -32,7 +32,6 @@ import {
   GetYieldDtfGovernanceDocument,
   GetYieldDtfProposalDocument,
   GetYieldDtfProposalsDocument,
-  type GetYieldDtfProposalQuery,
   type GetYieldDtfProposalsQuery,
 } from "@/yield-dtf/subgraph/yield.generated";
 
@@ -151,13 +150,25 @@ export async function getYieldDtfProposals(
     },
   });
 
-  const summaries = proposals.map((proposal) => mapProposalSummary(proposal, params.chainId));
-  // One latest block serves both clock domains (timestamp for Anastasius,
-  // number for Alexios), fetched once per request. Vote totals remain indexed,
-  // so list state is eventually consistent near the deadline; detail reads the
-  // authoritative governor state.
+  const summaries = proposals.map((proposal) => mapYieldDtfProposalSummary(proposal, params.chainId));
+
+  return withYieldDtfProposalListStates(client, params.chainId, summaries);
+}
+
+/**
+ * Applies the time-derived list state. One latest block serves both clock
+ * domains (timestamp for Anastasius, number for Alexios), fetched once per
+ * chain and only when an open proposal needs it. Vote totals remain indexed,
+ * so list state is eventually consistent near the deadline; detail reads the
+ * authoritative governor state.
+ */
+export async function withYieldDtfProposalListStates<T extends YieldDtfProposalSummary>(
+  client: DtfClient,
+  chainId: YieldDtfChainId,
+  summaries: readonly T[],
+): Promise<readonly T[]> {
   const needsTimepoint = summaries.some((summary) => summary.state === "PENDING" || summary.state === "ACTIVE");
-  const block = needsTimepoint ? await client.viem.getPublicClient(params.chainId).getBlock() : undefined;
+  const block = needsTimepoint ? await client.viem.getPublicClient(chainId).getBlock() : undefined;
 
   return summaries.map((summary) => ({
     ...summary,
@@ -248,7 +259,7 @@ export async function getYieldDtfProposal(
     });
   }
 
-  const summary = mapProposalSummary(proposal, params.chainId);
+  const summary = mapYieldDtfProposalSummary(proposal, params.chainId);
   const onChainState = await readProposalState(client, params.chainId, summary.governor, proposal.id);
 
   return {
@@ -391,8 +402,25 @@ export function prepareYieldDtfSubmitProposal(params: YieldDtfProposalActionPara
   return prepareGovernorPropose(params);
 }
 
-function mapProposalSummary(
-  proposal: NonNullable<GetYieldDtfProposalQuery["proposal"]> | GetYieldDtfProposalsQuery["proposals"][number],
+export type SubgraphYieldDtfProposalSummary = Pick<
+  GetYieldDtfProposalsQuery["proposals"][number],
+  | "id"
+  | "description"
+  | "creationTime"
+  | "state"
+  | "forWeightedVotes"
+  | "againstWeightedVotes"
+  | "abstainWeightedVotes"
+  | "quorumVotes"
+  | "startBlock"
+  | "endBlock"
+  | "executionETA"
+  | "proposer"
+  | "governanceFramework"
+>;
+
+export function mapYieldDtfProposalSummary(
+  proposal: SubgraphYieldDtfProposalSummary,
   chainId: YieldDtfChainId,
 ): YieldDtfProposalSummary {
   return {

@@ -13,6 +13,7 @@ import { mapAmount } from "@/lib/utils";
 
 export * from "@/index-dtf/vote-lock/builders";
 export * from "@/index-dtf/vote-lock/reads";
+export * from "@/index-dtf/vote-lock/totals";
 
 export type VoteLockDao = {
   readonly chainId: number;

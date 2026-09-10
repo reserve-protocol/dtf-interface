@@ -46,10 +46,12 @@ type SubgraphIndexDtfProposalSummary = {
   };
   readonly governance: {
     readonly id: string;
-    readonly token: { readonly id: string };
+    readonly token: SubgraphVoteToken;
     readonly timelock: { readonly id: string };
   };
 };
+/** Vote-lock share token; vote weights, quorum, and veto thresholds are denominated in its decimals. */
+type SubgraphVoteToken = { readonly id: string; readonly token: { readonly decimals: number } };
 type SubgraphIndexDtfOptimisticProposal = {
   readonly id: string;
   readonly isOptimistic?: boolean | null;
@@ -58,7 +60,7 @@ type SubgraphIndexDtfOptimisticProposal = {
   readonly optimisticSnapshot?: string | null;
   readonly optimisticSnapshotSupply?: string | null;
   readonly governance: {
-    readonly token: { readonly id: string };
+    readonly token: SubgraphVoteToken;
   };
 };
 type SubgraphIndexDtfProposalDtf = NonNullable<GetIndexDtfProposalQuery["dtf"]>;
@@ -76,6 +78,7 @@ export function mapIndexDtfProposalSummary(
   chainId: GetIndexDtfProposalParams["chainId"],
   dtf?: DtfParams,
 ): ParsedIndexDtfProposalSummary {
+  const decimals = proposal.governance.token.token.decimals;
   const executionETA = toOptionalNumber(proposal.executionETA);
   const executionTime = toOptionalNumber(proposal.executionTime);
   const executionBlock = toOptionalNumber(proposal.executionBlock);
@@ -98,10 +101,10 @@ export function mapIndexDtfProposalSummary(
     creationBlock: Number(proposal.creationBlock),
     voteStart: Number(proposal.voteStart),
     voteEnd: Number(proposal.voteEnd),
-    quorumVotes: mapAmount(proposal.quorumVotes),
-    forWeightedVotes: mapAmount(proposal.forWeightedVotes),
-    againstWeightedVotes: mapAmount(proposal.againstWeightedVotes),
-    abstainWeightedVotes: mapAmount(proposal.abstainWeightedVotes),
+    quorumVotes: mapAmount(proposal.quorumVotes, decimals),
+    forWeightedVotes: mapAmount(proposal.forWeightedVotes, decimals),
+    againstWeightedVotes: mapAmount(proposal.againstWeightedVotes, decimals),
+    abstainWeightedVotes: mapAmount(proposal.abstainWeightedVotes, decimals),
     ...(dtf ? { dtf: { address: getAddress(dtf.address), chainId: dtf.chainId } } : {}),
     ...(executionETA === undefined ? {} : { executionETA }),
     ...(executionTime === undefined ? {} : { executionTime }),
@@ -122,6 +125,7 @@ export function mapIndexDtfProposal(
   const executionTxnHash = proposal.executionTxnHash ? toHex(proposal.executionTxnHash) : undefined;
   const targets = proposal.targets!.map((target) => getAddress(target));
   const calldatas = proposal.calldatas!.map(toHex);
+  const decimals = proposal.governance.token.token.decimals;
 
   return {
     ...mapIndexDtfProposalSummary(proposal, chainId, {
@@ -133,7 +137,7 @@ export function mapIndexDtfProposal(
     votes: proposal.votes.map((vote) => ({
       voter: getAddress(vote.voter.address),
       choice: vote.choice,
-      weight: mapAmount(vote.weight),
+      weight: mapAmount(vote.weight, decimals),
     })),
     forDelegateVotes: Number(proposal.forDelegateVotes),
     againstDelegateVotes: Number(proposal.againstDelegateVotes),
@@ -154,6 +158,7 @@ export function mapIndexDtfProposalVotingSnapshot(
   const isOptimistic = !!proposal.isOptimistic;
   const optimistic = mapOptimisticProposalContext(proposal);
   const vetoThreshold = optimistic?.vetoThreshold ?? mapOptionalBigInt(proposal.vetoThreshold);
+  const decimals = proposal.governance.token.token.decimals;
 
   return {
     id: proposal.id,
@@ -165,14 +170,14 @@ export function mapIndexDtfProposalVotingSnapshot(
     ...(optimistic === undefined ? {} : { optimistic }),
     voteStart: Number(proposal.voteStart),
     voteEnd: Number(proposal.voteEnd),
-    quorumVotes: mapAmount(proposal.quorumVotes),
-    forWeightedVotes: mapAmount(proposal.forWeightedVotes),
-    againstWeightedVotes: mapAmount(proposal.againstWeightedVotes),
-    abstainWeightedVotes: mapAmount(proposal.abstainWeightedVotes),
+    quorumVotes: mapAmount(proposal.quorumVotes, decimals),
+    forWeightedVotes: mapAmount(proposal.forWeightedVotes, decimals),
+    againstWeightedVotes: mapAmount(proposal.againstWeightedVotes, decimals),
+    abstainWeightedVotes: mapAmount(proposal.abstainWeightedVotes, decimals),
     votes: proposal.votes.map((vote) => ({
       voter: getAddress(vote.voter.address),
       choice: vote.choice,
-      weight: mapAmount(vote.weight),
+      weight: mapAmount(vote.weight, decimals),
     })),
   };
 }
@@ -198,13 +203,15 @@ function mapOptimisticProposalContext(
     return undefined;
   }
 
+  const decimals = proposal.governance.token.token.decimals;
+
   return {
     proposalId: proposal.id,
     voteToken: getAddress(proposal.governance.token.id),
     snapshot: BigInt(proposal.optimisticSnapshot),
-    snapshotSupply: mapAmount(proposal.optimisticSnapshotSupply),
+    snapshotSupply: mapAmount(proposal.optimisticSnapshotSupply, decimals),
     vetoThreshold,
-    vetoThresholdVotes: mapAmount(vetoThresholdVotes),
+    vetoThresholdVotes: mapAmount(vetoThresholdVotes, decimals),
   };
 }
 

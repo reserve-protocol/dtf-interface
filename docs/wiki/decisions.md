@@ -35,3 +35,7 @@ Preserve-modules output reduced a direct price-reader bundle from 538.08 kB to 1
 ## 2026-08-25 — Publish only reviewed main commits
 
 Package publishing runs directly on pushes to `main` or manual dispatches selecting `main`, checks out the triggering SHA, and reruns `release:ci` before Changesets. Never publish by checking out `workflow_run.head_sha`: a successful fork workflow can otherwise move untrusted code into the write- and OIDC-enabled release context.
+
+## 2026-09-08 — Cross-DTF governance reads live in the SDK, per product
+
+The internal governance dashboard needs protocol-wide views (all proposals, top voters, activity, staking totals). Those reads belong in the SDK so Register's explorer can drop its raw GraphQL later, but they stay per product (`sdk.index.*` and `sdk.yield.*` with the same names) rather than a merged namespace: the two subgraphs disagree on attribution (vault vs rToken), lifecycle actors, and state derivation, and the dashboard merges rows itself. Governance→DTF attribution follows owner/trading governance first and falls back to every DTF on the vault only for the vault DAO governance. Arbitrum is out of scope: the SDK has no Arbitrum chain and Index DTFs are not deployed there.

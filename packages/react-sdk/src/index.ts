@@ -223,3 +223,25 @@ export {
   useIndexDtfPerformance,
 } from "@/index-dtf/use-index-dtf-performance";
 export type { IndexDtfPerformancePoint, UseIndexDtfPerformanceParams } from "@/index-dtf/use-index-dtf-performance";
+export {
+  indexDtfGovernanceActivityQueryOptions,
+  indexDtfProposalFeedQueryOptions,
+  indexDtfTopVotersQueryOptions,
+  indexDtfVoteLockDaosQueryOptions,
+  indexDtfVoteLockLifetimeTotalsQueryOptions,
+  indexDtfVoteLockTotalsQueryOptions,
+  useIndexDtfGovernanceActivity,
+  useIndexDtfProposalFeed,
+  useIndexDtfTopVoters,
+  useIndexDtfVoteLockDaos,
+  useIndexDtfVoteLockLifetimeTotals,
+  useIndexDtfVoteLockTotals,
+  useYieldDtfGovernanceActivity,
+  useYieldDtfProposalFeed,
+  useYieldDtfProtocolStakingTotals,
+  useYieldDtfTopVoters,
+  yieldDtfGovernanceActivityQueryOptions,
+  yieldDtfProposalFeedQueryOptions,
+  yieldDtfProtocolStakingTotalsQueryOptions,
+  yieldDtfTopVotersQueryOptions,
+} from "@/governance-overview-hooks";

@@ -19,7 +19,7 @@ Main package exports live in:
 
 - `sdk.index`: implemented Index DTF reads, builders, and refs.
 - `sdk.portfolio`: implemented portfolio helpers.
-- `sdk.yield`: implemented Yield DTF reads, issuance, staking, governance, auctions, APY, proposal builders, and refs for Ethereum mainnet and Base.
+- `sdk.yield`: implemented Yield DTF reads, issuance, staking, governance, auctions, APY, proposal builders, cross-DTF governance reads (proposal feed, top voters, governance activity, protocol staking totals), and refs for Ethereum mainnet and Base.
 
 ## Index Namespace
 
@@ -31,6 +31,7 @@ The Index namespace currently exposes product actions such as:
 - discover/list DTFs.
 - get holders.
 - get proposals/proposal detail.
+- cross-DTF governance reads for dashboards: proposal feed, top voters, governance activity, vote-lock totals and lifetime totals (all chains by default, optional `chainIds`/`limit`).
 - prepare governance actions.
 - prepare mint/redeem calls.
 - prepare deploy calls.

@@ -244,3 +244,165 @@ query GetYieldDtfDailySnapshots($rTokenId: String!, $limit: Int!) {
     rsrPrice
   }
 }
+
+query GetYieldDtfProposalFeed($limit: Int = 1000, $offset: Int = 0, $where: Proposal_filter) {
+  proposals(first: $limit, skip: $offset, orderBy: creationTime, orderDirection: desc, where: $where) {
+    id
+    description
+    creationTime
+    state
+    forWeightedVotes
+    againstWeightedVotes
+    abstainWeightedVotes
+    quorumVotes
+    forDelegateVotes
+    againstDelegateVotes
+    abstainDelegateVotes
+    startBlock
+    endBlock
+    executionETA
+    proposer {
+      address
+    }
+    governanceFramework {
+      name
+      contractAddress
+    }
+    governance {
+      rToken {
+        id
+        token {
+          symbol
+          name
+        }
+      }
+    }
+  }
+}
+
+query GetYieldDtfTopVoters($limit: Int = 20) {
+  delegates(first: $limit, orderBy: numberVotes, orderDirection: desc, where: { numberVotes_gt: 0 }) {
+    address
+    numberVotes
+    delegatedVotesRaw
+    tokenHoldersRepresentedAmount
+    governance {
+      rToken {
+        id
+        token {
+          symbol
+          name
+        }
+      }
+    }
+  }
+}
+
+query GetYieldDtfProtocolStakingTotals {
+  protocols(first: 1) {
+    rsrStaked
+    rsrStakedUSD
+    totalRsrStaked
+    totalRsrUnstaked
+    rTokenCount
+  }
+}
+
+query GetYieldDtfGovernanceActivity($limit: Int = 50) {
+  votes(first: $limit, orderBy: blockTime, orderDirection: desc) {
+    choice
+    weight
+    blockTime
+    txnHash
+    voter {
+      address
+    }
+    proposal {
+      id
+      governance {
+        ...YieldActivityGovernance
+      }
+    }
+  }
+  proposals(first: $limit, orderBy: creationTime, orderDirection: desc) {
+    id
+    txnHash
+    creationTime
+    proposer {
+      address
+    }
+    governance {
+      ...YieldActivityGovernance
+    }
+  }
+  queued: proposals(first: $limit, orderBy: queueTime, orderDirection: desc, where: { queueTime_not: null }) {
+    id
+    queueTime
+    queueTxnHash
+    proposer {
+      address
+    }
+    governance {
+      ...YieldActivityGovernance
+    }
+  }
+  executed: proposals(first: $limit, orderBy: executionTime, orderDirection: desc, where: { executionTime_not: null }) {
+    id
+    executionTime
+    executionTxnHash
+    proposer {
+      address
+    }
+    governance {
+      ...YieldActivityGovernance
+    }
+  }
+  canceled: proposals(
+    first: $limit
+    orderBy: cancellationTime
+    orderDirection: desc
+    where: { cancellationTime_not: null }
+  ) {
+    id
+    cancellationTime
+    cancellationTxnHash
+    proposer {
+      address
+    }
+    governance {
+      ...YieldActivityGovernance
+    }
+  }
+  entries(
+    first: $limit
+    orderBy: timestamp
+    orderDirection: desc
+    where: { type_in: ["STAKE", "UNSTAKE"], rToken_not: null }
+  ) {
+    type
+    hash
+    timestamp
+    amount
+    stAmount
+    from {
+      id
+    }
+    rToken {
+      id
+      token {
+        symbol
+        name
+      }
+    }
+  }
+}
+
+fragment YieldActivityGovernance on Governance {
+  rToken {
+    id
+    token {
+      symbol
+      name
+    }
+  }
+}

@@ -6,7 +6,8 @@ import type { GetIndexDtfTopVotersQuery } from "@/index-dtf/subgraph/dtf.generat
 import type { GetIndexDtfTopVotersParams, IndexDtfTopVoter } from "@/types/governance";
 
 import { supportedChainIds } from "@/config";
-import { mapGovernedDtfs, mapVaultShareToken, mapVaultUnderlying } from "@/index-dtf/governance/vault-context";
+import { loadGovernedDtfDirectory, type GovernedDtfDirectory } from "@/index-dtf/governance/governed-dtfs";
+import { mapVaultShareToken, mapVaultUnderlying } from "@/index-dtf/governance/vault-context";
 import { GetIndexDtfTopVotersDocument } from "@/index-dtf/subgraph/dtf.generated";
 import { mapAmount } from "@/lib/utils";
 
@@ -21,16 +22,19 @@ export async function getTopVoters(
   params: GetIndexDtfTopVotersParams = {},
 ): Promise<readonly IndexDtfTopVoter[]> {
   const limit = params.limit ?? DEFAULT_TOP_VOTER_LIMIT;
-  const byChain = await client.subgraph.queryIndexAll({
-    chainIds: params.chainIds ?? supportedChainIds,
-    query: GetIndexDtfTopVotersDocument,
-    variables: { limit },
-  });
+  const chains = await Promise.all(
+    (params.chainIds ?? supportedChainIds).map(async (chainId) => {
+      const [directory, { delegates }] = await Promise.all([
+        loadGovernedDtfDirectory(client, chainId),
+        client.subgraph.queryIndex({ chainId, query: GetIndexDtfTopVotersDocument, variables: { limit } }),
+      ]);
 
-  return Object.entries(byChain)
-    .flatMap(([chainId, data]) =>
-      data.delegates.flatMap((delegate) => mapTopVoter(delegate, Number(chainId) as SupportedChainId)),
-    )
+      return delegates.flatMap((delegate) => mapTopVoter(delegate, chainId, directory));
+    }),
+  );
+
+  return chains
+    .flat()
     .sort((a, b) => b.numberVotes - a.numberVotes)
     .slice(0, limit);
 }
@@ -38,6 +42,7 @@ export async function getTopVoters(
 function mapTopVoter(
   delegate: GetIndexDtfTopVotersQuery["delegates"][number],
   chainId: SupportedChainId,
+  directory: GovernedDtfDirectory,
 ): readonly IndexDtfTopVoter[] {
   const underlying = mapVaultUnderlying(delegate.token.underlying);
 
@@ -55,7 +60,7 @@ function mapTopVoter(
       numberOptimisticVotes: delegate.numberOptimisticVotes,
       delegatedVotes: mapAmount(delegate.delegatedVotesRaw, delegate.token.token.decimals),
       tokenHoldersRepresented: delegate.tokenHoldersRepresentedAmount,
-      dtfs: mapGovernedDtfs(delegate.token, chainId),
+      dtfs: directory.forVault(delegate.token.id),
     },
   ];
 }

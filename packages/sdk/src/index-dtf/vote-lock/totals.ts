@@ -8,7 +8,8 @@ import type {
 } from "@/types/governance";
 
 import { supportedChainIds } from "@/config";
-import { mapGovernedDtfs, mapVaultShareToken, mapVaultUnderlying } from "@/index-dtf/governance/vault-context";
+import { loadGovernedDtfDirectory } from "@/index-dtf/governance/governed-dtfs";
+import { mapVaultShareToken, mapVaultUnderlying } from "@/index-dtf/governance/vault-context";
 import {
   GetIndexDtfOpenUnstakeLocksDocument,
   GetIndexDtfStakingPositionsDocument,
@@ -33,7 +34,8 @@ async function getChainVoteLockTotals(
   client: DtfClient,
   chainId: SupportedChainId,
 ): Promise<readonly IndexDtfVoteLockTotals[]> {
-  const [vaults, locks] = await Promise.all([
+  const [directory, vaults, locks] = await Promise.all([
+    loadGovernedDtfDirectory(client, chainId),
     walkSubgraphById(async (cursor, pageSize) => {
       const data = await client.subgraph.queryIndex({
         chainId,
@@ -79,7 +81,7 @@ async function getChainVoteLockTotals(
         shareSupply: mapAmount(vault.token.totalSupply, vault.token.decimals),
         pendingUnstake: mapAmount(pending.amount, underlying.decimals),
         pendingUnstakeCount: pending.count,
-        dtfs: mapGovernedDtfs(vault, chainId),
+        dtfs: directory.forVault(vault.id),
       },
     ];
   });

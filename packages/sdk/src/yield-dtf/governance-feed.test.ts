@@ -174,22 +174,24 @@ describe("Yield DTF governance activity", () => {
           governance: { rToken: rToken(EUSD, "eUSD") },
         },
       ],
-      accountStakeRecords: [
+      entries: [
         {
+          type: "STAKE",
           hash: "0xs1",
-          isStake: true,
-          rsrAmountRaw: "2000000000000000000",
-          amountRaw: "1500000000000000000",
           timestamp: "350",
-          account: { account: { id: "0x0000000000000000000000000000000000000008" }, rToken: rToken(ETHPLUS, "ETH+") },
+          amount: "2000000000000000000",
+          stAmount: "1500000000000000000",
+          from: { id: "0x0000000000000000000000000000000000000008" },
+          rToken: rToken(ETHPLUS, "ETH+"),
         },
         {
+          type: "UNSTAKE",
           hash: "0xu1",
-          isStake: false,
-          rsrAmountRaw: "1",
-          amountRaw: "1",
           timestamp: "50",
-          account: { account: { id: "0x0000000000000000000000000000000000000008" }, rToken: rToken(ETHPLUS, "ETH+") },
+          amount: "1",
+          stAmount: "1",
+          from: { id: "0x0000000000000000000000000000000000000008" },
+          rToken: rToken(ETHPLUS, "ETH+"),
         },
       ],
     }));

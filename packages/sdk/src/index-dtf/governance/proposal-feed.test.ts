@@ -3,37 +3,23 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DtfClient } from "@/client";
 
 import { getProposalFeed } from "@/index-dtf/governance/proposal-feed";
+import {
+  isDirectoryQuery,
+  TEST_DAO_GOVERNANCE,
+  TEST_DIRECTORY,
+  TEST_OWNER_GOVERNANCE,
+  TEST_VAULT,
+} from "@/index-dtf/governance/test-directory";
 import { GetAllIndexDtfProposalsDocument } from "@/index-dtf/subgraph/dtf.generated";
 import { SUBGRAPH_MAX_ROWS } from "@/lib/subgraph-pages";
 
 const MAX_UINT256 = (1n << 256n) - 1n;
 
 const NOW = 2_000_000;
-const OWNER_GOVERNANCE = "0x0000000000000000000000000000000000000010";
-const DAO_GOVERNANCE = "0x0000000000000000000000000000000000000020";
+const OWNER_GOVERNANCE = TEST_OWNER_GOVERNANCE;
+const DAO_GOVERNANCE = TEST_DAO_GOVERNANCE;
 
-const vault = {
-  id: "0x0000000000000000000000000000000000000007",
-  token: { decimals: 6 },
-  dtfs: [
-    {
-      id: "0x00000000000000000000000000000000000000a1",
-      token: { symbol: "AAA", name: "Triple A" },
-      ownerGovernance: { id: OWNER_GOVERNANCE },
-      tradingGovernance: null,
-      legacyAdmins: [],
-      legacyAuctionApprovers: [],
-    },
-    {
-      id: "0x00000000000000000000000000000000000000b2",
-      token: { symbol: "BBB", name: "Triple B" },
-      ownerGovernance: null,
-      tradingGovernance: null,
-      legacyAdmins: [],
-      legacyAuctionApprovers: [],
-    },
-  ],
-};
+const vault = { id: TEST_VAULT, token: { decimals: 6 } };
 
 const createProposal = (overrides: Record<string, unknown>) => ({
   id: "1",
@@ -72,7 +58,8 @@ describe("Index DTF proposal feed", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(NOW * 1000));
 
-    const queryIndex = vi.fn(async ({ chainId }: { chainId: number }) => {
+    const queryIndex = vi.fn(async ({ chainId, query }: { chainId: number; query: unknown }) => {
+      if (isDirectoryQuery(query)) return TEST_DIRECTORY;
       if (chainId === 1) {
         return { proposals: [createProposal({ id: "mainnet-succeeded" })] };
       }
@@ -107,29 +94,33 @@ describe("Index DTF proposal feed", () => {
     expect(feed[1]!.forWeightedVotes.formatted).toBe("0.003");
     expect(feed[1]!.quorumVotes.formatted).toBe("0.002");
     expect(feed[1]!.votingState.quorum).toBe(true);
-    expect(queryIndex).toHaveBeenCalledTimes(2);
-    expect(queryIndex.mock.calls[0]![0]).toMatchObject({
-      chainId: 1,
-      query: GetAllIndexDtfProposalsDocument,
-      variables: { limit: 1000, offset: 0 },
-    });
+    const proposalCalls = queryIndex.mock.calls.filter((call) => call[0].query === GetAllIndexDtfProposalsDocument);
+    expect(proposalCalls).toHaveLength(2);
+    expect(proposalCalls[0]![0]).toMatchObject({ chainId: 1, variables: { limit: 1000, offset: 0 } });
   });
 
   it("pages past 1000 proposals by default", async () => {
-    const queryIndex = vi.fn(async ({ variables }: { variables: { limit: number; offset: number } }) => ({
-      proposals:
-        variables.offset === 0
-          ? Array.from({ length: variables.limit }, (_, index) => createProposal({ id: `p-${index}` }))
-          : [createProposal({ id: "p-tail" })],
-    }));
+    const queryIndex = vi.fn(
+      async ({ query, variables }: { query: unknown; variables: { limit: number; offset: number } }) => {
+        if (isDirectoryQuery(query)) return TEST_DIRECTORY;
+        return {
+          proposals:
+            variables.offset === 0
+              ? Array.from({ length: variables.limit }, (_, index) => createProposal({ id: `p-${index}` }))
+              : [createProposal({ id: "p-tail" })],
+        };
+      },
+    );
     const client = { subgraph: { queryIndex } } as unknown as DtfClient;
 
     const feed = await getProposalFeed(client, { chainIds: [56] });
 
     expect(feed).toHaveLength(1001);
-    expect(queryIndex).toHaveBeenCalledTimes(2);
-    expect(queryIndex.mock.calls[0]![0]).toMatchObject({ variables: { limit: 1000, offset: 0 } });
-    expect(queryIndex.mock.calls[1]![0]).toMatchObject({ variables: { limit: 1000, offset: 1000 } });
+    const proposalCalls = queryIndex.mock.calls.filter((call) => call[0].query === GetAllIndexDtfProposalsDocument);
+    expect(proposalCalls.map((call) => call[0].variables)).toEqual([
+      { limit: 1000, offset: 0 },
+      { limit: 1000, offset: 1000 },
+    ]);
   });
 
   it("rejects a window past the ceiling before querying", async () => {
@@ -167,7 +158,9 @@ describe("Index DTF proposal feed", () => {
       creationTime: "1100",
       voteEnd: String(NOW + 100),
     });
-    const queryIndex = vi.fn(async () => ({ proposals: [challenge, optimistic] }));
+    const queryIndex = vi.fn(async ({ query }: { query: unknown }) =>
+      isDirectoryQuery(query) ? TEST_DIRECTORY : { proposals: [challenge, optimistic] },
+    );
     const client = { subgraph: { queryIndex } } as unknown as DtfClient;
 
     const feed = await getProposalFeed(client, { chainIds: [8453] });
@@ -182,15 +175,17 @@ describe("Index DTF proposal feed", () => {
   });
 
   it("caps each chain at an explicit limit", async () => {
-    const queryIndex = vi.fn(async ({ variables }: { variables: { limit: number } }) => ({
-      proposals: Array.from({ length: variables.limit }, (_, index) => createProposal({ id: `p-${index}` })),
-    }));
+    const queryIndex = vi.fn(async ({ query, variables }: { query: unknown; variables: { limit: number } }) => {
+      if (isDirectoryQuery(query)) return TEST_DIRECTORY;
+      return { proposals: Array.from({ length: variables.limit }, (_, index) => createProposal({ id: `p-${index}` })) };
+    });
     const client = { subgraph: { queryIndex } } as unknown as DtfClient;
 
     const feed = await getProposalFeed(client, { chainIds: [56], limit: 3 });
 
     expect(feed).toHaveLength(3);
-    expect(queryIndex).toHaveBeenCalledTimes(1);
-    expect(queryIndex.mock.calls[0]![0]).toMatchObject({ variables: { limit: 3, offset: 0 } });
+    const proposalCalls = queryIndex.mock.calls.filter((call) => call[0].query === GetAllIndexDtfProposalsDocument);
+    expect(proposalCalls).toHaveLength(1);
+    expect(proposalCalls[0]![0]).toMatchObject({ variables: { limit: 3, offset: 0 } });
   });
 });

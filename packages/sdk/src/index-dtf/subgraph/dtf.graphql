@@ -236,7 +236,6 @@ query GetAllIndexDtfProposals($limit: Int = 100, $offset: Int = 0, $where: Propo
         token {
           decimals
         }
-        ...GovernedIndexDtfs
       }
       timelock {
         id
@@ -592,12 +591,15 @@ query GetIndexDtfRebalanceAuctions($rebalanceId: String!) {
   }
 }
 
-fragment GovernedIndexDtfs on StakingToken {
-  dtfs {
+query GetIndexDtfDirectory($limit: Int = 1000, $cursor: ID = "") {
+  dtfs(first: $limit, orderBy: id, orderDirection: asc, where: { id_gt: $cursor }) {
     id
     token {
       symbol
       name
+    }
+    stToken {
+      id
     }
     ownerGovernance {
       id
@@ -630,7 +632,6 @@ query GetIndexDtfTopVoters($limit: Int = 20) {
         name
         decimals
       }
-      ...GovernedIndexDtfs
     }
   }
 }
@@ -651,7 +652,6 @@ query GetIndexDtfVoteLockVaults($limit: Int = 1000, $cursor: ID = "") {
       name
       decimals
     }
-    ...GovernedIndexDtfs
   }
 }
 
@@ -710,7 +710,6 @@ query GetIndexDtfGovernanceActivity($limit: Int = 50) {
           token {
             decimals
           }
-          ...GovernedIndexDtfs
         }
       }
     }
@@ -775,6 +774,7 @@ query GetIndexDtfGovernanceActivity($limit: Int = 50) {
   ) {
     type
     assets
+    shares
     timestamp
     hash
     account {
@@ -793,7 +793,6 @@ query GetIndexDtfGovernanceActivity($limit: Int = 50) {
         name
         decimals
       }
-      ...GovernedIndexDtfs
     }
   }
 }
@@ -802,6 +801,5 @@ fragment ActivityGovernance on Governance {
   id
   token {
     id
-    ...GovernedIndexDtfs
   }
 }

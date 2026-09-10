@@ -13,14 +13,7 @@ export async function fetchSubgraphPages<T>(
   fetchPage: (offset: number, pageSize: number) => Promise<readonly T[]>,
   limit: number,
 ): Promise<readonly T[]> {
-  if (!Number.isInteger(limit) || limit < 1 || limit > SUBGRAPH_MAX_ROWS) {
-    throw new SdkError({
-      code: "INVALID_INPUT",
-      message: `Subgraph window limit must be an integer between 1 and ${SUBGRAPH_MAX_ROWS}, received ${limit}.`,
-      meta: { limit, max: SUBGRAPH_MAX_ROWS },
-    });
-  }
-
+  assertSubgraphWindow(limit);
   const rows: T[] = [];
 
   while (rows.length < limit) {
@@ -34,6 +27,17 @@ export async function fetchSubgraphPages<T>(
   }
 
   return rows;
+}
+
+/** Validates a `first`/`skip` window before any request goes out. */
+export function assertSubgraphWindow(limit: number): void {
+  if (!Number.isInteger(limit) || limit < 1 || limit > SUBGRAPH_MAX_ROWS) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `Subgraph window limit must be an integer between 1 and ${SUBGRAPH_MAX_ROWS}, received ${limit}.`,
+      meta: { limit, max: SUBGRAPH_MAX_ROWS },
+    });
+  }
 }
 
 /**

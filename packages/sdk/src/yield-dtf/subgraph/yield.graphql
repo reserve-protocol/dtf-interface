@@ -373,22 +373,25 @@ query GetYieldDtfGovernanceActivity($limit: Int = 50) {
       ...YieldActivityGovernance
     }
   }
-  accountStakeRecords(first: $limit, orderBy: timestamp, orderDirection: desc) {
+  entries(
+    first: $limit
+    orderBy: timestamp
+    orderDirection: desc
+    where: { type_in: ["STAKE", "UNSTAKE"], rToken_not: null }
+  ) {
+    type
     hash
-    isStake
-    rsrAmountRaw
-    amountRaw
     timestamp
-    account {
-      account {
-        id
-      }
-      rToken {
-        id
-        token {
-          symbol
-          name
-        }
+    amount
+    stAmount
+    from {
+      id
+    }
+    rToken {
+      id
+      token {
+        symbol
+        name
       }
     }
   }

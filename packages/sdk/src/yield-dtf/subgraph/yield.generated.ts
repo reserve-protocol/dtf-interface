@@ -6355,7 +6355,7 @@ export type GetYieldDtfGovernanceActivityQueryVariables = Exact<{
 }>;
 
 
-export type GetYieldDtfGovernanceActivityQuery = { votes: Array<{ choice: VoteChoice, weight: string, blockTime: string, txnHash: string, voter: { address: string }, proposal: { id: string, governance: { rToken: { id: string, token: { symbol: string, name: string } } } } }>, proposals: Array<{ id: string, txnHash: string, creationTime: string, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, queued: Array<{ id: string, queueTime?: string | null, queueTxnHash?: string | null, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, executed: Array<{ id: string, executionTime?: string | null, executionTxnHash?: string | null, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, canceled: Array<{ id: string, cancellationTime?: string | null, cancellationTxnHash?: string | null, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, accountStakeRecords: Array<{ hash: string, isStake: boolean, rsrAmountRaw: string, amountRaw: string, timestamp: string, account: { account: { id: string }, rToken: { id: string, token: { symbol: string, name: string } } } }> };
+export type GetYieldDtfGovernanceActivityQuery = { votes: Array<{ choice: VoteChoice, weight: string, blockTime: string, txnHash: string, voter: { address: string }, proposal: { id: string, governance: { rToken: { id: string, token: { symbol: string, name: string } } } } }>, proposals: Array<{ id: string, txnHash: string, creationTime: string, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, queued: Array<{ id: string, queueTime?: string | null, queueTxnHash?: string | null, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, executed: Array<{ id: string, executionTime?: string | null, executionTxnHash?: string | null, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, canceled: Array<{ id: string, cancellationTime?: string | null, cancellationTxnHash?: string | null, proposer: { address: string }, governance: { rToken: { id: string, token: { symbol: string, name: string } } } }>, entries: Array<{ type: string, hash: string, timestamp: string, amount?: string | null, stAmount?: string | null, from: { id: string }, rToken?: { id: string, token: { symbol: string, name: string } } | null }> };
 
 export type YieldActivityGovernanceFragment = { rToken: { id: string, token: { symbol: string, name: string } } };
 
@@ -6824,22 +6824,25 @@ export const GetYieldDtfGovernanceActivityDocument = new TypedDocumentString(`
       ...YieldActivityGovernance
     }
   }
-  accountStakeRecords(first: $limit, orderBy: timestamp, orderDirection: desc) {
+  entries(
+    first: $limit
+    orderBy: timestamp
+    orderDirection: desc
+    where: {type_in: ["STAKE", "UNSTAKE"], rToken_not: null}
+  ) {
+    type
     hash
-    isStake
-    rsrAmountRaw
-    amountRaw
     timestamp
-    account {
-      account {
-        id
-      }
-      rToken {
-        id
-        token {
-          symbol
-          name
-        }
+    amount
+    stAmount
+    from {
+      id
+    }
+    rToken {
+      id
+      token {
+        symbol
+        name
       }
     }
   }

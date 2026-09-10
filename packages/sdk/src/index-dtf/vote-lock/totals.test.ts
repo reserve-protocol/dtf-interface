@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { DtfClient } from "@/client";
 
+import { isDirectoryQuery, TEST_DIRECTORY, TEST_VAULT } from "@/index-dtf/governance/test-directory";
 import {
   GetIndexDtfOpenUnstakeLocksDocument,
   GetIndexDtfStakingPositionsDocument,
@@ -10,24 +11,15 @@ import {
 } from "@/index-dtf/subgraph/dtf.generated";
 import { getVoteLockLifetimeTotals, getVoteLockTotals } from "@/index-dtf/vote-lock/totals";
 
-const USDC_VAULT = "0x00000000000000000000000000000000000000a7";
+const USDC_VAULT = TEST_VAULT;
 const LEGACY_VAULT = "0x0000000000000000000000000000000000000009";
 const usdc = { id: "0x00000000000000000000000000000000000000c3", symbol: "USDC", name: "USD Coin", decimals: 6 };
 const shareToken = { symbol: "vlUSDC", name: "Vote-locked USDC", decimals: 18 };
-const dtfs = [
-  {
-    id: "0x00000000000000000000000000000000000000a1",
-    token: { symbol: "AAA", name: "Triple A" },
-    ownerGovernance: null,
-    tradingGovernance: null,
-    legacyAdmins: [],
-    legacyAuctionApprovers: [],
-  },
-];
 
 describe("Index DTF vote-lock totals", () => {
   it("reports staked and pending-unstake per vault in underlying decimals and skips untracked vaults", async () => {
     const queryIndex = vi.fn(async ({ query, variables }: { query: unknown; variables: { cursor: string } }) => {
+      if (isDirectoryQuery(query)) return TEST_DIRECTORY;
       if (query === GetIndexDtfVoteLockVaultsDocument) {
         return {
           stakingTokens: [
@@ -36,14 +28,12 @@ describe("Index DTF vote-lock totals", () => {
               totalAssets: "10000000",
               token: { ...shareToken, totalSupply: "9000000000000000000" },
               underlying: usdc,
-              dtfs,
             },
             {
               id: LEGACY_VAULT,
               totalAssets: "0",
               token: { symbol: "OLD", name: "Legacy", decimals: 18, totalSupply: "1" },
               underlying: null,
-              dtfs: [],
             },
           ],
         };
@@ -77,7 +67,7 @@ describe("Index DTF vote-lock totals", () => {
       pendingUnstake: { formatted: "3" },
       pendingUnstakeCount: 2,
     });
-    expect(totals[0]!.dtfs.map((dtf) => dtf.symbol)).toEqual(["AAA"]);
+    expect(totals[0]!.dtfs.map((dtf) => dtf.symbol)).toEqual(["AAA", "BBB"]);
   });
 
   it("sums lifetime deposits and withdrawals across positions per vault", async () => {

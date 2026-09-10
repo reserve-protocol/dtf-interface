@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { DtfClient } from "@/client";
 
+import { isDirectoryQuery, TEST_DIRECTORY, TEST_VAULT } from "@/index-dtf/governance/test-directory";
 import { getTopVoters } from "@/index-dtf/governance/top-voters";
 
 const underlying = {
@@ -21,42 +22,28 @@ const createDelegate = (
   delegatedVotesRaw: "5000000",
   tokenHoldersRepresentedAmount: 2,
   token: {
-    id: "0x0000000000000000000000000000000000000007",
+    id: TEST_VAULT,
     token: { symbol: "vlUSDC", name: "Vote-locked USDC", decimals: 6 },
     underlying: vaultUnderlying,
-    dtfs: [
-      {
-        id: "0x00000000000000000000000000000000000000a1",
-        token: { symbol: "AAA", name: "Triple A" },
-        ownerGovernance: null,
-        tradingGovernance: null,
-        legacyAdmins: [],
-        legacyAuctionApprovers: [],
-      },
-    ],
   },
 });
 
 describe("Index DTF top voters", () => {
   it("merges chains by votes cast, formats votes in share decimals, and skips vaults without an underlying", async () => {
-    const queryIndexAll = vi.fn(async ({ chainIds }: { chainIds: readonly number[] }) =>
-      Object.fromEntries(
-        chainIds.map((chainId) => [
-          chainId,
-          {
-            delegates:
-              chainId === 1
-                ? [
-                    createDelegate("0x0000000000000000000000000000000000000001", 5),
-                    createDelegate("0x0000000000000000000000000000000000000002", 1),
-                    createDelegate("0x0000000000000000000000000000000000000004", 9, null),
-                  ]
-                : [createDelegate("0x0000000000000000000000000000000000000003", 3)],
-          },
-        ]),
-      ),
-    );
-    const client = { subgraph: { queryIndexAll } } as unknown as DtfClient;
+    const queryIndex = vi.fn(async ({ chainId, query }: { chainId: number; query: unknown; variables: unknown }) => {
+      if (isDirectoryQuery(query)) return TEST_DIRECTORY;
+      return {
+        delegates:
+          chainId === 1
+            ? [
+                createDelegate("0x0000000000000000000000000000000000000001", 5),
+                createDelegate("0x0000000000000000000000000000000000000002", 1),
+                createDelegate("0x0000000000000000000000000000000000000004", 9, null),
+              ]
+            : [createDelegate("0x0000000000000000000000000000000000000003", 3)],
+      };
+    });
+    const client = { subgraph: { queryIndex } } as unknown as DtfClient;
 
     const voters = await getTopVoters(client, { chainIds: [1, 8453], limit: 2 });
 
@@ -71,7 +58,11 @@ describe("Index DTF top voters", () => {
       delegatedVotes: { formatted: "5" },
       tokenHoldersRepresented: 2,
     });
-    expect(voters[0]!.dtfs.map((dtf) => dtf.symbol)).toEqual(["AAA"]);
-    expect(queryIndexAll.mock.calls[0]![0]).toMatchObject({ chainIds: [1, 8453], variables: { limit: 2 } });
+    expect(voters[0]!.dtfs.map((dtf) => dtf.symbol)).toEqual(["AAA", "BBB"]);
+    const voterCalls = queryIndex.mock.calls.filter((call) => !isDirectoryQuery(call[0].query));
+    expect(voterCalls.map((call) => [call[0].chainId, call[0].variables])).toEqual([
+      [1, { limit: 2 }],
+      [8453, { limit: 2 }],
+    ]);
   });
 });

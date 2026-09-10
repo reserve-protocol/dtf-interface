@@ -1,11 +1,6 @@
 import { getAddress } from "viem";
 
-import type { SupportedChainId } from "@/config";
-import type { GovernedIndexDtfsFragment } from "@/index-dtf/subgraph/dtf.generated";
 import type { Token } from "@/types/common";
-import type { GovernedIndexDtf } from "@/types/governance";
-
-import { sameAddress } from "@/lib/utils";
 
 type SubgraphVaultShare = {
   readonly id: string;
@@ -18,33 +13,6 @@ type SubgraphVaultUnderlying = {
   readonly name: string;
   readonly decimals: number;
 };
-
-/**
- * A DTF's owner/trading governances, current or legacy, each control that one
- * DTF; the vault's own DAO governance (no such match) controls every DTF staked
- * through the vault.
- */
-export function mapGovernedDtfs(
-  vault: GovernedIndexDtfsFragment,
-  chainId: SupportedChainId,
-  governanceId?: string,
-): readonly GovernedIndexDtf[] {
-  const direct = governanceId
-    ? vault.dtfs.filter((dtf) =>
-        [dtf.ownerGovernance?.id, dtf.tradingGovernance?.id, ...dtf.legacyAdmins, ...dtf.legacyAuctionApprovers].some(
-          (candidate) => candidate !== undefined && sameAddress(candidate, governanceId),
-        ),
-      )
-    : [];
-  const dtfs = direct.length > 0 ? direct : vault.dtfs;
-
-  return dtfs.map((dtf) => ({
-    address: getAddress(dtf.id),
-    chainId,
-    symbol: dtf.token.symbol,
-    name: dtf.token.name,
-  }));
-}
 
 /** The vault's share token (vlRSR-LCAP and friends); votes are denominated in it. */
 export function mapVaultShareToken(vault: SubgraphVaultShare): Token {

@@ -98,7 +98,7 @@ export async function getYieldDtfTopVoters(
 /**
  * Reads the latest Yield DTF governance events across chains, newest first:
  * votes cast, proposal lifecycle transitions (each ordered by its own
- * timestamp), and RSR stakes/unstakes.
+ * timestamp), and RSR stakes and unstake starts.
  */
 export async function getYieldDtfGovernanceActivity(
   client: DtfClient,
@@ -145,16 +145,18 @@ export async function getYieldDtfGovernanceActivity(
             proposal.cancellationTxnHash!,
           ),
         ),
-        ...data.accountStakeRecords.map(
-          (record): YieldDtfGovernanceActivity => ({
-            type: record.isStake ? "stake" : "unstake",
+        // Entries are written by the Staked / UnstakingStarted handlers only; stRSR
+        // transfers get their own entry type, so they never show up as staking.
+        ...data.entries.map(
+          (entry): YieldDtfGovernanceActivity => ({
+            type: entry.type === "STAKE" ? "stake" : "unstake",
             chainId,
-            timestamp: Number(record.timestamp),
-            txnHash: record.hash as Hex,
-            rToken: mapGovernedYieldDtf(record.account.rToken, chainId),
-            account: getAddress(record.account.account.id),
-            rsrAmount: mapAmount(record.rsrAmountRaw),
-            stRsrAmount: mapAmount(record.amountRaw),
+            timestamp: Number(entry.timestamp),
+            txnHash: entry.hash as Hex,
+            rToken: mapGovernedYieldDtf(entry.rToken!, chainId),
+            account: getAddress(entry.from.id),
+            rsrAmount: mapAmount(entry.amount!),
+            stRsrAmount: mapAmount(entry.stAmount!),
           }),
         ),
       ];

@@ -114,7 +114,10 @@ export {
   dtfIndexStakingVaultOptimisticAbi,
   extractIndexDtfDeployedAddress,
   extractIndexDtfDeployedStakingTokenAddress,
+  folioDeployerV6Abi,
   folioArtifactAbi,
+  folioV6Abi,
+  folioVersionRegistryAbi,
   generateIndexDtfDeploymentNonce,
   getAllIndexDtfProposals,
   hashIndexDtfProposalDescription,
@@ -450,7 +453,7 @@ export {
   getAccountPortfolioTransactions,
 } from "@/client/api/portfolio";
 export { getTokenData, getTokenPrices, getTokenVolatilities, getTokensData } from "@/lib/tokens";
-export type { IndexDtfRef } from "@/index-dtf/index";
+export type { IndexDtfRef, PrepareIndexDtfOpenAuctionParams } from "@/index-dtf/index";
 export type * from "@/index-dtf/dtf/basket/index";
 export type * from "@/index-dtf/governance/propose/index";
 export type * from "@/index-dtf/index";

@@ -20,6 +20,19 @@ export const indexDtfV6WriteAbi = indexDtfV6Abi;
 
 export type IndexDtfWriteVersion = "5.0.0" | "6.0.0";
 
+const INDEX_DTF_WRITE_VERSIONS: readonly IndexDtfWriteVersion[] = ["5.0.0", "6.0.0"];
+
+/** Runtime guard for every write/calldata builder: v4 and unknown releases never get v5 bytes by default. */
+export function assertIndexDtfWriteVersion(version: unknown): asserts version is IndexDtfWriteVersion {
+  if (!INDEX_DTF_WRITE_VERSIONS.includes(version as IndexDtfWriteVersion)) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `Unsupported Index DTF version: ${String(version)}`,
+      meta: { version },
+    });
+  }
+}
+
 export type IndexDtfFeeRecipient = {
   readonly recipient: Address;
   readonly portion: bigint;
@@ -130,19 +143,41 @@ export function prepareIndexDtfSetSelfFee(params: PrepareIndexDtfPercentageCallP
 export function prepareIndexDtfSetFeeRecipients(
   params: PrepareIndexDtfCallParams & {
     readonly recipients: readonly IndexDtfFeeRecipient[];
+    readonly immutableRecipients?: readonly IndexDtfFeeRecipient[];
   },
 ): IndexDtfCall {
+  const recipients = params.recipients.map(normalizeFeeRecipient);
+
+  if (params.version === "6.0.0") {
+    if (params.immutableRecipients === undefined) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: "immutableRecipients is required for Index DTF 6.0.0 fee recipient calls",
+      });
+    }
+
+    return prepareContractCall({
+      chainId: params.chainId,
+      address: params.address,
+      abi: indexDtfV6WriteAbi,
+      functionName: "setFeeRecipients",
+      args: [recipients, params.immutableRecipients.map(normalizeFeeRecipient)] as const,
+    });
+  }
+
+  if (params.immutableRecipients?.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "immutable fee recipients are only supported by Index DTF 6.0.0",
+    });
+  }
+
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: getIndexDtfWriteAbi(params.version),
+    abi: indexDtfV5WriteAbi,
     functionName: "setFeeRecipients",
-    args: [
-      params.recipients.map((recipient) => ({
-        recipient: recipient.recipient,
-        portion: recipient.portion,
-      })),
-    ] as never,
+    args: [recipients] as const,
   });
 }
 
@@ -458,6 +493,13 @@ export function prepareIndexDtfTimelockExecuteBatch(
   });
 }
 
+function normalizeFeeRecipient(recipient: IndexDtfFeeRecipient) {
+  return {
+    recipient: recipient.recipient,
+    portion: recipient.portion,
+  };
+}
+
 function encodePercent(percentage: number): bigint {
   if (!Number.isFinite(percentage) || percentage < 0) {
     throw new SdkError({
@@ -486,5 +528,7 @@ function toSeconds(value: number | bigint): bigint {
 }
 
 function getIndexDtfWriteAbi(version: IndexDtfWriteVersion) {
+  assertIndexDtfWriteVersion(version);
+
   return version === "6.0.0" ? indexDtfV6WriteAbi : indexDtfV5WriteAbi;
 }

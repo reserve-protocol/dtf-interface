@@ -1,6 +1,6 @@
 ---
 title: Core SDK Domain
-updated: 2026-09-08
+updated: 2026-09-14
 type: domain
 sources:
   - packages/sdk/src/**
@@ -28,13 +28,16 @@ sources:
 - Index DTF proposal IDs are globally unique and do not need DTF-membership checks.
 - Governance→DTF attribution (`governance/governed-dtfs.ts`) is the reverse index of `getDtfProposalGovernanceIds` over every DTF on a chain, memoized per client and chain for 60s so reads mounting together share one walk: owner, trading, and vault governances, current or legacy, each map to the DTFs that name them. Resolving from the vault's current DTF list broke after vault migrations (old MAG7 vault on Base lists no DTFs). Vault-scoped rows (top voters, totals, stake records) still use the vault's current DTFs. Vaults without an indexed `underlying` are skipped, never invented.
 - Activity feeds fetch each lifecycle transition ordered by its own timestamp (aliased root fields in one document), so an old proposal executed today still surfaces. Index vault rows skip zero-share records (a withdrawal to another receiver writes a bookkeeping row on the receiver). Yield staking rows come from `Entry` rows of type STAKE/UNSTAKE; `AccountStakeRecord` is also written for stRSR transfers and for the zero address. The Index subgraph records the caller for queue, execute, and governor cancels but not guardian cancels (they run through the timelock), so that row carries the timelock address. Yield lifecycle rows carry only the proposer because that subgraph indexes no lifecycle callers.
-- Public call builders require exact calldata and value assertions when changed.
+- Standard proposal voting power uses the exact `voteStart` snapshot, including checkpoints written at that timepoint; only current/future snapshots clamp to `clock - 1`.
+- Public call builders require exact calldata and value assertions when changed. Folio v6 basket proposals require at least two tokens, read and increment the current rebalance nonce, and require an explicit execution deadline; v5 remains the four-argument call. V6 fee-recipient writes must preserve the full immutable table.
 - GraphQL-generated output must match the configured deployed schemas; ordinary CI and `release:ci` rerun codegen and reject drift.
 - Account balance snapshots bind through both the namespace and DTF ref. `selectPriceAtMark(points, mark?)` requires timestamped points, never selects a future or non-positive price when a mark is provided, and preserves latest-positive selection when it is omitted.
 - Yield proposal lists combine indexed vote totals with the latest chain-native timepoint, so they can be eventually consistent near `voteEnd`; proposal detail reads authoritative governor state.
+
+Regression tests use complete decoded transaction payloads and independent economic fixtures. Distinct token targets, owner/trading settings, unequal basket shares, and request-sensitive historical reads expose wiring mistakes that equal inputs and unconditional mocks hide. Keep tests colocated and use tables for meaningful boundaries; the package README owns test authoring guidance.
 
 ## Current pressure
 
 Register adoption lags the published SDK. Add new core reads only when a concrete consumer cannot be migrated with the existing namespace. The full/current DTF route fields and rebalance-health boundary are implemented; current pressure is consuming them in Register and filling the consumption-driven Yield gaps in `docs/SDK_AUDIT_2026-07-09.md`.
 
-The package preserves internal modules while retaining one ergonomic root API. A consumer price reader is 15.41 kB minified/5.12 kB gzip and excludes Zod, rebalance-lib, and Decimal; `check:sdk-bundle` protects that boundary.
+The package preserves internal modules while retaining one ergonomic root API. Folio v6, FolioDeployer v6, and FolioVersionRegistry ABIs are generated from the pinned protocol checkout; sync verifies artifact source hashes and ABI digests, while release CI verifies the checked-in digests without requiring a sibling repo. The generated Folio ABI is the single source used for v6 reads, writes, and proposal decoding; do not restore duplicate `folio-artifact` or `dtf-index-abi-v6` copies. A consumer price reader is 15.41 kB minified/5.12 kB gzip and excludes Zod, rebalance-lib, and Decimal; `check:sdk-bundle` protects that boundary.

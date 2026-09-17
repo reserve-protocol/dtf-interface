@@ -9,6 +9,9 @@
     "url": "https://github.com/reserve-protocol/dtf-interface"
   },
   "scripts": {
+    "abi:index-v6:check": "node packages/sdk/scripts/sync-index-dtf-v6-abis.mjs --check",
+    "abi:index-v6:check-generated": "node packages/sdk/scripts/sync-index-dtf-v6-abis.mjs --check-generated",
+    "abi:index-v6:sync": "node packages/sdk/scripts/sync-index-dtf-v6-abis.mjs",
     "build": "turbo run build",
     "bundle:check": "pnpm --filter @reserve-protocol/sdk build && pnpm --filter @reserve-protocol/docs check:sdk-bundle",
     "clean": "turbo run clean",
@@ -26,7 +29,7 @@
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish",
-    "release:ci": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm graphql:codegen:check && pnpm test && pnpm build && pnpm --filter @reserve-protocol/docs check:sdk-bundle && pnpm docs:links && pnpm --filter @reserve-protocol/dtf-catalog check:restricted && pnpm --filter @reserve-protocol/dtf-catalog check:tokenlists && pnpm --filter @reserve-protocol/dtf-catalog pack --dry-run && pnpm --filter @reserve-protocol/sdk pack --dry-run && pnpm --filter @reserve-protocol/react-sdk pack --dry-run",
+    "release:ci": "pnpm abi:index-v6:check-generated && pnpm typecheck && pnpm lint && pnpm format:check && pnpm graphql:codegen:check && pnpm test && pnpm build && pnpm --filter @reserve-protocol/docs check:sdk-bundle && pnpm docs:links && pnpm --filter @reserve-protocol/dtf-catalog check:restricted && pnpm --filter @reserve-protocol/dtf-catalog check:tokenlists && pnpm --filter @reserve-protocol/dtf-catalog pack --dry-run && pnpm --filter @reserve-protocol/sdk pack --dry-run && pnpm --filter @reserve-protocol/react-sdk pack --dry-run",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
   },

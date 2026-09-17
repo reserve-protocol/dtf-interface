@@ -125,7 +125,15 @@ describe("Index DTF governance voting", () => {
   });
 
   it("reads proposal voter state at the proposal snapshot timepoint", async () => {
-    const multicall = vi.fn().mockResolvedValueOnce([1_000_000n]).mockResolvedValueOnce([4000000000000000000n]);
+    // The governor counts a delegation checkpoint written at voteStart itself.
+    const multicall = vi.fn(
+      async ({ contracts }: { contracts: readonly { functionName: string; args?: readonly unknown[] }[] }) =>
+        contracts.map(({ functionName, args }) => {
+          if (functionName === "clock") return 1_000_000n;
+          if (functionName === "getVotes") return args?.[1] === 999_900n ? 4000000000000000000n : 0n;
+          throw new Error(`Unexpected read: ${functionName}`);
+        }),
+    );
     const client = {
       viem: {
         getPublicClient: vi.fn(() => ({ multicall })),
@@ -165,7 +173,7 @@ describe("Index DTF governance voting", () => {
         contracts: expect.arrayContaining([
           expect.objectContaining({
             functionName: "getVotes",
-            args: ["0x0000000000000000000000000000000000000002", 999899n],
+            args: ["0x0000000000000000000000000000000000000002", 999900n],
           }),
         ]),
       }),
@@ -179,38 +187,41 @@ describe("Index DTF governance voting", () => {
     });
   });
 
-  it("clamps standard proposal voter state reads before future snapshots", async () => {
-    const multicall = vi.fn().mockResolvedValueOnce([1_000_000n]).mockResolvedValueOnce([4000000000000000000n]);
-    const client = {
-      viem: {
-        getPublicClient: vi.fn(() => ({ multicall })),
-      },
-    } as unknown as DtfClient;
+  it.each([1_000_000, 1_000_100])(
+    "clamps the standard snapshot %i at or after the current clock",
+    async (voteStart) => {
+      const multicall = vi.fn().mockResolvedValueOnce([1_000_000n]).mockResolvedValueOnce([4000000000000000000n]);
+      const client = {
+        viem: {
+          getPublicClient: vi.fn(() => ({ multicall })),
+        },
+      } as unknown as DtfClient;
 
-    await getProposalVoterState(client, {
-      chainId: 1,
-      governance: "0x0000000000000000000000000000000000000001",
-      account: "0x0000000000000000000000000000000000000002",
-      proposal: {
-        id: "1",
-        voteStart: 1_000_100,
-        voteToken: "0x0000000000000000000000000000000000000003",
-        votes: [],
-      },
-    });
+      await getProposalVoterState(client, {
+        chainId: 1,
+        governance: "0x0000000000000000000000000000000000000001",
+        account: "0x0000000000000000000000000000000000000002",
+        proposal: {
+          id: "1",
+          voteStart,
+          voteToken: "0x0000000000000000000000000000000000000003",
+          votes: [],
+        },
+      });
 
-    expect(multicall).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        contracts: expect.arrayContaining([
-          expect.objectContaining({
-            functionName: "getVotes",
-            args: ["0x0000000000000000000000000000000000000002", 999999n],
-          }),
-        ]),
-      }),
-    );
-  });
+      expect(multicall).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          contracts: expect.arrayContaining([
+            expect.objectContaining({
+              functionName: "getVotes",
+              args: ["0x0000000000000000000000000000000000000002", 999999n],
+            }),
+          ]),
+        }),
+      );
+    },
+  );
 
   it("reads optimistic proposal voter state from the vote token snapshot", async () => {
     const multicall = vi

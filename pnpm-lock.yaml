@@ -150,8 +150,8 @@ importers:
         specifier: workspace:*
         version: link:../dtf-catalog
       '@reserve-protocol/dtf-rebalance-lib':
-        specifier: ^3.2.1
-        version: 3.2.1(decimal.js-light@2.5.1)
+        specifier: ^3.3.1
+        version: 3.3.1(decimal.js-light@2.5.1)
       decimal.js-light:
         specifier: ^2.5.1
         version: 2.5.1
@@ -1464,8 +1464,9 @@ packages:
   '@repeaterjs/repeater@3.0.6':
     resolution: {integrity: sha512-Javneu5lsuhwNCryN+pXH93VPQ8g0dBX7wItHFgYiwQmzE1sVdg5tWHiOgHywzL2W21XQopa7IwIEnNbmeUJYA==}
 
-  '@reserve-protocol/dtf-rebalance-lib@3.2.1':
-    resolution: {integrity: sha512-QfxMA/rLRYlgQHJCULzNHAHxXSPGER4TcN/4r6o5qjJklC4fcSHuxaE1DUJW5eR+8zTXwuZil5JJNHTEBPco8Q==}
+  '@reserve-protocol/dtf-rebalance-lib@3.3.1':
+    resolution: {integrity: sha512-Bftvz3OV7oD1bMTJ2gguq1XMh2qUgOzUWPo7VDY6KbT4kAVdBdCBbmN1D7zMSeMSAFrQV+/jWuuntRjTlmGkqA==}
+    engines: {node: '>=20'}
     peerDependencies:
       decimal.js-light: ^2.5.1
 
@@ -6652,7 +6653,7 @@ snapshots:
 
   '@repeaterjs/repeater@3.0.6': {}
 
-  '@reserve-protocol/dtf-rebalance-lib@3.2.1(decimal.js-light@2.5.1)':
+  '@reserve-protocol/dtf-rebalance-lib@3.3.1(decimal.js-light@2.5.1)':
     dependencies:
       decimal.js-light: 2.5.1
 

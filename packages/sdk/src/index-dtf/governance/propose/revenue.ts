@@ -47,6 +47,12 @@ export function prepareRevenueDistribution(
   if (!distribution) {
     return undefined;
   }
+  if (version === "6.0.0") {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "Index DTF 6.0.0 revenue proposals require the full immutable fee recipient table",
+    });
+  }
 
   validateRevenueDistributionInput(dtf, distribution);
 

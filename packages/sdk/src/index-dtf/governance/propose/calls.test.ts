@@ -217,3 +217,15 @@ describe("Index DTF call builders", () => {
     expect(batch.contract.args[1]).toEqual([0n]);
   });
 });
+
+describe("settings builders reject unsupported write versions", () => {
+  it.each(["4.0.0", "5.1.0", undefined])("setAuctionLength / setFeeRecipients reject %s", (version) => {
+    const base = { address: "0x0000000000000000000000000000000000000001", chainId: 1 } as const;
+    expect(() =>
+      prepareIndexDtfSetAuctionLength({ ...base, version: version as never, auctionLength: 1800n } as never),
+    ).toThrow(/Unsupported Index DTF version/);
+    expect(() =>
+      prepareIndexDtfSetFeeRecipients({ ...base, version: version as never, recipients: [] } as never),
+    ).toThrow(/Unsupported Index DTF version/);
+  });
+});

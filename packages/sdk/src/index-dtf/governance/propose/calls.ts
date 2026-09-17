@@ -146,6 +146,7 @@ export function prepareIndexDtfSetFeeRecipients(
     readonly immutableRecipients?: readonly IndexDtfFeeRecipient[];
   },
 ): IndexDtfCall {
+  assertIndexDtfWriteVersion(params.version);
   const recipients = params.recipients.map(normalizeFeeRecipient);
 
   if (params.version === "6.0.0") {
@@ -182,6 +183,7 @@ export function prepareIndexDtfSetFeeRecipients(
 }
 
 export function prepareIndexDtfSetAuctionLength(params: PrepareIndexDtfAuctionLengthCallParams): IndexDtfCall {
+  assertIndexDtfWriteVersion(params.version);
   if (params.version === "6.0.0") {
     return prepareContractCall({
       chainId: params.chainId,

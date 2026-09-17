@@ -41,8 +41,17 @@ describe("Dtf client explorer", () => {
     );
     const explorer = createDtfClientExplorer({ etherscanApiKey: "key" });
 
-    await expect(explorer.getContractMetadata({ chainId: 1, address: ADDRESS })).resolves.toMatchObject({
+    await expect(explorer.getContractMetadata({ chainId: 1, address: ADDRESS })).resolves.toEqual({
       contractName: "ExternalConfigurator",
+      abi: [
+        {
+          type: "function",
+          name: "setFoo",
+          inputs: [{ name: "value", type: "uint256" }],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+      ],
     });
   });
 

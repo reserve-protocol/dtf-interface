@@ -18,7 +18,8 @@ import {
   assertUniqueAddresses,
   assertValidBasketAddresses,
 } from "@/index-dtf/dtf/basket/validation";
-import { getTotalSupply } from "@/index-dtf/dtf/index";
+import { getTotalSupply, getVersion } from "@/index-dtf/dtf/index";
+import { assertIndexDtfWriteVersion } from "@/index-dtf/governance/propose/calls";
 import { SdkError } from "@/lib/errors";
 
 export async function buildIndexDtfStartRebalance(
@@ -26,6 +27,9 @@ export async function buildIndexDtfStartRebalance(
   params: BuildIndexDtfStartRebalanceParams,
 ): Promise<BuiltIndexDtfStartRebalance> {
   const address = getAddress(params.address);
+  // No silent default: an omitted version is read from the proxy and must be a supported one.
+  const version = params.version ?? (await getVersion(client, params));
+  assertIndexDtfWriteVersion(version);
   const inputTokens = params.basket.tokens.map((token) => ({ ...token, address: getAddress(token.address) }));
   assertUniqueAddresses(inputTokens.map((token) => token.address));
   assertValidBasketAddresses(inputTokens.map((token) => token.address));
@@ -69,6 +73,7 @@ export async function buildIndexDtfStartRebalance(
   return {
     address,
     chainId: params.chainId,
+    version,
     tokens: pricedTokens,
     assets: pricedTokens.map((token, index) => ({
       token,
@@ -81,6 +86,7 @@ export async function buildIndexDtfStartRebalance(
     weightControl,
     deferWeights: params.deferWeights ?? false,
     startRebalanceArgs: buildStartRebalanceArgs({
+      version,
       tokens: pricedTokens,
       supply,
       balances,

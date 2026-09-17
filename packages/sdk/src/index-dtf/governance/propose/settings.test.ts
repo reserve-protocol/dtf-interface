@@ -595,6 +595,24 @@ describe("settings proposal builders", () => {
     expect(total).toBe(parseEther("1"));
   });
 
+  it("rejects v6 revenue proposals without the immutable recipient table", async () => {
+    await expect(
+      buildIndexDtfSettingsProposal({} as never, {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        dtf: createDtfContext(),
+        version: "6.0.0",
+        revenueDistribution: {
+          platformFee: 20,
+          governanceShare: 0,
+          deployerShare: 80,
+          additionalRecipients: [],
+        },
+      }),
+    ).rejects.toThrow("full immutable fee recipient table");
+  });
+
   it("encodes repeating revenue recipient portions", async () => {
     const proposal = await buildIndexDtfSettingsProposal({} as never, {
       address: DTF,

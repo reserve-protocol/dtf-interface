@@ -103,6 +103,65 @@ describe("prepareIndexDtfOpenAuctionArgs", () => {
     );
   });
 
+  it("passes v6 through the library's V6 branch with the auction length the calldata will use", () => {
+    const input = createInput({ version: "6.0.0", auctionLength: 1800n, rebalancePercent: 80 });
+    const built = prepareIndexDtfOpenAuctionArgs(input);
+
+    expect(built.args).toBeDefined();
+    expect(getOpenAuction).toHaveBeenCalledWith(
+      FolioVersion.V6,
+      input.rebalance,
+      1_000n,
+      900n,
+      [50n],
+      [999n],
+      [75n],
+      [6n],
+      [3.5],
+      [0.02],
+      0.8,
+      false,
+      1800n,
+    );
+  });
+
+  it("requires a positive auction length for v6 math", () => {
+    expect(() => prepareIndexDtfOpenAuctionArgs(createInput({ version: "6.0.0" }))).toThrow(/auctionLength/);
+    expect(() => prepareIndexDtfOpenAuctionArgs(createInput({ version: "6.0.0", auctionLength: 0n }))).toThrow(
+      /auctionLength/,
+    );
+    expect(getOpenAuction).not.toHaveBeenCalled();
+  });
+
+  it.each([undefined, "4.0.0", "5.1.0", "6.1.0"])("rejects unsupported version %s with a typed error", (version) => {
+    expect(() => prepareIndexDtfOpenAuctionArgs({ ...createInput(), version: version as unknown as "5.0.0" })).toThrow(
+      /Unsupported Index DTF version/,
+    );
+    expect(getOpenAuction).not.toHaveBeenCalled();
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects a current price of %s before the rebalance library sees it",
+    (price) => {
+      const input = createInput();
+
+      expect(() =>
+        prepareIndexDtfOpenAuctionArgs({
+          ...input,
+          prices: { [TOKEN_KEY]: { currentPrice: price, snapshotPrice: 1 } },
+        }),
+      ).toThrow(/missing price for token/);
+      expect(getOpenAuction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("rejects a non-finite snapshot price when the target basket uses snapshot prices", () => {
+    expect(() =>
+      prepareIndexDtfOpenAuctionArgs({ ...createInput(), initialPrices: { [TOKEN_KEY]: Number.NaN } }),
+    ).toThrow(/missing price for token/);
+    expect(getOpenAuction).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid rebalance percentages before calling the rebalance library", () => {
     expect(() => prepareIndexDtfOpenAuctionArgs(createInput({ rebalancePercent: 101 }))).toThrow(
       "rebalancePercent must be between 0 and 100",
@@ -115,6 +174,7 @@ describe("prepareIndexDtfOpenAuctionArgs", () => {
 
 function createInput(overrides: Partial<IndexDtfOpenAuctionInput> = {}): IndexDtfOpenAuctionInput {
   return {
+    version: "5.0.0",
     rebalance: {
       nonce: 7n,
       priceControl: PriceControl.NONE,

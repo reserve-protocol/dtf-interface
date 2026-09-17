@@ -37,7 +37,7 @@ pnpm docs:links
 pnpm release:ci
 ```
 
-`pnpm release:ci` runs typecheck, lint/format, live-schema GraphQL codegen freshness, tests, builds (including the docs site and SDK bundle budget), documentation/catalog checks, and package dry-runs for all publishable packages.
+`pnpm release:ci` runs checked-in ABI freshness, typecheck, lint/format, live-schema GraphQL codegen freshness, tests, builds (including the docs site and SDK bundle budget), documentation/catalog checks, and package dry-runs for all publishable packages.
 
 ## Quick Example
 

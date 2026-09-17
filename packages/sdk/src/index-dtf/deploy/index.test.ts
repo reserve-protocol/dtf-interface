@@ -1,4 +1,4 @@
-import { decodeFunctionData, encodeAbiParameters, encodeEventTopics, parseEther, type Log } from "viem";
+import { decodeFunctionData, encodeAbiParameters, encodeEventTopics, erc20Abi, parseEther, type Log } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { indexDtfDeployerAbi } from "@/index-dtf/abis/deployer";
@@ -38,7 +38,7 @@ const additionalDetails = {
   auctionLength: 1800n,
   feeRecipients: [{ recipient: OWNER, portion: parseEther("1") }],
   tvlFee: parseEther("0.0015"),
-  mintFee: parseEther("0.0015"),
+  mintFee: parseEther("0.0025"),
   mandate: "Test mandate",
 } as const;
 
@@ -87,7 +87,15 @@ describe("Index DTF deploy builders", () => {
     });
   });
 
-  it("prepares governed deployGovernedFolio calls", () => {
+  it("preserves distinct owner and trading governance in the complete deploy payload", () => {
+    const tradingGovernance = {
+      votingDelay: 60,
+      votingPeriod: 43_200,
+      proposalThreshold: parseEther("0.02"),
+      quorumThreshold: parseEther("0.04"),
+      timelockDelay: 3600n,
+      guardians: [OWNER],
+    } as const;
     const call = prepareIndexDtfDeployGoverned({
       chainId: 1,
       stToken: ST_TOKEN,
@@ -95,21 +103,26 @@ describe("Index DTF deploy builders", () => {
       additionalDetails,
       flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
       ownerGovernance: governance,
-      tradingGovernance: governance,
+      tradingGovernance,
       roles: { auctionLaunchers: [ADMIN], brandManagers: [OWNER] },
       deploymentNonce: NONCE,
     });
 
-    expect(call.to).toBe(INDEX_DTF_DEPLOYER_ADDRESS[1]);
+    expect(call).toMatchObject({ to: INDEX_DTF_DEPLOYER_ADDRESS[1], chainId: 1, value: 0n });
     const decoded = decodeFunctionData({ abi: indexDtfDeployerAbi, data: call.data });
 
-    expect(decoded.functionName).toBe("deployGovernedFolio");
-    expect(decoded.args[0]).toBe(ST_TOKEN);
-    expect(decoded.args[4]).toEqual(governance);
-    expect(decoded.args[6]).toEqual({
-      existingBasketManagers: [],
-      auctionLaunchers: [ADMIN],
-      brandManagers: [OWNER],
+    expect(decoded).toEqual({
+      functionName: "deployGovernedFolio",
+      args: [
+        ST_TOKEN,
+        basicDetails,
+        additionalDetails,
+        DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+        governance,
+        tradingGovernance,
+        { existingBasketManagers: [], auctionLaunchers: [ADMIN], brandManagers: [OWNER] },
+        NONCE,
+      ],
     });
   });
 
@@ -138,9 +151,26 @@ describe("Index DTF deploy builders", () => {
     });
 
     expect(getIndexDtfDeployApprovalAmount({ amount: 100n })).toBe(200n);
-    expect(approvals.map((approval) => approval.contract.args)).toEqual([
-      [INDEX_DTF_DEPLOYER_ADDRESS[8453], 200n],
-      [INDEX_DTF_DEPLOYER_ADDRESS[8453], 400n],
+    expect(
+      approvals.map(({ to, chainId, value, data }) => ({
+        to,
+        chainId,
+        value,
+        decoded: decodeFunctionData({ abi: erc20Abi, data }),
+      })),
+    ).toEqual([
+      {
+        to: TOKEN_A,
+        chainId: 8453,
+        value: 0n,
+        decoded: { functionName: "approve", args: [INDEX_DTF_DEPLOYER_ADDRESS[8453], 200n] },
+      },
+      {
+        to: TOKEN_B,
+        chainId: 8453,
+        value: 0n,
+        decoded: { functionName: "approve", args: [INDEX_DTF_DEPLOYER_ADDRESS[8453], 400n] },
+      },
     ]);
   });
 

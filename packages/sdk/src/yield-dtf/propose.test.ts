@@ -94,12 +94,15 @@ describe("yield DTF proposal builders", () => {
     const calls = [
       prepareYieldDtfSetPrimeBasket({ chainId: 1, address: MAIN, erc20s: [ERC20], targetAmounts: [10n ** 18n] }),
       prepareYieldDtfRefreshBasket({ chainId: 1, address: MAIN }),
+      prepareYieldDtfGrantRole({ chainId: 1, address: ACCOUNT, role: "owner", account: GOVERNOR }),
     ];
     const payload = toYieldDtfProposalPayload(GOVERNOR, "Basket change", calls);
 
-    expect(payload.governor).toBe(GOVERNOR);
-    expect(payload.targets).toEqual([MAIN, MAIN]);
-    expect(payload.calldatas).toHaveLength(2);
-    expect(payload.description).toBe("Basket change");
+    expect(payload).toEqual({
+      governor: GOVERNOR,
+      targets: [MAIN, MAIN, ACCOUNT],
+      calldatas: [calls[0]!.data, calls[1]!.data, calls[2]!.data],
+      description: "Basket change",
+    });
   });
 });

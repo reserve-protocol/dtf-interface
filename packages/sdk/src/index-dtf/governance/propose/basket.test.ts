@@ -1,8 +1,10 @@
-import { decodeFunctionData, parseEther, parseUnits, type Address, type PublicClient } from "viem";
+import { decodeFunctionData, getAddress, parseEther, parseUnits, type Address, type PublicClient } from "viem";
 import { describe, expect, it, vi } from "vitest";
 
 import { createDtfClient } from "@/client";
+import { createDtfSdk } from "@/create-dtf-sdk";
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
 import {
   buildInitialBasket,
   getBasketSharesFromUnits,
@@ -17,6 +19,30 @@ const GOVERNANCE = "0x0000000000000000000000000000000000000002";
 const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 const DAI = "0x6b175474e89094c44da98b954eedeac495271d0f";
 const WBTC = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599";
+
+// A $1 share targets 0.5 USDC ($1) and 0.25 DAI ($2), with 50% price errors.
+// Weights scale by 10^(9 + token decimals); prices by 10^(36 - token decimals).
+const EXPECTED_REBALANCE_TOKENS = [
+  {
+    token: getAddress(USDC),
+    weight: { low: 250_000_000_000_000n, spot: 500_000_000_000_000n, high: 1_000_000_000_000_000n },
+    price: { low: 500_000_000_000_000_000_000_000_000_000n, high: 2_000_000_000_000_000_000_000_000_000_001n },
+    maxAuctionSize: 100_000_000n,
+    inRebalance: true,
+  },
+  {
+    token: getAddress(DAI),
+    weight: {
+      low: 125_000_000_000_000_000_000_000_000n,
+      spot: 250_000_000_000_000_000_000_000_000n,
+      high: 500_000_000_000_000_000_000_000_000n,
+    },
+    price: { low: 1_000_000_000_000_000_000n, high: 4_000_000_000_000_000_001n },
+    maxAuctionSize: 100_000_000_000_000_000_000n,
+    inRebalance: true,
+  },
+] as const;
+const EXPECTED_REBALANCE_LIMITS = { low: 1n, spot: 1_000_000_000_000_000_000n, high: 1_000_000_000_000_000_000n };
 
 describe("basket conversion helpers", () => {
   it("converts raw units to D18 basket shares", () => {
@@ -144,12 +170,13 @@ describe("buildIndexDtfBasketProposal", () => {
       },
       prices: {
         [USDC]: 1,
-        [DAI]: 1,
+        [DAI]: 2,
       },
       priceErrors: {
         [USDC]: 0.5,
         [DAI]: 0.5,
       },
+      maxAuctionSizesUsd: { [USDC]: 100, [DAI]: 200 },
       weightControl: true,
       basket: {
         type: "shares",
@@ -180,28 +207,102 @@ describe("buildIndexDtfBasketProposal", () => {
     });
 
     expect(decoded.functionName).toBe("startRebalance");
-    expect(decoded.args[2]).toBe(3600n);
-    expect(decoded.args[3]).toBe(10_800n);
+    expect(proposal.calldatas).toHaveLength(1);
+    expect(decoded.args).toEqual([EXPECTED_REBALANCE_TOKENS, EXPECTED_REBALANCE_LIMITS, 3600n, 10_800n]);
+  });
 
-    const decodedTokens = decoded.args[0] as readonly {
-      readonly token: Address;
-      readonly inRebalance: boolean;
-      readonly maxAuctionSize: bigint;
-      readonly weight: { readonly low: bigint; readonly spot: bigint; readonly high: bigint };
-      readonly price: { readonly low: bigint; readonly high: bigint };
-    }[];
+  it.each([undefined, "6.0.0"] as const)(
+    "builds the full v6 basket through the SDK with version %s",
+    async (version) => {
+      const sdk = createDtfSdk({ client: testClient({ version: "6.0.0", rebalanceNonce: 7n }) });
+      const proposal = await sdk.index.buildBasketProposal({
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        ...(version === undefined ? {} : { version }),
+        supply: parseEther("1"),
+        currentBalances: {
+          [USDC]: parseUnits("1", 6),
+          [DAI]: 0n,
+        },
+        prices: {
+          [USDC]: 1,
+          [DAI]: 2,
+        },
+        priceErrors: {
+          [USDC]: 0.5,
+          [DAI]: 0.5,
+        },
+        maxAuctionSizesUsd: { [USDC]: 100, [DAI]: 200 },
+        weightControl: true,
+        basket: {
+          type: "shares",
+          tokens: [
+            { address: USDC, share: "50" },
+            { address: DAI, share: "50" },
+          ],
+        },
+        auctionLauncherWindow: 3600,
+        ttl: 10_800,
+        deadline: 2_000_000_000,
+      });
 
-    expect(decodedTokens.map((tokenParams) => tokenParams.token.toLowerCase())).toEqual([USDC, DAI]);
-    expect(decodedTokens.every((tokenParams) => tokenParams.inRebalance)).toBe(true);
-    expect(decodedTokens.every((tokenParams) => tokenParams.maxAuctionSize > 0n)).toBe(true);
-    expect(
-      decodedTokens.every(
-        (tokenParams) =>
-          tokenParams.weight.low <= tokenParams.weight.spot &&
-          tokenParams.weight.spot <= tokenParams.weight.high &&
-          tokenParams.price.low < tokenParams.price.high,
-      ),
-    ).toBe(true);
+      const decoded = decodeFunctionData({
+        abi: folioArtifactAbi,
+        data: proposal.calldatas[0]!,
+      });
+
+      expect(proposal.context).toMatchObject({
+        version: "6.0.0",
+        rebalanceNonce: 8n,
+        deadline: 2_000_000_000n,
+      });
+      expect(decoded.functionName).toBe("startRebalance");
+      expect(proposal.governance).toBe(GOVERNANCE);
+      expect(proposal.targets).toEqual([DTF]);
+      expect(proposal.calldatas).toHaveLength(1);
+      expect(decoded.args).toEqual([
+        8n,
+        EXPECTED_REBALANCE_TOKENS,
+        EXPECTED_REBALANCE_LIMITS,
+        3600n,
+        10_800n,
+        2_000_000_000n,
+      ]);
+    },
+  );
+
+  it("requires a deadline for v6 basket proposals", async () => {
+    await expect(
+      buildIndexDtfBasketProposal(testClient({ version: "6.0.0" }), {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        supply: parseEther("1"),
+        currentBalances: { [USDC]: parseUnits("1", 6) },
+        prices: { [USDC]: 1 },
+        priceErrors: { [USDC]: 0.5 },
+        weightControl: true,
+        basket: { type: "shares", tokens: [{ address: USDC, share: "100" }] },
+      }),
+    ).rejects.toThrow("deadline is required");
+  });
+
+  it("rejects one-token v6 rebalances", async () => {
+    await expect(
+      buildIndexDtfBasketProposal(testClient({ version: "6.0.0" }), {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        supply: parseEther("1"),
+        currentBalances: { [USDC]: parseUnits("1", 6) },
+        prices: { [USDC]: 1 },
+        priceErrors: { [USDC]: 0.5 },
+        weightControl: true,
+        deadline: 2_000_000_000,
+        basket: { type: "shares", tokens: [{ address: USDC, share: "100" }] },
+      }),
+    ).rejects.toThrow("Rebalance must include at least two tokens");
   });
 
   it("builds tracking rebalance args from unit input", async () => {
@@ -433,26 +534,35 @@ describe("buildIndexDtfBasketProposal", () => {
   });
 });
 
-function testClient() {
+function testClient(options: { readonly version?: "5.0.0" | "6.0.0"; readonly rebalanceNonce?: bigint } = {}) {
   return createDtfClient({
     chains: {
       1: {
         publicClient: {
-          multicall: vi.fn(async ({ contracts }: { contracts: unknown[] }) => {
-            const tokens = [USDC, DAI, WBTC];
-            const metadata: Record<string, readonly [string, string, number]> = {
-              [USDC]: ["USD Coin", "USDC", 6],
-              [DAI]: ["Dai Stablecoin", "DAI", 18],
-              [WBTC]: ["Wrapped Bitcoin", "WBTC", 8],
-            };
-
-            return contracts.map((_, index) => {
-              const tokenAddress = tokens[Math.floor(index / 3)]!;
-              const field = (index % 3) as 0 | 1 | 2;
-
-              return metadata[tokenAddress]![field];
-            });
+          readContract: vi.fn(async ({ functionName }: { functionName: string }) => {
+            if (functionName === "version") return options.version ?? "5.0.0";
+            if (functionName === "getRebalanceNonce") return options.rebalanceNonce ?? 0n;
+            throw new Error(`Unexpected read: ${functionName}`);
           }),
+          multicall: vi.fn(
+            async ({
+              contracts,
+            }: {
+              contracts: readonly { address: string; functionName: "name" | "symbol" | "decimals" }[];
+            }) => {
+              const metadata: Record<string, { name: string; symbol: string; decimals: number }> = {
+                [USDC]: { name: "USD Coin", symbol: "USDC", decimals: 6 },
+                [DAI]: { name: "Dai Stablecoin", symbol: "DAI", decimals: 18 },
+                [WBTC]: { name: "Wrapped Bitcoin", symbol: "WBTC", decimals: 8 },
+              };
+
+              return contracts.map(({ address, functionName }) => {
+                const value = metadata[address.toLowerCase()]?.[functionName];
+                if (value === undefined) throw new Error(`Unexpected token read: ${address}.${functionName}`);
+                return value;
+              });
+            },
+          ),
         } as unknown as PublicClient,
       },
     },

@@ -11,8 +11,12 @@ import { SdkError } from "@/lib/errors";
 export type IndexDtfLatestAuction = {
   readonly auctionId: bigint;
   readonly rebalanceNonce: bigint;
+  /** `getRebalance().nonce` at the same block; bids are rejected when it differs from `rebalanceNonce`. */
+  readonly currentRebalanceNonce: bigint;
   readonly startTime: bigint;
   readonly endTime: bigint;
+  /** Block every field above was read at. */
+  readonly blockNumber: bigint;
   readonly isActive: boolean;
 };
 
@@ -45,14 +49,22 @@ export type PrepareIndexDtfBidParams = {
   readonly data?: Hex;
 };
 
+/**
+ * Resolves one block first and pins every read to it: auction id, auction
+ * window, current rebalance nonce and timestamp all describe the same state.
+ * Folio accepts bids while `startTime <= now <= endTime` (inclusive) and only
+ * when the auction's nonce equals the current rebalance nonce.
+ */
 export async function getLatestAuction(client: DtfClient, params: DtfParams): Promise<IndexDtfLatestAuction | null> {
   const address = getAddress(params.address);
+  const block = await getAuctionBlock(client, params);
+  const blockNumber = block.number;
   const nextAuctionId = await client.viem.readContract({
     chainId: params.chainId,
     address,
     abi: dtfIndexAbi,
     functionName: "nextAuctionId",
-    blockNumber: params.blockNumber,
+    blockNumber,
   });
 
   if (nextAuctionId === 0n) {
@@ -60,22 +72,34 @@ export async function getLatestAuction(client: DtfClient, params: DtfParams): Pr
   }
 
   const auctionId = nextAuctionId - 1n;
-  const [rebalanceNonce, startTime, endTime] = await client.viem.readContract({
-    chainId: params.chainId,
-    address,
-    abi: dtfIndexAbi,
-    functionName: "auctions",
-    args: [auctionId],
-    blockNumber: params.blockNumber,
-  });
-  const now = await getAuctionTimestamp(client, params);
+  const [[rebalanceNonce, startTime, endTime], rebalance] = await Promise.all([
+    client.viem.readContract({
+      chainId: params.chainId,
+      address,
+      abi: dtfIndexAbi,
+      functionName: "auctions",
+      args: [auctionId],
+      blockNumber,
+    }),
+    client.viem.readContract({
+      chainId: params.chainId,
+      address,
+      abi: dtfIndexAbi,
+      functionName: "getRebalance",
+      blockNumber,
+    }),
+  ]);
+  const currentRebalanceNonce = (rebalance as unknown as readonly unknown[])[0] as bigint;
+  const now = block.timestamp;
 
   return {
     auctionId,
     rebalanceNonce,
+    currentRebalanceNonce,
     startTime,
     endTime,
-    isActive: startTime <= now && now < endTime,
+    blockNumber,
+    isActive: rebalanceNonce === currentRebalanceNonce && startTime <= now && now <= endTime,
   };
 }
 
@@ -85,20 +109,17 @@ export async function getActiveAuction(client: DtfClient, params: DtfParams): Pr
   return auction?.isActive ? { ...auction, isActive: true } : null;
 }
 
-async function getAuctionTimestamp(client: DtfClient, params: DtfParams): Promise<bigint> {
+async function getAuctionBlock(
+  client: DtfClient,
+  params: DtfParams,
+): Promise<{ readonly number: bigint; readonly timestamp: bigint }> {
   const publicClient = client.viem.getPublicClient(params.chainId);
+  const block =
+    params.blockNumber === undefined
+      ? await publicClient.getBlock({})
+      : await publicClient.getBlock({ blockNumber: params.blockNumber });
 
-  if (params.blockNumber === undefined) {
-    const block = await publicClient.getBlock();
-
-    return block.timestamp;
-  }
-
-  const block = await publicClient.getBlock({
-    blockNumber: params.blockNumber,
-  });
-
-  return block.timestamp;
+  return { number: block.number, timestamp: block.timestamp };
 }
 
 export async function getBidQuote(client: DtfClient, params: GetIndexDtfBidQuoteParams): Promise<IndexDtfBidQuote> {

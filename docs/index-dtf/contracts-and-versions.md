@@ -45,14 +45,14 @@ Register may label roles differently. Encode the contract role, not the UI label
 
 Only include version deltas verified from source, changelogs, or SDK ABIs. Older public docs and local contract source may not describe every deployed SDK target.
 
-| Version | Important Deltas                                                                                                                         |
-| ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `1.0.0` | Initial release.                                                                                                                         |
-| `2.0.0` | Repeatable auctions, dust limits, minimum mint output.                                                                                   |
-| `3.0.0` | Skipped/deprecated path around individual repeatable auctions against target weights.                                                    |
-| `4.0.0` | Trusted fillers, rebalance targets, auction overhaul, daily fee accounting, `AUCTION_APPROVER` replaced by `REBALANCE_MANAGER`.          |
-| `5.0.0` | SDK-supported write ABI for current deployed Index DTF settings and rebalance proposal flows.                                            |
-| `6.0.0` | SDK-supported write ABI with v6-specific settings names such as `setMaxAuctionLength`; verify function support from ABI before encoding. |
+| Version | Important Deltas                                                                                                                                              |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `1.0.0` | Initial release.                                                                                                                                              |
+| `2.0.0` | Repeatable auctions, dust limits, minimum mint output.                                                                                                        |
+| `3.0.0` | Skipped/deprecated path around individual repeatable auctions against target weights.                                                                         |
+| `4.0.0` | Trusted fillers, rebalance targets, auction overhaul, daily fee accounting, `AUCTION_APPROVER` replaced by `REBALANCE_MANAGER`.                               |
+| `5.0.0` | SDK-supported write ABI for current deployed Index DTF settings and rebalance proposal flows.                                                                 |
+| `6.0.0` | SDK-supported write ABI with explicit rebalance nonce/deadline, mutable and immutable fee-recipient tables, and settings names such as `setMaxAuctionLength`. |
 
 ## SDK Version Handling
 
@@ -60,10 +60,11 @@ The SDK handles version-specific write calls where the affected builder encodes 
 
 - v5 auction length setter: `setAuctionLength`.
 - v6 auction length setter: `setMaxAuctionLength`.
+- v6 basket proposal: `startRebalance(rebalanceNonce, tokens, limits, auctionLauncherWindow, ttl, deadline)`.
 
 Product builders should accept a known DTF version or fetch it when needed. Keep version checks local to the affected write/read handler instead of adding a central operation registry.
 
-Current rebalance/open-auction and issuance helpers are v5-shaped unless the builder explicitly accepts a version. Do not assume every write helper supports every listed version.
+The basket proposal builder supports v5 and v6. For v6 it reads the current nonce, encodes the next nonce, and requires an explicit Unix-seconds deadline. Raw v6 fee-recipient calls require both mutable and full immutable tables; the higher-level revenue-distribution proposal remains v5-only until the immutable table can be read and preserved. Open-auction and issuance helpers remain version-sensitive; do not assume every write helper supports every listed version.
 
 Source owner: SDK calldata builders are owned by `dtf-sdk/packages/sdk/src/index-dtf/governance/propose/calls.ts`; protocol mechanics are owned by the Index DTF contract repo.
 

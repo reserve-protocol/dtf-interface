@@ -58,6 +58,7 @@ That address is LCAP from `indexDtfCatalog`.
 - Always pass `call.chainId` through to simulation and wallet layers when supported.
 - Use SDK builders for versioned writes instead of hand-encoding ABI calldata.
 - DTF settings builders often need `version: "5.0.0" | "6.0.0"`; read it with `sdk.index.getVersion({ address, chainId })`.
+- V6 basket proposals require an explicit Unix-seconds `deadline`; the SDK reads the current rebalance nonce and encodes the next nonce.
 - Raw version-sensitive `prepare*` helpers should receive the target DTF version explicitly. Higher-level proposal builders may fetch the DTF version when omitted.
 - Proposal action builders prepare vote, queue, execute, and cancel calls. They do not invalidate queries after a transaction.
 
@@ -86,7 +87,7 @@ That address is LCAP from `indexDtfCatalog`.
 
 ## ABIs
 
-All contract ABIs are exported from the sdk root (and re-exported by react-sdk): `dtfIndexAbi` (+ `V1/V2/V4`), `folioArtifactAbi` (v6), governance and staking-vault ABIs, `timelockAbi`, `optimisticTimelockAbi`, `selectorRegistryAbi`, `unstakingManagerAbi`, deployer ABIs, `daoFeeRegistryAbi`, and the proposal decode set (`dtfIndexProposalAbi`, `dtfIndexProposalAbiCatalog`, `indexDtfProposalDecoderAbi`). Never copy ABIs into a consumer project.
+All contract ABIs are exported from the sdk root (and re-exported by react-sdk): `dtfIndexAbi` (+ `V1/V2/V4`), `folioV6Abi`, `folioDeployerV6Abi`, `folioVersionRegistryAbi`, the compatibility alias `folioArtifactAbi`, governance and staking-vault ABIs, `timelockAbi`, `optimisticTimelockAbi`, `selectorRegistryAbi`, `unstakingManagerAbi`, deployer ABIs, `daoFeeRegistryAbi`, and the proposal decode set (`dtfIndexProposalAbi`, `dtfIndexProposalAbiCatalog`, `indexDtfProposalDecoderAbi`). Never copy ABIs into a consumer project.
 
 ## Public Surface Discovery
 

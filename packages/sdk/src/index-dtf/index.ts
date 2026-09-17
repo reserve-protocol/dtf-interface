@@ -97,7 +97,10 @@ export { dtfIndexProposalAbi, dtfIndexProposalAbiCatalog } from "@/index-dtf/abi
 export type { DtfIndexProposalAbiCatalogEntry } from "@/index-dtf/abis/dtf-index-proposal";
 export { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 export { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
+export { folioDeployerV6Abi } from "@/index-dtf/abis/folio-deployer-v6.generated";
+export { folioV6Abi } from "@/index-dtf/abis/folio-v6.generated";
 export { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
+export { folioVersionRegistryAbi } from "@/index-dtf/abis/folio-version-registry.generated";
 export { indexDtfDeployerAbi } from "@/index-dtf/abis/deployer";
 export { indexDtfGovernanceDeployerAbi } from "@/index-dtf/abis/governance-deployer";
 export { indexDtfProposalDecoderAbi } from "@/index-dtf/abis/proposal-decoder";
@@ -230,6 +233,7 @@ export {
   prepareIndexDtfOpenAuction,
   prepareIndexDtfOpenAuctionUnrestricted,
 } from "@/index-dtf/rebalance/index";
+export type { PrepareIndexDtfOpenAuctionParams } from "@/index-dtf/rebalance/index";
 export {
   getVoteLockDao as getIndexDtfVoteLockDao,
   getVoteLockDaos as getIndexDtfVoteLockDaos,

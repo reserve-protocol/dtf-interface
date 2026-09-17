@@ -147,6 +147,19 @@ export function indexDtfBidsEnabledQueryOptions<TData = MethodResult<IndexMethod
   );
 }
 
+export function indexDtfMaxAuctionLengthQueryOptions<TData = MethodResult<IndexMethod<"getMaxAuctionLength">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getMaxAuctionLength">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getMaxAuctionLength">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.maxAuctionLength(params),
+    () => sdk.index.getMaxAuctionLength(requireParams(params, "indexDtfMaxAuctionLengthQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
 export function indexDtfRebalanceControlQueryOptions<TData = MethodResult<IndexMethod<"getRebalanceControl">>>(
   sdk: DtfSdk,
   params: MethodParams<IndexMethod<"getRebalanceControl">> | undefined,

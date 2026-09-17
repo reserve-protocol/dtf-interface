@@ -59,6 +59,7 @@ import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 import {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
+  getIndexDtfMaxAuctionLength,
   getIndexDtfPendingFeeShares,
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
@@ -130,6 +131,8 @@ export function createIndexDtfNamespace(client: DtfClient) {
       getIndexDtfAccountBalanceSnapshot(client, params),
     getTransactions: (params: Parameters<typeof getIndexDtfTransactions>[1]) => getIndexDtfTransactions(client, params),
     getBidsEnabled: (params: Parameters<typeof getIndexDtfBidsEnabled>[1]) => getIndexDtfBidsEnabled(client, params),
+    getMaxAuctionLength: (params: Parameters<typeof getIndexDtfMaxAuctionLength>[1]) =>
+      getIndexDtfMaxAuctionLength(client, params),
     getRebalanceControl: (params: Parameters<typeof getIndexDtfRebalanceControl>[1]) =>
       getIndexDtfRebalanceControl(client, params),
     getPendingFeeShares: (params: Parameters<typeof getIndexDtfPendingFeeShares>[1]) =>

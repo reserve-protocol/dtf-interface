@@ -95,6 +95,14 @@ describe("prepareIndexDtfOpenAuctionArgs with the real rebalance library", () =>
     });
   });
 
+  it("rejects an explicit v6 auctionLength that diverges from the one the math used", () => {
+    const built = prepareIndexDtfOpenAuctionArgs({ ...createInput(), version: "6.0.0", auctionLength: 1800n });
+
+    expect(() =>
+      prepareIndexDtfOpenAuction({ address: DTF, chainId: 1, version: "6.0.0", args: built.args, auctionLength: 900n }),
+    ).toThrow(/differs/);
+  });
+
   it.each([undefined, 0n, -1n])("rejects invalid v6 auctionLength %s", (auctionLength) => {
     const built = prepareIndexDtfOpenAuctionArgs(createInput());
 

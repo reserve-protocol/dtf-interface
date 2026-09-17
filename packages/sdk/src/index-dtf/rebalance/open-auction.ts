@@ -153,6 +153,17 @@ export function prepareIndexDtfOpenAuction(params: PrepareIndexDtfOpenAuctionPar
   ] as const;
 
   if (params.version === "6.0.0") {
+    if (
+      params.auctionLength !== undefined &&
+      params.args.auctionLength !== undefined &&
+      params.auctionLength !== params.args.auctionLength
+    ) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: "auctionLength differs from the length the auction args were built with",
+        meta: { auctionLength: params.auctionLength, argsAuctionLength: params.args.auctionLength },
+      });
+    }
     const auctionLength = getRequiredAuctionLength(params.auctionLength ?? params.args.auctionLength);
 
     return prepareContractCall({

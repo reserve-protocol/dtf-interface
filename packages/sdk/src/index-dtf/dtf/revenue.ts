@@ -6,6 +6,7 @@ import type { Financials, IndexDtf, IndexDtfPlatformFee, PriceControl } from "@/
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
+import { folioV6Abi } from "@/index-dtf/abis/folio-v6.generated";
 import { getDtf, getPrice } from "@/index-dtf/dtf/index";
 import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 import { prepareContractCall } from "@/lib/contract-call";
@@ -43,6 +44,23 @@ export async function getIndexDtfBidsEnabled(
     address: getAddress(params.address),
     abi: dtfIndexAbi,
     functionName: "bidsEnabled",
+    chainId: params.chainId,
+    blockNumber: params.blockNumber,
+  });
+}
+
+/**
+ * Reads Folio 6.0's `maxAuctionLength()`: the per-auction length ceiling and the
+ * only valid `openAuction` length under PriceControl NONE. Reverts on v5 proxies.
+ */
+export async function getIndexDtfMaxAuctionLength(
+  client: DtfClient,
+  params: { readonly address: Address; readonly chainId: IndexDtf["chainId"]; readonly blockNumber?: bigint },
+): Promise<bigint> {
+  return client.viem.readContract({
+    address: getAddress(params.address),
+    abi: folioV6Abi,
+    functionName: "maxAuctionLength",
     chainId: params.chainId,
     blockNumber: params.blockNumber,
   });

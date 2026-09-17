@@ -135,7 +135,8 @@ export type IndexDtfOpenAuctionInput = {
   readonly version: IndexDtfWriteVersion;
   /** Required for v6: the same length the calldata will carry (protocol requires `maxAuctionLength` for PriceControl NONE). */
   readonly auctionLength?: bigint;
-  readonly rebalance: IndexDtfCurrentRebalance;
+  /** Live rebalance state; `bidsEnabled` is not part of the auction math, so a historical read without it is accepted. */
+  readonly rebalance: Rebalance & { readonly bidsEnabled?: boolean };
   readonly tokens: readonly Token[];
   readonly supply: bigint;
   readonly initialSupply: bigint;

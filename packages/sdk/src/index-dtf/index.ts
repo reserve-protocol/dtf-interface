@@ -51,6 +51,7 @@ export {
 export {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
+  getIndexDtfMaxAuctionLength,
   getEffectiveRevenueDistribution as getIndexDtfEffectiveRevenueDistribution,
   getIndexDtfPendingFeeShares,
   getIndexDtfRebalanceControl,

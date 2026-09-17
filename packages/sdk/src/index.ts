@@ -134,6 +134,7 @@ export {
   getIndexDtfActiveAuction,
   getIndexDtfBidQuote,
   getIndexDtfBidsEnabled,
+  getIndexDtfMaxAuctionLength,
   getIndexDtfBrand,
   getIndexDtfCompletedRebalance,
   getIndexDtfCompletedRebalances,

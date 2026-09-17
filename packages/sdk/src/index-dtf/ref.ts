@@ -35,6 +35,7 @@ import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 import {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
+  getIndexDtfMaxAuctionLength,
   getIndexDtfPendingFeeShares,
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
@@ -110,6 +111,12 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
       getIndexDtfTransactions(client, { ...options, address, chainId }),
     getBidsEnabled: (options?: BlockNumberOption | BlockNumber) =>
       getIndexDtfBidsEnabled(client, {
+        address,
+        chainId,
+        ...blockParams(options),
+      }),
+    getMaxAuctionLength: (options?: BlockNumberOption | BlockNumber) =>
+      getIndexDtfMaxAuctionLength(client, {
         address,
         chainId,
         ...blockParams(options),

@@ -11,6 +11,7 @@ import {
   indexDtfApprovedRevenueTokensQueryOptions,
   indexDtfBidQuoteQueryOptions,
   indexDtfBidsEnabledQueryOptions,
+  indexDtfMaxAuctionLengthQueryOptions,
   indexDtfCompletedRebalanceQueryOptions,
   indexDtfCompletedRebalancesQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
@@ -147,6 +148,14 @@ export function useIndexDtfBidsEnabled<TData = MethodResult<IndexMethod<"getBids
 ) {
   const sdk = useDtfSdk();
   return useQuery(indexDtfBidsEnabledQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfMaxAuctionLength<TData = MethodResult<IndexMethod<"getMaxAuctionLength">>>(
+  params: MethodParams<IndexMethod<"getMaxAuctionLength">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getMaxAuctionLength">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfMaxAuctionLengthQueryOptions(sdk, params, options));
 }
 
 export function useIndexDtfRebalanceControl<TData = MethodResult<IndexMethod<"getRebalanceControl">>>(

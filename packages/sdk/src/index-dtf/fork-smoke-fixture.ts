@@ -50,7 +50,8 @@ export type ForkV5ExecutionEvidence = ForkExecutionState & {
 export type ForkV6ExecutionEvidence = ForkExecutionState & {
   readonly roleAuthority: "optimistic-governance";
   readonly governanceMechanism: "optimistic";
-  readonly authority: ForkExecutedGovernanceEvidence & { readonly kind: "standard"; readonly optimistic: false };
+  /** Absent when the sandbox found the roles already granted and skipped the proposal (recorded as id 0). */
+  readonly authority?: ForkExecutedGovernanceEvidence & { readonly kind: "standard"; readonly optimistic: false };
   readonly rebalanceProposal: ForkExecutedGovernanceEvidence & {
     readonly kind: "optimistic";
     readonly optimistic: true;
@@ -361,7 +362,11 @@ function readExecutionEvidence(
   ) {
     throw new Error(`${field} must describe the optimistic-governance path`);
   }
-  const authority = readExecutedGovernanceEvidence(execution.authority, `${field}.authority`, "standard", false);
+  const authorityRecord = readRecord(execution.authority, `${field}.authority`);
+  const authority =
+    String(authorityRecord.proposalId) === "0"
+      ? undefined
+      : readExecutedGovernanceEvidence(execution.authority, `${field}.authority`, "standard", false);
   const rebalanceProposal = readExecutedGovernanceEvidence(
     execution.rebalanceProposal,
     `${field}.rebalanceProposal`,
@@ -375,27 +380,34 @@ function readExecutionEvidence(
     throw new Error(`${field} deadlines must match writePaths.deadline`);
   }
   if (
-    context.creationBlock >= authority.proposalBlock ||
-    authority.proposalBlock >= authority.executeBlock ||
-    authority.executeBlock >= rebalanceProposal.proposalBlock ||
+    context.creationBlock >= rebalanceProposal.proposalBlock ||
     rebalanceProposal.proposalBlock >= rebalanceProposal.executeBlock ||
     rebalanceProposal.executeBlock !== rebalanceBlock ||
     rebalanceProposal.executeTxHash.toLowerCase() !== rebalanceTxHash.toLowerCase()
   ) {
     throw new Error(`${field} governance, rebalance, and transaction linkage is inconsistent`);
   }
-  if (
-    authority.proposalId === rebalanceProposal.proposalId ||
-    authority.proposalTxHash.toLowerCase() === rebalanceProposal.proposalTxHash.toLowerCase()
-  ) {
-    throw new Error(`${field} authority and rebalance proposals must be distinct`);
+  if (authority !== undefined) {
+    if (
+      context.creationBlock >= authority.proposalBlock ||
+      authority.proposalBlock >= authority.executeBlock ||
+      authority.executeBlock >= rebalanceProposal.proposalBlock
+    ) {
+      throw new Error(`${field} authority proposal must sit between creation and the rebalance proposal`);
+    }
+    if (
+      authority.proposalId === rebalanceProposal.proposalId ||
+      authority.proposalTxHash.toLowerCase() === rebalanceProposal.proposalTxHash.toLowerCase()
+    ) {
+      throw new Error(`${field} authority and rebalance proposals must be distinct`);
+    }
   }
 
   return {
     ...common,
     roleAuthority: "optimistic-governance",
     governanceMechanism: "optimistic",
-    authority: { ...authority, kind: "standard", optimistic: false },
+    ...(authority ? { authority: { ...authority, kind: "standard" as const, optimistic: false as const } } : {}),
     rebalanceProposal: { ...rebalanceProposal, kind: "optimistic", optimistic: true },
     deadline,
   };

@@ -6,11 +6,18 @@ import {
   getTargetBasket,
   type WeightRange,
 } from "@reserve-protocol/dtf-rebalance-lib";
+import { decodeFunctionData } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { IndexDtfOpenAuctionInput } from "@/index-dtf/rebalance/types";
 
-import { prepareIndexDtfOpenAuctionArgs } from "@/index-dtf/rebalance/open-auction";
+import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
+import {
+  prepareIndexDtfOpenAuctionArgs,
+  prepareIndexDtfOpenAuctionUnrestricted,
+} from "@/index-dtf/rebalance/open-auction";
+import { SdkError } from "@/lib/errors";
 
 vi.mock("@reserve-protocol/dtf-rebalance-lib", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@reserve-protocol/dtf-rebalance-lib")>();
@@ -221,3 +228,28 @@ function createInput(overrides: Partial<IndexDtfOpenAuctionInput> = {}): IndexDt
     ...overrides,
   };
 }
+
+describe("prepareIndexDtfOpenAuctionUnrestricted", () => {
+  it("encodes the community launch identically for 5.0.0 and 6.0.0 and rejects other versions", () => {
+    const address = "0x0000000000000000000000000000000000000001";
+    const v5 = prepareIndexDtfOpenAuctionUnrestricted({ address, chainId: 56, version: "5.0.0", rebalanceNonce: 12n });
+    const v6 = prepareIndexDtfOpenAuctionUnrestricted({ address, chainId: 56, version: "6.0.0", rebalanceNonce: 12n });
+
+    expect(v6.data).toBe(v5.data);
+    expect(decodeFunctionData({ abi: dtfIndexAbi, data: v5.data })).toEqual({
+      functionName: "openAuctionUnrestricted",
+      args: [12n],
+    });
+    expect(v5.contract.abi).toBe(dtfIndexAbi);
+    expect(v6.contract.abi).toBe(folioArtifactAbi);
+    const build = () =>
+      prepareIndexDtfOpenAuctionUnrestricted({
+        address,
+        chainId: 56,
+        version: "4.0.0" as unknown as "5.0.0",
+        rebalanceNonce: 12n,
+      });
+    expect(build).toThrow(SdkError);
+    expect(build).toThrow(expect.objectContaining({ code: "INVALID_INPUT", meta: { version: "4.0.0" } }));
+  });
+});

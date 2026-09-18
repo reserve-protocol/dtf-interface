@@ -3,8 +3,10 @@ import { getAddress, type Address, type Hex } from "viem";
 import type { DtfClient } from "@/client";
 import type { SupportedChainId } from "@/config";
 import type { DtfParams } from "@/types/common";
+import type { IndexDtfCall } from "@/types/governance";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { getIndexDtfWriteAbi, type IndexDtfWriteVersion } from "@/index-dtf/write-version";
 import { prepareContractCall } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
 
@@ -40,6 +42,7 @@ export type GetIndexDtfBidQuoteParams = DtfParams & {
 export type PrepareIndexDtfBidParams = {
   readonly address: Address;
   readonly chainId: SupportedChainId;
+  readonly version: IndexDtfWriteVersion;
   readonly auctionId: bigint;
   readonly sellToken: Address;
   readonly buyToken: Address;
@@ -135,7 +138,7 @@ export async function getBidQuote(client: DtfClient, params: GetIndexDtfBidQuote
   return { sellAmount, bidAmount, price };
 }
 
-export function prepareIndexDtfBid(params: PrepareIndexDtfBidParams) {
+export function prepareIndexDtfBid(params: PrepareIndexDtfBidParams): IndexDtfCall {
   if (params.sellAmount <= 0n) {
     throw new SdkError({
       code: "INVALID_INPUT",
@@ -147,7 +150,7 @@ export function prepareIndexDtfBid(params: PrepareIndexDtfBidParams) {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: dtfIndexAbi,
+    abi: getIndexDtfWriteAbi(params.version),
     functionName: "bid",
     args: [
       params.auctionId,
@@ -164,22 +167,27 @@ export function prepareIndexDtfBid(params: PrepareIndexDtfBidParams) {
 export function prepareIndexDtfCloseAuction(params: {
   readonly address: Address;
   readonly chainId: SupportedChainId;
+  readonly version: IndexDtfWriteVersion;
   readonly auctionId: bigint;
-}) {
+}): IndexDtfCall {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: dtfIndexAbi,
+    abi: getIndexDtfWriteAbi(params.version),
     functionName: "closeAuction",
     args: [params.auctionId] as const,
   });
 }
 
-export function prepareIndexDtfEndRebalance(params: { readonly address: Address; readonly chainId: SupportedChainId }) {
+export function prepareIndexDtfEndRebalance(params: {
+  readonly address: Address;
+  readonly chainId: SupportedChainId;
+  readonly version: IndexDtfWriteVersion;
+}): IndexDtfCall {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: dtfIndexAbi,
+    abi: getIndexDtfWriteAbi(params.version),
     functionName: "endRebalance",
     args: [] as const,
   });

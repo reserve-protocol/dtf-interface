@@ -8,10 +8,11 @@ import type {
   IndexDtfTargetBasketPriceMode,
   OpenAuctionArgs,
 } from "@/index-dtf/rebalance/types";
+import type { IndexDtfCall } from "@/types/governance";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
-import { assertIndexDtfWriteVersion, type IndexDtfWriteVersion } from "@/index-dtf/governance/propose/calls";
+import { assertIndexDtfWriteVersion, getIndexDtfWriteAbi, type IndexDtfWriteVersion } from "@/index-dtf/write-version";
 import { prepareContractCall } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
 
@@ -188,12 +189,13 @@ export function prepareIndexDtfOpenAuction(params: PrepareIndexDtfOpenAuctionPar
 export function prepareIndexDtfOpenAuctionUnrestricted(params: {
   readonly address: Address;
   readonly chainId: SupportedChainId;
+  readonly version: IndexDtfWriteVersion;
   readonly rebalanceNonce: bigint;
-}) {
+}): IndexDtfCall {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: dtfIndexAbi,
+    abi: getIndexDtfWriteAbi(params.version),
     functionName: "openAuctionUnrestricted",
     args: [params.rebalanceNonce] as const,
   });

@@ -15,7 +15,8 @@ const [pendingFeeShares, platformFee, revenue] = await Promise.all([
 ## Distribute Fees
 
 ```ts
-const call = sdk.index.prepareDistributeFees({ address, chainId });
+const version = await sdk.index.getVersion({ address, chainId });
+const call = sdk.index.prepareDistributeFees({ address, chainId, version });
 ```
 
 Apps decide when to expose this action.

@@ -40,9 +40,11 @@ const quote = await sdk.index.getBidQuote({
   maxSellAmount,
 });
 
+const version = await sdk.index.getVersion({ address, chainId }); // "5.0.0" | "6.0.0"
 const bid = sdk.index.prepareBid({
   address,
   chainId,
+  version,
   auctionId,
   sellToken,
   buyToken,

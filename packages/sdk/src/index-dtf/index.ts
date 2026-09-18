@@ -226,6 +226,7 @@ export {
   getRebalance as getIndexDtfRebalance,
   getRebalanceAuctions as getIndexDtfRebalanceAuctions,
   getRebalances as getIndexDtfRebalances,
+  getIndexDtfRebalanceNonce,
   INDEX_DTF_ONDO_LIMIT_BUFFER,
   prepareIndexDtfBid,
   prepareIndexDtfCloseAuction,

@@ -4,34 +4,29 @@ import type { SupportedChainId } from "@/config";
 import type { IndexDtfCall } from "@/types/governance";
 import type { PriceControl } from "@/types/index-dtf";
 
-import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
-import { folioArtifactAbi as indexDtfV6Abi } from "@/index-dtf/abis/folio-artifact";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
+import {
+  assertIndexDtfWriteVersion,
+  getIndexDtfWriteAbi,
+  indexDtfV5WriteAbi,
+  indexDtfV6WriteAbi,
+  type IndexDtfWriteVersion,
+} from "@/index-dtf/write-version";
 import { prepareContractCall } from "@/lib/contract-call";
 import { Decimal } from "@/lib/decimal";
 import { SdkError } from "@/lib/errors";
 import { toUint, toUintNumber } from "@/lib/utils";
 
-export const indexDtfV5WriteAbi = indexDtfV5Abi;
-export const indexDtfV6WriteAbi = indexDtfV6Abi;
-
-export type IndexDtfWriteVersion = "5.0.0" | "6.0.0";
-
-const INDEX_DTF_WRITE_VERSIONS: readonly IndexDtfWriteVersion[] = ["5.0.0", "6.0.0"];
-
-/** Runtime guard for every write/calldata builder: v4 and unknown releases never get v5 bytes by default. */
-export function assertIndexDtfWriteVersion(version: unknown): asserts version is IndexDtfWriteVersion {
-  if (!INDEX_DTF_WRITE_VERSIONS.includes(version as IndexDtfWriteVersion)) {
-    throw new SdkError({
-      code: "INVALID_INPUT",
-      message: `Unsupported Index DTF version: ${String(version)}`,
-      meta: { version },
-    });
-  }
-}
+export {
+  assertIndexDtfWriteVersion,
+  getIndexDtfWriteAbi,
+  indexDtfV5WriteAbi,
+  indexDtfV6WriteAbi,
+  type IndexDtfWriteVersion,
+} from "@/index-dtf/write-version";
 
 export type IndexDtfFeeRecipient = {
   readonly recipient: Address;
@@ -527,10 +522,4 @@ function toSeconds(value: number | bigint): bigint {
   }
 
   return BigInt(Math.round(value));
-}
-
-function getIndexDtfWriteAbi(version: IndexDtfWriteVersion) {
-  assertIndexDtfWriteVersion(version);
-
-  return version === "6.0.0" ? indexDtfV6WriteAbi : indexDtfV5WriteAbi;
 }

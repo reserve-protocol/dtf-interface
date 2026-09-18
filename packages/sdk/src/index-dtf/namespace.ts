@@ -75,6 +75,7 @@ import {
   getBidQuote,
   getLatestAuction,
   getIndexDtfCurrentRebalance,
+  getIndexDtfRebalanceNonce,
   getIndexDtfExceededOndoLegs,
   getIndexDtfMaxSafeRebalancePercent,
   getIndexDtfRebalanceLegSizes,
@@ -166,6 +167,8 @@ export function createIndexDtfNamespace(client: DtfClient) {
     getRebalanceAuctions: (params: Parameters<typeof getRebalanceAuctions>[1]) => getRebalanceAuctions(client, params),
     getCurrentRebalance: (params: Parameters<typeof getIndexDtfCurrentRebalance>[1]) =>
       getIndexDtfCurrentRebalance(client, params),
+    getRebalanceNonce: (params: Parameters<typeof getIndexDtfRebalanceNonce>[1]) =>
+      getIndexDtfRebalanceNonce(client, params),
     getRebalanceLiquidity: (params: Parameters<typeof getIndexDtfRebalanceLiquidity>[1]) =>
       getIndexDtfRebalanceLiquidity(client, params),
     buildRebalanceLiquidityTrades: buildIndexDtfRebalanceLiquidityTrades,

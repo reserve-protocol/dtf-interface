@@ -33,6 +33,7 @@ import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
 import { DEFAULT_INDEX_DTF_DEPLOY_FLAGS } from "@/index-dtf/deploy";
 import { readForkSmokeConfig } from "@/index-dtf/fork-smoke-fixture";
 import {
+  getIndexDtfWriteAbi,
   indexDtfV5WriteAbi,
   indexDtfV6WriteAbi,
   prepareIndexDtfSetMandate,
@@ -321,7 +322,7 @@ forkDescribe("Index DTF deterministic fork smoke", () => {
           },
         });
         const decodedProposal = decodeFunctionData({ abi: governorWriteAbi, data: proposal.data });
-        const writeAbi = scenario.expectedVersion === "6.0.0" ? indexDtfV6WriteAbi : indexDtfV5WriteAbi;
+        const writeAbi = getIndexDtfWriteAbi(scenario.expectedVersion);
         const decodedCalls = calls.map((call) => decodeFunctionData({ abi: writeAbi, data: call.data }));
 
         expect(proposal.to, scenario.label).toBe(scenario.governance);

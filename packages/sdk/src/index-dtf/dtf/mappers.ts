@@ -146,9 +146,21 @@ export function mapIndexDtf(dtf: SubgraphIndexDtf, chainId: SupportedChainId): I
           },
         }
       : {}),
+    ...(dtf.version ? { version: dtf.version } : {}),
     rebalance: {
       auctionDelay: Number(dtf.auctionDelay),
       auctionLength: Number(dtf.auctionLength),
+      ...(dtf.maxAuctionLength === null || dtf.maxAuctionLength === undefined
+        ? {}
+        : { maxAuctionLength: Number(dtf.maxAuctionLength) }),
+      ...(dtf.tradeAllowlistEnabled === null || dtf.tradeAllowlistEnabled === undefined
+        ? {}
+        : {
+            tradeAllowlist: {
+              enabled: dtf.tradeAllowlistEnabled,
+              tokens: (dtf.tradeTokenAllowlist ?? []).map((token) => getAddress(token)),
+            },
+          }),
       ...(dtf.bidsEnabled === null || dtf.bidsEnabled === undefined ? {} : { bidsEnabled: dtf.bidsEnabled }),
       ...(dtf.trustedFillerRegistry ? { trustedFillerRegistry: getAddress(dtf.trustedFillerRegistry) } : {}),
       ...(dtf.trustedFillerEnabled === null || dtf.trustedFillerEnabled === undefined
@@ -162,6 +174,8 @@ export function mapIndexDtf(dtf: SubgraphIndexDtf, chainId: SupportedChainId): I
       tvlFee: mapAmount(dtf.tvlFee, 18),
       annualizedTvlFee: Number(mapAmount(dtf.annualizedTvlFee, 18).formatted),
       recipients: mapFeeRecipients(dtf.feeRecipients),
+      immutableRecipients: mapFeeRecipients(dtf.immutableFeeRecipients ?? ""),
+      selfFee: mapAmount(dtf.folioFeeForSelf ?? 0n, 18),
     },
     // NOTE: revenue fields are subgraph BigDecimal analytics values (already in
     // human units), kept as display-class numbers on purpose. On-chain integer

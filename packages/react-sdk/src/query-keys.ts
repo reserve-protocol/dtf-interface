@@ -217,6 +217,18 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "max-auction-length", keyParams(params)] as const,
     rebalanceNonce: (params?: IndexMethodParams<"getRebalanceNonce">) =>
       [...dtfQueryKeys.index.all(), "rebalance-nonce", keyParams(params)] as const,
+    selfFee: (params?: IndexMethodParams<"getSelfFee">) =>
+      [...dtfQueryKeys.index.all(), "self-fee", keyParams(params)] as const,
+    immutableFeeRecipients: (params?: IndexMethodParams<"getImmutableFeeRecipients">) =>
+      [...dtfQueryKeys.index.all(), "immutable-fee-recipients", keyParams(params)] as const,
+    tradeAllowlist: (params?: IndexMethodParams<"getTradeAllowlist">) =>
+      [...dtfQueryKeys.index.all(), "trade-allowlist", keyParams(params)] as const,
+    isTokenAllowlisted: (params?: IndexMethodParams<"getIsTokenAllowlisted">) =>
+      [...dtfQueryKeys.index.all(), "is-token-allowlisted", keyParams(params)] as const,
+    latestVersion: (params?: IndexMethodParams<"getLatestVersion">) =>
+      [...dtfQueryKeys.index.all(), "latest-version", keyParams(params)] as const,
+    versionDeployment: (params?: IndexMethodParams<"getVersionDeployment">) =>
+      [...dtfQueryKeys.index.all(), "version-deployment", keyParams(params)] as const,
     rebalanceControl: (params?: IndexMethodParams<"getRebalanceControl">) =>
       [...dtfQueryKeys.index.all(), "rebalance-control", keyParams(params)] as const,
     rebalances: (params?: IndexMethodParams<"getRebalances">) =>

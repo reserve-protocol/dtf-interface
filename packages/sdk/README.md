@@ -123,8 +123,10 @@ The opt-in Index DTF fork smoke verifies four scenarios prepared by an external 
 - v5 Folios upgraded to v6 through optimistic and legacy governance;
 - a Folio created directly on v6.
 
-The SDK test is read-only. The fixture runner owns fork startup, deployments, upgrade transactions, and standard
-governance deployment. The smoke independently matches each declared upgrade proposal to its on-chain
+The lane runs two files. `fork-smoke.test.ts` is read-only: the fixture runner owns fork startup, deployments,
+upgrade transactions, and standard governance deployment. `fork-smoke-v6.test.ts` writes (impersonated senders,
+an `evm_increaseTime` warp) strictly under `evm_snapshot`/`evm_revert`, so it leaves the indexed state untouched;
+run it after the subgraph parity test, which `sandbox.sh all` already orders. The smoke independently matches each declared upgrade proposal to its on-chain
 `ProposalCreated`/`ProposalExecuted` logs and executed Governor state. Run it after those transitions are mined:
 
 ```sh

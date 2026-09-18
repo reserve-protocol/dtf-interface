@@ -2,6 +2,7 @@ import { decodeFunctionData, encodeAbiParameters, encodeEventTopics, erc20Abi, p
 import { describe, expect, it } from "vitest";
 
 import { indexDtfDeployerAbi } from "@/index-dtf/abis/deployer";
+import { folioDeployerV6Abi } from "@/index-dtf/abis/folio-deployer-v6.generated";
 import { indexDtfGovernanceDeployerAbi } from "@/index-dtf/abis/governance-deployer";
 import {
   buildIndexDtfDeployFeeRecipients,
@@ -9,14 +10,17 @@ import {
   extractIndexDtfDeployedAddress,
   extractIndexDtfDeployedStakingTokenAddress,
   getIndexDtfDeployApprovalAmount,
+  getIndexDtfDeployerAddress,
   INDEX_DTF_DEPLOYER_ADDRESS,
   INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
   prepareIndexDtfDeploy,
   prepareIndexDtfDeployAssetApprovals,
   prepareIndexDtfDeployGoverned,
+  prepareIndexDtfDeployGovernedPlan,
   prepareIndexDtfDeployPlan,
   prepareIndexDtfDeployStakingToken,
 } from "@/index-dtf/deploy/index";
+import { SdkError } from "@/lib/errors";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const OWNER = "0x0000000000000000000000000000000000000002";
@@ -40,6 +44,35 @@ const additionalDetails = {
   tvlFee: parseEther("0.0015"),
   mintFee: parseEther("0.0025"),
   mandate: "Test mandate",
+} as const;
+
+// The only known Folio 6.0 deployer: the mainnet sandbox fixture (index-subgraph/.fork/fixture.json).
+const V6_DEPLOYER = "0x388dB009b7984E673938AC20480194D4481bEF11";
+
+const additionalDetailsV6 = {
+  maxAuctionLength: 1800n,
+  feeRecipients: [{ recipient: OWNER, portion: parseEther("0.7") }],
+  immutableFeeRecipients: [{ recipient: ST_TOKEN, portion: parseEther("0.3") }],
+  tvlFee: parseEther("0.0015"),
+  mintFee: parseEther("0.0025"),
+  selfFee: parseEther("0.05"),
+  mandate: "Test mandate",
+} as const;
+
+const optimisticGovernance = {
+  optimistic: { vetoDelay: 3600, vetoPeriod: 86_400, vetoThreshold: parseEther("0.1") },
+  standard: {
+    votingDelay: 0,
+    votingPeriod: 86_400,
+    voteExtension: 600,
+    proposalThreshold: parseEther("0.01"),
+    quorumNumerator: 3n,
+  },
+  optimisticSelectors: ["0xc1e54b89"],
+  optimisticProposers: [ADMIN],
+  additionalGuardians: [OWNER],
+  timelockDelay: 86_400n,
+  proposalThrottleCapacity: 5n,
 } as const;
 
 const governance = {
@@ -72,6 +105,7 @@ describe("Index DTF deploy builders", () => {
   it("prepares ungoverned deployFolio calls", () => {
     const call = prepareIndexDtfDeploy({
       chainId: 8453,
+      version: "5.0.0",
       basicDetails,
       additionalDetails,
       flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
@@ -98,6 +132,7 @@ describe("Index DTF deploy builders", () => {
     } as const;
     const call = prepareIndexDtfDeployGoverned({
       chainId: 1,
+      version: "5.0.0",
       stToken: ST_TOKEN,
       basicDetails,
       additionalDetails,
@@ -124,6 +159,169 @@ describe("Index DTF deploy builders", () => {
         NONCE,
       ],
     });
+  });
+
+  it("encodes Folio 6.0 deployFolio against the explicit v6 deployer with the v6 additional details", () => {
+    const call = prepareIndexDtfDeploy({
+      chainId: 1,
+      version: "6.0.0",
+      deployer: V6_DEPLOYER,
+      basicDetails,
+      additionalDetails: additionalDetailsV6,
+      flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+      owner: OWNER,
+      auctionLaunchers: [ADMIN],
+      deploymentNonce: NONCE,
+    });
+
+    expect(call).toMatchObject({ to: V6_DEPLOYER, chainId: 1, value: 0n });
+    expect(decodeFunctionData({ abi: folioDeployerV6Abi, data: call.data })).toEqual({
+      functionName: "deployFolio",
+      args: [
+        basicDetails,
+        {
+          maxAuctionLength: 1800n,
+          feeRecipients: [{ recipient: OWNER, portion: parseEther("0.7") }],
+          immutableFeeRecipients: [{ recipient: ST_TOKEN, portion: parseEther("0.3") }],
+          tvlFee: parseEther("0.0015"),
+          mintFee: parseEther("0.0025"),
+          folioFeeForSelf: parseEther("0.05"),
+          mandate: "Test mandate",
+        },
+        DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+        OWNER,
+        [],
+        [ADMIN],
+        [],
+        NONCE,
+      ],
+    });
+    expect(() => decodeFunctionData({ abi: indexDtfDeployerAbi, data: call.data })).toThrow();
+  });
+
+  it("encodes Folio 6.0 deployGovernedFolio with one optimistic governance table", () => {
+    const call = prepareIndexDtfDeployGoverned({
+      chainId: 8453,
+      version: "6.0.0",
+      deployer: V6_DEPLOYER,
+      stToken: ST_TOKEN,
+      basicDetails,
+      additionalDetails: additionalDetailsV6,
+      flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+      governance: optimisticGovernance,
+      roles: { auctionLaunchers: [ADMIN] },
+      deploymentNonce: NONCE,
+    });
+
+    expect(call.to).toBe(V6_DEPLOYER);
+    const decoded = decodeFunctionData({ abi: folioDeployerV6Abi, data: call.data });
+    expect(decoded.functionName).toBe("deployGovernedFolio");
+    expect(decoded.args?.[4]).toEqual({
+      optimisticParams: { vetoDelay: 3600, vetoPeriod: 86_400, vetoThreshold: parseEther("0.1") },
+      standardParams: {
+        votingDelay: 0,
+        votingPeriod: 86_400,
+        voteExtension: 600,
+        proposalThreshold: parseEther("0.01"),
+        quorumNumerator: 3n,
+      },
+      optimisticSelectors: ["0xc1e54b89"],
+      optimisticProposers: [ADMIN],
+      additionalGuardians: [OWNER],
+      timelockDelay: 86_400n,
+      proposalThrottleCapacity: 5n,
+    });
+    expect(decoded.args?.[5]).toEqual({ existingBasketManagers: [], auctionLaunchers: [ADMIN], brandManagers: [] });
+    expect(decoded.args?.[6]).toBe(NONCE);
+  });
+
+  it("points v6 plan approvals at the explicit deployer", () => {
+    const plan = prepareIndexDtfDeployGovernedPlan({
+      chainId: 8453,
+      version: "6.0.0",
+      deployer: V6_DEPLOYER,
+      stToken: ST_TOKEN,
+      basicDetails,
+      additionalDetails: additionalDetailsV6,
+      flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+      governance: optimisticGovernance,
+      approvals: [{ token: TOKEN_A, amount: 100n }],
+    });
+
+    expect(plan.type).toBe("approval-required");
+    if (plan.type !== "approval-required") throw new Error("expected approvals");
+    expect(decodeFunctionData({ abi: erc20Abi, data: plan.approvals[0]!.data })).toEqual({
+      functionName: "approve",
+      args: [V6_DEPLOYER, 100n],
+    });
+  });
+
+  it("routes ungoverned v6 plan approvals and plural approvals to the given deployer", () => {
+    const plan = prepareIndexDtfDeployPlan({
+      chainId: 1,
+      version: "6.0.0",
+      deployer: V6_DEPLOYER,
+      basicDetails,
+      additionalDetails: additionalDetailsV6,
+      flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+      owner: OWNER,
+      approvals: [{ token: TOKEN_A, amount: 100n }],
+    });
+    if (plan.type !== "approval-required") throw new Error("expected approvals");
+    expect(decodeFunctionData({ abi: erc20Abi, data: plan.approvals[0]!.data }).args).toEqual([V6_DEPLOYER, 100n]);
+
+    const approvals = prepareIndexDtfDeployAssetApprovals({
+      chainId: 1,
+      assets: [TOKEN_A, TOKEN_B],
+      amounts: [100n, 200n],
+      deployer: V6_DEPLOYER,
+    });
+    expect(approvals.map((approval) => decodeFunctionData({ abi: erc20Abi, data: approval.data }).args)).toEqual([
+      [V6_DEPLOYER, 200n],
+      [V6_DEPLOYER, 400n],
+    ]);
+  });
+
+  it("rejects out-of-range v6 details and malformed optimistic selectors", () => {
+    const base = {
+      chainId: 1,
+      version: "6.0.0",
+      deployer: V6_DEPLOYER,
+      basicDetails,
+      flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+      owner: OWNER,
+    } as const;
+    expect(() =>
+      prepareIndexDtfDeploy({ ...base, additionalDetails: { ...additionalDetailsV6, maxAuctionLength: 60n } }),
+    ).toThrow("maxAuctionLength");
+    expect(() =>
+      prepareIndexDtfDeployGoverned({
+        ...base,
+        stToken: ST_TOKEN,
+        additionalDetails: additionalDetailsV6,
+        governance: { ...optimisticGovernance, optimisticSelectors: [NONCE] },
+      }),
+    ).toThrow("4-byte");
+  });
+
+  it("rejects a self fee above 100% and unknown deploy versions", () => {
+    const build = () =>
+      prepareIndexDtfDeploy({
+        chainId: 1,
+        version: "6.0.0",
+        deployer: V6_DEPLOYER,
+        basicDetails,
+        additionalDetails: { ...additionalDetailsV6, selfFee: parseEther("1.01") },
+        flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+        owner: OWNER,
+      });
+    expect(build).toThrow(SdkError);
+    expect(build).toThrow(expect.objectContaining({ code: "INVALID_INPUT" }));
+
+    const unknown = () => getIndexDtfDeployerAddress({ chainId: 1, version: "4.0.0" as unknown as "5.0.0" });
+    expect(unknown).toThrow(SdkError);
+    expect(unknown).toThrow(expect.objectContaining({ code: "INVALID_INPUT", meta: { version: "4.0.0" } }));
+    expect(getIndexDtfDeployerAddress({ chainId: 56, version: "5.0.0" })).toBe(INDEX_DTF_DEPLOYER_ADDRESS[56]);
   });
 
   it("prepares governed staking token deploy calls", () => {
@@ -177,6 +375,7 @@ describe("Index DTF deploy builders", () => {
   it("prepares deploy plans with approvals on the deploy chain", () => {
     const plan = prepareIndexDtfDeployPlan({
       chainId: 8453,
+      version: "5.0.0",
       basicDetails,
       additionalDetails,
       flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,

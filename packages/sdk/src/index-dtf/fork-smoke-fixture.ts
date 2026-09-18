@@ -8,20 +8,7 @@ import type { SupportedChainId } from "@/config";
 
 import { dtfAdminProposalAbi } from "@/index-dtf/abis/dtf-admin-proposal";
 import { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
-
-const upgradeSpellEvidenceAbi = [
-  {
-    type: "function",
-    name: "cast",
-    inputs: [
-      { name: "folio", type: "address" },
-      { name: "proxyAdmin", type: "address" },
-      { name: "selectorRegistry", type: "address" },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-] as const;
+import { upgradeSpell600Abi } from "@/index-dtf/abis/upgrade-spell-6-0-0";
 
 export type ForkUpgradeProposalEvidence = {
   readonly proposalId: bigint;
@@ -110,6 +97,7 @@ export type ForkSmokeConfig = {
     readonly versionRegistry: Address;
     readonly upgradeSpell: Address;
     readonly upgradeSpellSourceCommit: string;
+    readonly startRebalanceSelectors: { readonly "5.0.0": Hex; readonly "6.0.0": Hex };
   };
   readonly scenarios: readonly [ForkScenario, ForkScenario, ForkScenario, ForkScenario];
 };
@@ -204,6 +192,7 @@ export function parseForkSmokeManifest(input: unknown, rpcUrlOverride?: string):
       versionRegistry,
       upgradeSpell,
       upgradeSpellSourceCommit,
+      startRebalanceSelectors: { "5.0.0": v5StartRebalanceSelector, "6.0.0": v6StartRebalanceSelector },
     },
     scenarios: parsedScenarios,
   };
@@ -573,7 +562,7 @@ function assertUpgradeCallPath(context: {
   if (transfer.functionName !== "transferOwnership" || transfer.args[0] !== context.upgradeSpell) {
     throw new Error(`scenarios.${label}.proposal must transfer ProxyAdmin ownership to the upgrade spell`);
   }
-  const cast = decodeFunctionData({ abi: upgradeSpellEvidenceAbi, data: calldatas[callIndex]! });
+  const cast = decodeFunctionData({ abi: upgradeSpell600Abi, data: calldatas[callIndex]! });
   const expectedSelectorRegistry = context.governanceKind === "optimistic" ? context.selectorRegistry : zeroAddress;
   if (
     cast.functionName !== "cast" ||

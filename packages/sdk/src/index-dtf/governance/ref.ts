@@ -4,6 +4,8 @@ import type {
   BuildIndexDtfBasketSettingsProposalParams,
   BuildIndexDtfDaoSettingsProposalParams,
   BuildIndexDtfSettingsProposalParams,
+  BuildIndexDtfUpgradeToV6CallsParams,
+  BuildIndexDtfUpgradeToV6ProposalParams,
 } from "@/index-dtf/governance/propose/index";
 import type { DtfParams } from "@/types/common";
 import type {
@@ -47,6 +49,8 @@ import {
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
+  buildIndexDtfUpgradeToV6Calls,
+  buildIndexDtfUpgradeToV6Proposal,
 } from "@/index-dtf/governance/propose/index";
 
 /** Creates address-bound Index DTF governance methods for the flat ref. */
@@ -98,6 +102,10 @@ export function createIndexDtfGovernanceRef(client: DtfClient, params: DtfParams
       }),
     buildSettingsProposal: (proposal: Omit<BuildIndexDtfSettingsProposalParams, "address" | "chainId">) =>
       buildIndexDtfSettingsProposal(client, { ...proposal, address, chainId }),
+    buildUpgradeToV6Calls: (params: Omit<BuildIndexDtfUpgradeToV6CallsParams, "address" | "chainId">) =>
+      buildIndexDtfUpgradeToV6Calls({ ...params, address, chainId }),
+    buildUpgradeToV6Proposal: (params: Omit<BuildIndexDtfUpgradeToV6ProposalParams, "address" | "chainId">) =>
+      buildIndexDtfUpgradeToV6Proposal(client, { ...params, address, chainId }),
     prepareVote: (call: Omit<Parameters<typeof prepareIndexDtfVote>[0], "chainId">) =>
       prepareIndexDtfVote({ ...call, chainId }),
     prepareQueueProposal: (call: Omit<Parameters<typeof prepareIndexDtfQueueProposal>[0], "chainId">) =>

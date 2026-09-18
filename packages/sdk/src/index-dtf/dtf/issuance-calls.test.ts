@@ -8,6 +8,7 @@ import {
   prepareIndexDtfMintPlan,
   prepareIndexDtfRedeem,
 } from "@/index-dtf/dtf/issuance-calls";
+import { SdkError } from "@/lib/errors";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const RECEIVER = "0x0000000000000000000000000000000000000002";
@@ -19,6 +20,7 @@ describe("Index DTF issuance call helpers", () => {
     const call = prepareIndexDtfMint({
       address: DTF,
       chainId: 8453,
+      version: "5.0.0",
       shares: 1000n,
       receiver: RECEIVER,
       minSharesOut: 987n,
@@ -35,6 +37,7 @@ describe("Index DTF issuance call helpers", () => {
     const call = prepareIndexDtfRedeem({
       address: DTF,
       chainId: 1,
+      version: "5.0.0",
       shares: 10n ** 18n,
       receiver: RECEIVER,
       assets: [USDC, DAI],
@@ -52,6 +55,7 @@ describe("Index DTF issuance call helpers", () => {
     const plan = prepareIndexDtfMintPlan({
       address: DTF,
       chainId: 8453,
+      version: "5.0.0",
       shares: 1000n,
       receiver: RECEIVER,
       minSharesOut: 987n,
@@ -85,6 +89,7 @@ describe("Index DTF issuance call helpers", () => {
     const plan = prepareIndexDtfMintPlan({
       address: DTF,
       chainId: 1,
+      version: "5.0.0",
       shares: 1000n,
       receiver: RECEIVER,
       minSharesOut: 987n,
@@ -114,5 +119,21 @@ describe("Index DTF issuance call helpers", () => {
     expect(() => getIndexDtfRedeemMinAmounts({ amounts: [100n], slippageBps })).toThrow(
       "slippageBps must be an integer between 0 and 10000",
     );
+  });
+
+  it("encodes identical mint bytes on 5.0.0 and 6.0.0 and rejects other versions", () => {
+    const input = {
+      address: DTF,
+      chainId: 8453,
+      shares: 10n,
+      receiver: "0x0000000000000000000000000000000000000002",
+      minSharesOut: 9n,
+    } as const;
+    expect(prepareIndexDtfMint({ ...input, version: "6.0.0" }).data).toBe(
+      prepareIndexDtfMint({ ...input, version: "5.0.0" }).data,
+    );
+    const build = () => prepareIndexDtfMint({ ...input, version: "4.0.0" as unknown as "5.0.0" });
+    expect(build).toThrow(SdkError);
+    expect(build).toThrow(expect.objectContaining({ code: "INVALID_INPUT", meta: { version: "4.0.0" } }));
   });
 });

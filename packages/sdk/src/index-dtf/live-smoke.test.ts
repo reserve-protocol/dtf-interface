@@ -12,6 +12,7 @@ import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-gove
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
 import { DEFAULT_INDEX_DTF_DEPLOY_FLAGS } from "@/index-dtf/deploy/index";
+import { getIndexDtfVersionHash } from "@/index-dtf/version-registry";
 import { prepareErc20Approval } from "@/lib/contract-call";
 
 const BASE_CHAIN_ID = 8453;
@@ -263,6 +264,20 @@ smokeDescribe("Index DTF live smoke", () => {
       ).toBe("proposeOptimistic");
     }, 180_000);
 
+    it(`${smokeCase.label}: reads the Folio version registry on every supported chain`, async () => {
+      for (const chainId of [1, BASE_CHAIN_ID, 56] as const) {
+        const latest = await sdk.index.getLatestVersion({ chainId });
+        const deployment = await sdk.index.getVersionDeployment({ chainId, version: latest.version });
+
+        expect(latest.version, `chain ${chainId}`).toMatch(/^\d+\.\d+\.\d+$/);
+        expect(latest.versionHash).toBe(getIndexDtfVersionHash(latest.version));
+        expect(latest.deployer).not.toBe(zeroAddress);
+        expect(deployment).toMatchObject({ deployer: latest.deployer, deprecated: latest.deprecated });
+        expect(deployment?.implementation).not.toBe(zeroAddress);
+        await expect(sdk.index.getVersionDeployment({ chainId, version: "0.0.0" })).resolves.toBeNull();
+      }
+    }, 120_000);
+
     it(`${smokeCase.label}: validates revenue, issuance, vote-lock, and rebalance surfaces`, async () => {
       const { dtf, version } = await getContext(smokeCase);
       const stToken = expectVoteLock(dtf);
@@ -343,6 +358,7 @@ smokeDescribe("Index DTF live smoke", () => {
       });
       const mint = sdk.index.prepareMint({
         chainId: BASE_CHAIN_ID,
+        version,
         address: smokeCase.address,
         shares: 1n,
         receiver: SMOKE_ACCOUNT,
@@ -350,6 +366,7 @@ smokeDescribe("Index DTF live smoke", () => {
       });
       const redeem = sdk.index.prepareRedeem({
         chainId: BASE_CHAIN_ID,
+        version,
         address: smokeCase.address,
         shares: 1n,
         receiver: SMOKE_ACCOUNT,
@@ -560,6 +577,7 @@ smokeDescribe("Index DTF live smoke", () => {
       } as const;
       const deploy = sdk.index.prepareDeploy({
         chainId: BASE_CHAIN_ID,
+        version: "5.0.0",
         basicDetails: deployBasicDetails,
         additionalDetails: deployAdditionalDetails,
         flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
@@ -568,6 +586,7 @@ smokeDescribe("Index DTF live smoke", () => {
       });
       const governedDeploy = sdk.index.prepareDeployGoverned({
         chainId: BASE_CHAIN_ID,
+        version: "5.0.0",
         stToken,
         basicDetails: deployBasicDetails,
         additionalDetails: deployAdditionalDetails,
@@ -578,6 +597,7 @@ smokeDescribe("Index DTF live smoke", () => {
       });
       const deployPlan = sdk.index.prepareDeployPlan({
         chainId: BASE_CHAIN_ID,
+        version: "5.0.0",
         basicDetails: deployBasicDetails,
         additionalDetails: deployAdditionalDetails,
         flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,

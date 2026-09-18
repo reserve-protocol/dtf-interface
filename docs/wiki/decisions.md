@@ -1,6 +1,6 @@
 ---
 title: Decisions
-updated: 2026-08-25
+updated: 2026-09-18
 type: decision
 ---
 
@@ -39,3 +39,7 @@ Package publishing runs directly on pushes to `main` or manual dispatches select
 ## 2026-09-08 — Cross-DTF governance reads live in the SDK, per product
 
 The internal governance dashboard needs protocol-wide views (all proposals, top voters, activity, staking totals). Those reads belong in the SDK so Register's explorer can drop its raw GraphQL later, but they stay per product (`sdk.index.*` and `sdk.yield.*` with the same names) rather than a merged namespace: the two subgraphs disagree on attribution (vault vs rToken), lifecycle actors, and state derivation, and the dashboard merges rows itself. Governance→DTF attribution follows owner/trading governance first and falls back to every DTF on the vault only for the vault DAO governance. Arbitrum is out of scope: the SDK has no Arbitrum chain and Index DTFs are not deployed there.
+
+## 2026-09-18 — Every Folio write takes a version; v6 reads are RPC-only until the subgraph ships
+
+The SDK never picks a Folio ABI silently: every write builder (auction, settings, fee distribution, deploy) takes `version` and rejects anything but 5.0.0 / 6.0.0, even where the calldata is byte-identical, so a v4 or unknown proxy cannot receive v5 bytes by default. Folio 6.0 state a write needs exactly (self fee, immutable fee recipients, allowlist) is read from RPC at one pinned block; the DTF and revenue models stay subgraph-shaped and gain the v6 fields with the subgraph release rather than through RPC fallbacks; the immutable table is confirmed with a v6 probe and a boundary read so a v5 proxy or a transport failure never reads as an empty table. Fee tables are validated at build time to FolioLib's rules (sorted, non-zero, not the folio, ≤64, total 1e18 across both tables) because a bad table otherwise reverts only after a governance vote. v6 deploys require an explicit deployer address: no public 6.0.0 `FolioDeployer` is registered, and a speculative chain map would encode against nothing. The 5.0.0 → 6.0.0 upgrade builder reproduces the reviewed spell proposal byte for byte and takes the spell address as input for the same reason.

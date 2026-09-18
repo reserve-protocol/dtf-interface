@@ -139,11 +139,13 @@ describe("Index DTF namespace", () => {
     const directMint = namespace.prepareMint({
       address,
       chainId: 1,
+      version: "5.0.0",
       shares: 1n,
       receiver: account,
       minSharesOut: 1n,
     });
     const refMint = dtf.prepareMint({
+      version: "5.0.0",
       shares: 1n,
       receiver: account,
       minSharesOut: 1n,

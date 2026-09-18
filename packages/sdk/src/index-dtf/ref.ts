@@ -12,6 +12,13 @@ import type {
 import { getIndexDtfAccountBalanceSnapshot } from "@/index-dtf/dtf/account-pnl";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 import {
+  getIndexDtfImmutableFeeRecipients,
+  getIndexDtfIsTokenAllowlisted,
+  getIndexDtfMaxAuctionLength,
+  getIndexDtfSelfFee,
+  getIndexDtfTradeAllowlist,
+} from "@/index-dtf/dtf/folio-v6";
+import {
   getBasket,
   getBasketSnapshot,
   getBrand,
@@ -35,7 +42,6 @@ import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 import {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
-  getIndexDtfMaxAuctionLength,
   getIndexDtfPendingFeeShares,
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
@@ -193,6 +199,13 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
       getLatestAuction(client, { address, chainId, ...blockParams(options) }),
     getRebalanceNonce: (options?: BlockNumberOption | BlockNumber) =>
       getIndexDtfRebalanceNonce(client, { address, chainId, ...blockParams(options) }),
+    getSelfFee: (options?: BlockNumberOption | BlockNumber) =>
+      getIndexDtfSelfFee(client, { address, chainId, ...blockParams(options) }),
+    getImmutableFeeRecipients: (options?: BlockNumberOption | BlockNumber) =>
+      getIndexDtfImmutableFeeRecipients(client, { address, chainId, ...blockParams(options) }),
+    getTradeAllowlist: (options?: BlockNumberOption | BlockNumber) =>
+      getIndexDtfTradeAllowlist(client, { address, chainId, ...blockParams(options) }),
+    getIsTokenAllowlisted: (token: Address) => getIndexDtfIsTokenAllowlisted(client, { address, chainId, token }),
     getBidQuote: (quote: Omit<Parameters<typeof getBidQuote>[1], "address" | "chainId">) =>
       getBidQuote(client, { ...quote, address, chainId }),
     prepareBid: (call: Omit<Parameters<typeof prepareIndexDtfBid>[0], "address" | "chainId">) =>

@@ -34,8 +34,6 @@ import { DEFAULT_INDEX_DTF_DEPLOY_FLAGS } from "@/index-dtf/deploy";
 import { readForkSmokeConfig } from "@/index-dtf/fork-smoke-fixture";
 import {
   getIndexDtfWriteAbi,
-  indexDtfV5WriteAbi,
-  indexDtfV6WriteAbi,
   prepareIndexDtfSetMandate,
   prepareIndexDtfSetName,
 } from "@/index-dtf/governance/propose/calls";
@@ -432,6 +430,7 @@ forkDescribe("Index DTF deterministic fork smoke", () => {
       const state = await getFixtureState(scenario);
       const call = sdk.index.prepareDeploy({
         chainId: config.chainId,
+        version: "5.0.0",
         basicDetails: {
           name: "Fork smoke deploy",
           symbol: "fsDTF",

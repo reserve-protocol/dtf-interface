@@ -14,13 +14,14 @@ import {
 
 ## Helpers
 
-| Helper                                       | Use                                                  |
-| -------------------------------------------- | ---------------------------------------------------- |
-| `generateIndexDtfDeploymentNonce`            | Generate a deployment nonce.                         |
-| `sdk.index.buildDeployFeeRecipients`         | Build deploy fee-recipient config.                   |
-| `sdk.index.getDeployApprovalAmount`          | Apply an approval buffer to an initial asset amount. |
-| `extractIndexDtfDeployedAddress`             | Extract DTF address from deployment logs.            |
-| `extractIndexDtfDeployedStakingTokenAddress` | Extract staking token address from deployment logs.  |
+| Helper                                       | Use                                                        |
+| -------------------------------------------- | ---------------------------------------------------------- |
+| `generateIndexDtfDeploymentNonce`            | Generate a deployment nonce.                               |
+| `sdk.index.buildDeployFeeRecipients`         | Build deploy fee-recipient config.                         |
+| `sdk.index.getDeployApprovalAmount`          | Apply an approval buffer to an initial asset amount.       |
+| `extractIndexDtfDeployedAddress`             | Extract DTF address from deployment logs.                  |
+| `getIndexDtfDeployerAddress`                 | Resolve the deployer for `{ chainId, version, deployer }`. |
+| `extractIndexDtfDeployedStakingTokenAddress` | Extract staking token address from deployment logs.        |
 
 ## Builders
 
@@ -34,11 +35,19 @@ import {
 | `prepareDeployAssetApproval`  | Approval for one deploy asset.                     |
 | `prepareDeployAssetApprovals` | Approval calls for deploy assets.                  |
 
+## Versions
+
+Every DTF deploy builder (`prepareDeploy`, `prepareDeployGoverned` and their plans) takes `version`. `"5.0.0"` deploys through the registered per-chain `FolioDeployer`
+(`INDEX_DTF_DEPLOYER_ADDRESS`). `"6.0.0"` needs an explicit `deployer` address until a public Folio 6.0 deployer is
+registered (check with `sdk.index.getLatestVersion({ chainId })`), a v6 `additionalDetails` shape, and for governed
+deploys one optimistic `governance` table. Approvals from a plan target whichever deployer the plan resolved.
+
 ## Basic Shape
 
 ```ts
 const plan = sdk.index.prepareDeployPlan({
   chainId: 8453,
+  version: "5.0.0",
   basicDetails: {
     name: "Example Index DTF",
     symbol: "eDTF",
@@ -69,6 +78,7 @@ Governed deployments include an existing vote-lock token plus owner and trading 
 ```ts
 const call = sdk.index.prepareDeployGoverned({
   chainId,
+  version: "5.0.0",
   stToken,
   basicDetails,
   additionalDetails,
@@ -91,6 +101,45 @@ const call = sdk.index.prepareDeployGoverned({
   },
 });
 ```
+
+## Folio 6.0 Deployment
+
+```ts
+const call = sdk.index.prepareDeployGoverned({
+  chainId,
+  version: "6.0.0",
+  deployer, // the v6 FolioDeployer address you are deploying against
+  stToken,
+  basicDetails,
+  additionalDetails: {
+    maxAuctionLength: 1800n,
+    feeRecipients,
+    immutableFeeRecipients: [],
+    tvlFee: 0n,
+    mintFee: 0n,
+    selfFee: 0n, // D18 fraction of non-DAO fees kept for holders, at most 1e18
+    mandate: "Example mandate",
+  },
+  flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+  governance: {
+    optimistic: { vetoDelay: 3600, vetoPeriod: 86400, vetoThreshold: 100000000000000000n },
+    standard: {
+      votingDelay: 0,
+      votingPeriod: 86400,
+      voteExtension: 600,
+      proposalThreshold: 10000000000000000n,
+      quorumNumerator: 3n,
+    },
+    optimisticSelectors: ["0xc1e54b89"], // startRebalance(uint256,...) on 6.0.0
+    optimisticProposers: [],
+    additionalGuardians: [],
+    timelockDelay: 86400n,
+    proposalThrottleCapacity: 5n,
+  },
+});
+```
+
+Ungoverned v6 deploys use the same `version`, `deployer` and `additionalDetails` with `prepareDeploy`.
 
 ## Approval Buffer
 

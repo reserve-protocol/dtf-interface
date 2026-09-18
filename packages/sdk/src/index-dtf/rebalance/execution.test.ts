@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { DtfClient } from "@/client";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
 import {
   getActiveAuction,
   getBidQuote,
@@ -12,6 +13,7 @@ import {
   prepareIndexDtfCloseAuction,
   prepareIndexDtfEndRebalance,
 } from "@/index-dtf/rebalance/execution";
+import { SdkError } from "@/lib/errors";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const SELL_TOKEN = "0x0000000000000000000000000000000000000002";
@@ -206,6 +208,7 @@ describe("Index DTF rebalance execution", () => {
     const bid = prepareIndexDtfBid({
       address: DTF,
       chainId: 8453,
+      version: "5.0.0",
       auctionId: 4n,
       sellToken: SELL_TOKEN,
       buyToken: BUY_TOKEN,
@@ -217,9 +220,10 @@ describe("Index DTF rebalance execution", () => {
     const close = prepareIndexDtfCloseAuction({
       address: DTF,
       chainId: 8453,
+      version: "5.0.0",
       auctionId: 4n,
     });
-    const end = prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453 });
+    const end = prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453, version: "5.0.0" });
 
     expect([bid, close, end].map(({ to, chainId, value }) => ({ to, chainId, value }))).toEqual([
       { to: DTF, chainId: 8453, value: 0n },
@@ -233,11 +237,68 @@ describe("Index DTF rebalance execution", () => {
     ]);
   });
 
+  it("encodes bid, close auction and end rebalance identically for 5.0.0 and 6.0.0", () => {
+    const bidInput = {
+      address: DTF,
+      chainId: 8453,
+      auctionId: 4n,
+      sellToken: SELL_TOKEN,
+      buyToken: BUY_TOKEN,
+      sellAmount: 100n,
+      maxBuyAmount: 130n,
+    } as const;
+
+    const v5 = [
+      prepareIndexDtfBid({ ...bidInput, version: "5.0.0" }),
+      prepareIndexDtfCloseAuction({ address: DTF, chainId: 8453, version: "5.0.0", auctionId: 4n }),
+      prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453, version: "5.0.0" }),
+    ];
+    const v6 = [
+      prepareIndexDtfBid({ ...bidInput, version: "6.0.0" }),
+      prepareIndexDtfCloseAuction({ address: DTF, chainId: 8453, version: "6.0.0", auctionId: 4n }),
+      prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453, version: "6.0.0" }),
+    ];
+
+    expect(v6.map((call) => call.data)).toEqual(v5.map((call) => call.data));
+    expect(v6.map((call) => decodeFunctionData({ abi: folioArtifactAbi, data: call.data }).functionName)).toEqual([
+      "bid",
+      "closeAuction",
+      "endRebalance",
+    ]);
+    expect(v5.map((call) => call.contract.abi === dtfIndexAbi)).toEqual([true, true, true]);
+    expect(v6.map((call) => call.contract.abi === folioArtifactAbi)).toEqual([true, true, true]);
+  });
+
+  it("rejects versions the write contract does not admit", () => {
+    const version = "4.0.0" as unknown as "5.0.0";
+    const builders = [
+      () =>
+        prepareIndexDtfBid({
+          address: DTF,
+          chainId: 8453,
+          version,
+          auctionId: 4n,
+          sellToken: SELL_TOKEN,
+          buyToken: BUY_TOKEN,
+          sellAmount: 100n,
+          maxBuyAmount: 130n,
+        }),
+      () => prepareIndexDtfCloseAuction({ address: DTF, chainId: 8453, version, auctionId: 4n }),
+      () => prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453, version }),
+    ];
+
+    for (const build of builders) {
+      expect(build).toThrow(SdkError);
+      expect(build).toThrow(expect.objectContaining({ code: "INVALID_INPUT", meta: { version: "4.0.0" } }));
+    }
+  });
+
   it("rejects zero-size bids", () => {
     expect(() =>
       prepareIndexDtfBid({
         address: DTF,
         chainId: 1,
+        version: "5.0.0",
         auctionId: 4n,
         sellToken: SELL_TOKEN,
         buyToken: BUY_TOKEN,

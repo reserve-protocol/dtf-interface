@@ -23,6 +23,7 @@ import {
   type IndexDtfStartRebalanceVersion,
 } from "@/index-dtf/dtf/basket/index";
 import { getDtf, getVersion } from "@/index-dtf/dtf/index";
+import { getIndexDtfRebalanceNonce } from "@/index-dtf/rebalance/current";
 import { prepareContractCall } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
 
@@ -177,15 +178,7 @@ async function getBasketProposalVersion(
 }
 
 async function getNextRebalanceNonce(client: DtfClient, params: DtfParams): Promise<bigint> {
-  const nonce = await client.viem.readContract({
-    chainId: params.chainId,
-    address: getAddress(params.address),
-    abi: folioArtifactAbi,
-    functionName: "getRebalanceNonce",
-    blockNumber: params.blockNumber,
-  });
-
-  return nonce + 1n;
+  return (await getIndexDtfRebalanceNonce(client, params)) + 1n;
 }
 
 function getRequiredDeadline(deadline: number | bigint | undefined): bigint {

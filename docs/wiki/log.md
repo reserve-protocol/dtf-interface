@@ -1,6 +1,6 @@
 ---
 title: Log
-updated: 2026-09-14
+updated: 2026-09-18
 type: log
 ---
 
@@ -56,3 +56,7 @@ Append-only chronological record: lessons, corrections, friction. Newest section
 
 - Fast-forwarded the v6 integration branch from `7a67fe3` to main `972bd25` (SDK/React SDK 0.6.0), then reapplied the uncommitted v6 and test-hardening work. Recovery stash `153f1cf` retains the original tracked and untracked state. Both public barrels and package settings merged cleanly; SDK domain notes required combining both sets of invariants. The wiki union merge duplicated ledger rows/frontmatter and displaced log dates, so those were reconciled without dropping either history. No workflow tooling change was needed.
 - Added public proposal-read cases combining generated v6 calldata decoding with six/eight-decimal vote weights, quorum, and vote rows. Independent review verified upstream exports and all non-overlapping local files were preserved. Full gate passed (SDK 380, React 85; 25 live/fork checks not run), as did generated ABI verification and live-schema codegen freshness. Existing RPC voter-state formatting still assumes 18 decimals and was recorded in backlog, not changed as part of integration. The v6/snapshot patch remains subject to engineer review; nothing was pushed or published.
+
+## 2026-09-18
+
+- v6 completion S1: the last five version-blind Folio write builders now take `version`; the ABI selector moved out of `governance/propose/calls.ts` into `index-dtf/write-version.ts` after both reviewers flagged three domains importing a governance internal. Annotating the builders with `IndexDtfCall` was required, not cosmetic: a union ABI through `prepareContractCall` blew TS7056 on the namespace and ref objects. The nonce query sits at the live tier because it is a write input. Register consumes the SDK through `link:`, so its community launch button breaks on the next SDK build, not on a re-pin.

@@ -2,6 +2,7 @@ import { getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
 import type { Amount, Token } from "@/types/common";
+import type { IndexDtfCall } from "@/types/governance";
 import type { Financials, IndexDtf, IndexDtfPlatformFee, PriceControl } from "@/types/index-dtf";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
@@ -9,6 +10,7 @@ import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vaul
 import { folioV6Abi } from "@/index-dtf/abis/folio-v6.generated";
 import { getDtf, getPrice } from "@/index-dtf/dtf/index";
 import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
+import { getIndexDtfWriteAbi, type IndexDtfWriteVersion } from "@/index-dtf/write-version";
 import { prepareContractCall } from "@/lib/contract-call";
 import { Decimal } from "@/lib/decimal";
 import { getTokensData } from "@/lib/tokens";
@@ -164,11 +166,12 @@ export function getEffectiveRevenueDistribution(
 export function prepareIndexDtfDistributeFees(params: {
   readonly address: Address;
   readonly chainId: IndexDtf["chainId"];
-}) {
+  readonly version: IndexDtfWriteVersion;
+}): IndexDtfCall {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: dtfIndexAbi,
+    abi: getIndexDtfWriteAbi(params.version),
     functionName: "distributeFees",
     args: [] as const,
   });

@@ -197,7 +197,7 @@ smokeDescribe("Index DTF live smoke", () => {
     }, 180_000);
 
     it(`${smokeCase.label}: validates optimistic governance expectations`, async () => {
-      const { dtf } = await getContext(smokeCase);
+      const { dtf, version } = await getContext(smokeCase);
       const optimisticGovernances = getGovernanceAuthorities(dtf).filter(
         (authority) => authority.governance.isOptimistic,
       );
@@ -254,7 +254,7 @@ smokeDescribe("Index DTF live smoke", () => {
         proposal: {
           governance: optimistic.governance,
           targets: [dtf.id],
-          calldatas: [sdk.index.prepareDistributeFees({ address: dtf.id, chainId: BASE_CHAIN_ID }).data],
+          calldatas: [sdk.index.prepareDistributeFees({ address: dtf.id, chainId: BASE_CHAIN_ID, version }).data],
           description: "Smoke optimistic proposal",
         },
       });
@@ -264,7 +264,7 @@ smokeDescribe("Index DTF live smoke", () => {
     }, 180_000);
 
     it(`${smokeCase.label}: validates revenue, issuance, vote-lock, and rebalance surfaces`, async () => {
-      const { dtf } = await getContext(smokeCase);
+      const { dtf, version } = await getContext(smokeCase);
       const stToken = expectVoteLock(dtf);
       const voteLockDaoPromise = smokeCase.expectsVoteLockDao
         ? sdk.index.getVoteLockDao({ address: smokeCase.address, chainId: BASE_CHAIN_ID })
@@ -330,7 +330,11 @@ smokeDescribe("Index DTF live smoke", () => {
         expect(Array.isArray(auctions)).toBe(true);
       }
 
-      const distributeFees = sdk.index.prepareDistributeFees({ address: smokeCase.address, chainId: BASE_CHAIN_ID });
+      const distributeFees = sdk.index.prepareDistributeFees({
+        address: smokeCase.address,
+        chainId: BASE_CHAIN_ID,
+        version,
+      });
       const approval = sdk.index.prepareBasketApproval({
         chainId: BASE_CHAIN_ID,
         address: smokeCase.address,

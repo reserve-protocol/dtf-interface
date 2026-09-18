@@ -160,6 +160,20 @@ export function indexDtfMaxAuctionLengthQueryOptions<TData = MethodResult<IndexM
   );
 }
 
+export function indexDtfRebalanceNonceQueryOptions<TData = MethodResult<IndexMethod<"getRebalanceNonce">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getRebalanceNonce">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getRebalanceNonce">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.rebalanceNonce(params),
+    () => sdk.index.getRebalanceNonce(requireParams(params, "indexDtfRebalanceNonceQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
 export function indexDtfRebalanceControlQueryOptions<TData = MethodResult<IndexMethod<"getRebalanceControl">>>(
   sdk: DtfSdk,
   params: MethodParams<IndexMethod<"getRebalanceControl">> | undefined,

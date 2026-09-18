@@ -20,7 +20,8 @@ const activeAuction = await sdk.index.getActiveAuction({
 });
 ```
 
-Both auction readers resolve one block first and pin every read to it. An auction is active only while
+`getRebalanceNonce` reads Folio 6.0's `getRebalanceNonce()` (the value the next `startRebalance` must exceed by one);
+it reverts on a v5 proxy. Both auction readers resolve one block first and pin every read to it. An auction is active only while
 `startTime <= now <= endTime` (inclusive, exactly as Folio's `bid` checks) **and** its `rebalanceNonce` equals the
 current rebalance nonce read at the same block; a time-valid auction left over from a previous rebalance is reported
 with `isActive: false`. The result carries `currentRebalanceNonce` and `blockNumber` so callers can reason about
@@ -62,6 +63,7 @@ const quote = await sdk.index.getBidQuote({
 const call = sdk.index.prepareBid({
   address,
   chainId,
+  version,
   auctionId: 1n,
   sellToken,
   buyToken,
@@ -70,9 +72,11 @@ const call = sdk.index.prepareBid({
 });
 ```
 
-`prepareOpenAuctionArgs` and `prepareOpenAuction` require `version` (`"5.0.0"` or `"6.0.0"`, read it from
-`getVersion`) and reject anything else with `SdkError(INVALID_INPUT)`; there is no silent v5 default and Folio 4.x is
-not supported by these builders. For Folio 6.0 pass the positive `auctionLength` once, to the args builder: it drives
+Every auction builder (`prepareOpenAuctionArgs`, `prepareOpenAuction`, `prepareOpenAuctionUnrestricted`,
+`prepareBid`, `prepareCloseAuction`, `prepareEndRebalance`) and the revenue builder `prepareDistributeFees` require
+`version` (`"5.0.0"` or `"6.0.0"`, read it from `getVersion`) and reject anything else with `SdkError(INVALID_INPUT)`;
+there is no silent v5 default and Folio 4.x is not supported by these builders. Where the call shape is identical in
+both versions the bytes are too; the ABI attached to the prepared call follows the version. For Folio 6.0 pass the positive `auctionLength` once, to the args builder: it drives
 the library's v6 math and is carried into the encoded sixth argument. Use `maxAuctionLength()` from RPC unless the
 rebalance's price control allows a shorter custom length.
 

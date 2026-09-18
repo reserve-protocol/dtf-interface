@@ -215,6 +215,8 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "bids-enabled", keyParams(params)] as const,
     maxAuctionLength: (params?: IndexMethodParams<"getMaxAuctionLength">) =>
       [...dtfQueryKeys.index.all(), "max-auction-length", keyParams(params)] as const,
+    rebalanceNonce: (params?: IndexMethodParams<"getRebalanceNonce">) =>
+      [...dtfQueryKeys.index.all(), "rebalance-nonce", keyParams(params)] as const,
     rebalanceControl: (params?: IndexMethodParams<"getRebalanceControl">) =>
       [...dtfQueryKeys.index.all(), "rebalance-control", keyParams(params)] as const,
     rebalances: (params?: IndexMethodParams<"getRebalances">) =>

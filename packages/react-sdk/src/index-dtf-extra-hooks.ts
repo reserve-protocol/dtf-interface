@@ -12,6 +12,7 @@ import {
   indexDtfBidQuoteQueryOptions,
   indexDtfBidsEnabledQueryOptions,
   indexDtfMaxAuctionLengthQueryOptions,
+  indexDtfRebalanceNonceQueryOptions,
   indexDtfCompletedRebalanceQueryOptions,
   indexDtfCompletedRebalancesQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
@@ -156,6 +157,14 @@ export function useIndexDtfMaxAuctionLength<TData = MethodResult<IndexMethod<"ge
 ) {
   const sdk = useDtfSdk();
   return useQuery(indexDtfMaxAuctionLengthQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfRebalanceNonce<TData = MethodResult<IndexMethod<"getRebalanceNonce">>>(
+  params: MethodParams<IndexMethod<"getRebalanceNonce">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getRebalanceNonce">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfRebalanceNonceQueryOptions(sdk, params, options));
 }
 
 export function useIndexDtfRebalanceControl<TData = MethodResult<IndexMethod<"getRebalanceControl">>>(

@@ -1,4 +1,10 @@
-import { decodeFunctionData, parseEther, type PublicClient } from "viem";
+import {
+  ContractFunctionExecutionError,
+  ContractFunctionZeroDataError,
+  decodeFunctionData,
+  parseEther,
+  type PublicClient,
+} from "viem";
 import { describe, expect, it, vi } from "vitest";
 
 import { createDtfClient } from "@/client";
@@ -220,8 +226,10 @@ describe("settings proposal builders", () => {
       indexDtfSettingsProposalSchema.parse({
         auctionLength: 30,
         version: "6.0.0",
+        selfFee: "5",
+        tradeAllowlist: { enabled: true, add: [REWARD] },
       }),
-    ).toMatchObject({ version: "6.0.0" });
+    ).toMatchObject({ version: "6.0.0", selfFee: 5, tradeAllowlist: { enabled: true, add: [REWARD] } });
   });
 
   it("requires timelock to build settings proposals", async () => {
@@ -595,7 +603,70 @@ describe("settings proposal builders", () => {
     expect(total).toBe(parseEther("1"));
   });
 
-  it("rejects v6 revenue proposals without the immutable recipient table", async () => {
+  it("fits a v6 revenue distribution next to an explicit immutable table", async () => {
+    const proposal = await buildIndexDtfSettingsProposal({} as never, {
+      address: DTF,
+      chainId: 1,
+      governance: GOVERNANCE,
+      dtf: createDtfContext(),
+      version: "6.0.0",
+      immutableFeeRecipients: [{ recipient: ST_TOKEN, portion: parseEther("0.25") }],
+      revenueDistribution: {
+        platformFee: 20,
+        governanceShare: 0,
+        deployerShare: 40,
+        additionalRecipients: [{ address: GUARDIAN_A, share: 40 }],
+      },
+    });
+
+    const decoded = decodeFunctionData({ abi: folioArtifactAbi, data: proposal.calldatas[0]! });
+    expect(decoded.functionName).toBe("setFeeRecipients");
+    expect(decoded.args).toEqual([
+      [
+        { recipient: GUARDIAN_A, portion: parseEther("0.375") },
+        { recipient: DEPLOYER, portion: parseEther("0.375") },
+      ],
+      [{ recipient: ST_TOKEN, portion: parseEther("0.25") }],
+    ]);
+  });
+
+  it("reads the immutable table from RPC for a v6 revenue distribution when none is passed", async () => {
+    const multicall = vi.fn(async ({ contracts }: { contracts: readonly { args?: readonly unknown[] }[] }) =>
+      contracts.map(({ args }) =>
+        Number(args?.[0]) === 0
+          ? { status: "success", result: [ST_TOKEN, parseEther("0.5")] }
+          : { status: "failure", error: new Error("revert") },
+      ),
+    );
+    const readContract = vi.fn(async ({ functionName }: { functionName: string }) => {
+      if (functionName === "folioFeeForSelf") return 0n;
+      throw new ContractFunctionExecutionError(new ContractFunctionZeroDataError({ functionName }), {
+        abi: folioArtifactAbi,
+        functionName,
+        args: [0n],
+      });
+    });
+    const getBlockNumber = vi.fn(async () => 1n);
+    const client = createDtfClient({
+      chains: { 1: { publicClient: { multicall, readContract, getBlockNumber } as unknown as PublicClient } },
+    });
+
+    const proposal = await buildIndexDtfSettingsProposal(client, {
+      address: DTF,
+      chainId: 1,
+      governance: GOVERNANCE,
+      dtf: createDtfContext(),
+      version: "6.0.0",
+      revenueDistribution: { platformFee: 20, governanceShare: 0, deployerShare: 80, additionalRecipients: [] },
+    });
+
+    expect(decodeFunctionData({ abi: folioArtifactAbi, data: proposal.calldatas[0]! }).args).toEqual([
+      [{ recipient: DEPLOYER, portion: parseEther("0.5") }],
+      [{ recipient: ST_TOKEN, portion: parseEther("0.5") }],
+    ]);
+  });
+
+  it("rejects a v6 revenue distribution when the immutable table already takes 100%", async () => {
     await expect(
       buildIndexDtfSettingsProposal({} as never, {
         address: DTF,
@@ -603,14 +674,87 @@ describe("settings proposal builders", () => {
         governance: GOVERNANCE,
         dtf: createDtfContext(),
         version: "6.0.0",
-        revenueDistribution: {
-          platformFee: 20,
-          governanceShare: 0,
-          deployerShare: 80,
-          additionalRecipients: [],
-        },
+        immutableFeeRecipients: [{ recipient: ST_TOKEN, portion: parseEther("1") }],
+        revenueDistribution: { platformFee: 20, governanceShare: 0, deployerShare: 80, additionalRecipients: [] },
       }),
-    ).rejects.toThrow("full immutable fee recipient table");
+    ).rejects.toThrow("no mutable share is left");
+  });
+
+  it("builds v6 self-fee and allowlist settings calls in one proposal", async () => {
+    const proposal = await buildIndexDtfSettingsProposal({} as never, {
+      address: DTF,
+      chainId: 1,
+      governance: GOVERNANCE,
+      timelock: TIMELOCK,
+      version: "6.0.0",
+      selfFee: 5,
+      tradeAllowlist: { add: [REWARD], remove: [GUARDIAN_B], enabled: true },
+    });
+
+    const decoded = proposal.calldatas.map((data) => decodeFunctionData({ abi: folioArtifactAbi, data }));
+    expect(decoded.map((call) => call.functionName)).toEqual([
+      "setFolioSelfFee",
+      "addToAllowlist",
+      "removeFromAllowlist",
+      "setTradeAllowlistEnabled",
+    ]);
+    expect(decoded[0]?.args).toEqual([parseEther("0.05")]);
+    expect(decoded[1]?.args).toEqual([[REWARD]]);
+    expect(decoded[3]?.args).toEqual([true]);
+  });
+
+  it("rejects v6-only settings on a v5 DTF by name", async () => {
+    await expect(
+      buildIndexDtfSettingsProposal({} as never, {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        timelock: TIMELOCK,
+        version: "5.0.0",
+        selfFee: 5,
+      }),
+    ).rejects.toThrow("setFolioSelfFee is not supported by Index DTF 5.0.0");
+    await expect(
+      buildIndexDtfSettingsProposal({} as never, {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        timelock: TIMELOCK,
+        version: "5.0.0",
+        tradeAllowlist: { enabled: true },
+      }),
+    ).rejects.toThrow("setTradeAllowlistEnabled is not supported by Index DTF 5.0.0");
+    await expect(
+      buildIndexDtfSettingsProposal({} as never, {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        timelock: TIMELOCK,
+        version: "6.0.0",
+        selfFee: 101,
+      }),
+    ).rejects.toThrow("selfFee");
+    await expect(
+      buildIndexDtfSettingsProposal({} as never, {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        dtf: createDtfContext(),
+        version: "5.0.0",
+        immutableFeeRecipients: [],
+        revenueDistribution: { platformFee: 20, governanceShare: 0, deployerShare: 80, additionalRecipients: [] },
+      }),
+    ).rejects.toThrow("immutableFeeRecipients is not supported by Index DTF 5.0.0");
+    await expect(
+      buildIndexDtfSettingsProposal({} as never, {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        timelock: TIMELOCK,
+        version: "6.0.0",
+        tradeAllowlist: { add: [] },
+      }),
+    ).rejects.toThrow("at least one call");
   });
 
   it("encodes repeating revenue recipient portions", async () => {

@@ -21,6 +21,10 @@ const call = sdk.index.prepareDistributeFees({ address, chainId, version });
 
 Apps decide when to expose this action.
 
+On Folio 6.0 the revenue view needs the subgraph's v6 fields (`immutableFeeRecipients`, `folioFeeForSelf`); until
+that schema is deployed, `getRevenue` describes the mutable table only. Read the exact tables from RPC with
+`getImmutableFeeRecipients` and `getSelfFee` when a proposal needs them.
+
 ## Supply Gotcha
 
 `totalSupply()` includes pending fee shares. Do not use stale ERC20 supply assumptions for share-price math.

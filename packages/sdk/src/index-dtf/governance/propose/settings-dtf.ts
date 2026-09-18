@@ -10,7 +10,10 @@ import type { IndexDtfCall } from "@/types/governance";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
+import { getIndexDtfImmutableFeeRecipients } from "@/index-dtf/dtf/folio-v6";
 import {
+  prepareIndexDtfAddToAllowlist,
+  prepareIndexDtfRemoveFromAllowlist,
   prepareIndexDtfRemoveFromBasket,
   prepareIndexDtfSetAuctionLength,
   prepareIndexDtfSetBidsEnabled,
@@ -18,6 +21,8 @@ import {
   prepareIndexDtfSetMintFee,
   prepareIndexDtfSetName,
   prepareIndexDtfSetRebalanceControl,
+  prepareIndexDtfSetSelfFee,
+  prepareIndexDtfSetTradeAllowlistEnabled,
   prepareIndexDtfSetTvlFee,
 } from "@/index-dtf/governance/propose/calls";
 import { prepareRevenueDistribution, validateRevenueDistributionInput } from "@/index-dtf/governance/propose/revenue";
@@ -125,9 +130,28 @@ async function buildIndexDtfSettingsCalls(
     }),
   );
 
+  if (version === "5.0.0" && params.immutableFeeRecipients !== undefined) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "immutableFeeRecipients is not supported by Index DTF 5.0.0",
+      meta: { version },
+    });
+  }
+  const immutableRecipients =
+    version === "6.0.0" && params.revenueDistribution
+      ? (params.immutableFeeRecipients ??
+        (await getIndexDtfImmutableFeeRecipients(client, { address: dtfAddress, chainId: params.chainId })))
+      : undefined;
   const revenueCall =
     version && params.revenueDistribution
-      ? prepareRevenueDistribution(dtfAddress, params.chainId, dtf, params.revenueDistribution, version)
+      ? prepareRevenueDistribution(
+          dtfAddress,
+          params.chainId,
+          dtf,
+          params.revenueDistribution,
+          version,
+          immutableRecipients,
+        )
       : undefined;
   if (revenueCall) calls.push(revenueCall);
 
@@ -188,6 +212,30 @@ function buildDtfCalls(
   if (params.bidsEnabled !== undefined)
     calls.push(
       prepareIndexDtfSetBidsEnabled({ address, chainId: params.chainId, enabled: params.bidsEnabled, version }),
+    );
+  if (params.selfFee !== undefined)
+    calls.push(prepareIndexDtfSetSelfFee({ address, chainId: params.chainId, percentage: params.selfFee, version }));
+  if (params.tradeAllowlist?.add?.length)
+    calls.push(
+      prepareIndexDtfAddToAllowlist({ address, chainId: params.chainId, tokens: params.tradeAllowlist.add, version }),
+    );
+  if (params.tradeAllowlist?.remove?.length)
+    calls.push(
+      prepareIndexDtfRemoveFromAllowlist({
+        address,
+        chainId: params.chainId,
+        tokens: params.tradeAllowlist.remove,
+        version,
+      }),
+    );
+  if (params.tradeAllowlist?.enabled !== undefined)
+    calls.push(
+      prepareIndexDtfSetTradeAllowlistEnabled({
+        address,
+        chainId: params.chainId,
+        enabled: params.tradeAllowlist.enabled,
+        version,
+      }),
     );
 
   return calls;

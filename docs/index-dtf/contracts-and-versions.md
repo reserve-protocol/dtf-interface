@@ -64,7 +64,7 @@ The SDK handles version-specific write calls where the affected builder encodes 
 
 Product builders should accept a known DTF version or fetch it when needed. Keep version checks local to the affected write/read handler instead of adding a central operation registry.
 
-The basket proposal builder supports v5 and v6. For v6 it reads the current nonce, encodes the next nonce, and requires an explicit Unix-seconds deadline. Raw v6 fee-recipient calls require both mutable and full immutable tables; the higher-level revenue-distribution proposal remains v5-only until the immutable table can be read and preserved. Open-auction and issuance helpers remain version-sensitive; do not assume every write helper supports every listed version.
+The basket proposal builder supports v5 and v6. For v6 it reads the current nonce, encodes the next nonce, and requires an explicit Unix-seconds deadline. Raw v6 fee-recipient calls require both mutable and full immutable tables; the higher-level revenue-distribution proposal reads the immutable table from RPC and scales the mutable shares into the remainder. Every Folio write helper, issuance included, takes `version` and rejects releases other than 5.0.0 and 6.0.0.
 
 Source owner: SDK calldata builders are owned by `dtf-sdk/packages/sdk/src/index-dtf/governance/propose/calls.ts`; protocol mechanics are owned by the Index DTF contract repo.
 

@@ -51,7 +51,6 @@ export {
 export {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
-  getIndexDtfMaxAuctionLength,
   getEffectiveRevenueDistribution as getIndexDtfEffectiveRevenueDistribution,
   getIndexDtfPendingFeeShares,
   getIndexDtfRebalanceControl,
@@ -59,6 +58,34 @@ export {
   prepareIndexDtfDistributeFees,
 } from "@/index-dtf/dtf/revenue";
 export { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
+export {
+  assertIndexDtfFeeRecipientTables,
+  INDEX_DTF_FEE_RECIPIENT_TOTAL,
+  INDEX_DTF_MAX_FEE_RECIPIENTS,
+  scaleIndexDtfFeeRecipients,
+  sortIndexDtfFeeRecipients,
+} from "@/index-dtf/fee-recipients";
+export type { IndexDtfFeeRecipient } from "@/index-dtf/fee-recipients";
+export {
+  getIndexDtfImmutableFeeRecipients,
+  getIndexDtfIsTokenAllowlisted,
+  getIndexDtfMaxAuctionLength,
+  getIndexDtfSelfFee,
+  getIndexDtfTradeAllowlist,
+} from "@/index-dtf/dtf/folio-v6";
+export type { GetIndexDtfIsTokenAllowlistedParams, IndexDtfTradeAllowlist } from "@/index-dtf/dtf/folio-v6";
+export {
+  getIndexDtfLatestVersion,
+  getIndexDtfVersionDeployment,
+  getIndexDtfVersionHash,
+  INDEX_DTF_VERSION_REGISTRY_ADDRESS,
+} from "@/index-dtf/version-registry";
+export type {
+  GetIndexDtfLatestVersionParams,
+  GetIndexDtfVersionDeploymentParams,
+  IndexDtfLatestVersion,
+  IndexDtfVersionDeployment,
+} from "@/index-dtf/version-registry";
 export { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 export {
   buildIndexDtfDeployFeeRecipients,
@@ -67,6 +94,7 @@ export {
   extractIndexDtfDeployedStakingTokenAddress,
   generateIndexDtfDeploymentNonce,
   getIndexDtfDeployApprovalAmount,
+  getIndexDtfDeployerAddress,
   INDEX_DTF_DEPLOYER_ADDRESS,
   INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
   prepareIndexDtfDeploy,
@@ -95,6 +123,7 @@ export { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 export { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 export { dtfIndexGovernanceProposalAbi } from "@/index-dtf/abis/dtf-index-governance-proposal";
 export { dtfIndexProposalAbi, dtfIndexProposalAbiCatalog } from "@/index-dtf/abis/dtf-index-proposal";
+export { upgradeSpell600Abi } from "@/index-dtf/abis/upgrade-spell-6-0-0";
 export type { DtfIndexProposalAbiCatalogEntry } from "@/index-dtf/abis/dtf-index-proposal";
 export { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 export { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
@@ -153,6 +182,9 @@ export {
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
+  buildIndexDtfUpgradeToV6Calls,
+  buildIndexDtfUpgradeToV6Proposal,
+  INDEX_DTF_START_REBALANCE_SELECTOR,
   indexDtfBasketProposalSchema,
   indexDtfBasketProposalTokenSchema,
   indexDtfBasketSettingsProposalSchema,

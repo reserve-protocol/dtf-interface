@@ -3,11 +3,16 @@ import { getAddress, parseEther, type Address } from "viem";
 import type { IndexDtfCall } from "@/types/governance";
 import type { IndexDtf } from "@/types/index-dtf";
 
+import {
+  INDEX_DTF_FEE_RECIPIENT_TOTAL,
+  INDEX_DTF_MAX_FEE_RECIPIENTS,
+  scaleIndexDtfFeeRecipients,
+  type IndexDtfFeeRecipient,
+} from "@/index-dtf/fee-recipients";
 import { prepareIndexDtfSetFeeRecipients } from "@/index-dtf/governance/propose/calls";
 import { Decimal } from "@/lib/decimal";
 import { SdkError } from "@/lib/errors";
 
-const MAX_FEE_RECIPIENTS = 64;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const RECIPIENT_SHARE_TOLERANCE = new Decimal("0.000000000001");
 
@@ -25,10 +30,7 @@ export type IndexDtfRevenueDistributionInput = {
   readonly additionalRecipients: readonly IndexDtfRevenueRecipientInput[];
 };
 
-export type IndexDtfFeeRecipient = {
-  readonly recipient: Address;
-  readonly portion: bigint;
-};
+export type { IndexDtfFeeRecipient } from "@/index-dtf/fee-recipients";
 
 export type BuildIndexDtfFeeRecipientsParams = IndexDtfRevenueDistributionInput & {
   readonly deployer: Address;
@@ -43,15 +45,11 @@ export function prepareRevenueDistribution(
   dtf: IndexDtf | undefined,
   distribution: IndexDtfRevenueDistributionInput | undefined,
   version: "5.0.0" | "6.0.0",
+  /** Required on 6.0.0: the current immutable table, passed back unchanged. */
+  immutableRecipients: readonly IndexDtfFeeRecipient[] | undefined,
 ): RevenueDistributionCall | undefined {
   if (!distribution) {
     return undefined;
-  }
-  if (version === "6.0.0") {
-    throw new SdkError({
-      code: "INVALID_INPUT",
-      message: "Index DTF 6.0.0 revenue proposals require the full immutable fee recipient table",
-    });
   }
 
   validateRevenueDistributionInput(dtf, distribution);
@@ -64,6 +62,34 @@ export function prepareRevenueDistribution(
     deployer: dtf.roles.deployment.deployer,
     ...(dtf.voteLockVault ? { voteLock: dtf.voteLockVault.token.address } : {}),
   });
+
+  if (version === "6.0.0") {
+    if (immutableRecipients === undefined) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: "Index DTF 6.0.0 revenue proposals require the full immutable fee recipient table",
+      });
+    }
+    // The immutable table is preserved as-is; the mutable shares split whatever it leaves.
+    const immutableTotal = immutableRecipients.reduce((sum, recipient) => sum + recipient.portion, 0n);
+    const remainder = INDEX_DTF_FEE_RECIPIENT_TOTAL - immutableTotal;
+
+    if (recipients.length > 0 && remainder <= 0n) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: "immutable fee recipients already take the full fee; no mutable share is left to distribute",
+        meta: { immutableTotal },
+      });
+    }
+
+    return prepareIndexDtfSetFeeRecipients({
+      address: dtfAddress,
+      chainId,
+      version,
+      recipients: scaleIndexDtfFeeRecipients(recipients, remainder),
+      immutableRecipients,
+    });
+  }
 
   return recipients.length > 0
     ? prepareIndexDtfSetFeeRecipients({ address: dtfAddress, chainId, recipients, version })
@@ -207,10 +233,10 @@ export function buildIndexDtfFeeRecipients({
 }
 
 function validateFeeRecipients(recipients: readonly { readonly recipient: Address; readonly portion: bigint }[]) {
-  if (recipients.length > MAX_FEE_RECIPIENTS) {
+  if (recipients.length > INDEX_DTF_MAX_FEE_RECIPIENTS) {
     throw new SdkError({
       code: "INVALID_INPUT",
-      message: `fee recipients cannot exceed ${MAX_FEE_RECIPIENTS}`,
+      message: `fee recipients cannot exceed ${INDEX_DTF_MAX_FEE_RECIPIENTS}`,
       meta: { count: recipients.length },
     });
   }
@@ -243,10 +269,10 @@ function validateRawAdditionalRecipients(
   recipients: readonly IndexDtfRevenueRecipientInput[],
   reservedRecipients: readonly Address[],
 ) {
-  if (recipients.length > MAX_FEE_RECIPIENTS) {
+  if (recipients.length > INDEX_DTF_MAX_FEE_RECIPIENTS) {
     throw new SdkError({
       code: "INVALID_INPUT",
-      message: `fee recipients cannot exceed ${MAX_FEE_RECIPIENTS}`,
+      message: `fee recipients cannot exceed ${INDEX_DTF_MAX_FEE_RECIPIENTS}`,
       meta: { count: recipients.length },
     });
   }

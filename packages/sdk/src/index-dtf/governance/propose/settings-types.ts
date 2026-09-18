@@ -1,6 +1,7 @@
 import { isAddress, type Address, type Hex } from "viem";
 import { z } from "zod";
 
+import type { IndexDtfFeeRecipient } from "@/index-dtf/fee-recipients";
 import type { IndexDtfRevenueDistributionInput } from "@/index-dtf/governance/propose/revenue";
 import type { DtfParams } from "@/types/common";
 import type { IndexDtfCall } from "@/types/governance";
@@ -34,6 +35,14 @@ export const indexDtfSettingsProposalSchema = z.object({
   mintFee: z.coerce.number().min(0).max(5).optional(),
   tvlFee: z.coerce.number().min(0).max(10).optional(),
   auctionLength: z.coerce.number().min(15).max(1440).optional(),
+  selfFee: z.coerce.number().min(0).max(100).optional(),
+  tradeAllowlist: z
+    .object({
+      enabled: z.boolean().optional(),
+      add: z.array(addressSchema).optional(),
+      remove: z.array(addressSchema).optional(),
+    })
+    .optional(),
   weightControl: z.boolean().optional(),
   priceControl: z.coerce.number().int().min(0).max(2).optional(),
   bidsEnabled: z.boolean().optional(),
@@ -117,6 +126,10 @@ export type BuildIndexDtfSettingsProposalParams = DtfParams & {
   readonly mintFee?: number;
   readonly tvlFee?: number;
   readonly auctionLength?: number;
+  /** Folio 6.0 only: percent of non-DAO fees kept for holders (`setFolioSelfFee`). */
+  readonly selfFee?: number;
+  /** Folio 6.0 only: allowlist membership and enforcement (`addToAllowlist`, `removeFromAllowlist`, `setTradeAllowlistEnabled`). */
+  readonly tradeAllowlist?: IndexDtfTradeAllowlistChanges;
   readonly weightControl?: boolean;
   readonly priceControl?: PriceControl;
   readonly bidsEnabled?: boolean;
@@ -128,7 +141,15 @@ export type BuildIndexDtfSettingsProposalParams = DtfParams & {
   readonly governanceChanges?: IndexDtfGovernanceChanges;
   readonly quorumDenominator?: number;
   readonly revenueDistribution?: IndexDtfRevenueDistributionInput;
+  /** Folio 6.0 only: the current immutable table for a revenue change; read from RPC when omitted. */
+  readonly immutableFeeRecipients?: readonly IndexDtfFeeRecipient[];
   readonly version?: "5.0.0" | "6.0.0" | undefined;
+};
+
+export type IndexDtfTradeAllowlistChanges = {
+  readonly enabled?: boolean;
+  readonly add?: readonly Address[];
+  readonly remove?: readonly Address[];
 };
 
 export type {

@@ -15,4 +15,5 @@ export type {
   IndexDtfGovernanceChanges,
   IndexDtfRevenueDistributionInput,
   IndexDtfRevenueRecipientInput,
+  IndexDtfTradeAllowlistChanges,
 } from "@/index-dtf/governance/propose/settings-types";

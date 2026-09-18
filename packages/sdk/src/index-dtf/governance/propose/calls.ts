@@ -1,4 +1,4 @@
-import { parseEther, zeroHash, type Address, type Hex } from "viem";
+import { getAddress, parseEther, zeroHash, type Address, type Hex } from "viem";
 
 import type { SupportedChainId } from "@/config";
 import type { IndexDtfCall } from "@/types/governance";
@@ -7,6 +7,11 @@ import type { PriceControl } from "@/types/index-dtf";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
+import {
+  assertIndexDtfFeeRecipientTables,
+  sortIndexDtfFeeRecipients,
+  type IndexDtfFeeRecipient,
+} from "@/index-dtf/fee-recipients";
 import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
 import {
   assertIndexDtfWriteVersion,
@@ -28,10 +33,7 @@ export {
   type IndexDtfWriteVersion,
 } from "@/index-dtf/write-version";
 
-export type IndexDtfFeeRecipient = {
-  readonly recipient: Address;
-  readonly portion: bigint;
-};
+export type { IndexDtfFeeRecipient } from "@/index-dtf/fee-recipients";
 
 export type PrepareIndexDtfCallParams = {
   readonly address: Address;
@@ -121,8 +123,16 @@ export function prepareIndexDtfSetSelfFee(params: PrepareIndexDtfPercentageCallP
   if (params.version !== "6.0.0") {
     throw new SdkError({
       code: "INVALID_INPUT",
-      message: `setSelfFee is not supported by Index DTF ${params.version}`,
+      message: `setFolioSelfFee is not supported by Index DTF ${params.version}`,
       meta: { version: params.version },
+    });
+  }
+
+  if (!Number.isFinite(params.percentage) || params.percentage < 0 || params.percentage > 100) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "selfFee percentage must be between 0 and 100",
+      meta: { percentage: params.percentage },
     });
   }
 
@@ -142,7 +152,10 @@ export function prepareIndexDtfSetFeeRecipients(
   },
 ): IndexDtfCall {
   assertIndexDtfWriteVersion(params.version);
-  const recipients = params.recipients.map(normalizeFeeRecipient);
+  const recipients = params.recipients.map((recipient) => ({
+    recipient: getAddress(recipient.recipient),
+    portion: recipient.portion,
+  }));
 
   if (params.version === "6.0.0") {
     if (params.immutableRecipients === undefined) {
@@ -152,12 +165,18 @@ export function prepareIndexDtfSetFeeRecipients(
       });
     }
 
+    const tables = {
+      recipients: sortIndexDtfFeeRecipients(recipients),
+      immutableRecipients: sortIndexDtfFeeRecipients(params.immutableRecipients),
+    };
+    assertIndexDtfFeeRecipientTables({ ...tables, folio: params.address });
+
     return prepareContractCall({
       chainId: params.chainId,
       address: params.address,
       abi: indexDtfV6WriteAbi,
       functionName: "setFeeRecipients",
-      args: [recipients, params.immutableRecipients.map(normalizeFeeRecipient)] as const,
+      args: [tables.recipients, tables.immutableRecipients] as const,
     });
   }
 
@@ -488,13 +507,6 @@ export function prepareIndexDtfTimelockExecuteBatch(
     ] as const,
     ...(params.value === undefined ? {} : { value: params.value }),
   });
-}
-
-function normalizeFeeRecipient(recipient: IndexDtfFeeRecipient) {
-  return {
-    recipient: recipient.recipient,
-    portion: recipient.portion,
-  };
 }
 
 function encodePercent(percentage: number): bigint {

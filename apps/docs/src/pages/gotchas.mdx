@@ -35,7 +35,7 @@ The SDK handles protocol encoding.
 
 Some Index DTF write builders need a contract version.
 
-Every settings, rebalance, auction and fee-distribution builder requires `version` (`5.0.0` or `6.0.0`) and rejects other releases. `prepareMint` and `prepareRedeem` are the remaining version-free builders (their signatures are identical in v5 and v6); verify before replacing legacy v4 calldata.
+Every settings, rebalance, auction and fee-distribution builder requires `version` (`5.0.0` or `6.0.0`) and rejects other releases. `prepareMint` and `prepareRedeem` take it too (their bytes are identical in v5 and v6, but v4 and unknown releases are rejected); verify before replacing legacy v4 calldata.
 
 See [Contracts & Versions](/index-dtf/contracts-and-versions) before hand-encoding writes.
 

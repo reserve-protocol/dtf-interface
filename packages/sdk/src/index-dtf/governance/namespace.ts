@@ -4,6 +4,7 @@ import type {
   BuildIndexDtfBasketSettingsProposalParams,
   BuildIndexDtfDaoSettingsProposalParams,
   BuildIndexDtfSettingsProposalParams,
+  BuildIndexDtfUpgradeToV6ProposalParams,
 } from "@/index-dtf/governance/propose/index";
 import type {
   GetAllIndexDtfProposalsParams,
@@ -79,6 +80,8 @@ import {
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
+  buildIndexDtfUpgradeToV6Calls,
+  buildIndexDtfUpgradeToV6Proposal,
 } from "@/index-dtf/governance/propose/index";
 
 /** Creates the direct Index DTF governance methods for the flat root namespace. */
@@ -146,5 +149,8 @@ export function createIndexDtfGovernanceNamespace(client: DtfClient) {
       buildIndexDtfDaoSettingsProposal(client, params),
     buildSettingsProposal: (params: BuildIndexDtfSettingsProposalParams) =>
       buildIndexDtfSettingsProposal(client, params),
+    buildUpgradeToV6Calls: buildIndexDtfUpgradeToV6Calls,
+    buildUpgradeToV6Proposal: (params: BuildIndexDtfUpgradeToV6ProposalParams) =>
+      buildIndexDtfUpgradeToV6Proposal(client, params),
   };
 }

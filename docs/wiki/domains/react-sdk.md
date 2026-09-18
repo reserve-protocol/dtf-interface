@@ -1,6 +1,6 @@
 ---
 title: React SDK Domain
-updated: 2026-09-08
+updated: 2026-09-18
 type: domain
 sources:
   - packages/react-sdk/src/**
@@ -29,3 +29,5 @@ The wrapper externalizes core SDK and peer dependencies and remains small. Keep 
 ## Current pressure
 
 Index read coverage is broad. The next large maintenance split is `yield-dtf-hooks.ts`, but only when another Yield feature lands so the split follows real domains rather than speculative structure.
+
+Folio 6.0 reads (`useIndexDtfMaxAuctionLength`, `useIndexDtfRebalanceNonce`, `useIndexDtfSelfFee`, `useIndexDtfImmutableFeeRecipients`, `useIndexDtfTradeAllowlist`, `useIndexDtfIsTokenAllowlisted`) sit at the default tier except the rebalance nonce, which is a write input and sits at the live tier; version registry hooks (`useIndexDtfLatestVersion`, `useIndexDtfVersionDeployment`) sit at the static tier. All fail on a v5 proxy; gate them on `useIndexDtfVersion`.

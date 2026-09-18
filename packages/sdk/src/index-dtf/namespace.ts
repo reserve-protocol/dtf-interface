@@ -32,6 +32,13 @@ import {
   getIndexDtfStatuses,
 } from "@/index-dtf/dtf/discovery";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
+import {
+  getIndexDtfImmutableFeeRecipients,
+  getIndexDtfIsTokenAllowlisted,
+  getIndexDtfMaxAuctionLength,
+  getIndexDtfSelfFee,
+  getIndexDtfTradeAllowlist,
+} from "@/index-dtf/dtf/folio-v6";
 import { getIndexDtfHolders } from "@/index-dtf/dtf/holders";
 import {
   getBasket,
@@ -59,7 +66,6 @@ import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
 import {
   getIndexDtfApprovedRevenueTokens,
   getIndexDtfBidsEnabled,
-  getIndexDtfMaxAuctionLength,
   getIndexDtfPendingFeeShares,
   getIndexDtfRebalanceControl,
   getIndexDtfRevenue,
@@ -97,6 +103,7 @@ import {
   type GetIndexDtfRebalancesParams,
 } from "@/index-dtf/rebalance/index";
 import { createIndexDtfRef } from "@/index-dtf/ref";
+import { getIndexDtfLatestVersion, getIndexDtfVersionDeployment } from "@/index-dtf/version-registry";
 import { createIndexDtfVoteLockNamespace } from "@/index-dtf/vote-lock/namespace";
 
 /** Creates the direct Index DTF namespace for scripts, bots, CLI, and apps. */
@@ -169,6 +176,17 @@ export function createIndexDtfNamespace(client: DtfClient) {
       getIndexDtfCurrentRebalance(client, params),
     getRebalanceNonce: (params: Parameters<typeof getIndexDtfRebalanceNonce>[1]) =>
       getIndexDtfRebalanceNonce(client, params),
+    getSelfFee: (params: Parameters<typeof getIndexDtfSelfFee>[1]) => getIndexDtfSelfFee(client, params),
+    getImmutableFeeRecipients: (params: Parameters<typeof getIndexDtfImmutableFeeRecipients>[1]) =>
+      getIndexDtfImmutableFeeRecipients(client, params),
+    getTradeAllowlist: (params: Parameters<typeof getIndexDtfTradeAllowlist>[1]) =>
+      getIndexDtfTradeAllowlist(client, params),
+    getIsTokenAllowlisted: (params: Parameters<typeof getIndexDtfIsTokenAllowlisted>[1]) =>
+      getIndexDtfIsTokenAllowlisted(client, params),
+    getLatestVersion: (params: Parameters<typeof getIndexDtfLatestVersion>[1]) =>
+      getIndexDtfLatestVersion(client, params),
+    getVersionDeployment: (params: Parameters<typeof getIndexDtfVersionDeployment>[1]) =>
+      getIndexDtfVersionDeployment(client, params),
     getRebalanceLiquidity: (params: Parameters<typeof getIndexDtfRebalanceLiquidity>[1]) =>
       getIndexDtfRebalanceLiquidity(client, params),
     buildRebalanceLiquidityTrades: buildIndexDtfRebalanceLiquidityTrades,

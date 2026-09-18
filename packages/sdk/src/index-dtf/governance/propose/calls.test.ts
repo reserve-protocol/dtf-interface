@@ -7,7 +7,11 @@ import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
 import {
   indexDtfV5WriteAbi,
   indexDtfV6WriteAbi,
+  prepareIndexDtfAddToAllowlist,
   prepareIndexDtfDeprecate,
+  prepareIndexDtfRemoveFromAllowlist,
+  prepareIndexDtfSetSelfFee,
+  prepareIndexDtfSetTradeAllowlistEnabled,
   prepareIndexDtfRelay,
   prepareIndexDtfRevokeOptimisticProposer,
   prepareIndexDtfSetAuctionLength,
@@ -92,6 +96,80 @@ describe("Index DTF call builders", () => {
       [{ recipient: ACCOUNT, portion: 600000000000000000n }],
       [{ recipient: IMMUTABLE_ACCOUNT, portion: 400000000000000000n }],
     ]);
+  });
+
+  it("sorts v6 fee tables and rejects tables that do not total 100%", () => {
+    const call = prepareIndexDtfSetFeeRecipients({
+      address: DTF,
+      chainId: 1,
+      version: "6.0.0",
+      recipients: [
+        { recipient: IMMUTABLE_ACCOUNT, portion: 300000000000000000n },
+        { recipient: ACCOUNT, portion: 300000000000000000n },
+      ],
+      immutableRecipients: [{ recipient: "0x0000000000000000000000000000000000000004", portion: 400000000000000000n }],
+    });
+    expect(decodeFunctionData({ abi: indexDtfV6WriteAbi, data: call.data }).args).toEqual([
+      [
+        { recipient: ACCOUNT, portion: 300000000000000000n },
+        { recipient: IMMUTABLE_ACCOUNT, portion: 300000000000000000n },
+      ],
+      [{ recipient: "0x0000000000000000000000000000000000000004", portion: 400000000000000000n }],
+    ]);
+    expect(() =>
+      prepareIndexDtfSetFeeRecipients({
+        address: DTF,
+        chainId: 1,
+        version: "6.0.0",
+        recipients: [{ recipient: DTF, portion: 1000000000000000000n }],
+        immutableRecipients: [],
+      }),
+    ).toThrow("not the Folio itself");
+    expect(() =>
+      prepareIndexDtfSetFeeRecipients({
+        address: DTF,
+        chainId: 1,
+        version: "6.0.0",
+        recipients: [{ recipient: ACCOUNT, portion: 600000000000000000n }],
+        immutableRecipients: [{ recipient: IMMUTABLE_ACCOUNT, portion: 300000000000000000n }],
+      }),
+    ).toThrow("must total 100%");
+  });
+
+  it("encodes v6 self-fee and allowlist calls and rejects them on v5", () => {
+    const selfFee = prepareIndexDtfSetSelfFee({ address: DTF, chainId: 1, version: "6.0.0", percentage: 5 });
+    const enable = prepareIndexDtfSetTradeAllowlistEnabled({
+      address: DTF,
+      chainId: 1,
+      version: "6.0.0",
+      enabled: true,
+    });
+    const add = prepareIndexDtfAddToAllowlist({ address: DTF, chainId: 1, version: "6.0.0", tokens: [ACCOUNT] });
+    const remove = prepareIndexDtfRemoveFromAllowlist({
+      address: DTF,
+      chainId: 1,
+      version: "6.0.0",
+      tokens: [ACCOUNT],
+    });
+
+    expect(
+      [selfFee, enable, add, remove].map((call) => decodeFunctionData({ abi: indexDtfV6WriteAbi, data: call.data })),
+    ).toEqual([
+      { functionName: "setFolioSelfFee", args: [50000000000000000n] },
+      { functionName: "setTradeAllowlistEnabled", args: [true] },
+      { functionName: "addToAllowlist", args: [[ACCOUNT]] },
+      { functionName: "removeFromAllowlist", args: [[ACCOUNT]] },
+    ]);
+    expect([selfFee, enable, add, remove].every((call) => call.to === DTF && call.value === 0n)).toBe(true);
+    expect(() => prepareIndexDtfSetSelfFee({ address: DTF, chainId: 1, version: "6.0.0", percentage: 101 })).toThrow(
+      "between 0 and 100",
+    );
+    expect(() => prepareIndexDtfSetSelfFee({ address: DTF, chainId: 1, version: "5.0.0", percentage: 5 })).toThrow(
+      "setFolioSelfFee is not supported by Index DTF 5.0.0",
+    );
+    expect(() =>
+      prepareIndexDtfAddToAllowlist({ address: DTF, chainId: 1, version: "5.0.0", tokens: [ACCOUNT] }),
+    ).toThrow("addToAllowlist is not supported by Index DTF 5.0.0");
   });
 
   it("requires the immutable fee recipient table for v6", () => {

@@ -110,7 +110,8 @@ const plan = sdk.index.prepareMintPlan({
 
 ## Folio 6.0 State
 
-These read the v6 contract directly and fail on a v5 proxy (the immutable-table read probes `folioFeeForSelf` first, so a v5 proxy is an error rather than an empty table); gate them on `getVersion`.
+On a 6.0 DTF the indexed model already carries `version`, `rebalance.maxAuctionLength`, `rebalance.tradeAllowlist`,
+`fees.immutableRecipients` and `fees.selfFee`. These read the v6 contract directly and fail on a v5 proxy (the immutable-table read probes `folioFeeForSelf` first, so a v5 proxy is an error rather than an empty table); gate them on `getVersion`.
 
 | Method                      | Use                                                                                                                                    |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |

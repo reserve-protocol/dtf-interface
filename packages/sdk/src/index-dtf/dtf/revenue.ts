@@ -29,6 +29,8 @@ export type IndexDtfRevenueDistribution = {
     readonly recipient: Address;
     readonly percentage: string;
   };
+  /** Percentage of total fees kept for holders (Folio 6.0 self fee); "0" before 6.0. */
+  readonly holders: { readonly percentage: string };
   readonly recipients: readonly {
     readonly address: Address;
     readonly configuredPercentage: string;
@@ -117,7 +119,7 @@ export async function getIndexDtfRevenue(
   return {
     financials: dtf.financials,
     feeRecipients: dtf.fees.recipients,
-    effectiveDistribution: getEffectiveRevenueDistribution(dtf.fees.recipients, platformFee),
+    effectiveDistribution: getEffectiveRevenueDistribution(dtf.fees, platformFee),
     pendingFeeShares,
     pendingFeeSharesUsd: new Decimal(pendingFeeShares.formatted).mul(price.price).toNumber(),
     platformFee,
@@ -125,18 +127,21 @@ export async function getIndexDtfRevenue(
 }
 
 export function getEffectiveRevenueDistribution(
-  feeRecipients: IndexDtf["fees"]["recipients"],
+  fees: Pick<IndexDtf["fees"], "recipients"> & Partial<Pick<IndexDtf["fees"], "immutableRecipients" | "selfFee">>,
   platformFee: IndexDtfPlatformFee,
 ): IndexDtfRevenueDistribution {
   const platformPercentage = new Decimal(platformFee.percent);
-  const recipientPool = new Decimal(100).minus(platformPercentage);
+  // Folio 6.0 keeps `selfFee` (a D18 fraction) of the non-DAO pool for holders before the tables split the rest.
+  const holdersShare = fees.selfFee ? new Decimal(fees.selfFee.formatted) : new Decimal(0);
+  const recipientPool = new Decimal(100).minus(platformPercentage).mul(new Decimal(1).minus(holdersShare));
 
   return {
     platform: {
       recipient: platformFee.recipient,
       percentage: platformPercentage.toString(),
     },
-    recipients: feeRecipients.map((recipient) => ({
+    holders: { percentage: new Decimal(100).minus(platformPercentage).mul(holdersShare).toString() },
+    recipients: [...fees.recipients, ...(fees.immutableRecipients ?? [])].map((recipient) => ({
       address: recipient.address,
       configuredPercentage: recipient.percentage,
       effectivePercentage: new Decimal(recipient.percentage).mul(recipientPool).div(100).toString(),

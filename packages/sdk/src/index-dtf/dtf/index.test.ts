@@ -441,6 +441,42 @@ describe("Index DTF getters", () => {
     );
   });
 
+  it("maps a pre-6.0 DTF with empty v6 fee and allowlist defaults", () => {
+    const dtf = mapIndexDtf(createSubgraphDtf(), 1);
+
+    expect(dtf.version).toBeUndefined();
+    expect(dtf.fees.immutableRecipients).toEqual([]);
+    expect(dtf.fees.selfFee).toEqual({ raw: 0n, formatted: "0" });
+    expect(dtf.rebalance.maxAuctionLength).toBeUndefined();
+    expect(dtf.rebalance.tradeAllowlist).toBeUndefined();
+  });
+
+  it("maps Folio 6.0 subgraph fields into fees and rebalance config", () => {
+    const dtf = mapIndexDtf(
+      {
+        ...createSubgraphDtf(),
+        version: "6.0.0",
+        maxAuctionLength: "1800",
+        immutableFeeRecipients: "0x000000000000000000000000000000000000000a:400000000000000000",
+        folioFeeForSelf: "50000000000000000",
+        tradeAllowlistEnabled: true,
+        tradeTokenAllowlist: ["0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"],
+      },
+      8453,
+    );
+
+    expect(dtf.version).toBe("6.0.0");
+    expect(dtf.rebalance.maxAuctionLength).toBe(1800);
+    expect(dtf.rebalance.tradeAllowlist).toEqual({
+      enabled: true,
+      tokens: [getAddress("0x833589fcd6edb6e08f4c7c32d4f71b54bda02913")],
+    });
+    expect(dtf.fees.immutableRecipients).toEqual([
+      { address: getAddress("0x000000000000000000000000000000000000000a"), percentage: "40" },
+    ]);
+    expect(dtf.fees.selfFee).toEqual({ raw: 50_000_000_000_000_000n, formatted: "0.05" });
+  });
+
   it("maps governance proposal thresholds from D18 fractions to percentages", () => {
     const dtf = mapIndexDtf(createSubgraphDtf(), 1);
     const authority = dtf.governance.admin.primary;

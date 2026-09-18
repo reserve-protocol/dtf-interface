@@ -21,9 +21,10 @@ const call = sdk.index.prepareDistributeFees({ address, chainId, version });
 
 Apps decide when to expose this action.
 
-On Folio 6.0 the revenue view needs the subgraph's v6 fields (`immutableFeeRecipients`, `folioFeeForSelf`); until
-that schema is deployed, `getRevenue` describes the mutable table only. Read the exact tables from RPC with
-`getImmutableFeeRecipients` and `getSelfFee` when a proposal needs them.
+On Folio 6.0 the DTF carries `fees.immutableRecipients` and `fees.selfFee` from the subgraph, and `getRevenue` folds
+both into `effectiveDistribution`: `holders.percentage` is the share kept for holders and immutable recipients are
+listed next to the mutable ones. A proposal that rewrites the tables still reads the exact on-chain table with
+`getImmutableFeeRecipients`.
 
 ## Supply Gotcha
 

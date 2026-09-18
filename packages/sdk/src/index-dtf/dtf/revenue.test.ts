@@ -1,9 +1,11 @@
 import { decodeFunctionData } from "viem";
 import { describe, expect, it } from "vitest";
 
+import type { IndexDtfPlatformFee } from "@/types/index-dtf";
+
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
-import { prepareIndexDtfDistributeFees } from "@/index-dtf/dtf/revenue";
+import { getEffectiveRevenueDistribution, prepareIndexDtfDistributeFees } from "@/index-dtf/dtf/revenue";
 import { SdkError } from "@/lib/errors";
 
 const DTF = "0x0000000000000000000000000000000000000001";
@@ -29,5 +31,31 @@ describe("prepareIndexDtfDistributeFees", () => {
 
     expect(build).toThrow(SdkError);
     expect(build).toThrow(expect.objectContaining({ code: "INVALID_INPUT", meta: { version: "4.0.0" } }));
+  });
+
+  it("folds the 6.0 immutable table and self fee into the effective distribution", () => {
+    const platformFee: IndexDtfPlatformFee = {
+      registry: DTF,
+      recipient: DTF,
+      numerator: 1n,
+      denominator: 10n,
+      floor: 0n,
+      percent: 10,
+    };
+    const v5 = getEffectiveRevenueDistribution({ recipients: [{ address: DTF, percentage: "100" }] }, platformFee);
+    expect(v5.holders.percentage).toBe("0");
+    expect(v5.recipients).toEqual([{ address: DTF, configuredPercentage: "100", effectivePercentage: "90" }]);
+
+    const v6 = getEffectiveRevenueDistribution(
+      {
+        recipients: [{ address: DTF, percentage: "60" }],
+        immutableRecipients: [{ address: "0x0000000000000000000000000000000000000002", percentage: "40" }],
+        selfFee: { raw: 50_000_000_000_000_000n, formatted: "0.05" },
+      },
+      platformFee,
+    );
+    expect(v6.platform.percentage).toBe("10");
+    expect(v6.holders.percentage).toBe("4.5");
+    expect(v6.recipients.map((recipient) => recipient.effectivePercentage)).toEqual(["51.3", "34.2"]);
   });
 });

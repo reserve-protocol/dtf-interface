@@ -40,6 +40,7 @@
   },
   "scripts": {
     "build": "tsdown",
+    "check:package": "node scripts/check-package-entries.mjs",
     "clean": "rm -rf dist *.tsbuildinfo",
     "dev": "tsdown --watch",
     "graphql:codegen": "graphql-codegen --config codegen.yml",

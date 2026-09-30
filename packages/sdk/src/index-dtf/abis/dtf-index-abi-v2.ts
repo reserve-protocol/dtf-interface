@@ -1321,5 +1321,3 @@ export const dtfIndexAbiV2 = [
     inputs: [{ name: "token", type: "address", internalType: "address" }],
   },
 ] as const;
-
-export default dtfIndexAbiV2;

@@ -2963,4 +2963,3 @@ export const folioV6Abi = [
     ]
   }
 ] as const;
-export default folioV6Abi;

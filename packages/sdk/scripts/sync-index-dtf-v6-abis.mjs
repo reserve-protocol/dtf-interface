@@ -104,7 +104,6 @@ function renderAbiModule(target, abi) {
     `// Artifact: ${target.artifact}`,
     "// Do not edit by hand; run `pnpm abi:index-v6:sync`.",
     `export const ${target.exportName} = ${JSON.stringify(abi, null, 2)} as const;`,
-    `export default ${target.exportName};`,
     "",
   ].join("\n");
 }
@@ -163,7 +162,7 @@ function assertCheckedInModule(target) {
     "// Do not edit by hand; run `pnpm abi:index-v6:sync`.",
     `export const ${target.exportName} = `,
   ].join("\n");
-  const suffix = ` as const;\nexport default ${target.exportName};\n`;
+  const suffix = " as const;\n";
 
   if (!current.startsWith(prefix) || !current.endsWith(suffix)) {
     fail(`Generated ABI module header or shape is stale: ${outputPath}`);

@@ -642,4 +642,3 @@ export const folioDeployerV6Abi = [
     ]
   }
 ] as const;
-export default folioDeployerV6Abi;

@@ -23,7 +23,7 @@ import type {
   IndexDtfTotalAssets,
 } from "@/types/index-dtf";
 
-import dtfAbi from "@/index-dtf/abis/dtf-index-abi-v6";
+import { folioV6Abi as dtfAbi } from "@/index-dtf/abis/folio-v6.generated";
 import {
   mapIndexDtf,
   mapIndexDtfBasketSnapshot,

@@ -466,5 +466,3 @@ export const timelockAbi = [
   },
   { stateMutability: "payable", type: "receive" },
 ] as const;
-
-export default timelockAbi;

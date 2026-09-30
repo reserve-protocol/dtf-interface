@@ -474,7 +474,11 @@ export {
   getAccountPortfolioTransactions,
 } from "@/client/api/portfolio";
 export { getTokenData, getTokenPrices, getTokenVolatilities, getTokensData } from "@/lib/tokens";
-export type { IndexDtfRef, PrepareIndexDtfOpenAuctionParams } from "@/index-dtf/index";
+export type {
+  IndexDtfRef,
+  PrepareIndexDtfEndRebalanceParams,
+  PrepareIndexDtfOpenAuctionParams,
+} from "@/index-dtf/index";
 export type * from "@/index-dtf/dtf/basket/index";
 export type * from "@/index-dtf/governance/propose/index";
 export type * from "@/index-dtf/index";

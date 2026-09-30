@@ -1,0 +1,651 @@
+{
+  "contract": "FolioDeployer",
+  "version": "6.0.0",
+  "chainId": 8453,
+  "address": "0x4c891fCa6319d492866672E3D2AfdAAA5bDcfF67",
+  "source": "https://base.blockscout.com/api/v2/smart-contracts/0x4c891fCa6319d492866672E3D2AfdAAA5bDcfF67",
+  "verifiedAt": "2026-09-30T02:14:54.911003Z",
+  "compiler": "0.8.28+commit.7893614a",
+  "sourceFile": "contracts/deployer/FolioDeployer.sol",
+  "runtimeCodeKeccak256": "0x25da310c34aa0a439b5616f5027e0b53dd8f0ef5ed539f66ea67e5eebad7d231",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_daoFeeRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_versionRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_trustedFillerRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_optimisticGovernorDeployer",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "FolioDeployer__InvalidStToken",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "FolioDeployer__LengthMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "SafeERC20FailedOperation",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "folioOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "folio",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "folioAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "FolioDeployed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "stToken",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "folio",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "ownerGovernor",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "ownerTimelock",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tradingGovernor",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tradingTimelock",
+          "type": "address"
+        }
+      ],
+      "name": "GovernedFolioDeployed",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "daoFeeRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "symbol",
+              "type": "string"
+            },
+            {
+              "internalType": "address[]",
+              "name": "assets",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amounts",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "initialShares",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct IFolio.FolioBasicDetails",
+          "name": "basicDetails",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "maxAuctionLength",
+              "type": "uint256"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint96",
+                  "name": "portion",
+                  "type": "uint96"
+                }
+              ],
+              "internalType": "struct IFolio.FeeRecipient[]",
+              "name": "feeRecipients",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint96",
+                  "name": "portion",
+                  "type": "uint96"
+                }
+              ],
+              "internalType": "struct IFolio.FeeRecipient[]",
+              "name": "immutableFeeRecipients",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tvlFee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "mintFee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "folioFeeForSelf",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "mandate",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IFolio.FolioAdditionalDetails",
+          "name": "additionalDetails",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "trustedFillerEnabled",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "weightControl",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "enum IFolio.PriceControl",
+                  "name": "priceControl",
+                  "type": "uint8"
+                }
+              ],
+              "internalType": "struct IFolio.RebalanceControl",
+              "name": "rebalanceControl",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bool",
+              "name": "bidsEnabled",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IFolio.FolioFlags",
+          "name": "folioFlags",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address[]",
+          "name": "basketManagers",
+          "type": "address[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "auctionLaunchers",
+          "type": "address[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "brandManagers",
+          "type": "address[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "deploymentNonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "deployFolio",
+      "outputs": [
+        {
+          "internalType": "contract Folio",
+          "name": "folio",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "proxyAdmin",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "stToken",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "symbol",
+              "type": "string"
+            },
+            {
+              "internalType": "address[]",
+              "name": "assets",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amounts",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "initialShares",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct IFolio.FolioBasicDetails",
+          "name": "basicDetails",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "maxAuctionLength",
+              "type": "uint256"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint96",
+                  "name": "portion",
+                  "type": "uint96"
+                }
+              ],
+              "internalType": "struct IFolio.FeeRecipient[]",
+              "name": "feeRecipients",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint96",
+                  "name": "portion",
+                  "type": "uint96"
+                }
+              ],
+              "internalType": "struct IFolio.FeeRecipient[]",
+              "name": "immutableFeeRecipients",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tvlFee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "mintFee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "folioFeeForSelf",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "mandate",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IFolio.FolioAdditionalDetails",
+          "name": "additionalDetails",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "trustedFillerEnabled",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "weightControl",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "enum IFolio.PriceControl",
+                  "name": "priceControl",
+                  "type": "uint8"
+                }
+              ],
+              "internalType": "struct IFolio.RebalanceControl",
+              "name": "rebalanceControl",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bool",
+              "name": "bidsEnabled",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IFolio.FolioFlags",
+          "name": "folioFlags",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint48",
+                  "name": "vetoDelay",
+                  "type": "uint48"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "vetoPeriod",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "vetoThreshold",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct IReserveOptimisticGovernor.OptimisticGovernanceParams",
+              "name": "optimisticParams",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint48",
+                  "name": "votingDelay",
+                  "type": "uint48"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "votingPeriod",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint48",
+                  "name": "voteExtension",
+                  "type": "uint48"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "proposalThreshold",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "quorumNumerator",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct IReserveOptimisticGovernor.StandardGovernanceParams",
+              "name": "standardParams",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "optimisticSelectors",
+              "type": "bytes4[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "optimisticProposers",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "additionalGuardians",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timelockDelay",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "proposalThrottleCapacity",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct IFolioDeployer.GovParams",
+          "name": "govParams",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address[]",
+              "name": "existingBasketManagers",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "auctionLaunchers",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "brandManagers",
+              "type": "address[]"
+            }
+          ],
+          "internalType": "struct IFolioDeployer.GovRoles",
+          "name": "govRoles",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "deploymentNonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "deployGovernedFolio",
+      "outputs": [
+        {
+          "internalType": "contract Folio",
+          "name": "folio",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "proxyAdmin",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "folioImplementation",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "optimisticGovernorDeployer",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "trustedFillerRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "versionRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}

@@ -237,7 +237,7 @@ describe("Index DTF rebalance execution", () => {
     ]);
   });
 
-  it("encodes bid, close auction and end rebalance identically for 5.0.0 and 6.0.0", () => {
+  it("encodes bid and close auction identically for 5.0.0 and 6.0.0", () => {
     const bidInput = {
       address: DTF,
       chainId: 8453,
@@ -251,22 +251,45 @@ describe("Index DTF rebalance execution", () => {
     const v5 = [
       prepareIndexDtfBid({ ...bidInput, version: "5.0.0" }),
       prepareIndexDtfCloseAuction({ address: DTF, chainId: 8453, version: "5.0.0", auctionId: 4n }),
-      prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453, version: "5.0.0" }),
     ];
     const v6 = [
       prepareIndexDtfBid({ ...bidInput, version: "6.0.0" }),
       prepareIndexDtfCloseAuction({ address: DTF, chainId: 8453, version: "6.0.0", auctionId: 4n }),
-      prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453, version: "6.0.0" }),
     ];
 
     expect(v6.map((call) => call.data)).toEqual(v5.map((call) => call.data));
     expect(v6.map((call) => decodeFunctionData({ abi: folioArtifactAbi, data: call.data }).functionName)).toEqual([
       "bid",
       "closeAuction",
-      "endRebalance",
     ]);
-    expect(v5.map((call) => call.contract.abi === dtfIndexAbi)).toEqual([true, true, true]);
-    expect(v6.map((call) => call.contract.abi === folioArtifactAbi)).toEqual([true, true, true]);
+    expect(v5.map((call) => call.contract.abi === dtfIndexAbi)).toEqual([true, true]);
+    expect(v6.map((call) => call.contract.abi === folioArtifactAbi)).toEqual([true, true]);
+  });
+
+  it("binds the 6.0.0 end rebalance to a rebalance nonce and keeps 5.0.0 on endRebalance()", () => {
+    const v5 = prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453, version: "5.0.0" });
+    const v6 = prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453, version: "6.0.0", rebalanceNonce: 3n });
+
+    // Folio 6.0.0 on-chain: endRebalance(uint256) = 0xf9ff9f9c; endRebalance() = 0x0040718e no longer dispatches.
+    expect(v5.data).toBe("0x0040718e");
+    expect(v6.data).toBe(`0xf9ff9f9c${"3".padStart(64, "0")}`);
+    expect(decodeFunctionData({ abi: folioArtifactAbi, data: v6.data })).toEqual({
+      functionName: "endRebalance",
+      args: [3n],
+    });
+    expect(v5.contract.abi).toBe(dtfIndexAbi);
+    expect(v6.contract.abi).toBe(folioArtifactAbi);
+    expect(v6.contract.args).toEqual([3n]);
+  });
+
+  it("rejects a 6.0.0 end rebalance without a rebalance nonce", () => {
+    for (const rebalanceNonce of [undefined, -1n, 1] as unknown as bigint[]) {
+      const build = () =>
+        prepareIndexDtfEndRebalance({ address: DTF, chainId: 8453, version: "6.0.0", rebalanceNonce });
+
+      expect(build).toThrow(SdkError);
+      expect(build).toThrow(expect.objectContaining({ code: "INVALID_INPUT", meta: { rebalanceNonce } }));
+    }
   });
 
   it("rejects versions the write contract does not admit", () => {

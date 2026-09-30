@@ -48,7 +48,7 @@ Use historical methods for analytics and completed lifecycle views.
 | `prepareOpenAuctionUnrestricted` | Open an auction after the community window starts. |
 | `prepareBid`                     | Bid on an auction.                                 |
 | `prepareCloseAuction`            | Close an auction.                                  |
-| `prepareEndRebalance`            | End the active rebalance.                          |
+| `prepareEndRebalance`            | End the active rebalance (6.0.0: by nonce).        |
 
 ```ts
 const quote = await sdk.index.getBidQuote({
@@ -84,6 +84,16 @@ rebalance's price control allows a shorter custom length.
 const version = await sdk.index.getVersion({ address, chainId }); // "6.0.0"
 const { args } = sdk.index.prepareOpenAuctionArgs({ ...input, version, auctionLength: 1800n });
 const call = sdk.index.prepareOpenAuction({ address, chainId, version, args });
+```
+
+Folio 6.0.0 binds `endRebalance` to the rebalance it ends: pass `rebalanceNonce` (read it with `getRebalanceNonce`)
+and the Folio reverts `Folio__InvalidRebalanceNonce` if a newer rebalance has started since. Folio 5.0.0 keeps the
+nonce-less `endRebalance()`. On-chain, `startRebalance` and `endRebalance` also accept `type(uint256).max` to skip the
+nonce check; the SDK basket builder always sends the exact next nonce.
+
+```ts
+const rebalanceNonce = await sdk.index.getRebalanceNonce({ address, chainId });
+const end = sdk.index.prepareEndRebalance({ address, chainId, version: "6.0.0", rebalanceNonce });
 ```
 
 Open-auction inputs are validated before the rebalance library runs: a zero, negative or non-finite current price

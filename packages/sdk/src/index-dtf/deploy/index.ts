@@ -1,4 +1,4 @@
-import { getAddress, keccak256, parseEventLogs, type Address, type Hex, type Log } from "viem";
+import { getAddress, isAddressEqual, keccak256, parseEventLogs, type Address, type Hex, type Log } from "viem";
 
 import type { SupportedChainId } from "@/config";
 import type { IndexDtfFeeRecipient } from "@/index-dtf/fee-recipients";
@@ -462,48 +462,73 @@ export function getIndexDtfDeployApprovalAmount(params: {
   return (params.amount * BigInt(approvalBufferBps)) / 10_000n;
 }
 
-export function extractIndexDtfDeployedAddress(logs: readonly Log[]): Address {
-  const governed = parseEventLogs({
-    abi: indexDtfDeployerAbi,
-    logs: [...logs],
-    eventName: "GovernedFolioDeployed",
+/**
+ * Reads the deployed Folio from a deploy receipt's logs. Only `FolioDeployed` / `GovernedFolioDeployed` emitted by the
+ * deployer the call was sent to count: every contract the deploy touches (a basket token during `transferFrom`, for
+ * one) can emit a lookalike event. Pass the same `{ chainId, version, deployer? }` the deploy builder took. Throws
+ * `RECORD_NOT_FOUND` without a deployer event and `INVALID_RESPONSE` when the deployer's events name more than one Folio.
+ */
+export function extractIndexDtfDeployedAddress(
+  logs: readonly Log[],
+  target: IndexDtfDeployTargetV5 | IndexDtfDeployTargetV6,
+): Address {
+  const deployer = getIndexDtfDeployerAddress(target);
+  const events = parseEventLogs({
+    abi: target.version === "6.0.0" ? folioDeployerV6Abi : indexDtfDeployerAbi,
+    logs: logs.filter((log) => isAddressEqual(log.address, deployer)),
+    eventName: ["FolioDeployed", "GovernedFolioDeployed"],
   });
 
-  if (governed[0]?.args.folio) {
-    return governed[0].args.folio;
-  }
-
-  const ungoverned = parseEventLogs({
-    abi: indexDtfDeployerAbi,
-    logs: [...logs],
-    eventName: "FolioDeployed",
-  });
-
-  if (ungoverned[0]?.args.folio) {
-    return ungoverned[0].args.folio;
-  }
-
-  throw new SdkError({
-    code: "RECORD_NOT_FOUND",
-    message: "Could not find FolioDeployed or GovernedFolioDeployed event in transaction logs",
-  });
+  return getSingleDeployedAddress(
+    events.map((event) => event.args.folio),
+    { deployer, events: "FolioDeployed or GovernedFolioDeployed" },
+  );
 }
 
-export function extractIndexDtfDeployedStakingTokenAddress(logs: readonly Log[]): Address {
+/**
+ * Reads the staking token from a `prepareIndexDtfDeployStakingToken` receipt: only `DeployedGovernedStakingToken`
+ * emitted by the chain's `INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS` counts, with the same errors as
+ * `extractIndexDtfDeployedAddress`.
+ */
+export function extractIndexDtfDeployedStakingTokenAddress(
+  logs: readonly Log[],
+  target: { readonly chainId: SupportedChainId },
+): Address {
+  const deployer = INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS[target.chainId];
   const events = parseEventLogs({
     abi: indexDtfGovernanceDeployerAbi,
-    logs: [...logs],
+    logs: logs.filter((log) => isAddressEqual(log.address, deployer)),
     eventName: "DeployedGovernedStakingToken",
   });
 
-  if (events[0]?.args.stToken) {
-    return events[0].args.stToken;
+  return getSingleDeployedAddress(
+    events.map((event) => event.args.stToken),
+    { deployer, events: "DeployedGovernedStakingToken" },
+  );
+}
+
+function getSingleDeployedAddress(
+  addresses: readonly Address[],
+  source: { readonly deployer: Address; readonly events: string },
+): Address {
+  const deployed = [...new Set(addresses.map((address) => getAddress(address)))];
+
+  if (deployed.length === 0) {
+    throw new SdkError({
+      code: "RECORD_NOT_FOUND",
+      message: `Could not find ${source.events} emitted by ${source.deployer} in transaction logs`,
+      meta: { deployer: source.deployer },
+    });
+  }
+  if (deployed.length > 1) {
+    throw new SdkError({
+      code: "INVALID_RESPONSE",
+      message: `${source.deployer} emitted ${source.events} for more than one address`,
+      meta: { deployer: source.deployer, deployed },
+    });
   }
 
-  throw new SdkError({
-    code: "RECORD_NOT_FOUND",
-    message: "Could not find DeployedGovernedStakingToken event in transaction logs",
-  });
+  return deployed[0]!;
 }
 
 function normalizeBasicDetails(details: IndexDtfDeployBasicDetails): IndexDtfDeployBasicDetails {

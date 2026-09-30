@@ -46,11 +46,14 @@ Defaults:
 
 ## Logs
 
-After sending the deployment transaction, parse logs with:
+After sending the deployment transaction, parse logs with the same target the deploy builder took:
 
 ```ts
-const address = extractIndexDtfDeployedAddress(receipt.logs);
-const stToken = extractIndexDtfDeployedStakingTokenAddress(receipt.logs);
+const address = extractIndexDtfDeployedAddress(receipt.logs, { chainId, version, deployer });
+const stToken = extractIndexDtfDeployedStakingTokenAddress(receipt.logs, { chainId });
 ```
 
-Do this after confirmation, not before.
+Only events emitted by the expected deployer count (`getIndexDtfDeployerAddress(target)`, or the chain's governance
+deployer for staking tokens): a basket token can emit a lookalike `FolioDeployed` during `transferFrom`. A receipt
+without the deployer's event throws `RECORD_NOT_FOUND`; one where the deployer names more than one address throws
+`INVALID_RESPONSE`. Do this after confirmation, not before.

@@ -194,7 +194,11 @@ forkDescribe("Index DTF v6 completion fork smoke", () => {
         if (plan.type !== "approval-required") throw new Error("expected an approval plan");
         for (const approval of plan.approvals) await send(actor, approval);
         const receipt = await send(actor, plan.call);
-        const folio = extractIndexDtfDeployedAddress(receipt.logs);
+        const folio = extractIndexDtfDeployedAddress(receipt.logs, {
+          chainId,
+          version: "6.0.0",
+          deployer: config.protocol.v6Deployer,
+        });
 
         expect(await sdk.index.getVersion({ address: folio, chainId })).toBe("6.0.0");
         expect(await sdk.index.getMaxAuctionLength({ address: folio, chainId })).toBe(config.writePaths.auctionLength);

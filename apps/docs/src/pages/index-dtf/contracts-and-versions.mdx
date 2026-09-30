@@ -62,6 +62,8 @@ ended. `getVersionDeployment({ version: "6.0.0" })` tells you whether the chain'
 `sdk.index.getLatestVersion({ chainId })` and `sdk.index.getVersionDeployment({ chainId, version })` read the
 on-chain `FolioVersionRegistry` (deployer, Folio implementation, deprecation flag). Use them instead of assuming a
 release is live on a chain; `getVersionDeployment` returns `null` for a version that was never registered there.
+Deploys do not need registration (6.0.0 deploys go to `INDEX_DTF_V6_DEPLOYER_ADDRESS`); upgrading an existing DTF does,
+because its proxy admin resolves the implementation through the registry.
 
 Open-auction and issuance helpers remain version-sensitive. Do not assume every write helper supports every deployed Folio version.
 

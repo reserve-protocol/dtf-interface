@@ -96,6 +96,7 @@ export {
   getIndexDtfDeployApprovalAmount,
   getIndexDtfDeployerAddress,
   INDEX_DTF_DEPLOYER_ADDRESS,
+  INDEX_DTF_V6_DEPLOYER_ADDRESS,
   INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
   prepareIndexDtfDeploy,
   prepareIndexDtfDeployAssetApproval,

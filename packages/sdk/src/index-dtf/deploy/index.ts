@@ -27,6 +27,16 @@ export const INDEX_DTF_DEPLOYER_ADDRESS = {
   56: "0x72f87239981159ed23673012EE3806Ca6114AB2A",
 } as const satisfies Record<SupportedChainId, Address>;
 
+/**
+ * Folio 6.0 `FolioDeployer` per chain (`version()` 6.0.0). v6 deploys target it whether or not the chain's
+ * `FolioVersionRegistry` has registered it yet; `getIndexDtfLatestVersion` reports the registry's view.
+ */
+export const INDEX_DTF_V6_DEPLOYER_ADDRESS = {
+  1: "0x2B1Cd9aEF0CD3B9fF5DCa1C66348eCfC46F37392",
+  8453: "0x4c891fCa6319d492866672E3D2AfdAAA5bDcfF67",
+  56: "0x9837Ce9825D52672Ca02533B5A160212bf901963",
+} as const satisfies Record<SupportedChainId, Address>;
+
 export const INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS = {
   1: "0x72f87239981159ed23673012EE3806Ca6114AB2A",
   8453: "0xECA52a5BDBAd98a5B4B6B944C4C9cc636D4D7461",
@@ -125,7 +135,10 @@ export type IndexDtfDeployRevenueDistributionParams = {
   readonly voteLock?: Address;
 };
 
-/** v5 deploys through the registered per-chain deployer; v6 has no public deployer yet, so its address is explicit. */
+/**
+ * v5 deploys through `INDEX_DTF_DEPLOYER_ADDRESS`; v6 through `INDEX_DTF_V6_DEPLOYER_ADDRESS` unless `deployer`
+ * overrides it (forks, sandboxes).
+ */
 export type IndexDtfDeployTargetV5 = {
   readonly chainId: SupportedChainId;
   readonly version: "5.0.0";
@@ -134,8 +147,11 @@ export type IndexDtfDeployTargetV5 = {
 export type IndexDtfDeployTargetV6 = {
   readonly chainId: SupportedChainId;
   readonly version: "6.0.0";
-  readonly deployer: Address;
+  /** Override for forks and sandboxes; defaults to the chain's `INDEX_DTF_V6_DEPLOYER_ADDRESS`. */
+  readonly deployer?: Address;
 };
+
+type IndexDtfDeployVersion = (IndexDtfDeployTargetV5 | IndexDtfDeployTargetV6)["version"];
 
 type IndexDtfDeployCommon = {
   readonly basicDetails: IndexDtfDeployBasicDetails;
@@ -191,9 +207,11 @@ export type PrepareIndexDtfDeployStakingTokenParams = {
 
 export type PrepareIndexDtfDeployApprovalParams = {
   readonly chainId: SupportedChainId;
+  /** The Folio version being deployed; the spender defaults to that version's per-chain deployer. */
+  readonly version: IndexDtfDeployVersion;
   readonly token: Address;
   readonly amount: bigint;
-  /** Spender; defaults to the registered v5 deployer. Pass the v6 deployer for 6.0.0 deployments. */
+  /** Spender override for forks and sandboxes. */
   readonly deployer?: Address;
 };
 
@@ -204,6 +222,7 @@ export type PrepareIndexDtfDeployPlanApprovalParams = {
 
 export type PrepareIndexDtfDeployApprovalsParams = {
   readonly chainId: SupportedChainId;
+  readonly version: IndexDtfDeployVersion;
   readonly assets: readonly Address[];
   readonly amounts: readonly bigint[];
   readonly approvalBufferBps?: number;
@@ -240,7 +259,7 @@ export function generateIndexDtfDeploymentNonce(): Hex {
 
 export function getIndexDtfDeployerAddress(target: IndexDtfDeployTargetV5 | IndexDtfDeployTargetV6): Address {
   if (target.version === "6.0.0") {
-    return getAddress(target.deployer);
+    return target.deployer ? getAddress(target.deployer) : INDEX_DTF_V6_DEPLOYER_ADDRESS[target.chainId];
   }
   if (target.version !== "5.0.0") {
     throw new SdkError({
@@ -355,6 +374,7 @@ export function prepareIndexDtfDeployPlan(
   const approvals = (params.approvals ?? []).map((approval) =>
     prepareIndexDtfDeployAssetApproval({
       chainId: params.chainId,
+      version: params.version,
       token: approval.token,
       amount: approval.amount,
       deployer: call.to,
@@ -374,6 +394,7 @@ export function prepareIndexDtfDeployGovernedPlan(
   const approvals = (params.approvals ?? []).map((approval) =>
     prepareIndexDtfDeployAssetApproval({
       chainId: params.chainId,
+      version: params.version,
       token: approval.token,
       amount: approval.amount,
       deployer: call.to,
@@ -384,10 +405,14 @@ export function prepareIndexDtfDeployGovernedPlan(
 }
 
 export function prepareIndexDtfDeployAssetApproval(params: PrepareIndexDtfDeployApprovalParams) {
+  const spender = params.deployer
+    ? getAddress(params.deployer)
+    : getIndexDtfDeployerAddress({ chainId: params.chainId, version: params.version });
+
   return prepareErc20Approval({
     chainId: params.chainId,
     token: params.token,
-    spender: params.deployer ? getAddress(params.deployer) : INDEX_DTF_DEPLOYER_ADDRESS[params.chainId],
+    spender,
     amount: params.amount,
   });
 }
@@ -406,6 +431,7 @@ export function prepareIndexDtfDeployAssetApprovals(
   return params.assets.map((token, index) =>
     prepareIndexDtfDeployAssetApproval({
       chainId: params.chainId,
+      version: params.version,
       token,
       ...(params.deployer ? { deployer: params.deployer } : {}),
       amount: getIndexDtfDeployApprovalAmount({

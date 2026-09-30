@@ -1,6 +1,6 @@
 ---
 title: Decisions
-updated: 2026-09-18
+updated: 2026-09-30
 type: decision
 ---
 
@@ -43,3 +43,7 @@ The internal governance dashboard needs protocol-wide views (all proposals, top 
 ## 2026-09-18 — Every Folio write takes a version; v6 reads are RPC-only until the subgraph ships
 
 The SDK never picks a Folio ABI silently: every write builder (auction, settings, fee distribution, deploy) takes `version` and rejects anything but 5.0.0 / 6.0.0, even where the calldata is byte-identical, so a v4 or unknown proxy cannot receive v5 bytes by default. Folio 6.0 state a write needs exactly (self fee, immutable fee recipients, allowlist) is read from RPC at one pinned block; the DTF and revenue models stay subgraph-shaped and gain the v6 fields with the subgraph release rather than through RPC fallbacks; the immutable table is confirmed with a v6 probe and a boundary read so a v5 proxy or a transport failure never reads as an empty table. Fee tables are validated at build time to FolioLib's rules (sorted, non-zero, not the folio, ≤64, total 1e18 across both tables) because a bad table otherwise reverts only after a governance vote. v6 deploys require an explicit deployer address: no public 6.0.0 `FolioDeployer` is registered, and a speculative chain map would encode against nothing. The 5.0.0 → 6.0.0 upgrade builder reproduces the reviewed spell proposal byte for byte and takes the spell address as input for the same reason.
+
+## 2026-09-30 — v6 deploys target the real 6.0.0 deployer; deploy approvals take a version
+
+Reserve deployed the production Folio 6.0.0 `FolioDeployer` on mainnet, Base and BSC before registering it in any `FolioVersionRegistry`. The SDK pins those addresses in `INDEX_DTF_V6_DEPLOYER_ADDRESS` and defaults the `"6.0.0"` deploy target to them rather than resolving the deployer from the registry: a deploy is a write, and the registry lagging the deployment must not block it or make it depend on an extra read. `deployer` stays as an override for forks and sandboxes. Standalone deploy approvals now require `version`, extending the "no silent v5 default" rule to approval spenders, so a v6 deploy can never approve the 5.0.0 deployer by default.

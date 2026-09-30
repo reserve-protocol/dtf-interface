@@ -250,7 +250,7 @@ forkDescribe.each(REAL_FORKS)("Folio 6.0 real deployer fork on chain $chainId", 
 
       for (const approval of plan.approvals) await send(ACTOR, approval);
       const receipt = await send(ACTOR, plan.call);
-      folio = extractIndexDtfDeployedAddress(receipt.logs);
+      folio = extractIndexDtfDeployedAddress(receipt.logs, { chainId, version: "6.0.0" });
       const [deployed] = parseEventLogs({
         abi: folioDeployerV6Abi,
         eventName: "FolioDeployed",
@@ -483,7 +483,7 @@ forkDescribe.each(REAL_FORKS)("Folio 6.0 real deployer fork on chain $chainId", 
       for (const approval of plan.approvals) await send(ACTOR, approval);
       const receipt = await send(ACTOR, plan.call);
 
-      const governedFolio = extractIndexDtfDeployedAddress(receipt.logs);
+      const governedFolio = extractIndexDtfDeployedAddress(receipt.logs, { chainId, version: "6.0.0" });
       const [governed] = parseEventLogs({
         abi: folioDeployerV6Abi,
         eventName: "GovernedFolioDeployed",

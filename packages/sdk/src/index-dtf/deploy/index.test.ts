@@ -1,4 +1,12 @@
-import { decodeFunctionData, encodeAbiParameters, encodeEventTopics, erc20Abi, parseEther, type Log } from "viem";
+import {
+  decodeFunctionData,
+  encodeAbiParameters,
+  encodeEventTopics,
+  erc20Abi,
+  parseEther,
+  type Address,
+  type Log,
+} from "viem";
 import { describe, expect, it } from "vitest";
 
 import { indexDtfDeployerAbi } from "@/index-dtf/abis/deployer";
@@ -464,48 +472,136 @@ describe("Index DTF deploy builders", () => {
     expect(plan.approvals[0]?.contract.args).toEqual([INDEX_DTF_DEPLOYER_ADDRESS[8453], 100n]);
   });
 
-  it("extracts deployed DTF addresses from deploy logs", () => {
-    const log = {
-      address: INDEX_DTF_DEPLOYER_ADDRESS[1],
-      topics: encodeEventTopics({
-        abi: indexDtfDeployerAbi,
-        eventName: "FolioDeployed",
-        args: { folioOwner: OWNER, folio: DTF },
-      }),
-      data: encodeAbiParameters([{ type: "address" }], [ADMIN]),
-    } as unknown as Log;
+  describe("deploy event extraction", () => {
+    const FORGED = "0x00000000000000000000000000000000000000f0";
+    const OTHER_DTF = "0x0000000000000000000000000000000000000007";
 
-    expect(extractIndexDtfDeployedAddress([log])).toBe(DTF);
-  });
+    function folioDeployedLog(emitter: Address, folio: Address): Log {
+      return {
+        address: emitter,
+        topics: encodeEventTopics({
+          abi: indexDtfDeployerAbi,
+          eventName: "FolioDeployed",
+          args: { folioOwner: OWNER, folio },
+        }),
+        data: encodeAbiParameters([{ type: "address" }], [ADMIN]),
+      } as unknown as Log;
+    }
 
-  it("extracts governed deployed DTF addresses from deploy logs", () => {
-    const log = {
-      address: INDEX_DTF_DEPLOYER_ADDRESS[1],
-      topics: encodeEventTopics({
-        abi: indexDtfDeployerAbi,
-        eventName: "GovernedFolioDeployed",
-        args: { stToken: ST_TOKEN, folio: DTF },
-      }),
-      data: encodeAbiParameters(
-        [{ type: "address" }, { type: "address" }, { type: "address" }, { type: "address" }],
-        [OWNER, TOKEN_A, ADMIN, TOKEN_B],
-      ),
-    } as unknown as Log;
+    function governedFolioDeployedLog(emitter: Address, folio: Address): Log {
+      return {
+        address: emitter,
+        topics: encodeEventTopics({
+          abi: indexDtfDeployerAbi,
+          eventName: "GovernedFolioDeployed",
+          args: { stToken: ST_TOKEN, folio },
+        }),
+        data: encodeAbiParameters(
+          [{ type: "address" }, { type: "address" }, { type: "address" }, { type: "address" }],
+          [OWNER, TOKEN_A, ADMIN, TOKEN_B],
+        ),
+      } as unknown as Log;
+    }
 
-    expect(extractIndexDtfDeployedAddress([log])).toBe(DTF);
-  });
+    function stakingTokenLog(emitter: Address, stToken: Address): Log {
+      return {
+        address: emitter,
+        topics: encodeEventTopics({
+          abi: indexDtfGovernanceDeployerAbi,
+          eventName: "DeployedGovernedStakingToken",
+          args: { underlying: TOKEN_A, stToken },
+        }),
+        data: encodeAbiParameters([{ type: "address" }, { type: "address" }], [OWNER, ADMIN]),
+      } as unknown as Log;
+    }
 
-  it("extracts deployed staking token addresses from governance deploy logs", () => {
-    const log = {
-      address: INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS[1],
-      topics: encodeEventTopics({
-        abi: indexDtfGovernanceDeployerAbi,
-        eventName: "DeployedGovernedStakingToken",
-        args: { underlying: TOKEN_A, stToken: ST_TOKEN },
-      }),
-      data: encodeAbiParameters([{ type: "address" }, { type: "address" }], [OWNER, ADMIN]),
-    } as unknown as Log;
+    it("extracts the Folio from the version's deployer, ungoverned and governed", () => {
+      const v5 = { chainId: 1, version: "5.0.0" } as const;
+      const v6 = { chainId: 1, version: "6.0.0" } as const;
 
-    expect(extractIndexDtfDeployedStakingTokenAddress([log])).toBe(ST_TOKEN);
+      expect(extractIndexDtfDeployedAddress([folioDeployedLog(INDEX_DTF_DEPLOYER_ADDRESS[1], DTF)], v5)).toBe(DTF);
+      expect(
+        extractIndexDtfDeployedAddress(
+          [
+            folioDeployedLog(INDEX_DTF_V6_DEPLOYER_ADDRESS[1], DTF),
+            governedFolioDeployedLog(INDEX_DTF_V6_DEPLOYER_ADDRESS[1], DTF),
+          ],
+          v6,
+        ),
+      ).toBe(DTF);
+    });
+
+    it("ignores lookalike events from any other emitter, before or after the deployer's", () => {
+      // A basket token can emit a forged FolioDeployed during transferFrom, before the deployer emits the real one.
+      const logs = [
+        folioDeployedLog(FORGED, OTHER_DTF),
+        governedFolioDeployedLog(FORGED, OTHER_DTF),
+        folioDeployedLog(INDEX_DTF_DEPLOYER_ADDRESS[8453], DTF),
+        folioDeployedLog(TOKEN_A, OTHER_DTF),
+      ];
+
+      expect(extractIndexDtfDeployedAddress(logs, { chainId: 8453, version: "5.0.0" })).toBe(DTF);
+    });
+
+    it("rejects receipts where only another contract emitted the event", () => {
+      const forgedOnly = [folioDeployedLog(FORGED, OTHER_DTF), governedFolioDeployedLog(TOKEN_A, OTHER_DTF)];
+      const build = () => extractIndexDtfDeployedAddress(forgedOnly, { chainId: 1, version: "5.0.0" });
+
+      expect(build).toThrow(SdkError);
+      expect(build).toThrow(
+        expect.objectContaining({ code: "RECORD_NOT_FOUND", meta: { deployer: INDEX_DTF_DEPLOYER_ADDRESS[1] } }),
+      );
+      // The v5 deployer is not the v6 target's emitter, and a v6 default is not an override's emitter.
+      expect(() =>
+        extractIndexDtfDeployedAddress([folioDeployedLog(INDEX_DTF_DEPLOYER_ADDRESS[1], DTF)], {
+          chainId: 1,
+          version: "6.0.0",
+        }),
+      ).toThrow(expect.objectContaining({ code: "RECORD_NOT_FOUND" }));
+      expect(() =>
+        extractIndexDtfDeployedAddress([folioDeployedLog(INDEX_DTF_V6_DEPLOYER_ADDRESS[1], DTF)], {
+          chainId: 1,
+          version: "6.0.0",
+          deployer: ADMIN,
+        }),
+      ).toThrow(expect.objectContaining({ code: "RECORD_NOT_FOUND", meta: { deployer: ADMIN } }));
+    });
+
+    it("uses a v6 deployer override as the only accepted emitter", () => {
+      const logs = [folioDeployedLog(INDEX_DTF_V6_DEPLOYER_ADDRESS[56], OTHER_DTF), folioDeployedLog(ADMIN, DTF)];
+
+      expect(extractIndexDtfDeployedAddress(logs, { chainId: 56, version: "6.0.0", deployer: ADMIN })).toBe(DTF);
+    });
+
+    it("rejects a deployer receipt that names more than one Folio", () => {
+      const logs = [
+        folioDeployedLog(INDEX_DTF_DEPLOYER_ADDRESS[1], DTF),
+        folioDeployedLog(INDEX_DTF_DEPLOYER_ADDRESS[1], OTHER_DTF),
+      ];
+      const build = () => extractIndexDtfDeployedAddress(logs, { chainId: 1, version: "5.0.0" });
+
+      expect(build).toThrow(expect.objectContaining({ code: "INVALID_RESPONSE", meta: expect.anything() }));
+      expect(build).toThrow(/more than one address/);
+    });
+
+    it("extracts the staking token only from the chain's governance deployer", () => {
+      const genuine = stakingTokenLog(INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS[1], ST_TOKEN);
+      const forged = stakingTokenLog(FORGED, OTHER_DTF);
+
+      expect(extractIndexDtfDeployedStakingTokenAddress([forged, genuine], { chainId: 1 })).toBe(ST_TOKEN);
+      expect(() => extractIndexDtfDeployedStakingTokenAddress([forged], { chainId: 1 })).toThrow(
+        expect.objectContaining({ code: "RECORD_NOT_FOUND" }),
+      );
+      // Mainnet's governance deployer is not Base's.
+      expect(() => extractIndexDtfDeployedStakingTokenAddress([genuine], { chainId: 8453 })).toThrow(
+        expect.objectContaining({ code: "RECORD_NOT_FOUND" }),
+      );
+      expect(() =>
+        extractIndexDtfDeployedStakingTokenAddress(
+          [genuine, stakingTokenLog(INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS[1], OTHER_DTF)],
+          { chainId: 1 },
+        ),
+      ).toThrow(expect.objectContaining({ code: "INVALID_RESPONSE" }));
+    });
   });
 });

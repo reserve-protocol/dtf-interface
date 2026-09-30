@@ -293,18 +293,42 @@ proposal IDs, and calldata are abbreviated and must come from the fixture runner
 
 `address` is accepted as a documented alias for each scenario's `folio`. `INDEX_DTF_FORK_RPC_URL` may override the
 manifest RPC URL, but both forms are restricted to loopback HTTP. `chainId` is the forked source chain (`1`, `8453`,
-or `56`), even when the local RPC reports a development chain ID. No production Folio or v6 deployer address is built
-into the harness. Normal unit tests collect the fork file as skipped unless the opt-in flag is set.
+or `56`), even when the local RPC reports a development chain ID. No production Folio address is built into the
+harness; the sandbox's own v6 deployer comes from the manifest. Normal unit tests collect the fork file as skipped
+unless the opt-in flag is set.
 
-The write-path checks are read-only: standard Governor proposal ordering, executed upgrade-path log attestation,
-v5/v6 `openAuction` calldata, the live v6 `startRebalance` next nonce/deadline, and the currently available v5 deploy
-builder. They do not submit transactions or perform upgrades. Direct v6 deployment is not claimed because the SDK has
-no v6 deployer configuration or public v6 deploy builder yet.
+The `fork-smoke.test.ts` write-path checks are read-only: standard Governor proposal ordering, executed upgrade-path log
+attestation, v5/v6 `openAuction` calldata, the live v6 `startRebalance` next nonce/deadline, and the v5 deploy builder.
+They do not submit transactions or perform upgrades. SDK-built v6 deploys are executed by `fork-smoke-v6.test.ts`
+against the sandbox deployer and by the real-deployer fork below.
 
 Execution readback is pinned to `stateBlock`. The generated fixture can have non-overlapping auction windows: the v5
 auction is active at its current state timestamp while the v6 auction is successfully opened and scheduled. The smoke
 therefore asserts v5 through `getActiveAuction`, v6 through `getLatestAuction` with `getActiveAuction === null` before
 its declared start, and exact event/readback start, end, duration, nonce, ID, and token equality for both.
+
+## Real Folio 6.0 Deployer Fork
+
+`fork-real-v6.test.ts` exercises the production 6.0.0 `FolioDeployer` behind `INDEX_DTF_V6_DEPLOYER_ADDRESS` on
+disposable, unindexed Anvil forks of mainnet, Base and BSC (never the shared sandbox on 8545, which the suite refuses).
+Per chain it deploys an ungoverned Folio through the SDK's default deployer and reads the v6 state back, runs
+`startRebalance` → `openAuction` → a bid at the auction's end price with SDK builders and checks the settled amounts
+against arithmetic on contract reads, deploys a governed Folio (the deployer's optimistic governor deployer 1.1.0
+wires governor, timelock and selector registry), then registers the deployer in the chain's `FolioVersionRegistry`
+as the registry owner and reads 6.0.0 back. Each chain runs inside one `evm_snapshot`/`evm_revert`, so the forks can be
+reused.
+
+```sh
+anvil --fork-url <mainnet-rpc> --port 8546 --chain-id 1
+anvil --fork-url <base-rpc> --port 8547 --chain-id 8453
+anvil --fork-url <bsc-rpc> --port 8548 --chain-id 56
+pnpm --filter @reserve-protocol/sdk test:smoke:index:fork-real-v6
+```
+
+`INDEX_DTF_FORK_REAL_V6_RPC_URL_1`, `_8453` and `_56` override the loopback URLs. Run one chain with
+`-t "chain 8453"`. The suite aborts before writing when the RPC is not Anvil or reports another chain id, which also
+keeps it off Register's indexed fork stacks (Base on 8546, BSC on 8547); never point an override at an indexed fork.
+When a chain's registry already has 6.0.0, the last case only checks that the registered deployer is the pinned one.
 
 ## Errors
 

@@ -288,6 +288,35 @@ describe("buildIndexDtfBasketProposal", () => {
     ).rejects.toThrow("deadline is required");
   });
 
+  it("rejects v6 rebalance tokens missing from an enabled trade allowlist", async () => {
+    const build = (tradeAllowlist: readonly Address[]) =>
+      buildIndexDtfBasketProposal(testClient({ version: "6.0.0", tradeAllowlist }), {
+        address: DTF,
+        chainId: 1,
+        governance: GOVERNANCE,
+        supply: parseEther("1"),
+        currentBalances: { [USDC]: parseUnits("1", 6), [DAI]: 0n },
+        prices: { [USDC]: 1, [DAI]: 2 },
+        priceErrors: { [USDC]: 0.5, [DAI]: 0.5 },
+        weightControl: true,
+        deadline: 2_000_000_000,
+        basket: {
+          type: "shares",
+          tokens: [
+            { address: USDC, share: "50" },
+            { address: DAI, share: "50" },
+          ],
+        },
+      });
+
+    // Folio checks every rebalance token, the kept one included: USDC alone is not enough.
+    await expect(build([USDC])).rejects.toThrow(
+      expect.objectContaining({ code: "INVALID_INPUT", meta: { tokens: [getAddress(DAI)] } }),
+    );
+    await expect(build([])).rejects.toThrow(/Folio__TokenNotAllowlisted/);
+    await expect(build([USDC, DAI])).resolves.toMatchObject({ context: { rebalanceNonce: 1n } });
+  });
+
   it("rejects one-token v6 rebalances", async () => {
     await expect(
       buildIndexDtfBasketProposal(testClient({ version: "6.0.0" }), {
@@ -534,7 +563,13 @@ describe("buildIndexDtfBasketProposal", () => {
   });
 });
 
-function testClient(options: { readonly version?: "5.0.0" | "6.0.0"; readonly rebalanceNonce?: bigint } = {}) {
+function testClient(
+  options: {
+    readonly version?: "5.0.0" | "6.0.0";
+    readonly rebalanceNonce?: bigint;
+    readonly tradeAllowlist?: readonly Address[];
+  } = {},
+) {
   return createDtfClient({
     chains: {
       1: {
@@ -542,6 +577,8 @@ function testClient(options: { readonly version?: "5.0.0" | "6.0.0"; readonly re
           readContract: vi.fn(async ({ functionName }: { functionName: string }) => {
             if (functionName === "version") return options.version ?? "5.0.0";
             if (functionName === "getRebalanceNonce") return options.rebalanceNonce ?? 0n;
+            if (functionName === "tradeAllowlistEnabled") return options.tradeAllowlist !== undefined;
+            if (functionName === "getTokenAllowlist") return options.tradeAllowlist ?? [];
             throw new Error(`Unexpected read: ${functionName}`);
           }),
           multicall: vi.fn(

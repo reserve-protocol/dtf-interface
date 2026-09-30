@@ -13,7 +13,9 @@ import {
   getIndexDtfDeployerAddress,
   INDEX_DTF_DEPLOYER_ADDRESS,
   INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
+  INDEX_DTF_V6_DEPLOYER_ADDRESS,
   prepareIndexDtfDeploy,
+  prepareIndexDtfDeployAssetApproval,
   prepareIndexDtfDeployAssetApprovals,
   prepareIndexDtfDeployGoverned,
   prepareIndexDtfDeployGovernedPlan,
@@ -46,8 +48,9 @@ const additionalDetails = {
   mandate: "Test mandate",
 } as const;
 
-// The only known Folio 6.0 deployer: the mainnet sandbox fixture (index-subgraph/.fork/fixture.json).
+// A non-canonical Folio 6.0 deployer: the mainnet sandbox fixture's (index-subgraph/.fork/fixture.json), used as an override.
 const V6_DEPLOYER = "0x388dB009b7984E673938AC20480194D4481bEF11";
+const V6_DEPLOYER_LOWERCASE = "0x388db009b7984e673938ac20480194d4481bef11";
 
 const additionalDetailsV6 = {
   maxAuctionLength: 1800n,
@@ -161,7 +164,7 @@ describe("Index DTF deploy builders", () => {
     });
   });
 
-  it("encodes Folio 6.0 deployFolio against the explicit v6 deployer with the v6 additional details", () => {
+  it("encodes Folio 6.0 deployFolio against an overriding v6 deployer with the v6 additional details", () => {
     const call = prepareIndexDtfDeploy({
       chainId: 1,
       version: "6.0.0",
@@ -235,7 +238,7 @@ describe("Index DTF deploy builders", () => {
     expect(decoded.args?.[6]).toBe(NONCE);
   });
 
-  it("points v6 plan approvals at the explicit deployer", () => {
+  it("points v6 plan approvals at an overriding deployer", () => {
     const plan = prepareIndexDtfDeployGovernedPlan({
       chainId: 8453,
       version: "6.0.0",
@@ -272,6 +275,7 @@ describe("Index DTF deploy builders", () => {
 
     const approvals = prepareIndexDtfDeployAssetApprovals({
       chainId: 1,
+      version: "6.0.0",
       assets: [TOKEN_A, TOKEN_B],
       amounts: [100n, 200n],
       deployer: V6_DEPLOYER,
@@ -280,6 +284,74 @@ describe("Index DTF deploy builders", () => {
       [V6_DEPLOYER, 200n],
       [V6_DEPLOYER, 400n],
     ]);
+  });
+
+  it("defaults v6 deploys, governed deploys and their plan approvals to the chain's 6.0.0 deployer", () => {
+    // Pinned so an edit to the map fails here, not only in the opt-in real-deployer fork suite.
+    expect(INDEX_DTF_V6_DEPLOYER_ADDRESS).toEqual({
+      1: "0x2B1Cd9aEF0CD3B9fF5DCa1C66348eCfC46F37392",
+      8453: "0x4c891fCa6319d492866672E3D2AfdAAA5bDcfF67",
+      56: "0x9837Ce9825D52672Ca02533B5A160212bf901963",
+    });
+    for (const chainId of [1, 8453, 56] as const) {
+      const deployer = INDEX_DTF_V6_DEPLOYER_ADDRESS[chainId];
+      const plan = prepareIndexDtfDeployPlan({
+        chainId,
+        version: "6.0.0",
+        basicDetails,
+        additionalDetails: additionalDetailsV6,
+        flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+        owner: OWNER,
+        approvals: [{ token: TOKEN_A, amount: 100n }],
+      });
+      const governedPlan = prepareIndexDtfDeployGovernedPlan({
+        chainId,
+        version: "6.0.0",
+        stToken: ST_TOKEN,
+        basicDetails,
+        additionalDetails: additionalDetailsV6,
+        flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+        governance: optimisticGovernance,
+        approvals: [{ token: TOKEN_B, amount: 200n }],
+      });
+      if (plan.type !== "approval-required" || governedPlan.type !== "approval-required") {
+        throw new Error("expected approval plans");
+      }
+
+      expect(deployer).not.toBe(INDEX_DTF_DEPLOYER_ADDRESS[chainId]);
+      expect(getIndexDtfDeployerAddress({ chainId, version: "6.0.0" })).toBe(deployer);
+      expect(plan.call.to, `${chainId} deploy`).toBe(deployer);
+      expect(decodeFunctionData({ abi: folioDeployerV6Abi, data: plan.call.data }).functionName).toBe("deployFolio");
+      expect(governedPlan.call.to, `${chainId} governed deploy`).toBe(deployer);
+      expect(decodeFunctionData({ abi: erc20Abi, data: plan.approvals[0]!.data }).args).toEqual([deployer, 100n]);
+      expect(decodeFunctionData({ abi: erc20Abi, data: governedPlan.approvals[0]!.data }).args).toEqual([
+        deployer,
+        200n,
+      ]);
+    }
+  });
+
+  it("points standalone deploy approvals at the version's deployer and keeps an explicit override", () => {
+    const spenderOf = (params: Parameters<typeof prepareIndexDtfDeployAssetApproval>[0]) =>
+      decodeFunctionData({ abi: erc20Abi, data: prepareIndexDtfDeployAssetApproval(params).data }).args?.[0];
+
+    expect(spenderOf({ chainId: 56, version: "6.0.0", token: TOKEN_A, amount: 1n })).toBe(
+      INDEX_DTF_V6_DEPLOYER_ADDRESS[56],
+    );
+    expect(spenderOf({ chainId: 56, version: "5.0.0", token: TOKEN_A, amount: 1n })).toBe(
+      INDEX_DTF_DEPLOYER_ADDRESS[56],
+    );
+    expect(
+      spenderOf({ chainId: 56, version: "6.0.0", token: TOKEN_A, amount: 1n, deployer: V6_DEPLOYER_LOWERCASE }),
+    ).toBe(V6_DEPLOYER);
+    expect(
+      prepareIndexDtfDeployAssetApprovals({ chainId: 8453, version: "6.0.0", assets: [TOKEN_A], amounts: [5n] }).map(
+        (approval) => decodeFunctionData({ abi: erc20Abi, data: approval.data }).args,
+      ),
+    ).toEqual([[INDEX_DTF_V6_DEPLOYER_ADDRESS[8453], 10n]]);
+    expect(getIndexDtfDeployerAddress({ chainId: 1, version: "6.0.0", deployer: V6_DEPLOYER_LOWERCASE })).toBe(
+      V6_DEPLOYER,
+    );
   });
 
   it("rejects out-of-range v6 details and malformed optimistic selectors", () => {
@@ -344,6 +416,7 @@ describe("Index DTF deploy builders", () => {
   it("prepares deploy asset approvals with Register's 2x default buffer", () => {
     const approvals = prepareIndexDtfDeployAssetApprovals({
       chainId: 8453,
+      version: "5.0.0",
       assets: [TOKEN_A, TOKEN_B],
       amounts: [100n, 200n],
     });

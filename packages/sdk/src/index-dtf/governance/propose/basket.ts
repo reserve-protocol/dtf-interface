@@ -7,6 +7,7 @@ import type { IndexDtf } from "@/types/index-dtf";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
+import { folioV6Abi } from "@/index-dtf/abis/folio-v6.generated";
 import {
   DEFAULT_AUCTION_LAUNCHER_WINDOW,
   buildIndexDtfStartRebalance,
@@ -76,18 +77,22 @@ export async function buildIndexDtfBasketProposal(
     getDtfForProposal(client, params),
     getBasketProposalVersion(client, params),
   ]);
-  const v6Context =
-    version === "6.0.0"
-      ? {
-          deadline: getRequiredDeadline(params.deadline),
-          rebalanceNonce: await getNextRebalanceNonce(client, params),
-        }
-      : {};
+  const v6Deadline = version === "6.0.0" ? getRequiredDeadline(params.deadline) : undefined;
+  const [v6Context, tradeAllowlist] =
+    v6Deadline === undefined
+      ? [{}, undefined]
+      : await Promise.all([
+          getNextRebalanceNonce(client, params).then((rebalanceNonce) => ({ deadline: v6Deadline, rebalanceNonce })),
+          getEnabledTradeAllowlist(client, params),
+        ]);
   const rebalance = await buildIndexDtfStartRebalance(client, {
     ...params,
     version,
     ...(dtf ? { dtf } : {}),
   });
+  if (tradeAllowlist) {
+    assertRebalanceTokensAllowlisted(rebalance.startRebalanceArgs.tokens, tradeAllowlist);
+  }
   const context: BuiltIndexDtfBasketProposalContext = {
     ...rebalance,
     chainId: params.chainId,
@@ -179,6 +184,53 @@ async function getBasketProposalVersion(
 
 async function getNextRebalanceNonce(client: DtfClient, params: DtfParams): Promise<bigint> {
   return (await getIndexDtfRebalanceNonce(client, params)) + 1n;
+}
+
+/** The Folio 6.0 trade allowlist when enforcement is on; `undefined` when every token may trade. */
+async function getEnabledTradeAllowlist(
+  client: DtfClient,
+  params: DtfParams,
+): Promise<ReadonlySet<Address> | undefined> {
+  const address = getAddress(params.address);
+  const enabled = await client.viem.readContract({
+    chainId: params.chainId,
+    address,
+    abi: folioV6Abi,
+    functionName: "tradeAllowlistEnabled",
+    blockNumber: params.blockNumber,
+  });
+  if (!enabled) return undefined;
+
+  const tokens = await client.viem.readContract({
+    chainId: params.chainId,
+    address,
+    abi: folioV6Abi,
+    functionName: "getTokenAllowlist",
+    blockNumber: params.blockNumber,
+  });
+
+  return new Set(tokens.map((token) => getAddress(token)));
+}
+
+/**
+ * Folio 6.0 `startRebalance` reverts `Folio__TokenNotAllowlisted` for every rebalance token (kept or new) missing from
+ * an enabled allowlist. Checked at build time; governance can still change the allowlist before execution.
+ */
+function assertRebalanceTokensAllowlisted(
+  tokens: BuiltIndexDtfStartRebalance["startRebalanceArgs"]["tokens"],
+  allowlist: ReadonlySet<Address>,
+) {
+  const notAllowlisted = tokens
+    .map(({ token }) => getAddress(token as Address))
+    .filter((token) => !allowlist.has(token));
+
+  if (notAllowlisted.length > 0) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: `The Folio's trade allowlist is enabled and does not include ${notAllowlisted.join(", ")}; startRebalance would revert with Folio__TokenNotAllowlisted`,
+      meta: { tokens: notAllowlisted },
+    });
+  }
 }
 
 function getRequiredDeadline(deadline: number | bigint | undefined): bigint {

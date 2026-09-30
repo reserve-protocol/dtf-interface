@@ -3,6 +3,7 @@
   "gate": [
     "pnpm exec turbo run build --force",
     "pnpm --filter @reserve-protocol/docs check:sdk-bundle",
+    "pnpm --filter @reserve-protocol/sdk check:package",
     "pnpm typecheck",
     "pnpm lint",
     "pnpm format:check",
@@ -34,7 +35,12 @@
     },
     {
       "name": "sdk-bundle",
-      "globs": ["packages/sdk/src/**", "packages/sdk/package.json", "packages/sdk/tsdown.config.ts"],
+      "globs": [
+        "packages/sdk/src/**",
+        "packages/sdk/package.json",
+        "packages/sdk/tsdown.config.ts",
+        "packages/sdk/scripts/check-package-entries.mjs"
+      ],
       "commands": ["pnpm bundle:check"]
     },
     {

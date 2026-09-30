@@ -196,4 +196,3 @@ export const folioVersionRegistryAbi = [
     "inputs": []
   }
 ] as const;
-export default folioVersionRegistryAbi;

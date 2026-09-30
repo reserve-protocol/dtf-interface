@@ -179,11 +179,43 @@ export function prepareIndexDtfCloseAuction(params: {
   });
 }
 
-export function prepareIndexDtfEndRebalance(params: {
-  readonly address: Address;
-  readonly chainId: SupportedChainId;
-  readonly version: IndexDtfWriteVersion;
-}): IndexDtfCall {
+export type PrepareIndexDtfEndRebalanceParams =
+  | {
+      readonly address: Address;
+      readonly chainId: SupportedChainId;
+      readonly version: "5.0.0";
+    }
+  | {
+      readonly address: Address;
+      readonly chainId: SupportedChainId;
+      readonly version: "6.0.0";
+      /**
+       * The rebalance being ended (`getRebalanceNonce()`); Folio 6.0 reverts `Folio__InvalidRebalanceNonce` on any
+       * other value, so a stale call cannot end a newer rebalance. `maxUint256` skips that check on-chain.
+       */
+      readonly rebalanceNonce: bigint;
+    };
+
+/** v5 encodes `endRebalance()`; Folio 6.0.0 encodes `endRebalance(uint256 rebalanceNonce)`. */
+export function prepareIndexDtfEndRebalance(params: PrepareIndexDtfEndRebalanceParams): IndexDtfCall {
+  if (params.version === "6.0.0") {
+    if (typeof params.rebalanceNonce !== "bigint" || params.rebalanceNonce < 0n) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: "rebalanceNonce is required to end an Index DTF 6.0.0 rebalance",
+        meta: { rebalanceNonce: params.rebalanceNonce },
+      });
+    }
+
+    return prepareContractCall({
+      chainId: params.chainId,
+      address: params.address,
+      abi: getIndexDtfWriteAbi(params.version),
+      functionName: "endRebalance",
+      args: [params.rebalanceNonce] as const,
+    });
+  }
+
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,

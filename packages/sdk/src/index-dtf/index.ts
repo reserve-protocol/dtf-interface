@@ -268,7 +268,7 @@ export {
   prepareIndexDtfOpenAuction,
   prepareIndexDtfOpenAuctionUnrestricted,
 } from "@/index-dtf/rebalance/index";
-export type { PrepareIndexDtfOpenAuctionParams } from "@/index-dtf/rebalance/index";
+export type { PrepareIndexDtfEndRebalanceParams, PrepareIndexDtfOpenAuctionParams } from "@/index-dtf/rebalance/index";
 export {
   getVoteLockDao as getIndexDtfVoteLockDao,
   getVoteLockDaos as getIndexDtfVoteLockDaos,

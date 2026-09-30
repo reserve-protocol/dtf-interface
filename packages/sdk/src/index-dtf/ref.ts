@@ -75,6 +75,7 @@ import {
 import { createIndexDtfVoteLockRef } from "@/index-dtf/vote-lock/ref";
 
 type BlockNumberOption = Pick<DtfParams, "blockNumber">;
+type WithoutTarget<T> = T extends unknown ? Omit<T, "address" | "chainId"> : never;
 
 export type IndexDtfRef = ReturnType<typeof createIndexDtfRef>;
 
@@ -212,7 +213,7 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
       prepareIndexDtfBid({ ...call, address, chainId }),
     prepareCloseAuction: (call: Omit<Parameters<typeof prepareIndexDtfCloseAuction>[0], "address" | "chainId">) =>
       prepareIndexDtfCloseAuction({ ...call, address, chainId }),
-    prepareEndRebalance: (call: Omit<Parameters<typeof prepareIndexDtfEndRebalance>[0], "address" | "chainId">) =>
+    prepareEndRebalance: (call: WithoutTarget<Parameters<typeof prepareIndexDtfEndRebalance>[0]>) =>
       prepareIndexDtfEndRebalance({ ...call, address, chainId }),
     prepareOpenAuctionArgs: prepareIndexDtfOpenAuctionArgs,
     prepareOpenAuction: (call: Omit<Parameters<typeof prepareIndexDtfOpenAuction>[0], "address" | "chainId">) =>

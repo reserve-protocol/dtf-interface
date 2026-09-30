@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { keccak256, toBytes } from "viem";
 
-const PROTOCOL_COMMIT = "18706fb455b8e6b91250deba795eb791243f6827";
+const PROTOCOL_COMMIT = "7d97c807003c563038ec948e92eb43eabba43ef0";
 const sdkRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = resolve(sdkRoot, "../..");
 const defaultProtocolRoot = resolve(repositoryRoot, "../index-protocol");
@@ -15,8 +15,8 @@ const targets = [
     artifact: "out/Folio.sol/Folio.json",
     output: "src/index-dtf/abis/folio-v6.generated.ts",
     exportName: "folioV6Abi",
-    expectedAbiSha256: "e9311d6e5bad2dbfc5a2998fe034e7c7a1e86e744428431387b8d6d491bdc30c",
-    requiredFunctions: ["openAuction", "startRebalance", "version"],
+    expectedAbiSha256: "f8e371547b312b08507ef8c8e7d05f602b500cf685d471d67845be7de6678c78",
+    requiredFunctions: ["openAuction", "startRebalance", "endRebalance", "version"],
   },
   {
     artifact: "out/FolioDeployer.sol/FolioDeployer.json",

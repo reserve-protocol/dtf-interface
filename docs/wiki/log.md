@@ -1,6 +1,6 @@
 ---
 title: Log
-updated: 2026-09-18
+updated: 2026-09-30
 type: log
 ---
 
@@ -64,3 +64,9 @@ Append-only chronological record: lessons, corrections, friction. Newest section
 - Fork lane flake: one `fork-smoke-v6` run reverted the first `setFolioSelfFee` send from the impersonated timelock while a scope run was building in parallel; the same suite passed 5/5 on the two runs right after and on an isolated simulate. Unexplained; the script now pins `--no-file-parallelism`, and a repeat should be traced with `cast run` before the snapshot reverts.
 - Codex whole-feature review (xhigh) blocked 0.7.0 on three points, all fixed the same day: the immutable-table boundary read now accepts only a contract revert or empty return (`error.walk` over viem's wrapped causes; a wrapped transport failure had read as end-of-table); `getIndexDtfRevenue` on 6.0.0 reads the immutable table and self fee from RPC and folds them into `effectiveDistribution` (`holders.percentage`); `prepareIndexDtfMint`/`Redeem` take `version` so the S1 invariant holds for every Folio write, and `ref.getIsTokenAllowlisted(token)` is positional. Live smoke reads the version registry on all three chains. The v6 fork smoke's settings case reverted twice, both times while a turbo build ran in parallel with Anvil, and passed 4/4 runs otherwise; a manual probe on the persistent sandbox left two extra blocks (self fee set to 5% then back to 0), so the fixture state block is unchanged but the head is 25834917.
 - Luis: the full v6 release includes the subgraph support, so the SDK must not build around its absence. Removed the RPC fold from `getIndexDtfRevenue` (added earlier for a codex blocker); the v6 fee fields now land through the subgraph in plan stage S7, and the codex finding is closed by that release dependency rather than by an RPC workaround.
+
+## 2026-09-30
+
+- Reserve deployed the real Folio 6.0.0 `FolioDeployer` on mainnet, Base and BSC ahead of registering it; the SDK now defaults v6 deploys to those addresses (`INDEX_DTF_V6_DEPLOYER_ADDRESS`) and standalone deploy approvals take `version`. On-chain wiring matches the 5.0.0 deployers per chain (same version registry, DAO fee registry and trusted filler registry); the only new piece is optimistic governor deployer 1.1.0, whose `deployWithExistingStakingVault` signature and system event match what the Folio deployer calls.
+- `fork-real-v6.test.ts` proves it on disposable Anvil forks of all three chains: default-deployer ungoverned and governed deploys, v6 reads, startRebalance → openAuction → a bid priced at the auction's end with exact settled amounts, and registry registration by the role-registry owner (`0xe825…3064`, the only DEFAULT_ADMIN of role registry `0xE1eC…41C9` on every chain).
+- Fork flake root cause: Anvil estimates gas at one timestamp and may mine the next second. Folio's `sync` writes `lastFolioFeePoke = block.timestamp` unconditionally, a no-op SSTORE in the estimate and a real one when mined, so a tight estimate starves the delegatecall into RebalancingLib and the call reverts with empty data (reproduced: startRebalance reverts under a 590k limit while its success uses 587k). The new suite pins a 12M gas limit. This likely explains the unexplained 2026-09-18 `setFolioSelfFee` revert in `fork-smoke-v6`, which sends without a gas limit; not changed there because the sandbox on 8545 was off-limits for this stage.

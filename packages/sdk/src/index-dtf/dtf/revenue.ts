@@ -126,22 +126,28 @@ export async function getIndexDtfRevenue(
   };
 }
 
+/**
+ * The configured fee split, in the order Folio pays it: the DAO fee first, then (6.0) `selfFee` of the rest kept for
+ * holders, then the mutable and immutable tables, whose portions sum to 100% together. With both tables empty,
+ * `distributeFees` pays the recipients' pool to the DAO as well.
+ */
 export function getEffectiveRevenueDistribution(
-  fees: Pick<IndexDtf["fees"], "recipients"> & Partial<Pick<IndexDtf["fees"], "immutableRecipients" | "selfFee">>,
+  fees: Pick<IndexDtf["fees"], "recipients" | "immutableRecipients" | "selfFee">,
   platformFee: IndexDtfPlatformFee,
 ): IndexDtfRevenueDistribution {
   const platformPercentage = new Decimal(platformFee.percent);
-  // Folio 6.0 keeps `selfFee` (a D18 fraction) of the non-DAO pool for holders before the tables split the rest.
-  const holdersShare = fees.selfFee ? new Decimal(fees.selfFee.formatted) : new Decimal(0);
-  const recipientPool = new Decimal(100).minus(platformPercentage).mul(new Decimal(1).minus(holdersShare));
+  const nonDaoPool = new Decimal(100).minus(platformPercentage);
+  const holdersPercentage = nonDaoPool.mul(fees.selfFee.formatted);
+  const recipientPool = nonDaoPool.minus(holdersPercentage);
+  const recipients = [...fees.recipients, ...fees.immutableRecipients];
 
   return {
     platform: {
       recipient: platformFee.recipient,
-      percentage: platformPercentage.toString(),
+      percentage: (recipients.length === 0 ? platformPercentage.plus(recipientPool) : platformPercentage).toString(),
     },
-    holders: { percentage: new Decimal(100).minus(platformPercentage).mul(holdersShare).toString() },
-    recipients: [...fees.recipients, ...(fees.immutableRecipients ?? [])].map((recipient) => ({
+    holders: { percentage: holdersPercentage.toString() },
+    recipients: recipients.map((recipient) => ({
       address: recipient.address,
       configuredPercentage: recipient.percentage,
       effectivePercentage: new Decimal(recipient.percentage).mul(recipientPool).div(100).toString(),

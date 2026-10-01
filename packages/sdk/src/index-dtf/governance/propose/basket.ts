@@ -77,21 +77,21 @@ export async function buildIndexDtfBasketProposal(
     getDtfForProposal(client, params),
     getBasketProposalVersion(client, params),
   ]);
-  const v6Deadline = version === "6.0.0" ? getRequiredDeadline(params.deadline) : undefined;
-  const [v6Context, tradeAllowlist] =
-    v6Deadline === undefined
-      ? [{}, undefined]
-      : await Promise.all([
-          getNextRebalanceNonce(client, params).then((rebalanceNonce) => ({ deadline: v6Deadline, rebalanceNonce })),
-          getEnabledTradeAllowlist(client, params),
-        ]);
+  const v6Context =
+    version === "6.0.0"
+      ? {
+          deadline: getRequiredDeadline(params.deadline),
+          rebalanceNonce: await getNextRebalanceNonce(client, params),
+        }
+      : {};
   const rebalance = await buildIndexDtfStartRebalance(client, {
     ...params,
     version,
     ...(dtf ? { dtf } : {}),
   });
-  if (tradeAllowlist) {
-    assertRebalanceTokensAllowlisted(rebalance.startRebalanceArgs.tokens, tradeAllowlist);
+  if (version === "6.0.0") {
+    const tradeAllowlist = await getEnabledTradeAllowlist(client, params);
+    if (tradeAllowlist) assertRebalanceTokensAllowlisted(rebalance.startRebalanceArgs.tokens, tradeAllowlist);
   }
   const context: BuiltIndexDtfBasketProposalContext = {
     ...rebalance,

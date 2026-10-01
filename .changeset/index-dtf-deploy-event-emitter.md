@@ -1,5 +1,6 @@
 ---
 "@reserve-protocol/sdk": minor
+"@reserve-protocol/react-sdk": minor
 ---
 
 Index DTF: deploy event extraction only trusts the deployer.

@@ -129,7 +129,8 @@ export async function getIndexDtfRevenue(
 /**
  * The configured fee split, in the order Folio pays it: the DAO fee first, then (6.0) `selfFee` of the rest kept for
  * holders, then the mutable and immutable tables, whose portions sum to 100% together. With both tables empty,
- * `distributeFees` pays the recipients' pool to the DAO as well.
+ * `distributeFees` pays the recipients' pool to the DAO as well. It uses the DAO's nominal share: when a Folio's TVL
+ * or mint fee is low enough that the DAO fee floor binds, the DAO takes more and everyone else proportionally less.
  */
 export function getEffectiveRevenueDistribution(
   fees: Pick<IndexDtf["fees"], "recipients" | "immutableRecipients" | "selfFee">,

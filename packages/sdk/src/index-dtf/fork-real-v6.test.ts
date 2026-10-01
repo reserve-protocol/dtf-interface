@@ -423,6 +423,13 @@ forkDescribe.each(REAL_FORKS)("Folio 6.0 real deployer fork on chain $chainId", 
         if (!details) throw new Error(`${token} is not in the rebalance`);
         return (current.rebalance.limits.spot * details.weight.spot * current.totalSupply) / (D18 * D27);
       };
+      // Independently: 20% of the basket's value at the fixture prices in native, 80% in the stable.
+      const stableUnit = 10n ** BigInt(stableDecimals);
+      const nativePrice = BigInt(fork.nativePrice);
+      const valueInStable = (initialBalances.native * nativePrice * stableUnit) / D18 + initialBalances.stable;
+      const targetShare = BigInt(TARGET_NATIVE_SHARE_PERCENT);
+      expect(spotTarget(wrappedNative)).toBe((valueInStable * targetShare * D18) / (100n * nativePrice * stableUnit));
+      expect(spotTarget(stable)).toBe((valueInStable * (100n - targetShare)) / 100n);
       expect(spotTarget(wrappedNative)).toBeLessThan(initialBalances.native);
       expect(spotTarget(stable)).toBeGreaterThan(initialBalances.stable);
       await annotate(
@@ -648,14 +655,13 @@ forkDescribe.each(REAL_FORKS)("Folio 6.0 real deployer fork on chain $chainId", 
       const stableCeiling = (((final.limits.low * stableDetails.weight.low) / D18) * supply) / D27;
       expect(balances.native).toBeGreaterThanOrEqual(nativeFloor);
       expect(balances.stable).toBeLessThanOrEqual(stableCeiling);
-      // And moved toward the 20/80 target: from 50% native by value, at least three quarters of the way. Bidders
-      // paid above the fixture price, so the stable side can bind before native reaches its own spot amount.
+      // And moved from 50% native by value to within two points of the 20% target (the spot amounts are pinned
+      // exactly at startRebalance). Bidders pay above or below the fixture price, so the first side to bind leaves the
+      // other a little off its own spot amount.
       const initialShare = nativeValueShare(initialBalances);
       const finalShare = nativeValueShare(balances);
-      const target = TARGET_NATIVE_SHARE_PERCENT / 100;
       expect(initialShare).toBeCloseTo(0.5, 6);
-      expect(finalShare).toBeLessThan(initialShare);
-      expect(Math.abs(finalShare - target)).toBeLessThan(Math.abs(initialShare - target) / 4);
+      expect(Math.abs(finalShare - TARGET_NATIVE_SHARE_PERCENT / 100)).toBeLessThan(0.02);
       await annotate(
         `chain ${chainId} rebalance ${rebalanceNonce} ended at ${endedAt}: native ${initialBalances.native} -> ${balances.native} (floor ${nativeFloor}), stable ${initialBalances.stable} -> ${balances.stable} (ceiling ${stableCeiling}); native value share ${initialShare.toFixed(4)} -> ${finalShare.toFixed(4)} (target ${TARGET_NATIVE_SHARE_PERCENT / 100})`,
       );

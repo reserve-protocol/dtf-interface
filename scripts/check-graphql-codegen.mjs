@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,6 +15,15 @@ const result = spawnSync(pnpm, ["--filter", "@reserve-protocol/sdk", "graphql:co
   stdio: "inherit",
 });
 
+const changedFiles = generatedFiles.filter((file) => before.get(file) !== read(file));
+// A check must not rewrite the checked-in types (e.g. back to an older prod schema): restore them on every path,
+// including a codegen run that failed after writing one output.
+for (const file of changedFiles) {
+  const content = before.get(file);
+  if (content === undefined) rmSync(resolve(root, file), { force: true });
+  else writeFileSync(resolve(root, file), content);
+}
+
 if (result.error) {
   throw result.error;
 }
@@ -23,14 +32,7 @@ if (result.status !== 0) {
   process.exit(result.status ?? 1);
 }
 
-const changedFiles = generatedFiles.filter((file) => before.get(file) !== read(file));
-
 if (changedFiles.length > 0) {
-  // A check must not rewrite the checked-in types (e.g. back to an older prod schema); restore them.
-  for (const file of changedFiles) {
-    const content = before.get(file);
-    if (content !== undefined) writeFileSync(resolve(root, file), content);
-  }
   console.error(`GraphQL generated outputs differ from the configured schemas:\n${changedFiles.join("\n")}`);
   console.error(
     "Run `pnpm graphql:codegen` and review the diff. Before a subgraph release is promoted to prod, point the index " +

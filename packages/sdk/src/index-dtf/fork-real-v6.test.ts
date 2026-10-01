@@ -126,6 +126,7 @@ const MAX_TOKEN_BUY_AMOUNT = 10n ** 36n;
 const PRICE_TOLERANCE = 1e-9;
 const PRICE_TOLERANCE_PARTS = 1_000_000_000n;
 const FOLIO_6_0_0 = readExplorerAbiFixture("folio-6.0.0.base.json");
+const FOLIO_DEPLOYER_6_0_0 = readExplorerAbiFixture("folio-deployer-6.0.0.base.json");
 const SELF_FEE = parseEther("0.1");
 const ERC1967_IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 const DEFAULT_ADMIN_ROLE = zeroHash;
@@ -243,7 +244,13 @@ forkDescribe.each(REAL_FORKS)("Folio 6.0 real deployer fork on chain $chainId", 
       // The implementation is the explorer-verified 6.0.0 the SDK ABIs are checked against, byte for byte.
       const runtimeCode = await publicClient.getCode({ address: folioImplementation });
       expect(runtimeCode && keccak256(runtimeCode)).toBe(FOLIO_6_0_0.runtimeCodeKeccak256);
-      if (chainId === FOLIO_6_0_0.chainId) expect(folioImplementation).toBe(FOLIO_6_0_0.address);
+      if (chainId === FOLIO_6_0_0.chainId) {
+        expect(folioImplementation).toBe(FOLIO_6_0_0.address);
+        // The deployer's runtime code carries chain-specific immutables, so its verified hash only pins Base.
+        const deployerCode = await publicClient.getCode({ address: deployer });
+        expect(deployer).toBe(FOLIO_DEPLOYER_6_0_0.address);
+        expect(deployerCode && keccak256(deployerCode)).toBe(FOLIO_DEPLOYER_6_0_0.runtimeCodeKeccak256);
+      }
 
       expect(version).toBe("6.0.0");
       expect(getAddress(versionRegistry)).toBe(INDEX_DTF_VERSION_REGISTRY_ADDRESS[chainId]);
@@ -490,6 +497,7 @@ forkDescribe.each(REAL_FORKS)("Folio 6.0 real deployer fork on chain $chainId", 
         built.args.newPrices[built.args.tokens.findIndex((entry) => getAddress(entry) === token)];
       expect(await readAuctionPrice(0n, wrappedNative)).toEqual(builtPrice(wrappedNative));
       expect(await readAuctionPrice(0n, stable)).toEqual(builtPrice(stable));
+      expectPricesBracketFairPrice(builtPrice(wrappedNative)!, builtPrice(stable)!);
 
       const midpoint = auction.startTime + auctionLength / 2n;
       const bids = [
@@ -551,6 +559,7 @@ forkDescribe.each(REAL_FORKS)("Folio 6.0 real deployer fork on chain $chainId", 
         expect(after.weight).toEqual({ low: before.weight.spot, spot: before.weight.spot, high: before.weight.spot });
         expect(await readAuctionPrice(1n, token)).toEqual(before.price);
       }
+      expectPricesBracketFairPrice(await readAuctionPrice(1n, wrappedNative), await readAuctionPrice(1n, stable));
 
       // One bid for everything available at the exact start price takes the basket to the spot target on the
       // binding side; the auction stays open (a zero-size quote still prices it) until the launcher closes it.
@@ -1013,6 +1022,15 @@ forkDescribe.each(REAL_FORKS)("Folio 6.0 real deployer fork on chain $chainId", 
     });
 
     return { native, stable: stableBalance };
+  }
+
+  /** The fixture's fair price lies strictly inside the auction curve: above the end price, below the start price. */
+  function expectPricesBracketFairPrice(sell: PriceRange, buy: PriceRange) {
+    // D27{stable/native} = {USD/native} * 10^stableDecimals * 1e27 / 1e18
+    const fairPrice = (BigInt(fork.nativePrice) * 10n ** BigInt(stableDecimals) * D27) / D18;
+
+    expect(ceilDiv(sell.high * D27, buy.low)).toBeGreaterThan(fairPrice);
+    expect(ceilDiv(sell.low * D27, buy.high)).toBeLessThan(fairPrice);
   }
 
   function nativeValueShare(balances: TokenBalances): number {

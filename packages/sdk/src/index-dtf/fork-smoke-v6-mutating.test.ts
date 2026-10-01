@@ -66,6 +66,10 @@ forkDescribe("Index DTF v6 completion fork smoke (mutating, disposable fork)", (
     if (!clientVersion.toLowerCase().startsWith("anvil")) {
       throw new Error(`${config.rpcUrl} is not an Anvil fork (${clientVersion})`);
     }
+    const forkChainId = await publicClient.getChainId();
+    if (forkChainId !== config.chainId) {
+      throw new Error(`${config.rpcUrl} reports chain ${forkChainId}, the fixture is chain ${config.chainId}`);
+    }
     // A fork of the sandbox carries the fixture: the v6 native Folio must already exist at its address.
     const v6Native = config.scenarios.find((scenario) => scenario.label === "v6Native");
     if (!v6Native || !(await publicClient.getCode({ address: v6Native.folio }))) {

@@ -86,13 +86,16 @@ const { args } = sdk.index.prepareOpenAuctionArgs({ ...input, version, auctionLe
 const call = sdk.index.prepareOpenAuction({ address, chainId, version, args });
 ```
 
-Folio 6.0.0 binds `endRebalance` to the rebalance it ends: pass `rebalanceNonce` (read it with `getRebalanceNonce`)
-and the Folio reverts `Folio__InvalidRebalanceNonce` if a newer rebalance has started since. Folio 5.0.0 keeps the
-nonce-less `endRebalance()`. On-chain, `startRebalance` and `endRebalance` also accept `type(uint256).max` to skip the
-nonce check; the SDK basket builder always sends the exact next nonce.
+Folio 6.0.0 binds `endRebalance` to the rebalance it ends: pass the `rebalanceNonce` of the rebalance the user or
+bot is acting on (the one it displayed or launched auctions for), and the Folio reverts `Folio__InvalidRebalanceNonce`
+if a newer rebalance has started since. Reading the nonce right before building the call defeats that guard. Folio
+5.0.0 keeps the nonce-less `endRebalance()`. On-chain, `startRebalance` and `endRebalance` also accept
+`type(uint256).max` to skip the nonce check; the SDK basket builder always sends the exact next nonce.
 
 ```ts
-const rebalanceNonce = await sdk.index.getRebalanceNonce({ address, chainId });
+const { rebalance } = await sdk.index.getCurrentRebalance({ address, chainId }); // the rebalance on screen
+// ...later, when the user ends it:
+const rebalanceNonce = BigInt(rebalance.nonce);
 const end = sdk.index.prepareEndRebalance({ address, chainId, version: "6.0.0", rebalanceNonce });
 ```
 

@@ -29,7 +29,10 @@ what is left. For example DAO 50%, self fee 25% and tables 60/40 give mutable 22
 `financials.selfRevenue` is the self fee already paid (part of `totalRevenue`, not of `externalRevenue`; 0 before 6.0).
 A proposal that rewrites the tables still reads the exact on-chain table with `getImmutableFeeRecipients`.
 
-These fields need the index subgraph 1.11.1 schema on the configured endpoint; a 1.10.2 endpoint rejects the query.
+With both tables empty, `distributeFees` pays the recipients' pool to the DAO, and the platform share includes it.
+
+The DTF query (`GetIndexDTF`) needs the index subgraph 1.11.1 schema on every configured endpoint; a 1.10.2 endpoint
+rejects it, which fails every Index DTF read, not only revenue.
 
 ## Supply Gotcha
 

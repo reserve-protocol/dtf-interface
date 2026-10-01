@@ -484,10 +484,10 @@ describe("Index DTF getters", () => {
     });
   });
 
-  it("maps an enabled 6.0 allowlist with a null token list to no tokens", () => {
+  it("leaves the allowlist out when the subgraph has no token list for an enabled allowlist", () => {
     const dtf = mapIndexDtf({ ...createSubgraphDtf(), tradeAllowlistEnabled: true, tradeTokenAllowlist: null }, 8453);
 
-    expect(dtf.rebalance.tradeAllowlist).toEqual({ enabled: true, tokens: [] });
+    expect(dtf.rebalance.tradeAllowlist).toBeUndefined();
   });
 
   it("maps Folio 6.0 subgraph fields into fees and rebalance config", () => {

@@ -102,6 +102,7 @@ export type IndexDtfRebalanceConfig = {
   readonly priceControl: PriceControl;
 };
 
+/** Fee shares paid, as raw 18-decimal share amounts from the subgraph (display-class numbers). */
 export type Financials = {
   /** protocol + governance + external + self. */
   readonly totalRevenue: number;
@@ -251,7 +252,7 @@ export type IndexDtfFull = IndexDtf & {
 export type IndexDtf = {
   readonly id: Address;
   readonly chainId: SupportedChainId;
-  /** Folio release read from `version()` by the subgraph; absent for DTFs indexed before 1.11.0 backfills. */
+  /** Folio release read from `version()` by the subgraph (1.11+); absent while a grafted DTF's field is still null. */
   readonly version?: string;
   readonly token: TokenWithSnapshot;
   readonly mandate: string;

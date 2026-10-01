@@ -9,6 +9,7 @@ import { getEffectiveRevenueDistribution, prepareIndexDtfDistributeFees } from "
 import { SdkError } from "@/lib/errors";
 
 const DTF = "0x0000000000000000000000000000000000000001";
+const ZERO_SELF_FEE = { raw: 0n, formatted: "0" };
 
 describe("prepareIndexDtfDistributeFees", () => {
   it("encodes distributeFees identically for 5.0.0 and 6.0.0 with the matching ABI", () => {
@@ -66,6 +67,27 @@ describe("prepareIndexDtfDistributeFees", () => {
     expect(total).toBe(100);
   });
 
+  it("gives the recipients' pool to the DAO when both tables are empty, as distributeFees does", () => {
+    const platformFee: IndexDtfPlatformFee = {
+      registry: DTF,
+      recipient: DTF,
+      numerator: 1n,
+      denominator: 2n,
+      floor: 0n,
+      percent: 50,
+    };
+    const distribution = getEffectiveRevenueDistribution(
+      { recipients: [], immutableRecipients: [], selfFee: { raw: 250_000_000_000_000_000n, formatted: "0.25" } },
+      platformFee,
+    );
+
+    expect(distribution).toEqual({
+      platform: { recipient: DTF, percentage: "87.5" },
+      holders: { percentage: "12.5" },
+      recipients: [],
+    });
+  });
+
   it("folds the 6.0 immutable table and self fee into the effective distribution", () => {
     const platformFee: IndexDtfPlatformFee = {
       registry: DTF,
@@ -75,7 +97,10 @@ describe("prepareIndexDtfDistributeFees", () => {
       floor: 0n,
       percent: 10,
     };
-    const v5 = getEffectiveRevenueDistribution({ recipients: [{ address: DTF, percentage: "100" }] }, platformFee);
+    const v5 = getEffectiveRevenueDistribution(
+      { recipients: [{ address: DTF, percentage: "100" }], immutableRecipients: [], selfFee: ZERO_SELF_FEE },
+      platformFee,
+    );
     expect(v5.holders.percentage).toBe("0");
     expect(v5.recipients).toEqual([{ address: DTF, configuredPercentage: "100", effectivePercentage: "90" }]);
 

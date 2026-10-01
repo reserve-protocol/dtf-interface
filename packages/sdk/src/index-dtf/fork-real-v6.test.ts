@@ -38,6 +38,7 @@ import {
   INDEX_DTF_DEPLOYER_ADDRESS,
   INDEX_DTF_V6_DEPLOYER_ADDRESS,
 } from "@/index-dtf/deploy";
+import { assertDisposableForkRpcUrl } from "@/index-dtf/fork-smoke-fixture";
 import { INDEX_DTF_START_REBALANCE_SELECTOR } from "@/index-dtf/governance/propose/upgrade-v6";
 import { getIndexDtfVersionHash, INDEX_DTF_VERSION_REGISTRY_ADDRESS } from "@/index-dtf/version-registry";
 
@@ -794,17 +795,6 @@ forkDescribe.each(REAL_FORKS)("Folio 6.0 real deployer fork on chain $chainId", 
     return receipt;
   }
 });
-
-function assertDisposableForkRpcUrl(value: string) {
-  const url = new URL(value);
-
-  if (url.protocol !== "http:" || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) {
-    throw new Error("real v6 fork RPC must use HTTP on localhost, 127.0.0.1, or ::1");
-  }
-  if ((url.port || "80") === "8545") {
-    throw new Error("port 8545 is the shared indexed sandbox; run the real v6 forks on their own ports");
-  }
-}
 
 function ceilDiv(numerator: bigint, denominator: bigint): bigint {
   return (numerator + denominator - 1n) / denominator;

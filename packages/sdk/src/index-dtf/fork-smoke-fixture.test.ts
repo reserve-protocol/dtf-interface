@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { dtfAdminProposalAbi } from "@/index-dtf/abis/dtf-admin-proposal";
 import { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
-import { parseForkSmokeManifest } from "@/index-dtf/fork-smoke-fixture";
+import { assertDisposableForkRpcUrl, parseForkSmokeManifest } from "@/index-dtf/fork-smoke-fixture";
 
 const FOLIOS = {
   control: "0x0000000000000000000000000000000000000001",
@@ -174,6 +174,25 @@ function createManifest() {
     },
   };
 }
+
+describe("assertDisposableForkRpcUrl", () => {
+  it("refuses the shared indexed sandbox and non-loopback RPCs", () => {
+    for (const url of ["http://127.0.0.1:8545", "http://localhost:8545/", "http://[::1]:8545"]) {
+      expect(() => assertDisposableForkRpcUrl(url)).toThrow("port 8545 is the shared indexed sandbox");
+    }
+    expect(() => assertDisposableForkRpcUrl("https://base.gateway.tenderly.co")).toThrow("must use HTTP on localhost");
+    expect(() => assertDisposableForkRpcUrl("http://10.0.0.2:8549")).toThrow("must use HTTP on localhost");
+  });
+
+  it("refuses the manifest's indexed RPC on any port and accepts a separate disposable fork", () => {
+    expect(() =>
+      assertDisposableForkRpcUrl("http://localhost:9545", { indexedRpcUrl: "http://127.0.0.1:9545" }),
+    ).toThrow("indexed sandbox RPC");
+    expect(() =>
+      assertDisposableForkRpcUrl("http://127.0.0.1:8546", { indexedRpcUrl: "http://127.0.0.1:8545" }),
+    ).not.toThrow();
+  });
+});
 
 describe("parseForkSmokeManifest", () => {
   it("normalizes four distinct scenarios and documented address alias", () => {

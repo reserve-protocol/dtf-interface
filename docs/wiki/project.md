@@ -1,6 +1,6 @@
 ---
 title: Project
-updated: 2026-07-22
+updated: 2026-09-30
 type: context
 ---
 
@@ -16,7 +16,7 @@ Start with `docs/README.md`, then `docs/sdk/architecture.md` and `docs/sdk/api-s
 
 - pnpm/Turbo monorepo on Node 24; TypeScript 6, viem, Zod, GraphQL Codegen, Vitest, React 18/19, TanStack Query 5, tsdown, and Vocs.
 - Normal closeout commands are owned by `llm-workflow.config.json`. `pnpm release:ci` is the publication check: it adds checked-in ABI freshness, live-schema GraphQL freshness, and package tarball dry-runs to the compile, test, docs, bundle, and catalog gates.
-- Generated GraphQL documents are committed. Run `pnpm graphql:codegen` after GraphQL document or codegen changes; ordinary CI and the publication gate reject stale generated output against the configured deployed schemas.
+- Generated GraphQL documents are committed. Run `pnpm graphql:codegen` after GraphQL document or codegen changes; ordinary CI and the publication gate reject stale generated output against the configured deployed schemas. Before a subgraph release reaches `prod`, generate and check against the candidate with `INDEX_DTF_SUBGRAPH_SCHEMA=<.../dtf-index-base/<version>/gn>`; never publish an SDK whose documents `prod` cannot serve.
 - Releases use Changesets. Never edit package versions or changelogs by hand.
 
 ## Safety Rules

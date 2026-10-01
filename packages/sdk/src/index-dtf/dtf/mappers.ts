@@ -185,6 +185,7 @@ export function mapIndexDtf(dtf: SubgraphIndexDtf, chainId: SupportedChainId): I
       protocolRevenue: Number(dtf.protocolRevenue),
       governanceRevenue: Number(dtf.governanceRevenue),
       externalRevenue: Number(dtf.externalRevenue),
+      selfRevenue: Number(dtf.selfRevenue ?? 0),
     },
   };
 }

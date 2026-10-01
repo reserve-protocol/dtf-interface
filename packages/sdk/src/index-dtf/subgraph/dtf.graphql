@@ -23,6 +23,7 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
     protocolRevenue
     governanceRevenue
     externalRevenue
+    selfRevenue
     feeRecipients
     immutableFeeRecipients
     folioFeeForSelf

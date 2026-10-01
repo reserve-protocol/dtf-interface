@@ -1,6 +1,6 @@
 // Packs @reserve-protocol/sdk the way npm will ship it, installs the tarball next to the workspace dependencies and
 // loads it through both package entries: `import` (ESM) and `require` (CJS). Every export must exist in both with the
-// same shape; every exported ABI must be an array. Catches interop regressions such as CJS exporting `{ default: ABI }`.
+// same kind and the same value (functions by kind only); every exported ABI must be an array. Catches interop regressions such as CJS exporting `{ default: ABI }`.
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -29,10 +29,14 @@ try {
   writeFileSync(
     probe,
     [
+      'import { createHash } from "node:crypto";',
       'import { createRequire } from "node:module";',
       'import * as esm from "@reserve-protocol/sdk";',
       'const cjs = createRequire(import.meta.url)("@reserve-protocol/sdk");',
-      "const shape = (module) => Object.fromEntries(Object.keys(module).filter((key) => key !== 'default' && key !== '__esModule').sort().map((key) => [key, Array.isArray(module[key]) ? 'array' : typeof module[key]]));",
+      // Kind plus a digest of every non-function value: `{ default: x }` and other wrappers change both.
+      "const json = (value) => JSON.stringify(value, (_, item) => (typeof item === 'bigint' ? `${item}n` : item));",
+      "const describe = (value) => `${Array.isArray(value) ? 'array' : typeof value}${typeof value === 'function' ? '' : ` ${createHash('sha256').update(String(json(value))).digest('hex').slice(0, 16)}`}`;",
+      "const shape = (module) => Object.fromEntries(Object.keys(module).filter((key) => key !== 'default' && key !== '__esModule').sort().map((key) => [key, describe(module[key])]));",
       "process.stdout.write(JSON.stringify({ esm: shape(esm), cjs: shape(cjs) }));",
     ].join("\n"),
   );
@@ -41,8 +45,8 @@ try {
   const problems = [];
   const abiKeys = new Set([...REQUIRED_ABIS, ...[...Object.keys(esm), ...Object.keys(cjs)].filter(isAbiName)]);
   for (const key of new Set([...Object.keys(esm), ...Object.keys(cjs), ...abiKeys])) {
-    const expected = abiKeys.has(key) ? "array" : esm[key];
-    if (esm[key] !== expected || cjs[key] !== expected) {
+    const isArray = (shape) => shape?.startsWith("array ") ?? false;
+    if (esm[key] !== cjs[key] || (abiKeys.has(key) && !isArray(esm[key]))) {
       problems.push(
         `${key}: ESM ${esm[key] ?? "missing"}, CJS ${cjs[key] ?? "missing"}${abiKeys.has(key) ? " (ABIs must be arrays)" : ""}`,
       );

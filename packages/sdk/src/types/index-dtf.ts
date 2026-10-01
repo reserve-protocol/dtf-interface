@@ -103,10 +103,13 @@ export type IndexDtfRebalanceConfig = {
 };
 
 export type Financials = {
+  /** protocol + governance + external + self. */
   readonly totalRevenue: number;
   readonly protocolRevenue: number;
   readonly governanceRevenue: number;
   readonly externalRevenue: number;
+  /** Folio 6.0 self fee kept for holders; 0 before 6.0 and for DTFs the subgraph indexed before 1.11.1. */
+  readonly selfRevenue: number;
 };
 
 export type IndexDtfPriceBasketToken = {

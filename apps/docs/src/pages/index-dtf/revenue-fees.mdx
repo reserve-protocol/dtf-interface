@@ -23,8 +23,13 @@ Apps decide when to expose this action.
 
 On Folio 6.0 the DTF carries `fees.immutableRecipients` and `fees.selfFee` from the subgraph, and `getRevenue` folds
 both into `effectiveDistribution`: `holders.percentage` is the share kept for holders and immutable recipients are
-listed next to the mutable ones. A proposal that rewrites the tables still reads the exact on-chain table with
-`getImmutableFeeRecipients`.
+listed next to the mutable ones. The order matches the contract: the DAO fee comes off first, the self fee keeps its
+fraction of the remainder for holders, and the mutable and immutable tables (whose portions sum to 100% together) split
+what is left. For example DAO 50%, self fee 25% and tables 60/40 give mutable 22.5%, immutable 15%, holders 12.5%.
+`financials.selfRevenue` is the self fee already paid (part of `totalRevenue`, not of `externalRevenue`; 0 before 6.0).
+A proposal that rewrites the tables still reads the exact on-chain table with `getImmutableFeeRecipients`.
+
+These fields need the index subgraph 1.11.1 schema on the configured endpoint; a 1.10.2 endpoint rejects the query.
 
 ## Supply Gotcha
 

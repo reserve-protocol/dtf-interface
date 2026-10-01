@@ -33,6 +33,39 @@ describe("prepareIndexDtfDistributeFees", () => {
     expect(build).toThrow(expect.objectContaining({ code: "INVALID_INPUT", meta: { version: "4.0.0" } }));
   });
 
+  it("splits a 6.0 fee: DAO first, then the self fee, then the mutable and immutable tables", () => {
+    // DAO 50%, self fee 25%, mutable/immutable 60/40 → mutable 22.5%, immutable 15%, holders 12.5%.
+    const platformFee: IndexDtfPlatformFee = {
+      registry: DTF,
+      recipient: DTF,
+      numerator: 1n,
+      denominator: 2n,
+      floor: 0n,
+      percent: 50,
+    };
+    const distribution = getEffectiveRevenueDistribution(
+      {
+        recipients: [{ address: DTF, percentage: "60" }],
+        immutableRecipients: [{ address: "0x0000000000000000000000000000000000000002", percentage: "40" }],
+        selfFee: { raw: 250_000_000_000_000_000n, formatted: "0.25" },
+      },
+      platformFee,
+    );
+
+    expect(distribution.platform.percentage).toBe("50");
+    expect(distribution.holders.percentage).toBe("12.5");
+    expect(distribution.recipients).toEqual([
+      { address: DTF, configuredPercentage: "60", effectivePercentage: "22.5" },
+      { address: "0x0000000000000000000000000000000000000002", configuredPercentage: "40", effectivePercentage: "15" },
+    ]);
+    const total = [
+      distribution.platform.percentage,
+      distribution.holders.percentage,
+      ...distribution.recipients.map((recipient) => recipient.effectivePercentage),
+    ].reduce((sum, percentage) => sum + Number(percentage), 0);
+    expect(total).toBe(100);
+  });
+
   it("folds the 6.0 immutable table and self fee into the effective distribution", () => {
     const platformFee: IndexDtfPlatformFee = {
       registry: DTF,

@@ -123,16 +123,29 @@ The opt-in Index DTF fork smoke verifies four scenarios prepared by an external 
 - v5 Folios upgraded to v6 through optimistic and legacy governance;
 - a Folio created directly on v6.
 
-The lane runs two files. `fork-smoke.test.ts` is read-only: the fixture runner owns fork startup, deployments,
-upgrade transactions, and standard governance deployment. `fork-smoke-v6.test.ts` writes (impersonated senders,
-an `evm_increaseTime` warp) strictly under `evm_snapshot`/`evm_revert`, so it leaves the indexed state untouched;
-run it after the subgraph parity test, which `sandbox.sh all` already orders. The smoke independently matches each declared upgrade proposal to its on-chain
-`ProposalCreated`/`ProposalExecuted` logs and executed Governor state. Run it after those transitions are mined:
+`test:smoke:index:fork` runs two read-only files against the sandbox's indexed Anvil: `fork-smoke.test.ts` (the fixture
+runner owns fork startup, deployments, upgrade transactions, and standard governance deployment) and
+`fork-smoke-v6.test.ts` (v6 registry and state reads). Neither sends transactions, snapshots, reverts or warps time, so
+they are safe while a fork Graph Node indexes the chain. The smoke independently matches each declared upgrade
+proposal to its on-chain `ProposalCreated`/`ProposalExecuted` logs and executed Governor state. Run it after those
+transitions are mined:
 
 ```sh
 RUN_INDEX_DTF_FORK_SMOKE=1 \
 INDEX_DTF_FORK_MANIFEST=/absolute/path/to/fixture.json \
 pnpm --filter @reserve-protocol/sdk test:smoke:index:fork
+```
+
+The writing v6 cases (SDK-built settings from the admin timelock, a v6 deploy against the sandbox deployer, the
+5.0.0 → 6.0.0 upgrade after a 400-day warp, each under `evm_snapshot`/`evm_revert`) live in
+`fork-smoke-v6-mutating.test.ts` and have their own script. They need a disposable Anvil forked from the sandbox and
+refuse port 8545 and the manifest's own RPC: rewinding a chain under its Graph Node corrupts the index.
+
+```sh
+anvil --fork-url http://127.0.0.1:8545 --port 8549
+INDEX_DTF_FORK_MANIFEST=/absolute/path/to/fixture.json \
+INDEX_DTF_FORK_DISPOSABLE_RPC_URL=http://127.0.0.1:8549 \
+pnpm --filter @reserve-protocol/sdk test:smoke:index:fork-mutating
 ```
 
 When `INDEX_DTF_FORK_MANIFEST` is unset, the harness reads `fixture.json` from `SANDBOX_STATE_DIR`. The manifest is the
@@ -299,8 +312,8 @@ unless the opt-in flag is set.
 
 The `fork-smoke.test.ts` write-path checks are read-only: standard Governor proposal ordering, executed upgrade-path log
 attestation, v5/v6 `openAuction` calldata, the live v6 `startRebalance` next nonce/deadline, and the v5 deploy builder.
-They do not submit transactions or perform upgrades. SDK-built v6 deploys are executed by `fork-smoke-v6.test.ts`
-against the sandbox deployer and by the real-deployer fork below.
+They do not submit transactions or perform upgrades. SDK-built v6 deploys are executed by
+`fork-smoke-v6-mutating.test.ts` against the sandbox deployer and by the real-deployer fork below.
 
 Execution readback is pinned to `stateBlock`. The generated fixture can have non-overlapping auction windows: the v5
 auction is active at its current state timestamp while the v6 auction is successfully opened and scheduled. The smoke

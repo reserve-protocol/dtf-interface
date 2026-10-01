@@ -47,6 +47,7 @@
     "playground:index": "tsx playground/index-dtf.ts",
     "test": "vitest run --passWithNoTests",
     "test:smoke:index:fork": "RUN_INDEX_DTF_FORK_SMOKE=1 vitest run --passWithNoTests --no-file-parallelism src/index-dtf/fork-smoke.test.ts src/index-dtf/fork-smoke-v6.test.ts",
+    "test:smoke:index:fork-mutating": "RUN_INDEX_DTF_FORK_MUTATING=1 vitest run --passWithNoTests --no-file-parallelism src/index-dtf/fork-smoke-v6-mutating.test.ts",
     "test:smoke:index:fork-real-v6": "RUN_INDEX_DTF_FORK_REAL_V6=1 vitest run --passWithNoTests --no-file-parallelism src/index-dtf/fork-real-v6.test.ts",
     "test:smoke:index": "RUN_INDEX_DTF_SMOKE=1 vitest run --passWithNoTests src/index-dtf/live-smoke.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",

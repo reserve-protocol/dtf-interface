@@ -722,6 +722,31 @@ function readChainId(value: unknown): SupportedChainId {
   throw new Error("chainId must be 1, 8453, or 56");
 }
 
+/**
+ * Mutating fork suites (snapshots, reverts, time warps, impersonated writes) run only on a disposable loopback Anvil.
+ * Port 8545 is the shared sandbox a fork Graph Node indexes: rewinding it under the indexer corrupts the stack.
+ * `indexedRpcUrl` (the sandbox manifest's RPC) is refused too, whatever its port.
+ */
+export function assertDisposableForkRpcUrl(value: string, options: { readonly indexedRpcUrl?: string } = {}) {
+  const url = new URL(value);
+
+  if (url.protocol !== "http:" || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) {
+    throw new Error("disposable fork RPC must use HTTP on localhost, 127.0.0.1, or ::1");
+  }
+  if ((url.port || "80") === "8545") {
+    throw new Error("port 8545 is the shared indexed sandbox; run mutating fork suites on a disposable fork");
+  }
+  if (options.indexedRpcUrl && sameLoopbackEndpoint(url, new URL(options.indexedRpcUrl))) {
+    throw new Error(`${value} is the indexed sandbox RPC from the manifest; point the suite at a disposable fork`);
+  }
+}
+
+function sameLoopbackEndpoint(left: URL, right: URL): boolean {
+  const loopback = (hostname: string) => (hostname === "localhost" || hostname === "[::1]" ? "127.0.0.1" : hostname);
+
+  return loopback(left.hostname) === loopback(right.hostname) && (left.port || "80") === (right.port || "80");
+}
+
 function assertLocalRpcUrl(value: string) {
   let url: URL;
 

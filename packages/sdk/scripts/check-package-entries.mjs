@@ -86,7 +86,7 @@ function listFiles(directory) {
   );
 }
 
+// Throws instead of exiting so the `finally` above always removes the unpacked package.
 function fail(message) {
-  process.stderr.write(`${message}\n`);
-  process.exit(1);
+  throw new Error(message);
 }

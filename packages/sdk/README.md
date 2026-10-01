@@ -324,12 +324,28 @@ its declared start, and exact event/readback start, end, duration, nonce, ID, an
 
 `fork-real-v6.test.ts` exercises the production 6.0.0 `FolioDeployer` behind `INDEX_DTF_V6_DEPLOYER_ADDRESS` on
 disposable, unindexed Anvil forks of mainnet, Base and BSC (never the shared sandbox on 8545, which the suite refuses).
-Per chain it deploys an ungoverned Folio through the SDK's default deployer and reads the v6 state back, runs
-`startRebalance` → `openAuction` → a bid at the auction's end price with SDK builders and checks the settled amounts
-against arithmetic on contract reads, deploys a governed Folio (the deployer's optimistic governor deployer 1.1.0
-wires governor, timelock and selector registry), then registers the deployer in the chain's `FolioVersionRegistry`
-as the registry owner and reads 6.0.0 back. Each chain runs inside one `evm_snapshot`/`evm_revert`, so the forks can be
-reused.
+Per chain it:
+
+- checks the deployer's `folioImplementation()` runtime code against the explorer-verified 6.0.0 hash the SDK ABIs are
+  tested against (`src/index-dtf/abis/explorer/`);
+- deploys an ungoverned Folio through the SDK's default deployer and reads the v6 state back;
+- `eth_call`s every function of the SDK's v6 Folio ABI with well-formed arguments: an unknown selector (and the
+  pre-audit `endRebalance()`) reverts with empty data, so every function must return or revert with a decoded error;
+- runs a complete rebalance with SDK builders: `startRebalance` at the expected nonce; a launcher `openAuction` with
+  bids at its start, middle and end; a no-op `closeAuction` after the end; `openAuctionUnrestricted` from a roleless
+  account, rejected before `restrictedUntil` and opened from it on spot limits, spot weights and initial prices; one
+  bid for everything available; a mid-auction `closeAuction`; `endRebalance(nonce)` after a stale nonce is rejected.
+  Every price and bid size is recomputed from contract reads (exact at an auction's start and end, the exponential
+  curve within 1e-9 between, the sell cap from limits, weights, supply and balances as Folio's `getBid` computes it),
+  and the final basket must sit within the spot limits and at least three quarters of the way to the 20/80 target;
+- deploys a governed Folio (the deployer's optimistic governor deployer 1.1.0 wires governor, timelock and selector
+  registry), then registers the deployer in the chain's `FolioVersionRegistry` as the registry owner and reads 6.0.0
+  back.
+
+Each chain runs inside one `evm_snapshot`/`evm_revert`, so the forks can be reused. Only Folio calls behind the
+`sync` modifier (`startRebalance`, `openAuction`, `openAuctionUnrestricted`, `bid`) are sent with a fixed gas limit:
+Anvil can estimate at one timestamp and mine the next, and `sync`'s `lastFolioFeePoke` write then costs more than the
+estimate covered, starving the delegatecall into `RebalancingLib`.
 
 ```sh
 anvil --fork-url <mainnet-rpc> --port 8546 --chain-id 1

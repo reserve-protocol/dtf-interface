@@ -17,11 +17,7 @@ export {
 export type { GovernorProposalParams, GovernorProposalPayload, GovernorVoteParams } from "@/lib/governor-calls";
 export { createDtfSdk } from "@/create-dtf-sdk";
 export { SdkError, isSdkError } from "@/lib/errors";
-export {
-  default as dtfCatalog,
-  indexDtfs as indexDtfCatalog,
-  yieldDtfs as yieldDtfCatalog,
-} from "@reserve-protocol/dtf-catalog";
+export { dtfCatalog, indexDtfs as indexDtfCatalog, yieldDtfs as yieldDtfCatalog } from "@reserve-protocol/dtf-catalog";
 export type { DtfClient, DtfChainConfig, DtfClientConfig } from "@/client";
 export type {
   DtfClientApi,

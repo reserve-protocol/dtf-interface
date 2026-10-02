@@ -19,7 +19,7 @@
     "logo": "vlone.webp",
     "decimals": 18,
     "createdAt": 1760977343,
-    "status": "active",
+    "status": "unsupported",
     "restricted": false,
     "tags": ["L1", "Majors"]
   },
@@ -67,7 +67,7 @@
     "logo": "mvtt10f.webp",
     "decimals": 18,
     "createdAt": 1739559743,
-    "status": "active",
+    "status": "unsupported",
     "restricted": false,
     "tags": ["Majors", "L1", "DeFi", "Bitcoin"]
   },

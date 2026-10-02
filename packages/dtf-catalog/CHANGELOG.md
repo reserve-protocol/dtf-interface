@@ -1,5 +1,11 @@
 # @reserve-protocol/dtf-catalog
 
+## 0.1.6
+
+### Patch Changes
+
+- fe59b55: Mark VLONE and MVTT10F as unsupported.
+
 ## 0.1.5
 
 ### Patch Changes

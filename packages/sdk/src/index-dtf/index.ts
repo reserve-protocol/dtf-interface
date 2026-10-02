@@ -29,12 +29,7 @@ export {
   getTotalSupply as getIndexDtfTotalSupply,
   getVersion as getIndexDtfVersion,
 } from "@/index-dtf/dtf/index";
-export {
-  discoverIndexDtfs,
-  discoverIndexDtfsByChain,
-  discoverIndexDtfsFromSubgraph,
-  getIndexDtfStatuses,
-} from "@/index-dtf/dtf/discovery";
+export { discoverIndexDtfs, discoverIndexDtfsFromSubgraph, getIndexDtfStatuses } from "@/index-dtf/dtf/discovery";
 export { getIndexDtfStatus } from "@/index-dtf/dtf/status";
 export { getAssetList as getIndexDtfAssetList } from "@/client/api/assets";
 export { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";

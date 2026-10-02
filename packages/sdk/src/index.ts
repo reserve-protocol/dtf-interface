@@ -98,7 +98,6 @@ export {
   decodeIndexDtfProposal,
   decodeIndexDtfProposalCalldatas,
   discoverIndexDtfs,
-  discoverIndexDtfsByChain,
   discoverIndexDtfsFromSubgraph,
   dtfAdminProposalAbi,
   dtfIndexAbi,

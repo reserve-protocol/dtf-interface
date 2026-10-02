@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createDtfClient } from "@/client";
-import { discoverIndexDtfs, discoverIndexDtfsByChain, discoverIndexDtfsFromSubgraph } from "@/index-dtf/dtf/discovery";
+import { discoverIndexDtfs, discoverIndexDtfsFromSubgraph } from "@/index-dtf/dtf/discovery";
 
 const DTF = "0x0000000000000000000000000000000000000001";
 const TOKEN = "0x0000000000000000000000000000000000000002";
@@ -32,7 +32,7 @@ describe("Index DTF discovery", () => {
     );
   });
 
-  it("filters chain-scoped discovery to Index DTFs", async () => {
+  it("filters chainId-scoped discovery to Index DTFs", async () => {
     const fetch = vi.fn(async () =>
       Response.json([
         { type: "index", address: DTF, chainId: 8453, status: "active" },
@@ -42,8 +42,9 @@ describe("Index DTF discovery", () => {
     vi.stubGlobal("fetch", fetch);
     const client = createDtfClient({ apiBaseUrl: "https://api.example" });
 
-    const dtfs = await discoverIndexDtfsByChain(client, { chainId: 8453 });
+    const dtfs = await discoverIndexDtfs(client, { chainId: 8453 });
 
+    expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe("https://api.example/discover/dtfs?chainId=8453");
     expect(dtfs.map((dtf) => dtf.address)).toEqual([DTF]);
   });
 

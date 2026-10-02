@@ -20,7 +20,15 @@ import {
   indexDtfPendingFeeSharesQueryOptions,
   indexDtfPlatformFeeQueryOptions,
   indexDtfRebalanceAuctionsQueryOptions,
+  indexDtfMaxAuctionLengthQueryOptions,
   indexDtfRebalanceControlQueryOptions,
+  indexDtfRebalanceNonceQueryOptions,
+  indexDtfSelfFeeQueryOptions,
+  indexDtfImmutableFeeRecipientsQueryOptions,
+  indexDtfTradeAllowlistQueryOptions,
+  indexDtfIsTokenAllowlistedQueryOptions,
+  indexDtfLatestVersionQueryOptions,
+  indexDtfVersionDeploymentQueryOptions,
   indexDtfRebalanceLiquidityQueryOptions,
   indexDtfRebalanceQueryOptions,
   indexDtfRevenueQueryOptions,
@@ -223,6 +231,70 @@ const extraIndexQueryOptions: readonly QueryOptionCase[] = [
     key: dtfQueryKeys.index.bidsEnabled,
     params: { address: DTF, chainId: 1 },
     result: true,
+  },
+  {
+    name: "max auction length",
+    method: "getMaxAuctionLength",
+    build: indexDtfMaxAuctionLengthQueryOptions,
+    key: dtfQueryKeys.index.maxAuctionLength,
+    params: { address: DTF, chainId: 1 },
+    result: 1800n,
+  },
+  {
+    name: "rebalance nonce",
+    method: "getRebalanceNonce",
+    build: indexDtfRebalanceNonceQueryOptions,
+    key: dtfQueryKeys.index.rebalanceNonce,
+    params: { address: DTF, chainId: 1 },
+    result: 12n,
+  },
+  {
+    name: "self fee",
+    method: "getSelfFee",
+    build: indexDtfSelfFeeQueryOptions,
+    key: dtfQueryKeys.index.selfFee,
+    params: { address: DTF, chainId: 1 },
+    result: { raw: 0n, formatted: "0" },
+  },
+  {
+    name: "immutable fee recipients",
+    method: "getImmutableFeeRecipients",
+    build: indexDtfImmutableFeeRecipientsQueryOptions,
+    key: dtfQueryKeys.index.immutableFeeRecipients,
+    params: { address: DTF, chainId: 1 },
+    result: [{ recipient: TARGET, portion: 1n }],
+  },
+  {
+    name: "trade allowlist",
+    method: "getTradeAllowlist",
+    build: indexDtfTradeAllowlistQueryOptions,
+    key: dtfQueryKeys.index.tradeAllowlist,
+    params: { address: DTF, chainId: 1 },
+    result: { enabled: false, tokens: [] },
+  },
+  {
+    name: "is token allowlisted",
+    method: "getIsTokenAllowlisted",
+    build: indexDtfIsTokenAllowlistedQueryOptions,
+    key: dtfQueryKeys.index.isTokenAllowlisted,
+    params: { address: DTF, chainId: 1, token: TARGET },
+    result: true,
+  },
+  {
+    name: "latest version",
+    method: "getLatestVersion",
+    build: indexDtfLatestVersionQueryOptions,
+    key: dtfQueryKeys.index.latestVersion,
+    params: { chainId: 1 },
+    result: { versionHash: "0x01", version: "5.0.0", deployer: TARGET, deprecated: false },
+  },
+  {
+    name: "version deployment",
+    method: "getVersionDeployment",
+    build: indexDtfVersionDeploymentQueryOptions,
+    key: dtfQueryKeys.index.versionDeployment,
+    params: { chainId: 1, version: "6.0.0" },
+    result: null,
   },
   {
     name: "rebalance control",
@@ -473,9 +545,18 @@ describe("staleTime defaults", () => {
       getTotalSupply: vi.fn(),
       getVersion: vi.fn(),
       getProposal: vi.fn(),
+      getLatestVersion: vi.fn(),
+      getVersionDeployment: vi.fn(),
     },
   } as unknown as DtfSdk;
   const dtfParams = { chainId: 1, address: DTF } as const;
+
+  it("keeps version registry reads at the static tier", () => {
+    expect(indexDtfLatestVersionQueryOptions(sdk, { chainId: 1 }).staleTime).toBe(STATIC_STALE_TIME);
+    expect(indexDtfVersionDeploymentQueryOptions(sdk, { chainId: 1, version: "6.0.0" }).staleTime).toBe(
+      STATIC_STALE_TIME,
+    );
+  });
 
   it("applies the live class to price queries", () => {
     expect(indexDtfPriceQueryOptions(sdk, dtfParams).staleTime).toBe(LIVE_STALE_TIME);

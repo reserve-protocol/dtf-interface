@@ -11,6 +11,14 @@ import {
   indexDtfApprovedRevenueTokensQueryOptions,
   indexDtfBidQuoteQueryOptions,
   indexDtfBidsEnabledQueryOptions,
+  indexDtfMaxAuctionLengthQueryOptions,
+  indexDtfRebalanceNonceQueryOptions,
+  indexDtfSelfFeeQueryOptions,
+  indexDtfImmutableFeeRecipientsQueryOptions,
+  indexDtfTradeAllowlistQueryOptions,
+  indexDtfIsTokenAllowlistedQueryOptions,
+  indexDtfLatestVersionQueryOptions,
+  indexDtfVersionDeploymentQueryOptions,
   indexDtfCompletedRebalanceQueryOptions,
   indexDtfCompletedRebalancesQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
@@ -147,6 +155,70 @@ export function useIndexDtfBidsEnabled<TData = MethodResult<IndexMethod<"getBids
 ) {
   const sdk = useDtfSdk();
   return useQuery(indexDtfBidsEnabledQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfMaxAuctionLength<TData = MethodResult<IndexMethod<"getMaxAuctionLength">>>(
+  params: MethodParams<IndexMethod<"getMaxAuctionLength">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getMaxAuctionLength">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfMaxAuctionLengthQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfRebalanceNonce<TData = MethodResult<IndexMethod<"getRebalanceNonce">>>(
+  params: MethodParams<IndexMethod<"getRebalanceNonce">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getRebalanceNonce">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfRebalanceNonceQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfSelfFee<TData = MethodResult<IndexMethod<"getSelfFee">>>(
+  params: MethodParams<IndexMethod<"getSelfFee">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getSelfFee">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfSelfFeeQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfImmutableFeeRecipients<TData = MethodResult<IndexMethod<"getImmutableFeeRecipients">>>(
+  params: MethodParams<IndexMethod<"getImmutableFeeRecipients">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getImmutableFeeRecipients">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfImmutableFeeRecipientsQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfTradeAllowlist<TData = MethodResult<IndexMethod<"getTradeAllowlist">>>(
+  params: MethodParams<IndexMethod<"getTradeAllowlist">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getTradeAllowlist">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfTradeAllowlistQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfIsTokenAllowlisted<TData = MethodResult<IndexMethod<"getIsTokenAllowlisted">>>(
+  params: MethodParams<IndexMethod<"getIsTokenAllowlisted">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getIsTokenAllowlisted">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfIsTokenAllowlistedQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfLatestVersion<TData = MethodResult<IndexMethod<"getLatestVersion">>>(
+  params: MethodParams<IndexMethod<"getLatestVersion">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getLatestVersion">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfLatestVersionQueryOptions(sdk, params, options));
+}
+
+export function useIndexDtfVersionDeployment<TData = MethodResult<IndexMethod<"getVersionDeployment">>>(
+  params: MethodParams<IndexMethod<"getVersionDeployment">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getVersionDeployment">>, TData>,
+) {
+  const sdk = useDtfSdk();
+  return useQuery(indexDtfVersionDeploymentQueryOptions(sdk, params, options));
 }
 
 export function useIndexDtfRebalanceControl<TData = MethodResult<IndexMethod<"getRebalanceControl">>>(

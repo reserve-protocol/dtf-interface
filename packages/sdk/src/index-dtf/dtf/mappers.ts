@@ -146,9 +146,25 @@ export function mapIndexDtf(dtf: SubgraphIndexDtf, chainId: SupportedChainId): I
           },
         }
       : {}),
+    ...(dtf.version ? { version: dtf.version } : {}),
     rebalance: {
       auctionDelay: Number(dtf.auctionDelay),
       auctionLength: Number(dtf.auctionLength),
+      ...(dtf.maxAuctionLength === null || dtf.maxAuctionLength === undefined
+        ? {}
+        : { maxAuctionLength: Number(dtf.maxAuctionLength) }),
+      // Both fields or neither: an enabled allowlist with an unknown token list must not read as "nothing tradable".
+      ...(dtf.tradeAllowlistEnabled === null ||
+      dtf.tradeAllowlistEnabled === undefined ||
+      dtf.tradeTokenAllowlist === null ||
+      dtf.tradeTokenAllowlist === undefined
+        ? {}
+        : {
+            tradeAllowlist: {
+              enabled: dtf.tradeAllowlistEnabled,
+              tokens: dtf.tradeTokenAllowlist.map((token) => getAddress(token)),
+            },
+          }),
       ...(dtf.bidsEnabled === null || dtf.bidsEnabled === undefined ? {} : { bidsEnabled: dtf.bidsEnabled }),
       ...(dtf.trustedFillerRegistry ? { trustedFillerRegistry: getAddress(dtf.trustedFillerRegistry) } : {}),
       ...(dtf.trustedFillerEnabled === null || dtf.trustedFillerEnabled === undefined
@@ -162,15 +178,18 @@ export function mapIndexDtf(dtf: SubgraphIndexDtf, chainId: SupportedChainId): I
       tvlFee: mapAmount(dtf.tvlFee, 18),
       annualizedTvlFee: Number(mapAmount(dtf.annualizedTvlFee, 18).formatted),
       recipients: mapFeeRecipients(dtf.feeRecipients),
+      immutableRecipients: mapFeeRecipients(dtf.immutableFeeRecipients ?? ""),
+      selfFee: mapAmount(dtf.folioFeeForSelf ?? 0n, 18),
     },
-    // NOTE: revenue fields are subgraph BigDecimal analytics values (already in
-    // human units), kept as display-class numbers on purpose. On-chain integer
-    // amounts always map through mapAmount to Amount instead.
+    // NOTE: revenue fields are the subgraph's raw fee-share totals (BigInt, 18 decimals), kept as display-class
+    // numbers on purpose; precision past 2^53 is not needed for these analytics. Exact on-chain amounts always map
+    // through mapAmount to Amount instead.
     financials: {
       totalRevenue: Number(dtf.totalRevenue),
       protocolRevenue: Number(dtf.protocolRevenue),
       governanceRevenue: Number(dtf.governanceRevenue),
       externalRevenue: Number(dtf.externalRevenue),
+      selfRevenue: Number(dtf.selfRevenue ?? 0),
     },
   };
 }

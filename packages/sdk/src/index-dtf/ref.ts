@@ -12,6 +12,13 @@ import type {
 import { getIndexDtfAccountBalanceSnapshot } from "@/index-dtf/dtf/account-pnl";
 import { getIndexDtfExposure } from "@/index-dtf/dtf/exposure";
 import {
+  getIndexDtfImmutableFeeRecipients,
+  getIndexDtfIsTokenAllowlisted,
+  getIndexDtfMaxAuctionLength,
+  getIndexDtfSelfFee,
+  getIndexDtfTradeAllowlist,
+} from "@/index-dtf/dtf/folio-v6";
+import {
   getBasket,
   getBasketSnapshot,
   getBrand,
@@ -48,6 +55,7 @@ import {
   getBidQuote,
   getLatestAuction,
   getIndexDtfCurrentRebalance,
+  getIndexDtfRebalanceNonce,
   getIndexDtfRebalanceLiquidity,
   getCompletedRebalance,
   getCompletedRebalances,
@@ -67,6 +75,7 @@ import {
 import { createIndexDtfVoteLockRef } from "@/index-dtf/vote-lock/ref";
 
 type BlockNumberOption = Pick<DtfParams, "blockNumber">;
+type WithoutTarget<T> = T extends unknown ? Omit<T, "address" | "chainId"> : never;
 
 export type IndexDtfRef = ReturnType<typeof createIndexDtfRef>;
 
@@ -114,6 +123,12 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
         chainId,
         ...blockParams(options),
       }),
+    getMaxAuctionLength: (options?: BlockNumberOption | BlockNumber) =>
+      getIndexDtfMaxAuctionLength(client, {
+        address,
+        chainId,
+        ...blockParams(options),
+      }),
     getRebalanceControl: (options?: BlockNumberOption | BlockNumber) =>
       getIndexDtfRebalanceControl(client, {
         address,
@@ -153,7 +168,8 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
         address,
         chainId,
       }),
-    prepareDistributeFees: () => prepareIndexDtfDistributeFees({ address, chainId }),
+    prepareDistributeFees: (call: Omit<Parameters<typeof prepareIndexDtfDistributeFees>[0], "address" | "chainId">) =>
+      prepareIndexDtfDistributeFees({ ...call, address, chainId }),
     ...createIndexDtfGovernanceRef(client, { address, chainId }),
     getRebalances: (options: Omit<Parameters<typeof getRebalances>[1], "address" | "chainId"> = {}) =>
       getRebalances(client, { ...options, address, chainId }),
@@ -182,13 +198,23 @@ export function createIndexDtfRef(client: DtfClient, params: DtfParams) {
       getActiveAuction(client, { address, chainId, ...blockParams(options) }),
     getLatestAuction: (options?: BlockNumberOption | BlockNumber) =>
       getLatestAuction(client, { address, chainId, ...blockParams(options) }),
+    getRebalanceNonce: (options?: BlockNumberOption | BlockNumber) =>
+      getIndexDtfRebalanceNonce(client, { address, chainId, ...blockParams(options) }),
+    getSelfFee: (options?: BlockNumberOption | BlockNumber) =>
+      getIndexDtfSelfFee(client, { address, chainId, ...blockParams(options) }),
+    getImmutableFeeRecipients: (options?: BlockNumberOption | BlockNumber) =>
+      getIndexDtfImmutableFeeRecipients(client, { address, chainId, ...blockParams(options) }),
+    getTradeAllowlist: (options?: BlockNumberOption | BlockNumber) =>
+      getIndexDtfTradeAllowlist(client, { address, chainId, ...blockParams(options) }),
+    getIsTokenAllowlisted: (token: Address) => getIndexDtfIsTokenAllowlisted(client, { address, chainId, token }),
     getBidQuote: (quote: Omit<Parameters<typeof getBidQuote>[1], "address" | "chainId">) =>
       getBidQuote(client, { ...quote, address, chainId }),
     prepareBid: (call: Omit<Parameters<typeof prepareIndexDtfBid>[0], "address" | "chainId">) =>
       prepareIndexDtfBid({ ...call, address, chainId }),
     prepareCloseAuction: (call: Omit<Parameters<typeof prepareIndexDtfCloseAuction>[0], "address" | "chainId">) =>
       prepareIndexDtfCloseAuction({ ...call, address, chainId }),
-    prepareEndRebalance: () => prepareIndexDtfEndRebalance({ address, chainId }),
+    prepareEndRebalance: (call: WithoutTarget<Parameters<typeof prepareIndexDtfEndRebalance>[0]>) =>
+      prepareIndexDtfEndRebalance({ ...call, address, chainId }),
     prepareOpenAuctionArgs: prepareIndexDtfOpenAuctionArgs,
     prepareOpenAuction: (call: Omit<Parameters<typeof prepareIndexDtfOpenAuction>[0], "address" | "chainId">) =>
       prepareIndexDtfOpenAuction({ ...call, address, chainId }),

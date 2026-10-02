@@ -2,12 +2,14 @@ import { getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
 import type { Amount, Token } from "@/types/common";
+import type { IndexDtfCall } from "@/types/governance";
 import type { Financials, IndexDtf, IndexDtfPlatformFee, PriceControl } from "@/types/index-dtf";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 import { getDtf, getPrice } from "@/index-dtf/dtf/index";
 import { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
+import { getIndexDtfWriteAbi, type IndexDtfWriteVersion } from "@/index-dtf/write-version";
 import { prepareContractCall } from "@/lib/contract-call";
 import { Decimal } from "@/lib/decimal";
 import { getTokensData } from "@/lib/tokens";
@@ -27,6 +29,8 @@ export type IndexDtfRevenueDistribution = {
     readonly recipient: Address;
     readonly percentage: string;
   };
+  /** Percentage of total fees kept for holders (Folio 6.0 self fee); "0" before 6.0. */
+  readonly holders: { readonly percentage: string };
   readonly recipients: readonly {
     readonly address: Address;
     readonly configuredPercentage: string;
@@ -115,26 +119,36 @@ export async function getIndexDtfRevenue(
   return {
     financials: dtf.financials,
     feeRecipients: dtf.fees.recipients,
-    effectiveDistribution: getEffectiveRevenueDistribution(dtf.fees.recipients, platformFee),
+    effectiveDistribution: getEffectiveRevenueDistribution(dtf.fees, platformFee),
     pendingFeeShares,
     pendingFeeSharesUsd: new Decimal(pendingFeeShares.formatted).mul(price.price).toNumber(),
     platformFee,
   };
 }
 
+/**
+ * The configured fee split, in the order Folio pays it: the DAO fee first, then (6.0) `selfFee` of the rest kept for
+ * holders, then the mutable and immutable tables, whose portions sum to 100% together. With both tables empty,
+ * `distributeFees` pays the recipients' pool to the DAO as well. It uses the DAO's nominal share: when a Folio's TVL
+ * or mint fee is low enough that the DAO fee floor binds, the DAO takes more and everyone else proportionally less.
+ */
 export function getEffectiveRevenueDistribution(
-  feeRecipients: IndexDtf["fees"]["recipients"],
+  fees: Pick<IndexDtf["fees"], "recipients" | "immutableRecipients" | "selfFee">,
   platformFee: IndexDtfPlatformFee,
 ): IndexDtfRevenueDistribution {
   const platformPercentage = new Decimal(platformFee.percent);
-  const recipientPool = new Decimal(100).minus(platformPercentage);
+  const nonDaoPool = new Decimal(100).minus(platformPercentage);
+  const holdersPercentage = nonDaoPool.mul(fees.selfFee.formatted);
+  const recipientPool = nonDaoPool.minus(holdersPercentage);
+  const recipients = [...fees.recipients, ...fees.immutableRecipients];
 
   return {
     platform: {
       recipient: platformFee.recipient,
-      percentage: platformPercentage.toString(),
+      percentage: (recipients.length === 0 ? platformPercentage.plus(recipientPool) : platformPercentage).toString(),
     },
-    recipients: feeRecipients.map((recipient) => ({
+    holders: { percentage: holdersPercentage.toString() },
+    recipients: recipients.map((recipient) => ({
       address: recipient.address,
       configuredPercentage: recipient.percentage,
       effectivePercentage: new Decimal(recipient.percentage).mul(recipientPool).div(100).toString(),
@@ -146,11 +160,12 @@ export function getEffectiveRevenueDistribution(
 export function prepareIndexDtfDistributeFees(params: {
   readonly address: Address;
   readonly chainId: IndexDtf["chainId"];
-}) {
+  readonly version: IndexDtfWriteVersion;
+}): IndexDtfCall {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: dtfIndexAbi,
+    abi: getIndexDtfWriteAbi(params.version),
     functionName: "distributeFees",
     args: [] as const,
   });

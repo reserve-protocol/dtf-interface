@@ -1,6 +1,7 @@
 query GetIndexDTF($id: ID!, $block: Block_height) {
   dtf(id: $id, block: $block) {
     id
+    version
     proxyAdmin
     timestamp
     deployer
@@ -12,6 +13,9 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
     mandate
     auctionDelay
     auctionLength
+    maxAuctionLength
+    tradeAllowlistEnabled
+    tradeTokenAllowlist
     auctionApprovers
     auctionLaunchers
     brandManagers
@@ -19,7 +23,10 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
     protocolRevenue
     governanceRevenue
     externalRevenue
+    selfRevenue
     feeRecipients
+    immutableFeeRecipients
+    folioFeeForSelf
     bidsEnabled
     trustedFillerRegistry
     trustedFillerEnabled

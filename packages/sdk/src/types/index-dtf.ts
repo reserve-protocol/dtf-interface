@@ -23,6 +23,10 @@ export type Fees = {
   readonly tvlFee: Amount;
   readonly annualizedTvlFee: number;
   readonly recipients: FeeRecipients;
+  /** Folio 6.0: recipients governance cannot remove; empty before 6.0. */
+  readonly immutableRecipients: FeeRecipients;
+  /** Folio 6.0: D18 share of the recipient pool kept for holders; zero before 6.0. */
+  readonly selfFee: Amount;
 };
 
 export type IndexDtfGovernance = {
@@ -85,7 +89,11 @@ export type PriceControl = 0 | 1 | 2;
 
 export type IndexDtfRebalanceConfig = {
   readonly auctionDelay: number;
+  /** Folio 6.0 mirrors `maxAuctionLength` here so existing readers keep working. */
   readonly auctionLength: number;
+  readonly maxAuctionLength?: number;
+  /** Folio 6.0 trade allowlist; absent before 6.0. */
+  readonly tradeAllowlist?: { readonly enabled: boolean; readonly tokens: readonly Address[] };
   readonly bidsEnabled?: boolean;
   readonly trustedFillerRegistry?: Address;
   readonly trustedFillerEnabled?: boolean;
@@ -94,11 +102,15 @@ export type IndexDtfRebalanceConfig = {
   readonly priceControl: PriceControl;
 };
 
+/** Fee shares paid, as raw 18-decimal share amounts from the subgraph (display-class numbers). */
 export type Financials = {
+  /** protocol + governance + external + self. */
   readonly totalRevenue: number;
   readonly protocolRevenue: number;
   readonly governanceRevenue: number;
   readonly externalRevenue: number;
+  /** Folio 6.0 self fee kept for holders; 0 before 6.0 and for DTFs the subgraph indexed before 1.11.1. */
+  readonly selfRevenue: number;
 };
 
 export type IndexDtfPriceBasketToken = {
@@ -240,6 +252,8 @@ export type IndexDtfFull = IndexDtf & {
 export type IndexDtf = {
   readonly id: Address;
   readonly chainId: SupportedChainId;
+  /** Folio release read from `version()` by the subgraph (1.11+); absent while a grafted DTF's field is still null. */
+  readonly version?: string;
   readonly token: TokenWithSnapshot;
   readonly mandate: string;
   readonly createdAt: number;

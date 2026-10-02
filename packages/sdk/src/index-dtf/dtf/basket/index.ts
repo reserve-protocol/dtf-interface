@@ -20,7 +20,9 @@ export type {
   IndexDtfBasketTokenInput,
   IndexDtfBasketUnitsInput,
   IndexDtfInitialBasket,
+  IndexDtfStartRebalanceVersion,
   StartRebalanceArgsV5,
+  StartRebalanceArgsV6,
 } from "@/index-dtf/dtf/basket/types";
 export {
   buildInitialBasket,

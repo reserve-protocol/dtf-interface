@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { DtfClient } from "@/client";
 
+import { folioV6Abi, getIndexDtfProposal } from "@/index";
 import { dtfIndexProposalAbi } from "@/index-dtf/abis/proposal-decoder";
 import {
   getAllProposals,
@@ -87,6 +88,59 @@ describe("Index DTF governance proposals", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
+
+  it.each([6, 8])(
+    "reads v6 proposal calldata with %i-decimal vote weights through the public SDK",
+    async (decimals) => {
+      vi.spyOn(Date, "now").mockReturnValue(1_000_000_000);
+      const response = createChallengedConfirmationResponse();
+      const target = "0x0000000000000000000000000000000000000003";
+      const calldata = encodeFunctionData({
+        abi: folioV6Abi,
+        functionName: "setMaxAuctionLength",
+        args: [1800n],
+      });
+      const queryIndex = vi.fn(async () => ({
+        ...response,
+        proposal: {
+          ...response.proposal,
+          description: "Update v6 maximum auction length",
+          targets: [target],
+          calldatas: [calldata],
+          forWeightedVotes: "2500000",
+          quorumVotes: "1000000",
+          votes: [{ choice: "FOR", voter: { address: target }, weight: "2500000" }],
+          governance: {
+            ...response.proposal.governance,
+            token: { ...response.proposal.governance.token, token: { decimals } },
+          },
+        },
+      }));
+      const client = { subgraph: { queryIndex } } as unknown as DtfClient;
+
+      const proposal = await getIndexDtfProposal(client, {
+        address: target,
+        chainId: 8453,
+        proposalId: response.proposal.id,
+      });
+
+      expect(proposal.forWeightedVotes).toEqual({ raw: 2500000n, formatted: decimals === 6 ? "2.5" : "0.025" });
+      expect(proposal.quorumVotes).toEqual({ raw: 1000000n, formatted: decimals === 6 ? "1" : "0.01" });
+      expect(proposal.votes).toEqual([
+        { voter: target, choice: "FOR", weight: { raw: 2500000n, formatted: decimals === 6 ? "2.5" : "0.025" } },
+      ]);
+      expect(proposal.state).toBe("ACTIVE");
+      expect(proposal.decoded.unknownCalls).toEqual([]);
+      expect(proposal.decoded.calls).toHaveLength(1);
+      expect(proposal.decoded.calls[0]).toMatchObject({
+        target,
+        contract: "Index DTF",
+        functionName: "setMaxAuctionLength",
+        params: [1800n],
+        callData: calldata,
+      });
+    },
+  );
 
   it("preserves transitioned optimistic proposal veto threshold sentinel", () => {
     const proposal = mapIndexDtfProposalSummary(

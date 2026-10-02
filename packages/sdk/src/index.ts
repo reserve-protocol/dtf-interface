@@ -17,11 +17,7 @@ export {
 export type { GovernorProposalParams, GovernorProposalPayload, GovernorVoteParams } from "@/lib/governor-calls";
 export { createDtfSdk } from "@/create-dtf-sdk";
 export { SdkError, isSdkError } from "@/lib/errors";
-export {
-  default as dtfCatalog,
-  indexDtfs as indexDtfCatalog,
-  yieldDtfs as yieldDtfCatalog,
-} from "@reserve-protocol/dtf-catalog";
+export { dtfCatalog, indexDtfs as indexDtfCatalog, yieldDtfs as yieldDtfCatalog } from "@reserve-protocol/dtf-catalog";
 export type { DtfClient, DtfChainConfig, DtfClientConfig } from "@/client";
 export type {
   DtfClientApi,
@@ -88,6 +84,10 @@ export {
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfDeployFeeRecipients,
   buildIndexDtfSettingsProposal,
+  buildIndexDtfUpgradeToV6Calls,
+  buildIndexDtfUpgradeToV6Proposal,
+  INDEX_DTF_START_REBALANCE_SELECTOR,
+  upgradeSpell600Abi,
   CANCELLER_ROLE,
   DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
   buildIndexDtfStartRebalance,
@@ -114,7 +114,10 @@ export {
   dtfIndexStakingVaultOptimisticAbi,
   extractIndexDtfDeployedAddress,
   extractIndexDtfDeployedStakingTokenAddress,
+  folioDeployerV6Abi,
   folioArtifactAbi,
+  folioV6Abi,
+  folioVersionRegistryAbi,
   generateIndexDtfDeploymentNonce,
   getAllIndexDtfProposals,
   hashIndexDtfProposalDescription,
@@ -128,9 +131,25 @@ export {
   getIndexDtfBasketUnitsFromShares,
   getIndexDtfBasketWithPrice,
   getIndexDtfDeployApprovalAmount,
+  getIndexDtfDeployerAddress,
   getIndexDtfActiveAuction,
   getIndexDtfBidQuote,
   getIndexDtfBidsEnabled,
+  getIndexDtfMaxAuctionLength,
+  getIndexDtfRebalanceNonce,
+  getIndexDtfSelfFee,
+  assertIndexDtfFeeRecipientTables,
+  INDEX_DTF_FEE_RECIPIENT_TOTAL,
+  INDEX_DTF_MAX_FEE_RECIPIENTS,
+  scaleIndexDtfFeeRecipients,
+  sortIndexDtfFeeRecipients,
+  getIndexDtfImmutableFeeRecipients,
+  getIndexDtfTradeAllowlist,
+  getIndexDtfIsTokenAllowlisted,
+  getIndexDtfLatestVersion,
+  getIndexDtfVersionDeployment,
+  getIndexDtfVersionHash,
+  INDEX_DTF_VERSION_REGISTRY_ADDRESS,
   getIndexDtfBrand,
   getIndexDtfCompletedRebalance,
   getIndexDtfCompletedRebalances,
@@ -221,6 +240,7 @@ export {
   indexDtfV5WriteAbi,
   indexDtfV6WriteAbi,
   INDEX_DTF_DEPLOYER_ADDRESS,
+  INDEX_DTF_V6_DEPLOYER_ADDRESS,
   INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
   listIndexDtfs,
   OPTIMISTIC_PROPOSER_ROLE,
@@ -450,7 +470,11 @@ export {
   getAccountPortfolioTransactions,
 } from "@/client/api/portfolio";
 export { getTokenData, getTokenPrices, getTokenVolatilities, getTokensData } from "@/lib/tokens";
-export type { IndexDtfRef } from "@/index-dtf/index";
+export type {
+  IndexDtfRef,
+  PrepareIndexDtfEndRebalanceParams,
+  PrepareIndexDtfOpenAuctionParams,
+} from "@/index-dtf/index";
 export type * from "@/index-dtf/dtf/basket/index";
 export type * from "@/index-dtf/governance/propose/index";
 export type * from "@/index-dtf/index";

@@ -2,8 +2,9 @@ import type { Address } from "viem";
 
 import type { SupportedChainId } from "@/config";
 import type { ContractCallPlan } from "@/lib/contract-call";
+import type { IndexDtfCall } from "@/types/governance";
 
-import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { getIndexDtfWriteAbi, type IndexDtfWriteVersion } from "@/index-dtf/write-version";
 import { prepareContractCall, prepareErc20Approval } from "@/lib/contract-call";
 import { SdkError } from "@/lib/errors";
 
@@ -13,6 +14,7 @@ type RedeemArgs = readonly [bigint, Address, readonly Address[], readonly bigint
 export type PrepareIndexDtfMintParams = {
   readonly address: Address;
   readonly chainId: SupportedChainId;
+  readonly version: IndexDtfWriteVersion;
   readonly shares: bigint;
   readonly receiver: Address;
   readonly minSharesOut: bigint;
@@ -21,6 +23,7 @@ export type PrepareIndexDtfMintParams = {
 export type PrepareIndexDtfRedeemParams = {
   readonly address: Address;
   readonly chainId: SupportedChainId;
+  readonly version: IndexDtfWriteVersion;
   readonly shares: bigint;
   readonly receiver: Address;
   readonly assets: readonly Address[];
@@ -41,12 +44,12 @@ export type PrepareIndexDtfMintPlanParams = PrepareIndexDtfMintParams & {
   }[];
 };
 
-/** Prepares a v5 `mint(shares, receiver, minSharesOut)` contract call. */
-export function prepareIndexDtfMint(params: PrepareIndexDtfMintParams) {
+/** Prepares a `mint(shares, receiver, minSharesOut)` contract call (identical bytes on 5.0.0 and 6.0.0). */
+export function prepareIndexDtfMint(params: PrepareIndexDtfMintParams): IndexDtfCall {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: dtfIndexAbi,
+    abi: getIndexDtfWriteAbi(params.version),
     functionName: "mint",
     args: getMintArgs(params),
   });
@@ -69,12 +72,12 @@ export function prepareIndexDtfMintPlan(
   return approvals.length ? { type: "approval-required", approvals, call } : { type: "call", call };
 }
 
-/** Prepares a v5 `redeem(shares, receiver, assets, minAmountsOut)` contract call. */
-export function prepareIndexDtfRedeem(params: PrepareIndexDtfRedeemParams) {
+/** Prepares a `redeem(shares, receiver, assets, minAmountsOut)` contract call (identical bytes on 5.0.0 and 6.0.0). */
+export function prepareIndexDtfRedeem(params: PrepareIndexDtfRedeemParams): IndexDtfCall {
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: dtfIndexAbi,
+    abi: getIndexDtfWriteAbi(params.version),
     functionName: "redeem",
     args: getRedeemArgs(params),
   });

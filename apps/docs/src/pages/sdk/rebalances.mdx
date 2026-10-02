@@ -20,6 +20,13 @@ const activeAuction = await sdk.index.getActiveAuction({
 });
 ```
 
+`getRebalanceNonce` reads Folio 6.0's `getRebalanceNonce()` (the value the next `startRebalance` must exceed by one);
+it reverts on a v5 proxy. Both auction readers resolve one block first and pin every read to it. An auction is active only while
+`startTime <= now <= endTime` (inclusive, exactly as Folio's `bid` checks) **and** its `rebalanceNonce` equals the
+current rebalance nonce read at the same block; a time-valid auction left over from a previous rebalance is reported
+with `isActive: false`. The result carries `currentRebalanceNonce` and `blockNumber` so callers can reason about
+staleness.
+
 ## Historical State
 
 Use historical methods for analytics and completed lifecycle views.
@@ -36,12 +43,12 @@ Use historical methods for analytics and completed lifecycle views.
 
 | Method                           | Use                                                |
 | -------------------------------- | -------------------------------------------------- |
-| `prepareOpenAuctionArgs`         | Build version-aware open-auction args.             |
-| `prepareOpenAuction`             | Open an auction.                                   |
+| `prepareOpenAuctionArgs`         | Build v5-compatible open-auction args.             |
+| `prepareOpenAuction`             | Encode a version-aware open-auction call.          |
 | `prepareOpenAuctionUnrestricted` | Open an auction after the community window starts. |
 | `prepareBid`                     | Bid on an auction.                                 |
 | `prepareCloseAuction`            | Close an auction.                                  |
-| `prepareEndRebalance`            | End the active rebalance.                          |
+| `prepareEndRebalance`            | End the active rebalance (6.0.0: by nonce).        |
 
 ```ts
 const quote = await sdk.index.getBidQuote({
@@ -56,6 +63,7 @@ const quote = await sdk.index.getBidQuote({
 const call = sdk.index.prepareBid({
   address,
   chainId,
+  version,
   auctionId: 1n,
   sellToken,
   buyToken,
@@ -63,6 +71,36 @@ const call = sdk.index.prepareBid({
   maxBuyAmount: quote.bidAmount,
 });
 ```
+
+Every auction builder (`prepareOpenAuctionArgs`, `prepareOpenAuction`, `prepareOpenAuctionUnrestricted`,
+`prepareBid`, `prepareCloseAuction`, `prepareEndRebalance`) and the revenue builder `prepareDistributeFees` require
+`version` (`"5.0.0"` or `"6.0.0"`, read it from `getVersion`) and reject anything else with `SdkError(INVALID_INPUT)`;
+there is no silent v5 default and Folio 4.x is not supported by these builders. Where the call shape is identical in
+both versions the bytes are too; the ABI attached to the prepared call follows the version. For Folio 6.0 pass the positive `auctionLength` once, to the args builder: it drives
+the library's v6 math and is carried into the encoded sixth argument. Use `maxAuctionLength()` from RPC unless the
+rebalance's price control allows a shorter custom length.
+
+```ts
+const version = await sdk.index.getVersion({ address, chainId }); // "6.0.0"
+const { args } = sdk.index.prepareOpenAuctionArgs({ ...input, version, auctionLength: 1800n });
+const call = sdk.index.prepareOpenAuction({ address, chainId, version, args });
+```
+
+Folio 6.0.0 binds `endRebalance` to the rebalance it ends: pass the `rebalanceNonce` of the rebalance the user or
+bot is acting on (the one it displayed or launched auctions for), and the Folio reverts `Folio__InvalidRebalanceNonce`
+if a newer rebalance has started since. Reading the nonce right before building the call defeats that guard. Folio
+5.0.0 keeps the nonce-less `endRebalance()`. On-chain, `startRebalance` and `endRebalance` also accept
+`type(uint256).max` to skip the nonce check; the SDK basket builder always sends the exact next nonce.
+
+```ts
+const { rebalance } = await sdk.index.getCurrentRebalance({ address, chainId }); // the rebalance on screen
+// ...later, when the user ends it:
+const rebalanceNonce = BigInt(rebalance.nonce);
+const end = sdk.index.prepareEndRebalance({ address, chainId, version: "6.0.0", rebalanceNonce });
+```
+
+Open-auction inputs are validated before the rebalance library runs: a zero, negative or non-finite current price
+(or snapshot price when the target basket uses snapshot prices) throws instead of skewing weights.
 
 ## Bidding Mode
 

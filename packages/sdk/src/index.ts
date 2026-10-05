@@ -357,6 +357,9 @@ export {
   timelockAbi,
   unstakingManagerAbi,
   upgradeSpellProposalAbi,
+  INDEX_DTF_UPGRADE_SPELL_6_0_0_ADDRESS,
+  governanceSpell09182026Abi,
+  INDEX_DTF_GOVERNANCE_SPELL_09_18_2026_ADDRESS,
 } from "@/index-dtf/index";
 export {
   basketHandlerAbi,

@@ -3,6 +3,10 @@ import { getAddress, type Abi, type Address } from "viem";
 import type { SupportedChainId } from "@/config";
 
 import {
+  governanceSpell09182026Abi,
+  INDEX_DTF_GOVERNANCE_SPELL_09_18_2026_ADDRESS,
+} from "@/index-dtf/abis/governance-spell-09-18-2026";
+import {
   dtfAdminProposalAbi,
   dtfIndexProposalAbi,
   dtfIndexGovernanceProposalAbi,
@@ -10,6 +14,7 @@ import {
   timelockProposalAbi,
   upgradeSpellProposalAbi,
 } from "@/index-dtf/abis/proposal-decoder";
+import { INDEX_DTF_UPGRADE_SPELL_6_0_0_ADDRESS, upgradeSpell600Abi } from "@/index-dtf/abis/upgrade-spell-6-0-0";
 import { sameAddress } from "@/lib/utils";
 
 export type ProposalContractDecoder = {
@@ -97,6 +102,16 @@ const EXTRA_PROPOSAL_CONTRACTS: readonly {
       8453: "0xe9ae2cb2b5e5658035617f92efa1878429f9cd3f",
       56: "0x3dde17cfd36e740cb7452cb2f59fc925eacb91ab",
     },
+  },
+  {
+    contract: "Governance Spell 09_18_2026",
+    abi: governanceSpell09182026Abi,
+    addresses: INDEX_DTF_GOVERNANCE_SPELL_09_18_2026_ADDRESS,
+  },
+  {
+    contract: "Upgrade Spell 6.0.0",
+    abi: upgradeSpell600Abi,
+    addresses: INDEX_DTF_UPGRADE_SPELL_6_0_0_ADDRESS,
   },
 ];
 

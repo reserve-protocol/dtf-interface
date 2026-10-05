@@ -141,6 +141,11 @@ export { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
 export { timelockAbi } from "@/index-dtf/abis/timelock";
 export { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
 export { upgradeSpellProposalAbi } from "@/index-dtf/abis/upgrade-spell-proposal";
+export { INDEX_DTF_UPGRADE_SPELL_6_0_0_ADDRESS } from "@/index-dtf/abis/upgrade-spell-6-0-0";
+export {
+  governanceSpell09182026Abi,
+  INDEX_DTF_GOVERNANCE_SPELL_09_18_2026_ADDRESS,
+} from "@/index-dtf/abis/governance-spell-09-18-2026";
 export {
   getOptimisticGovernance as getIndexDtfOptimisticGovernance,
   getOptimisticProposalContext as getIndexDtfOptimisticProposalContext,

@@ -34,7 +34,7 @@ export type BuildIndexDtfUpgradeToV6CallsParams = {
   readonly chainId: SupportedChainId;
   readonly address: Address;
   readonly proxyAdmin: Address;
-  /** The deployed `UpgradeSpell_6_0_0`; none is published on a public chain yet. */
+  /** The deployed `UpgradeSpell_6_0_0` (`INDEX_DTF_UPGRADE_SPELL_6_0_0_ADDRESS`). */
   readonly spell: Address;
   /** The optimistic governor's selector registry; omit (or pass the zero address) for standard governance. */
   readonly selectorRegistry?: Address;

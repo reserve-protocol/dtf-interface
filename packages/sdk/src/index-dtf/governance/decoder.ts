@@ -5,6 +5,7 @@ import type { DtfClientExplorer } from "@/client/explorer";
 import type { SupportedChainId } from "@/config";
 import type { IndexDtfDecodedCalldata, IndexDtfProposalDecoded, IndexDtfUnknownCalldata } from "@/types/governance";
 
+import { ownableTransferOwnershipAbi } from "@/index-dtf/abis/governance-spell-09-18-2026";
 import { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
 import {
   buildProposalContractMap,
@@ -20,6 +21,10 @@ const FALLBACK_DECODERS: readonly Omit<ProposalContractDecoder, "target">[] = [
   {
     contract: "Selector Registry",
     abi: selectorRegistryAbi,
+  },
+  {
+    contract: "Ownable Contract",
+    abi: ownableTransferOwnershipAbi,
   },
 ];
 

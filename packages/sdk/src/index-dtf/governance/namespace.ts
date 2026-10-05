@@ -12,6 +12,7 @@ import type {
   GetIndexDtfGovernanceActivityParams,
   GetIndexDtfGuardiansParams,
   GetIndexDtfLegacyVoteLocksParams,
+  GetIndexDtfVoteLockDependentsParams,
   GetIndexDtfOptimisticGovernanceParams,
   GetIndexDtfOptimisticProposalContextParams,
   GetIndexDtfOptimisticProposalVoterStateParams,
@@ -52,6 +53,7 @@ import {
   getProposerState,
   getTopVoters,
   getVoterState,
+  getVoteLockDependents,
   prepareIndexDtfCancelProposal,
   prepareIndexDtfExecuteProposal,
   prepareIndexDtfGovernorCancelProposal,
@@ -101,6 +103,7 @@ export function createIndexDtfGovernanceNamespace(client: DtfClient) {
     getDelegates: (params: GetIndexDtfDelegatesParams) => getDelegates(client, params),
     getGuardians: (params: GetIndexDtfGuardiansParams) => getGuardians(client, params),
     getLegacyVoteLocks: (params: GetIndexDtfLegacyVoteLocksParams) => getLegacyVoteLocks(client, params),
+    getVoteLockDependents: (params: GetIndexDtfVoteLockDependentsParams) => getVoteLockDependents(client, params),
     getVoterState: (params: GetIndexDtfVoterStateParams) => getVoterState(client, params),
     getOptimisticGovernance: (params: GetIndexDtfOptimisticGovernanceParams) => getOptimisticGovernance(client, params),
     getOptimisticProposalContext: (params: GetIndexDtfOptimisticProposalContextParams) =>

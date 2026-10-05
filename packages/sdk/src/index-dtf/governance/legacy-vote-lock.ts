@@ -14,15 +14,17 @@ export async function getLegacyVoteLocks(
 ): Promise<readonly Address[]> {
   const context = await getLegacyVoteLockContext(client, params);
 
-  const legacyGovernance = context?.legacyGovernance.filter((governance) => governance.toLowerCase() !== zeroAddress);
-
-  if (!context || !legacyGovernance || legacyGovernance.length === 0) {
+  if (!context) {
     return [];
   }
 
-  const legacyVoteLocks = await Promise.all(
-    legacyGovernance.map((governance) => readLegacyVoteLock(client, context.chainId, governance)),
-  );
+  const legacyGovernance = context.legacyGovernance.filter((governance) => governance.toLowerCase() !== zeroAddress);
+  const legacyVoteLocks = [
+    ...context.knownVoteLocks,
+    ...(await Promise.all(
+      legacyGovernance.map((governance) => readLegacyVoteLock(client, context.chainId, governance)),
+    )),
+  ];
   const currentVoteLock = context.currentVoteLock.toLowerCase();
   const result: Address[] = [];
 
@@ -73,12 +75,14 @@ async function getLegacyVoteLockContext(
   readonly chainId: IndexDtf["chainId"];
   readonly currentVoteLock: Address;
   readonly legacyGovernance: readonly Address[];
+  readonly knownVoteLocks: readonly Address[];
 } | null> {
   if ("currentVoteLock" in params) {
     return {
       chainId: params.chainId,
       currentVoteLock: getAddress(params.currentVoteLock),
       legacyGovernance: params.legacyGovernance.map((address) => getAddress(address)),
+      knownVoteLocks: [],
     };
   }
 
@@ -92,6 +96,7 @@ async function getLegacyVoteLockContext(
     chainId: dtf.chainId,
     currentVoteLock: dtf.voteLockVault.token.address,
     legacyGovernance: dtf.voteLockVault.legacyGovernance,
+    knownVoteLocks: dtf.roles.admin.legacyGovernances.map(({ voteLock }) => voteLock),
   };
 }
 

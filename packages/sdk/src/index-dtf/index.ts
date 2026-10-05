@@ -114,6 +114,7 @@ export { getTopVoters as getIndexDtfTopVoters } from "@/index-dtf/governance/top
 export { withProposalSummaryState as withIndexDtfProposalSummaryState } from "@/index-dtf/governance/proposals";
 export { getGuardians as getIndexDtfGuardians } from "@/index-dtf/governance/guardians";
 export { getLegacyVoteLocks as getIndexDtfLegacyVoteLocks } from "@/index-dtf/governance/legacy-vote-lock";
+export { getVoteLockDependents as getIndexDtfVoteLockDependents } from "@/index-dtf/governance/vote-lock-dependents";
 export { daoFeeRegistryAbi } from "@/index-dtf/abis/dao-fee-registry";
 export { dtfAdminProposalAbi } from "@/index-dtf/abis/dtf-admin-proposal";
 export { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";

@@ -169,6 +169,7 @@ export {
   getIndexDtfHolders,
   getIndexDtfIssuanceState,
   getIndexDtfLegacyVoteLocks,
+  getIndexDtfVoteLockDependents,
   getIndexDtfLatestAuction,
   getIndexDtfMaxSafeRebalancePercent,
   getIndexDtfMandate,

@@ -7661,7 +7661,7 @@ export type GetIndexDtfQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfQuery = { dtf?: { id: string, version?: string | null, proxyAdmin: string, timestamp: string, deployer: string, ownerAddress: string, admins: Array<string>, mintingFee: string, tvlFee: string, annualizedTvlFee: string, mandate: string, auctionDelay: string, auctionLength: string, maxAuctionLength?: string | null, tradeAllowlistEnabled?: boolean | null, tradeTokenAllowlist?: Array<string> | null, auctionApprovers: Array<string>, auctionLaunchers: Array<string>, brandManagers: Array<string>, totalRevenue: string, protocolRevenue: string, governanceRevenue: string, externalRevenue: string, selfRevenue?: string | null, feeRecipients: string, immutableFeeRecipients?: string | null, folioFeeForSelf?: string | null, bidsEnabled?: boolean | null, trustedFillerRegistry?: string | null, trustedFillerEnabled?: boolean | null, weightControl: boolean, priceControl: number, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, tradingGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, stToken?: { id: string, currentDelegates: string, totalDelegates: string, delegatedVotesRaw: string, currentOptimisticDelegates: string, totalOptimisticDelegates: string, optimisticDelegatedVotesRaw: string, legacyGovernance: Array<string>, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, underlying?: { name: string, symbol: string, address: string, decimals: number } | null, governance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, rewards: Array<{ rewardToken: { address: string, name: string, symbol: string, decimals: number } }> } | null } | null };
+export type GetIndexDtfQuery = { dtf?: { id: string, version?: string | null, proxyAdmin: string, timestamp: string, deployer: string, ownerAddress: string, admins: Array<string>, mintingFee: string, tvlFee: string, annualizedTvlFee: string, mandate: string, auctionDelay: string, auctionLength: string, maxAuctionLength?: string | null, tradeAllowlistEnabled?: boolean | null, tradeTokenAllowlist?: Array<string> | null, auctionApprovers: Array<string>, auctionLaunchers: Array<string>, brandManagers: Array<string>, totalRevenue: string, protocolRevenue: string, governanceRevenue: string, externalRevenue: string, selfRevenue?: string | null, feeRecipients: string, immutableFeeRecipients?: string | null, folioFeeForSelf?: string | null, bidsEnabled?: boolean | null, trustedFillerRegistry?: string | null, trustedFillerEnabled?: boolean | null, weightControl: boolean, priceControl: number, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, legacyAdminGovernances?: Array<{ id: string, token: { id: string, governance?: { id: string } | null } }> | null, tradingGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, stToken?: { id: string, currentDelegates: string, totalDelegates: string, delegatedVotesRaw: string, currentOptimisticDelegates: string, totalOptimisticDelegates: string, optimisticDelegatedVotesRaw: string, legacyGovernance: Array<string>, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, underlying?: { name: string, symbol: string, address: string, decimals: number } | null, governance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, rewards: Array<{ rewardToken: { address: string, name: string, symbol: string, decimals: number } }> } | null } | null };
 
 export type GetIndexDtfProposalsQueryVariables = Exact<{
   governanceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
@@ -7685,7 +7685,7 @@ export type GetIndexDtfProposalGovernanceAddressesQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalGovernanceAddressesQuery = { dtf?: { legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null, stToken?: { legacyGovernance: Array<string>, governance?: { id: string } | null } | null } | null };
+export type GetIndexDtfProposalGovernanceAddressesQuery = { dtf?: { legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null, legacyAdminGovernances?: Array<{ id: string, token: { id: string, governance?: { id: string } | null } }> | null, stToken?: { legacyGovernance: Array<string>, governance?: { id: string } | null } | null } | null };
 
 export type IndexDtfProposalContractContextFragment = { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null };
 
@@ -7767,7 +7767,7 @@ export type GetIndexDtfDirectoryQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfDirectoryQuery = { dtfs: Array<{ id: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, token: { symbol: string, name: string }, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string } | null } | null, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null }> };
+export type GetIndexDtfDirectoryQuery = { dtfs: Array<{ id: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, token: { symbol: string, name: string }, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string } | null } | null, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null, legacyAdminGovernances?: Array<{ id: string, token: { id: string, governance?: { id: string } | null } }> | null }> };
 
 export type GetIndexDtfTopVotersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7775,6 +7775,13 @@ export type GetIndexDtfTopVotersQueryVariables = Exact<{
 
 
 export type GetIndexDtfTopVotersQuery = { delegates: Array<{ address: string, numberVotes: number, numberOptimisticVotes: number, delegatedVotesRaw: string, tokenHoldersRepresentedAmount: number, token: { id: string, token: { symbol: string, name: string, decimals: number }, underlying?: { id: string, symbol: string, name: string, decimals: number } | null } }> };
+
+export type GetIndexDtfVoteLockDependentsQueryVariables = Exact<{
+  voteLock: Scalars['String']['input'];
+}>;
+
+
+export type GetIndexDtfVoteLockDependentsQuery = { dtfs: Array<{ id: string, token: { symbol: string, name: string }, ownerGovernance?: { token: { id: string }, timelock: { id: string } } | null, tradingGovernance?: { token: { id: string }, timelock: { id: string } } | null }> };
 
 export type GetIndexDtfVoteLockVaultsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7929,6 +7936,15 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
       }
     }
     legacyAdmins
+    legacyAdminGovernances {
+      id
+      token {
+        id
+        governance {
+          id
+        }
+      }
+    }
     tradingGovernance {
       id
       name
@@ -8140,6 +8156,15 @@ export const GetIndexDtfProposalGovernanceAddressesDocument = new TypedDocumentS
       id
     }
     legacyAdmins
+    legacyAdminGovernances {
+      id
+      token {
+        id
+        governance {
+          id
+        }
+      }
+    }
     legacyAuctionApprovers
     stToken {
       governance {
@@ -8503,6 +8528,15 @@ export const GetIndexDtfDirectoryDocument = new TypedDocumentString(`
       id
     }
     legacyAdmins
+    legacyAdminGovernances {
+      id
+      token {
+        id
+        governance {
+          id
+        }
+      }
+    }
     legacyAuctionApprovers
   }
 }
@@ -8537,6 +8571,36 @@ export const GetIndexDtfTopVotersDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetIndexDtfTopVotersQuery, GetIndexDtfTopVotersQueryVariables>;
+export const GetIndexDtfVoteLockDependentsDocument = new TypedDocumentString(`
+    query GetIndexDtfVoteLockDependents($voteLock: String!) {
+  dtfs(
+    first: 1000
+    where: {or: [{stToken: $voteLock}, {ownerGovernance_: {token: $voteLock}}, {tradingGovernance_: {token: $voteLock}}]}
+  ) {
+    id
+    token {
+      symbol
+      name
+    }
+    ownerGovernance {
+      token {
+        id
+      }
+      timelock {
+        id
+      }
+    }
+    tradingGovernance {
+      token {
+        id
+      }
+      timelock {
+        id
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetIndexDtfVoteLockDependentsQuery, GetIndexDtfVoteLockDependentsQueryVariables>;
 export const GetIndexDtfVoteLockVaultsDocument = new TypedDocumentString(`
     query GetIndexDtfVoteLockVaults($limit: Int = 1000, $cursor: ID = "") {
   stakingTokens(

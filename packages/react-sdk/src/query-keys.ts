@@ -10,6 +10,7 @@ import type {
   DecodeIndexDtfProposalParams,
   GetIndexDtfDelegatesParams,
   GetIndexDtfGuardiansParams,
+  GetIndexDtfVoteLockDependentsParams,
   GetIndexDtfPriceHistoryParams,
   GetIndexDtfPriceParams,
   GetIndexDtfVersionParams,
@@ -319,6 +320,10 @@ export const dtfQueryKeys = {
         [...dtfQueryKeys.index.governance.all(), "delegates", keyParams(params)] as const,
       guardians: (params?: GetIndexDtfGuardiansParams) =>
         [...dtfQueryKeys.index.governance.all(), "guardians", keyParams(indexDtfGuardiansKeyParams(params))] as const,
+      legacyVoteLocks: (params?: DtfParams) =>
+        [...dtfQueryKeys.index.governance.all(), "legacy-vote-locks", keyParams(params)] as const,
+      voteLockDependents: (params?: GetIndexDtfVoteLockDependentsParams) =>
+        [...dtfQueryKeys.index.governance.all(), "vote-lock-dependents", keyParams(params)] as const,
       voterState: (params?: GetIndexDtfVoterStateParams) =>
         [...dtfQueryKeys.index.governance.all(), "voter-state", keyParams(params)] as const,
       proposerState: (params?: GetIndexDtfProposerStateParams) =>

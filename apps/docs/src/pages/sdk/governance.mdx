@@ -29,13 +29,14 @@ Proposal IDs can be extremely long decimal strings. Keep them as strings in rout
 
 ## Voting And Account State
 
-| Method               | Use                                                |
-| -------------------- | -------------------------------------------------- |
-| `getDelegates`       | Delegate list for a staking/vote-lock token.       |
-| `getGuardians`       | Guardian addresses for Index DTF governance.       |
-| `getLegacyVoteLocks` | Legacy vote-lock governance entries.               |
-| `getVoterState`      | Account voting state for a vote-lock token.        |
-| `getProposerState`   | Account proposal threshold and voting power state. |
+| Method                  | Use                                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| `getDelegates`          | Delegate list for a staking/vote-lock token.                                                  |
+| `getGuardians`          | Guardian addresses for Index DTF governance.                                                  |
+| `getLegacyVoteLocks`    | Previous vote-lock vaults of a DTF, including the vault a replaced admin governor voted with. |
+| `getVoteLockDependents` | DTFs whose owner or trading governance votes with a vault, with the live role check.          |
+| `getVoterState`         | Account voting state for a vote-lock token.                                                   |
+| `getProposerState`      | Account proposal threshold and voting power state.                                            |
 
 ```ts
 const proposalDetail = await sdk.index.getProposal({

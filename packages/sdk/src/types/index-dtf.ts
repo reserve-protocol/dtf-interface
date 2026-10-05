@@ -54,6 +54,13 @@ export type VoteLockVault = {
   };
 };
 
+// A Folio admin governor replaced by a governance migration, with the vote-lock vault it voted with.
+export type LegacyAdminGovernance = {
+  readonly governance: Address;
+  readonly voteLock: Address;
+  readonly voteLockGovernance?: Address;
+};
+
 export type IndexDtfAdminRoles = {
   // The protocol can expose multiple admin role members. In production this is
   // normally one timelock/admin. `primary` is what product workflows usually
@@ -63,6 +70,7 @@ export type IndexDtfAdminRoles = {
   // Previous admin authorities are needed to resolve/display historical
   // proposals after governance has changed.
   readonly legacy: readonly Address[];
+  readonly legacyGovernances: readonly LegacyAdminGovernance[];
 };
 
 export type IndexDtfRoles = {

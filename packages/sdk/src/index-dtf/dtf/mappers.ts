@@ -101,6 +101,11 @@ export function mapIndexDtf(dtf: SubgraphIndexDtf, chainId: SupportedChainId): I
         primary: getAddress(dtf.ownerAddress),
         all: dtf.admins.map((address) => getAddress(address)),
         legacy: dtf.legacyAdmins.map((address) => getAddress(address)),
+        legacyGovernances: (dtf.legacyAdminGovernances ?? []).map((governance) => ({
+          governance: getAddress(governance.id),
+          voteLock: getAddress(governance.token.id),
+          ...(governance.token.governance ? { voteLockGovernance: getAddress(governance.token.governance.id) } : {}),
+        })),
       },
       rebalance: {
         auctionApprovers: dtf.auctionApprovers.map((address) => getAddress(address)),

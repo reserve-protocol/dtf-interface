@@ -3,6 +3,7 @@ export * from "@/index-dtf/governance/delegates";
 export * from "@/index-dtf/governance/decoder";
 export * from "@/index-dtf/governance/guardians";
 export * from "@/index-dtf/governance/legacy-vote-lock";
+export * from "@/index-dtf/governance/vote-lock-dependents";
 export * from "@/index-dtf/governance/optimistic";
 export * from "@/index-dtf/governance/proposal-actions";
 export * from "@/index-dtf/governance/propose/index";

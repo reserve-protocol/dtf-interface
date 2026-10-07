@@ -1,5 +1,11 @@
 # @reserve-protocol/react-sdk
 
+## 0.6.2
+
+### Patch Changes
+
+- @reserve-protocol/sdk@0.6.2
+
 ## 0.6.1
 
 ### Patch Changes

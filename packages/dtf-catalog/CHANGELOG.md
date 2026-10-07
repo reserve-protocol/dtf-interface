@@ -1,5 +1,11 @@
 # @reserve-protocol/dtf-catalog
 
+## 0.1.7
+
+### Patch Changes
+
+- 2367cfd: Mark VLONE, MVTT10F, and BDTF as deprecated.
+
 ## 0.1.6
 
 ### Patch Changes

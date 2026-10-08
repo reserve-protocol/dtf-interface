@@ -1658,5 +1658,3 @@ export const dtfIndexGovernanceAbi = [
     ],
   },
 ] as const;
-
-export default dtfIndexGovernanceAbi;

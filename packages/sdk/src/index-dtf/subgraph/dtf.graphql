@@ -1,6 +1,7 @@
 query GetIndexDTF($id: ID!, $block: Block_height) {
   dtf(id: $id, block: $block) {
     id
+    version
     proxyAdmin
     timestamp
     deployer
@@ -12,6 +13,9 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
     mandate
     auctionDelay
     auctionLength
+    maxAuctionLength
+    tradeAllowlistEnabled
+    tradeTokenAllowlist
     auctionApprovers
     auctionLaunchers
     brandManagers
@@ -19,7 +23,10 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
     protocolRevenue
     governanceRevenue
     externalRevenue
+    selfRevenue
     feeRecipients
+    immutableFeeRecipients
+    folioFeeForSelf
     bidsEnabled
     trustedFillerRegistry
     trustedFillerEnabled
@@ -51,6 +58,15 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
       }
     }
     legacyAdmins
+    legacyAdminGovernances {
+      id
+      token {
+        id
+        governance {
+          id
+        }
+      }
+    }
     tradingGovernance {
       id
       name
@@ -253,6 +269,15 @@ query GetIndexDtfProposalGovernanceAddresses($dtfId: ID!) {
       id
     }
     legacyAdmins
+    legacyAdminGovernances {
+      id
+      token {
+        id
+        governance {
+          id
+        }
+      }
+    }
     legacyAuctionApprovers
     stToken {
       governance {
@@ -612,6 +637,15 @@ query GetIndexDtfDirectory($limit: Int = 1000, $cursor: ID = "") {
       id
     }
     legacyAdmins
+    legacyAdminGovernances {
+      id
+      token {
+        id
+        governance {
+          id
+        }
+      }
+    }
     legacyAuctionApprovers
   }
 }
@@ -635,6 +669,41 @@ query GetIndexDtfTopVoters($limit: Int = 20) {
         symbol
         name
         decimals
+      }
+    }
+  }
+}
+
+query GetIndexDtfVoteLockDependents($voteLock: String!) {
+  dtfs(
+    first: 1000
+    where: {
+      or: [
+        { stToken: $voteLock }
+        { ownerGovernance_: { token: $voteLock } }
+        { tradingGovernance_: { token: $voteLock } }
+      ]
+    }
+  ) {
+    id
+    token {
+      symbol
+      name
+    }
+    ownerGovernance {
+      token {
+        id
+      }
+      timelock {
+        id
+      }
+    }
+    tradingGovernance {
+      token {
+        id
+      }
+      timelock {
+        id
       }
     }
   }

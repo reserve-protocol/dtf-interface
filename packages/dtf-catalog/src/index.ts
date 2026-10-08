@@ -21,7 +21,8 @@ export const yieldDtfs: Partial<Record<1 | 56 | 8453, Record<string, CatalogYiel
 
 // NOTE: spread order is intentional - if an address exists in both catalogs,
 // the index DTF entry wins over the yield DTF entry.
-const dtfs: Record<1 | 56 | 8453, Record<string, CatalogIndexDTF | CatalogYieldDTF>> = {
+// Also exported by name: a bundler's CommonJS interop for a re-exported default can hand out the module namespace.
+export const dtfCatalog: Record<1 | 56 | 8453, Record<string, CatalogIndexDTF | CatalogYieldDTF>> = {
   1: {
     ...yieldDtfs[1],
     ...indexDtfs[1],
@@ -37,4 +38,4 @@ const dtfs: Record<1 | 56 | 8453, Record<string, CatalogIndexDTF | CatalogYieldD
 
 export { indexBase, indexBnb, indexMainnet, yieldBase, yieldMainnet };
 
-export default dtfs;
+export default dtfCatalog;

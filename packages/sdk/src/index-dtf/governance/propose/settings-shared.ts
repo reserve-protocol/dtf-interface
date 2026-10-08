@@ -17,6 +17,7 @@ const MAX_MINT_FEE = 5;
 const MAX_TVL_FEE = 10;
 const MIN_AUCTION_LENGTH_MINUTES = 15;
 const MAX_AUCTION_LENGTH_MINUTES = 1440;
+const MAX_SELF_FEE_PERCENT = 100;
 
 export function buildSettingsProposal({
   calls,
@@ -93,6 +94,10 @@ export function hasIndexDtfSettingsCall(params: BuildIndexDtfSettingsProposalPar
     params.mintFee !== undefined ||
     params.tvlFee !== undefined ||
     params.auctionLength !== undefined ||
+    params.selfFee !== undefined ||
+    params.tradeAllowlist?.enabled !== undefined ||
+    (params.tradeAllowlist?.add?.length ?? 0) > 0 ||
+    (params.tradeAllowlist?.remove?.length ?? 0) > 0 ||
     params.weightControl !== undefined ||
     params.priceControl !== undefined ||
     params.bidsEnabled !== undefined ||
@@ -110,6 +115,7 @@ export function validateDtfSettingsParams(params: BuildIndexDtfSettingsProposalP
   if (params.tvlFee !== undefined) assertNumberRange(params.tvlFee, "tvlFee", 0, MAX_TVL_FEE);
   if (params.auctionLength !== undefined)
     assertNumberRange(params.auctionLength, "auctionLength", MIN_AUCTION_LENGTH_MINUTES, MAX_AUCTION_LENGTH_MINUTES);
+  if (params.selfFee !== undefined) assertNumberRange(params.selfFee, "selfFee", 0, MAX_SELF_FEE_PERCENT);
   if (params.priceControl !== undefined && !isPriceControl(params.priceControl)) {
     throw new SdkError({
       code: "INVALID_INPUT",

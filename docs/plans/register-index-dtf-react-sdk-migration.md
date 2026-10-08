@@ -43,7 +43,7 @@ Implemented in core SDK:
 - `sdk.index.getIssuanceState`, `prepareMint`, `prepareMintPlan`, `prepareRedeem`, `prepareBasketApproval`, `getRedeemMinAmounts`.
 - `sdk.index.prepareDistributeFees`.
 - direct deploy builders: `prepareDeploy`, `prepareDeployGoverned`, `prepareDeployStakingToken`, deploy approval helpers, and deploy plans.
-- deploy event extraction helpers: `extractIndexDtfDeployedAddress` and `extractIndexDtfDeployedStakingTokenAddress` are top-level named exports, not `sdk.index` methods.
+- deploy event extraction helpers: `extractIndexDtfDeployedAddress` and `extractIndexDtfDeployedStakingTokenAddress` are top-level named exports, not `sdk.index` methods. Both take the deploy target (`{ chainId, version, deployer? }` / `{ chainId }`) and only trust that deployer's logs; Register's zap deploy path, where the zapper picks the deployer server-side, cannot use them as-is and keeps its own candidate-deployer filter.
 - governance proposal reads/actions/builders through the Index namespace/ref.
 - rebalance reads/builders: rebalances, auctions, bid quote, bid/open/close/end builders.
 - vote-lock reads/builders through the Index namespace/ref.

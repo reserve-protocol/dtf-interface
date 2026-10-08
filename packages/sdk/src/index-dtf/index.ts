@@ -58,6 +58,34 @@ export {
   prepareIndexDtfDistributeFees,
 } from "@/index-dtf/dtf/revenue";
 export { getIndexDtfPlatformFee } from "@/index-dtf/dtf/platform-fee";
+export {
+  assertIndexDtfFeeRecipientTables,
+  INDEX_DTF_FEE_RECIPIENT_TOTAL,
+  INDEX_DTF_MAX_FEE_RECIPIENTS,
+  scaleIndexDtfFeeRecipients,
+  sortIndexDtfFeeRecipients,
+} from "@/index-dtf/fee-recipients";
+export type { IndexDtfFeeRecipient } from "@/index-dtf/fee-recipients";
+export {
+  getIndexDtfImmutableFeeRecipients,
+  getIndexDtfIsTokenAllowlisted,
+  getIndexDtfMaxAuctionLength,
+  getIndexDtfSelfFee,
+  getIndexDtfTradeAllowlist,
+} from "@/index-dtf/dtf/folio-v6";
+export type { GetIndexDtfIsTokenAllowlistedParams, IndexDtfTradeAllowlist } from "@/index-dtf/dtf/folio-v6";
+export {
+  getIndexDtfLatestVersion,
+  getIndexDtfVersionDeployment,
+  getIndexDtfVersionHash,
+  INDEX_DTF_VERSION_REGISTRY_ADDRESS,
+} from "@/index-dtf/version-registry";
+export type {
+  GetIndexDtfLatestVersionParams,
+  GetIndexDtfVersionDeploymentParams,
+  IndexDtfLatestVersion,
+  IndexDtfVersionDeployment,
+} from "@/index-dtf/version-registry";
 export { getIndexDtfTransactions } from "@/index-dtf/dtf/transactions";
 export {
   buildIndexDtfDeployFeeRecipients,
@@ -66,7 +94,9 @@ export {
   extractIndexDtfDeployedStakingTokenAddress,
   generateIndexDtfDeploymentNonce,
   getIndexDtfDeployApprovalAmount,
+  getIndexDtfDeployerAddress,
   INDEX_DTF_DEPLOYER_ADDRESS,
+  INDEX_DTF_V6_DEPLOYER_ADDRESS,
   INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
   prepareIndexDtfDeploy,
   prepareIndexDtfDeployAssetApproval,
@@ -84,6 +114,7 @@ export { getTopVoters as getIndexDtfTopVoters } from "@/index-dtf/governance/top
 export { withProposalSummaryState as withIndexDtfProposalSummaryState } from "@/index-dtf/governance/proposals";
 export { getGuardians as getIndexDtfGuardians } from "@/index-dtf/governance/guardians";
 export { getLegacyVoteLocks as getIndexDtfLegacyVoteLocks } from "@/index-dtf/governance/legacy-vote-lock";
+export { getVoteLockDependents as getIndexDtfVoteLockDependents } from "@/index-dtf/governance/vote-lock-dependents";
 export { daoFeeRegistryAbi } from "@/index-dtf/abis/dao-fee-registry";
 export { dtfAdminProposalAbi } from "@/index-dtf/abis/dtf-admin-proposal";
 export { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
@@ -94,10 +125,14 @@ export { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 export { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
 export { dtfIndexGovernanceProposalAbi } from "@/index-dtf/abis/dtf-index-governance-proposal";
 export { dtfIndexProposalAbi, dtfIndexProposalAbiCatalog } from "@/index-dtf/abis/dtf-index-proposal";
+export { upgradeSpell600Abi } from "@/index-dtf/abis/upgrade-spell-6-0-0";
 export type { DtfIndexProposalAbiCatalogEntry } from "@/index-dtf/abis/dtf-index-proposal";
 export { dtfIndexStakingVaultAbi } from "@/index-dtf/abis/dtf-index-staking-vault";
 export { dtfIndexStakingVaultOptimisticAbi } from "@/index-dtf/abis/dtf-index-staking-vault-optimistic";
+export { folioDeployerV6Abi } from "@/index-dtf/abis/folio-deployer-v6.generated";
+export { folioV6Abi } from "@/index-dtf/abis/folio-v6.generated";
 export { folioArtifactAbi } from "@/index-dtf/abis/folio-artifact";
+export { folioVersionRegistryAbi } from "@/index-dtf/abis/folio-version-registry.generated";
 export { indexDtfDeployerAbi } from "@/index-dtf/abis/deployer";
 export { indexDtfGovernanceDeployerAbi } from "@/index-dtf/abis/governance-deployer";
 export { indexDtfProposalDecoderAbi } from "@/index-dtf/abis/proposal-decoder";
@@ -106,6 +141,11 @@ export { selectorRegistryAbi } from "@/index-dtf/abis/selector-registry";
 export { timelockAbi } from "@/index-dtf/abis/timelock";
 export { unstakingManagerAbi } from "@/index-dtf/abis/unstaking-manager";
 export { upgradeSpellProposalAbi } from "@/index-dtf/abis/upgrade-spell-proposal";
+export { INDEX_DTF_UPGRADE_SPELL_6_0_0_ADDRESS } from "@/index-dtf/abis/upgrade-spell-6-0-0";
+export {
+  governanceSpell09182026Abi,
+  INDEX_DTF_GOVERNANCE_SPELL_09_18_2026_ADDRESS,
+} from "@/index-dtf/abis/governance-spell-09-18-2026";
 export {
   getOptimisticGovernance as getIndexDtfOptimisticGovernance,
   getOptimisticProposalContext as getIndexDtfOptimisticProposalContext,
@@ -149,6 +189,9 @@ export {
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
+  buildIndexDtfUpgradeToV6Calls,
+  buildIndexDtfUpgradeToV6Proposal,
+  INDEX_DTF_START_REBALANCE_SELECTOR,
   indexDtfBasketProposalSchema,
   indexDtfBasketProposalTokenSchema,
   indexDtfBasketSettingsProposalSchema,
@@ -222,6 +265,7 @@ export {
   getRebalance as getIndexDtfRebalance,
   getRebalanceAuctions as getIndexDtfRebalanceAuctions,
   getRebalances as getIndexDtfRebalances,
+  getIndexDtfRebalanceNonce,
   INDEX_DTF_ONDO_LIMIT_BUFFER,
   prepareIndexDtfBid,
   prepareIndexDtfCloseAuction,
@@ -230,6 +274,7 @@ export {
   prepareIndexDtfOpenAuction,
   prepareIndexDtfOpenAuctionUnrestricted,
 } from "@/index-dtf/rebalance/index";
+export type { PrepareIndexDtfEndRebalanceParams, PrepareIndexDtfOpenAuctionParams } from "@/index-dtf/rebalance/index";
 export {
   getVoteLockDao as getIndexDtfVoteLockDao,
   getVoteLockDaos as getIndexDtfVoteLockDaos,

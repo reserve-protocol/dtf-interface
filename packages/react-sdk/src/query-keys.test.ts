@@ -397,6 +397,7 @@ function createDtfKeyFixture() {
     roles: {
       admin: {
         legacy: ["0x0000000000000000000000000000000000000004"],
+        legacyGovernances: [],
       },
       rebalance: {
         legacyAuctionApprovers: ["0x0000000000000000000000000000000000000005"],

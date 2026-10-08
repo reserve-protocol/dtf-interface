@@ -35,6 +35,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Package Entry Points
+        run: pnpm --filter @reserve-protocol/sdk check:package
+
       - name: Typecheck
         run: pnpm typecheck
 

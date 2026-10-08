@@ -1822,5 +1822,3 @@ export const dtfIndexStakingVaultAbi = [
     ],
   },
 ] as const;
-
-export default dtfIndexStakingVaultAbi;

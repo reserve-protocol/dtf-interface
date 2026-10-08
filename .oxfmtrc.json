@@ -34,6 +34,8 @@
     "**/coverage/**",
     "**/.pnpm-store/**",
     "**/.output/**",
+    "**/.claude/**",
+    "**/.scratch/**",
     "**/*.generated.ts",
     "**/CHANGELOG.md",
     "scripts/llm-workflow/**",

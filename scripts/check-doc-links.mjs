@@ -71,6 +71,9 @@ function collectMarkdown(path) {
     const child = join(path, entry.name);
 
     if (entry.isDirectory()) {
+      if (entry.name === "node_modules") {
+        continue;
+      }
       if (path === "packages" && !existsSync(join(child, "README.md"))) {
         continue;
       }

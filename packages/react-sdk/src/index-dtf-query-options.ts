@@ -147,6 +147,115 @@ export function indexDtfBidsEnabledQueryOptions<TData = MethodResult<IndexMethod
   );
 }
 
+export function indexDtfMaxAuctionLengthQueryOptions<TData = MethodResult<IndexMethod<"getMaxAuctionLength">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getMaxAuctionLength">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getMaxAuctionLength">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.maxAuctionLength(params),
+    () => sdk.index.getMaxAuctionLength(requireParams(params, "indexDtfMaxAuctionLengthQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfRebalanceNonceQueryOptions<TData = MethodResult<IndexMethod<"getRebalanceNonce">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getRebalanceNonce">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getRebalanceNonce">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.rebalanceNonce(params),
+    () => sdk.index.getRebalanceNonce(requireParams(params, "indexDtfRebalanceNonceQueryOptions")),
+    params !== undefined,
+    options,
+    LIVE_STALE_TIME,
+  );
+}
+
+export function indexDtfSelfFeeQueryOptions<TData = MethodResult<IndexMethod<"getSelfFee">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getSelfFee">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getSelfFee">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.selfFee(params),
+    () => sdk.index.getSelfFee(requireParams(params, "indexDtfSelfFeeQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfImmutableFeeRecipientsQueryOptions<
+  TData = MethodResult<IndexMethod<"getImmutableFeeRecipients">>,
+>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getImmutableFeeRecipients">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getImmutableFeeRecipients">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.immutableFeeRecipients(params),
+    () => sdk.index.getImmutableFeeRecipients(requireParams(params, "indexDtfImmutableFeeRecipientsQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfTradeAllowlistQueryOptions<TData = MethodResult<IndexMethod<"getTradeAllowlist">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getTradeAllowlist">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getTradeAllowlist">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.tradeAllowlist(params),
+    () => sdk.index.getTradeAllowlist(requireParams(params, "indexDtfTradeAllowlistQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfIsTokenAllowlistedQueryOptions<TData = MethodResult<IndexMethod<"getIsTokenAllowlisted">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getIsTokenAllowlisted">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getIsTokenAllowlisted">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.isTokenAllowlisted(params),
+    () => sdk.index.getIsTokenAllowlisted(requireParams(params, "indexDtfIsTokenAllowlistedQueryOptions")),
+    params !== undefined,
+    options,
+  );
+}
+
+export function indexDtfLatestVersionQueryOptions<TData = MethodResult<IndexMethod<"getLatestVersion">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getLatestVersion">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getLatestVersion">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.latestVersion(params),
+    () => sdk.index.getLatestVersion(requireParams(params, "indexDtfLatestVersionQueryOptions")),
+    params !== undefined,
+    options,
+    STATIC_STALE_TIME,
+  );
+}
+
+export function indexDtfVersionDeploymentQueryOptions<TData = MethodResult<IndexMethod<"getVersionDeployment">>>(
+  sdk: DtfSdk,
+  params: MethodParams<IndexMethod<"getVersionDeployment">> | undefined,
+  options?: DtfQueryOptions<MethodResult<IndexMethod<"getVersionDeployment">>, TData>,
+) {
+  return createDtfQueryOptions(
+    dtfQueryKeys.index.versionDeployment(params),
+    () => sdk.index.getVersionDeployment(requireParams(params, "indexDtfVersionDeploymentQueryOptions")),
+    params !== undefined,
+    options,
+    STATIC_STALE_TIME,
+  );
+}
+
 export function indexDtfRebalanceControlQueryOptions<TData = MethodResult<IndexMethod<"getRebalanceControl">>>(
   sdk: DtfSdk,
   params: MethodParams<IndexMethod<"getRebalanceControl">> | undefined,

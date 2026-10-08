@@ -92,11 +92,13 @@ export {
   DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
   extractIndexDtfDeployedAddress,
   extractIndexDtfDeployedStakingTokenAddress,
+  extractIndexDtfDeployedStakingVault,
   generateIndexDtfDeploymentNonce,
   getIndexDtfDeployApprovalAmount,
   getIndexDtfDeployerAddress,
   INDEX_DTF_DEPLOYER_ADDRESS,
   INDEX_DTF_V6_DEPLOYER_ADDRESS,
+  INDEX_DTF_OPTIMISTIC_GOVERNOR_DEPLOYER_ADDRESS,
   INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
   prepareIndexDtfDeploy,
   prepareIndexDtfDeployAssetApproval,
@@ -105,6 +107,7 @@ export {
   prepareIndexDtfDeployGovernedPlan,
   prepareIndexDtfDeployPlan,
   prepareIndexDtfDeployStakingToken,
+  prepareIndexDtfDeployStakingVault,
 } from "@/index-dtf/deploy/index";
 
 export { getDelegates as getIndexDtfDelegates } from "@/index-dtf/governance/delegates";

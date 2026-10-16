@@ -8,8 +8,9 @@ Discovery, product status, and holder analytics are separate concerns.
 
 Primary product discovery comes from Reserve API:
 
-- `/discover/dtf`: chain-scoped Index DTF discovery.
-- `/discover/dtfs`: aggregate discovery used by Register list/status screens.
+- `/discover/dtfs`: canonical aggregate discovery used by Register list/status screens. Pass `chainId` to scope it to one chain.
+
+The chain-scoped `/discover/dtf` endpoint is deprecated in reserve-api (popularity-filtered browse view that can omit supported DTFs) and the SDK no longer wraps it.
 
 Register uses `/discover/dtfs?performance=true&brand=true`, filters `type === "index"`, and sorts by market cap for discovery tables.
 

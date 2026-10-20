@@ -1,5 +1,81 @@
 # @reserve-protocol/sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- 8f12b39: Index DTF: deploy event extraction only trusts the deployer.
+
+  - Breaking: `extractIndexDtfDeployedAddress(logs, target)` takes the deploy target (`{ chainId, version, deployer? }`, the same object the deploy builders take) and only reads `FolioDeployed` / `GovernedFolioDeployed` emitted by that version's deployer. Before, any emitter was accepted, so a basket token could emit a lookalike event during `transferFrom` and the SDK returned the attacker's address.
+  - Breaking: `extractIndexDtfDeployedStakingTokenAddress(logs, { chainId })` only reads `DeployedGovernedStakingToken` from the chain's `INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS`.
+  - Both throw `RECORD_NOT_FOUND` without the deployer's event and `INVALID_RESPONSE` when the deployer's events name more than one address.
+
+- 5f53142: Index DTF: Folio 6.0 deployments.
+
+  - `prepareIndexDtfDeploy`, `prepareIndexDtfDeployGoverned` and their plans take `version`. `"5.0.0"` keeps the registered per-chain deployer and the existing shapes. `"6.0.0"` deploys through `INDEX_DTF_V6_DEPLOYER_ADDRESS` and takes v6 additional details (`maxAuctionLength`, `feeRecipients`, `immutableFeeRecipients`, `tvlFee`, `mintFee`, `selfFee`, `mandate`) and, for governed deploys, one optimistic `governance` table instead of owner/trading pairs.
+  - Deploy plans approve the deployer they resolved. `getIndexDtfDeployerAddress` resolves the target for `{ chainId, version, deployer? }`. Both deploy builders now return `IndexDtfCall`, so `call.contract` is typed against the generic `Abi`.
+
+- d26bccf: Index DTF: Folio 6.0 ABIs re-synced to the deployed 6.0.0 (`reserve-index-dtf@7d97c80`, identical to the explorer-verified implementation on mainnet, Base and BSC).
+
+  - Breaking for 6.0.0: `prepareIndexDtfEndRebalance` / `ref.prepareEndRebalance` require `rebalanceNonce` and encode `endRebalance(uint256)`; the previous nonce-less call reverted on every real 6.0.0 Folio. 5.0.0 still encodes `endRebalance()`. New `PrepareIndexDtfEndRebalanceParams` type.
+  - `folioV6Abi` / `folioArtifactAbi` now carry `endRebalance(uint256 rebalanceNonce)`. A unit test compares the generated Folio and FolioDeployer ABIs item for item with the Base Blockscout verified ABIs, so drift from the deployed contracts fails CI.
+
+- 041b6fb: Index DTF 6.0.0 deploy: create the governance vault and reject parameters the contracts would revert on.
+
+  - New `prepareIndexDtfDeployStakingVault` builds `deployWithNewStakingVault` on the governance deployer 1.1.0 (`INDEX_DTF_OPTIMISTIC_GOVERNOR_DEPLOYER_ADDRESS`), creating an optimistic staking vault (vlX) with its own governor and timelock. `extractIndexDtfDeployedStakingVault` reads the vault and its DAO from that deployer's `ReserveOptimisticGovernorSystemDeployed` event only.
+  - 6.0.0 deploy builders now reject what the Folio, governor or vault would revert on: zero basket amounts, TVL fee above 10% and mint fee above 5%, veto delay under 1 s and veto period under 5 minutes, veto/proposal threshold and quorum outside (0, 1e18], proposal throttle outside 1–12, the zero selector, a zero `stToken` on governed deploys, and vault reward half-life outside 1 day–2 weeks, unstaking delay over 4 weeks or more than 20 reward tokens. Zero basket amounts are rejected for 5.0.0 too.
+
+- 46ddfcf: Index DTF: Folio 6.0 deploys target the real 6.0.0 `FolioDeployer`.
+
+  - New `INDEX_DTF_V6_DEPLOYER_ADDRESS` per chain (mainnet `0x2B1C…7392`, Base `0x4c89…cF67`, BSC `0x9837…1963`). `"6.0.0"` deploys go there by default, whether or not the chain's `FolioVersionRegistry` has registered 6.0.0 yet; `deployer` is an optional override for fork and sandbox deployers.
+  - Breaking: `prepareIndexDtfDeployAssetApproval(s)` require `version` and default the spender to that version's deployer, so a 6.0.0 deploy never approves the 5.0.0 deployer by default. `deployer` still overrides the spender.
+
+- 5f53142: Index DTF: Folio 6.0 settings and revenue proposals.
+
+  - `buildIndexDtfSettingsProposal` accepts `selfFee` (percent kept for holders), `tradeAllowlist: { enabled?, add?, remove? }` and, for revenue changes on 6.0.0, `immutableFeeRecipients`. When the table is omitted the client-bound builder reads it from RPC. The mutable shares are scaled into whatever the immutable table leaves; v5 DTFs reject the v6-only fields by name.
+  - `prepareIndexDtfSetFeeRecipients` on 6.0.0 sorts both tables by address and rejects tables that do not total 100%, mirroring FolioLib so a bad table fails at build time. Folio 6.0 deploys apply the same check.
+  - New `sortIndexDtfFeeRecipients`, `scaleIndexDtfFeeRecipients`, `assertIndexDtfFeeRecipientTables` helpers.
+
+- 5f53142: Index DTF: Folio 6.0 state reads and the version registry.
+
+  - `getIndexDtfSelfFee`, `getIndexDtfImmutableFeeRecipients` (the full table `setFeeRecipients` must receive back), `getIndexDtfTradeAllowlist` (`{ enabled, tokens }`) and `getIndexDtfIsTokenAllowlisted` read the v6 contract from RPC at one pinned block; on a v5 proxy they throw (the immutable-table read probes `folioFeeForSelf` first instead of reporting an empty table). Exposed as `sdk.index.get*`, on the DTF ref, and as `useIndexDtf*` hooks.
+  - `getIndexDtfLatestVersion` and `getIndexDtfVersionDeployment` read `FolioVersionRegistry` (`INDEX_DTF_VERSION_REGISTRY_ADDRESS` per chain, overridable with `registry`); `getIndexDtfVersionHash` mirrors the registry's `keccak256(abi.encodePacked(version))`. Hooks sit at the static cache tier.
+
+- 30f2e02: Index DTF: Folio 6.0 fields from the subgraph.
+
+  - `IndexDtf` gains `version`, `rebalance.maxAuctionLength`, `rebalance.tradeAllowlist`, `fees.immutableRecipients`, `fees.selfFee` and `financials.selfRevenue` (absent, empty or zero before 6.0 and for grafted DTFs whose fields are null; `tradeAllowlist` is left out unless both the flag and the token list are indexed). `financials.totalRevenue` is protocol + governance + external + self; revenue fields are raw 18-decimal share amounts. The React SDK's flat `IndexDtfData` gains `selfRevenue`.
+  - `getIndexDtfRevenue` folds the immutable table and the holders' share into `effectiveDistribution` (`holders.percentage`) in the order Folio pays: the DAO fee first, the self fee keeps its share of the rest for holders, and the mutable and immutable tables split what is left (DAO 50%, self fee 25%, tables 60/40 → mutable 22.5%, immutable 15%, holders 12.5%). With both tables empty the DAO gets the recipients' pool, as `distributeFees` does.
+  - Breaking: `getIndexDtfEffectiveRevenueDistribution(fees, platformFee)` takes `{ recipients, immutableRecipients, selfFee }` instead of the recipients array.
+  - Breaking for code that builds these objects by hand: `Fees` requires `immutableRecipients` and `selfFee`, `Financials` requires `selfRevenue`, and `IndexDtfRevenueDistribution` requires `holders`.
+
+  Rollout blocker: `GetIndexDTF` now needs the index subgraph 1.11.1 schema. Against a 1.10.2 endpoint every Index DTF query fails, so this release must not be published (or Register pointed at it) before all three `prod` endpoints (mainnet, Base, BSC) serve 1.11.1. `release:ci` enforces it: `graphql:codegen:check` keeps checking Base `prod` by default (`INDEX_DTF_SUBGRAPH_SCHEMA=<.../dtf-index-base/1.11.1-test/gn>` checks the candidate), and the new `check:subgraph-endpoints` validates the shipped documents against every configured endpoint.
+
+- 5f53142: Index DTF: 5.0.0 → 6.0.0 upgrade proposals. `buildIndexDtfUpgradeToV6Proposal` (`sdk.index.buildUpgradeToV6Proposal`, `ref.buildUpgradeToV6Proposal`) builds the spell migration against the DTF's admin governance: selector-registry swap of `startRebalance` for optimistic governors, `transferOwnership(spell)` on the proxy admin, then `cast`. `buildIndexDtfUpgradeToV6Calls` is the pure form (`selectorRegistry` present means optimistic); the description defaults to "Upgrade to Folio 6.0.0" and the DTF can be injected with `dtf`; `INDEX_DTF_START_REBALANCE_SELECTOR` and `upgradeSpell600Abi` are exported.
+- 619142f: Index DTF: every Folio write builder takes `version`.
+
+  - `prepareIndexDtfBid`, `prepareIndexDtfCloseAuction`, `prepareIndexDtfEndRebalance`, `prepareIndexDtfOpenAuctionUnrestricted`, `prepareIndexDtfDistributeFees`, `prepareIndexDtfMint` (and its plan) and `prepareIndexDtfRedeem` now require `version` (`"5.0.0"` | `"6.0.0"`) and reject anything else with `SdkError(INVALID_INPUT)`. Their calldata is byte-identical across both versions; the ABI attached to the call follows the version.
+  - Breaking for ref callers: `dtf.prepareEndRebalance()` and `dtf.prepareDistributeFees()` now take `{ version }`. Read it with `sdk.index.getVersion` / `useIndexDtfVersion`.
+  - These five builders now return `IndexDtfCall` (`contract.abi` is `Abi`, `contract.functionName` is `string`, `contract.args` is `readonly unknown[]`); call sites that relied on the narrower inferred type must widen.
+  - New `getIndexDtfRebalanceNonce` (`sdk.index.getRebalanceNonce`, `ref.getRebalanceNonce`, `useIndexDtfRebalanceNonce`) reads Folio 6.0's `getRebalanceNonce()`.
+
+- 9baa37a: Index DTF rebalance: explicit version contract and protocol-accurate auction state.
+
+  - `prepareIndexDtfOpenAuctionArgs`, `prepareIndexDtfOpenAuction` and `buildIndexDtfStartRebalanceArgs` now require `version` (`"5.0.0"` | `"6.0.0"`) and reject anything else with `SdkError(INVALID_INPUT)`; there is no silent v5 default. `buildIndexDtfStartRebalance` reads the proxy version when none is passed and applies the same check.
+  - v6 open-auction math takes `auctionLength` and carries it into the args; `prepareIndexDtfOpenAuction` uses it when no explicit length is passed.
+  - `getLatestAuction` / `getActiveAuction` resolve one block first and pin every read to it, report `currentRebalanceNonce` and `blockNumber`, and treat an auction as active only while `startTime <= now <= endTime` (inclusive, as Folio checks) and its nonce matches the current rebalance.
+  - Open-auction inputs reject zero, negative or non-finite prices before the rebalance library runs.
+
+### Patch Changes
+
+- 5476fba: Fix the CommonJS entry: `require("@reserve-protocol/sdk")` exported `{ default: abi }` instead of the ABI array for `folioV6Abi`, `folioArtifactAbi`, `folioDeployerV6Abi`, `folioVersionRegistryAbi`, `dtfIndexAbi`, `dtfIndexAbiV1`, `dtfIndexAbiV2`, `dtfIndexAbiV4`, `dtfIndexGovernanceAbi`, `dtfIndexStakingVaultAbi` and `timelockAbi`, so encoding with them failed (`abi.filter is not a function`). ESM was unaffected. The ABI modules no longer carry a default export, and `check:package` now packs the tarball and loads it through both `import` and `require` in CI and the release gate.
+- 471ec49: Fix `require("@reserve-protocol/sdk").dtfCatalog`: the CommonJS entry re-exported the catalog's module namespace (`{ default, indexDtfs, ... }`) instead of the chain-keyed catalog, because the bundler's interop for a re-exported default hands out `module.exports`. The catalog now also exports the combined catalog by name (`dtfCatalog`, same object as the default export), and the SDK re-exports that. `check:package` now compares every export's value between the ESM and CommonJS entries, not just its kind.
+- 9baa37a: Generate and export the Folio v6, FolioDeployer v6, and FolioVersionRegistry ABIs from pinned `reserve-index-dtf` artifacts, and encode v6 basket proposals with the expected rebalance nonce and required execution deadline. V6 fee-recipient calls now require both mutable and immutable recipient tables; higher-level revenue proposals reject v6 until they can preserve the immutable table.
+- 9baa37a: Read standard Index DTF proposal voting power at the proposal snapshot itself, matching the governor and including delegation checkpoints created at that timepoint. Preserve clamping for snapshots at or after the current clock.
+- 5d5e35d: Index DTF: the Folio 6.0 basket proposal builder reads the trade allowlist and throws `INVALID_INPUT` (meta `tokens`) when enforcement is on and a rebalance token is missing from it, instead of building a proposal whose `startRebalance` reverts `Folio__TokenNotAllowlisted` on execution.
+- 9baa37a: Encode Folio 6.0 `openAuction` calls with the required trailing auction length while preserving the existing Folio 5.0 call shape.
+- Updated dependencies [471ec49]
+  - @reserve-protocol/dtf-catalog@0.2.0
+
 ## 0.6.2
 
 ### Patch Changes

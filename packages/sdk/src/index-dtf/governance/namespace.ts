@@ -4,6 +4,7 @@ import type {
   BuildIndexDtfBasketSettingsProposalParams,
   BuildIndexDtfDaoSettingsProposalParams,
   BuildIndexDtfSettingsProposalParams,
+  BuildIndexDtfUpgradeToV6ProposalParams,
 } from "@/index-dtf/governance/propose/index";
 import type {
   GetAllIndexDtfProposalsParams,
@@ -11,6 +12,7 @@ import type {
   GetIndexDtfGovernanceActivityParams,
   GetIndexDtfGuardiansParams,
   GetIndexDtfLegacyVoteLocksParams,
+  GetIndexDtfVoteLockDependentsParams,
   GetIndexDtfOptimisticGovernanceParams,
   GetIndexDtfOptimisticProposalContextParams,
   GetIndexDtfOptimisticProposalVoterStateParams,
@@ -51,6 +53,7 @@ import {
   getProposerState,
   getTopVoters,
   getVoterState,
+  getVoteLockDependents,
   prepareIndexDtfCancelProposal,
   prepareIndexDtfExecuteProposal,
   prepareIndexDtfGovernorCancelProposal,
@@ -79,6 +82,8 @@ import {
   buildIndexDtfBasketSettingsProposal,
   buildIndexDtfDaoSettingsProposal,
   buildIndexDtfSettingsProposal,
+  buildIndexDtfUpgradeToV6Calls,
+  buildIndexDtfUpgradeToV6Proposal,
 } from "@/index-dtf/governance/propose/index";
 
 /** Creates the direct Index DTF governance methods for the flat root namespace. */
@@ -98,6 +103,7 @@ export function createIndexDtfGovernanceNamespace(client: DtfClient) {
     getDelegates: (params: GetIndexDtfDelegatesParams) => getDelegates(client, params),
     getGuardians: (params: GetIndexDtfGuardiansParams) => getGuardians(client, params),
     getLegacyVoteLocks: (params: GetIndexDtfLegacyVoteLocksParams) => getLegacyVoteLocks(client, params),
+    getVoteLockDependents: (params: GetIndexDtfVoteLockDependentsParams) => getVoteLockDependents(client, params),
     getVoterState: (params: GetIndexDtfVoterStateParams) => getVoterState(client, params),
     getOptimisticGovernance: (params: GetIndexDtfOptimisticGovernanceParams) => getOptimisticGovernance(client, params),
     getOptimisticProposalContext: (params: GetIndexDtfOptimisticProposalContextParams) =>
@@ -146,5 +152,8 @@ export function createIndexDtfGovernanceNamespace(client: DtfClient) {
       buildIndexDtfDaoSettingsProposal(client, params),
     buildSettingsProposal: (params: BuildIndexDtfSettingsProposalParams) =>
       buildIndexDtfSettingsProposal(client, params),
+    buildUpgradeToV6Calls: buildIndexDtfUpgradeToV6Calls,
+    buildUpgradeToV6Proposal: (params: BuildIndexDtfUpgradeToV6ProposalParams) =>
+      buildIndexDtfUpgradeToV6Proposal(client, params),
   };
 }

@@ -1,29 +1,39 @@
-import { parseEther, zeroHash, type Address, type Hex } from "viem";
+import { getAddress, parseEther, zeroHash, type Address, type Hex } from "viem";
 
 import type { SupportedChainId } from "@/config";
 import type { IndexDtfCall } from "@/types/governance";
 import type { PriceControl } from "@/types/index-dtf";
 
-import { dtfIndexAbi as indexDtfV5Abi } from "@/index-dtf/abis/dtf-index-abi";
 import { dtfIndexGovernanceAbi } from "@/index-dtf/abis/dtf-index-governance";
 import { dtfIndexGovernanceOptimisticAbi } from "@/index-dtf/abis/dtf-index-governance-optimistic";
-import { folioArtifactAbi as indexDtfV6Abi } from "@/index-dtf/abis/folio-artifact";
 import { timelockAbi } from "@/index-dtf/abis/timelock";
+import {
+  assertIndexDtfFeeRecipientTables,
+  sortIndexDtfFeeRecipients,
+  type IndexDtfFeeRecipient,
+} from "@/index-dtf/fee-recipients";
 import { OPTIMISTIC_PROPOSER_ROLE } from "@/index-dtf/governance/optimistic";
+import {
+  assertIndexDtfWriteVersion,
+  getIndexDtfWriteAbi,
+  indexDtfV5WriteAbi,
+  indexDtfV6WriteAbi,
+  type IndexDtfWriteVersion,
+} from "@/index-dtf/write-version";
 import { prepareContractCall } from "@/lib/contract-call";
 import { Decimal } from "@/lib/decimal";
 import { SdkError } from "@/lib/errors";
 import { toUint, toUintNumber } from "@/lib/utils";
 
-export const indexDtfV5WriteAbi = indexDtfV5Abi;
-export const indexDtfV6WriteAbi = indexDtfV6Abi;
+export {
+  assertIndexDtfWriteVersion,
+  getIndexDtfWriteAbi,
+  indexDtfV5WriteAbi,
+  indexDtfV6WriteAbi,
+  type IndexDtfWriteVersion,
+} from "@/index-dtf/write-version";
 
-export type IndexDtfWriteVersion = "5.0.0" | "6.0.0";
-
-export type IndexDtfFeeRecipient = {
-  readonly recipient: Address;
-  readonly portion: bigint;
-};
+export type { IndexDtfFeeRecipient } from "@/index-dtf/fee-recipients";
 
 export type PrepareIndexDtfCallParams = {
   readonly address: Address;
@@ -113,8 +123,16 @@ export function prepareIndexDtfSetSelfFee(params: PrepareIndexDtfPercentageCallP
   if (params.version !== "6.0.0") {
     throw new SdkError({
       code: "INVALID_INPUT",
-      message: `setSelfFee is not supported by Index DTF ${params.version}`,
+      message: `setFolioSelfFee is not supported by Index DTF ${params.version}`,
       meta: { version: params.version },
+    });
+  }
+
+  if (!Number.isFinite(params.percentage) || params.percentage < 0 || params.percentage > 100) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "selfFee percentage must be between 0 and 100",
+      meta: { percentage: params.percentage },
     });
   }
 
@@ -130,23 +148,56 @@ export function prepareIndexDtfSetSelfFee(params: PrepareIndexDtfPercentageCallP
 export function prepareIndexDtfSetFeeRecipients(
   params: PrepareIndexDtfCallParams & {
     readonly recipients: readonly IndexDtfFeeRecipient[];
+    readonly immutableRecipients?: readonly IndexDtfFeeRecipient[];
   },
 ): IndexDtfCall {
+  assertIndexDtfWriteVersion(params.version);
+  const recipients = params.recipients.map((recipient) => ({
+    recipient: getAddress(recipient.recipient),
+    portion: recipient.portion,
+  }));
+
+  if (params.version === "6.0.0") {
+    if (params.immutableRecipients === undefined) {
+      throw new SdkError({
+        code: "INVALID_INPUT",
+        message: "immutableRecipients is required for Index DTF 6.0.0 fee recipient calls",
+      });
+    }
+
+    const tables = {
+      recipients: sortIndexDtfFeeRecipients(recipients),
+      immutableRecipients: sortIndexDtfFeeRecipients(params.immutableRecipients),
+    };
+    assertIndexDtfFeeRecipientTables({ ...tables, folio: params.address });
+
+    return prepareContractCall({
+      chainId: params.chainId,
+      address: params.address,
+      abi: indexDtfV6WriteAbi,
+      functionName: "setFeeRecipients",
+      args: [tables.recipients, tables.immutableRecipients] as const,
+    });
+  }
+
+  if (params.immutableRecipients?.length) {
+    throw new SdkError({
+      code: "INVALID_INPUT",
+      message: "immutable fee recipients are only supported by Index DTF 6.0.0",
+    });
+  }
+
   return prepareContractCall({
     chainId: params.chainId,
     address: params.address,
-    abi: getIndexDtfWriteAbi(params.version),
+    abi: indexDtfV5WriteAbi,
     functionName: "setFeeRecipients",
-    args: [
-      params.recipients.map((recipient) => ({
-        recipient: recipient.recipient,
-        portion: recipient.portion,
-      })),
-    ] as never,
+    args: [recipients] as const,
   });
 }
 
 export function prepareIndexDtfSetAuctionLength(params: PrepareIndexDtfAuctionLengthCallParams): IndexDtfCall {
+  assertIndexDtfWriteVersion(params.version);
   if (params.version === "6.0.0") {
     return prepareContractCall({
       chainId: params.chainId,
@@ -483,8 +534,4 @@ function toSeconds(value: number | bigint): bigint {
   }
 
   return BigInt(Math.round(value));
-}
-
-function getIndexDtfWriteAbi(version: IndexDtfWriteVersion) {
-  return version === "6.0.0" ? indexDtfV6WriteAbi : indexDtfV5WriteAbi;
 }

@@ -8,6 +8,7 @@ import type {
 } from "@reserve-protocol/dtf-rebalance-lib";
 import type { Address } from "viem";
 
+import type { IndexDtfWriteVersion } from "@/index-dtf/governance/propose/calls";
 import type { DtfParams, Token } from "@/types/common";
 import type { IndexDtfInput } from "@/types/index-dtf";
 
@@ -130,7 +131,12 @@ export type IndexDtfCurrentRebalance = Rebalance & {
 export type IndexDtfTargetBasketPriceMode = "current" | "snapshot";
 
 export type IndexDtfOpenAuctionInput = {
-  readonly rebalance: IndexDtfCurrentRebalance;
+  /** Folio version of the proxy; v4 is not admitted (Register-local), unknown releases are rejected. */
+  readonly version: IndexDtfWriteVersion;
+  /** Required for v6: the same length the calldata will carry (protocol requires `maxAuctionLength` for PriceControl NONE). */
+  readonly auctionLength?: bigint;
+  /** Live rebalance state; `bidsEnabled` is not part of the auction math, so a historical read without it is accepted. */
+  readonly rebalance: Rebalance & { readonly bidsEnabled?: boolean };
   readonly tokens: readonly Token[];
   readonly supply: bigint;
   readonly initialSupply: bigint;

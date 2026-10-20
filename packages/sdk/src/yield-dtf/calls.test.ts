@@ -1,3 +1,4 @@
+import { decodeFunctionData, erc20Abi } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { prepareYieldDtfVote } from "@/yield-dtf/governance";
@@ -97,8 +98,19 @@ describe("yield DTF issuance calls", () => {
     expect(plan.type).toBe("approval-required");
     if (plan.type !== "approval-required") return;
     expect(plan.approvals).toHaveLength(2);
-    expect(plan.approvals[0]!.contract.args).toEqual([DTF, 5n]);
-    expect(plan.approvals[1]!.contract.args).toEqual([DTF, 7n]);
+    const expectedApprovals = [
+      { token: ST_TOKEN, amount: 5n },
+      { token: ACCOUNT, amount: 7n },
+    ];
+    for (const [index, expected] of expectedApprovals.entries()) {
+      const approval = plan.approvals[index]!;
+      expect(approval).toMatchObject({ to: expected.token, chainId: 1, value: 0n });
+      expect(decodeFunctionData({ abi: erc20Abi, data: approval.data })).toEqual({
+        functionName: "approve",
+        args: [DTF, expected.amount],
+      });
+    }
+    expect(plan.call).toMatchObject({ to: DTF, chainId: 1, value: 0n });
     expect(plan.call.data).toBe("0xcc872b66" + PAD("0x2a"));
   });
 

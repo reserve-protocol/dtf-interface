@@ -10,9 +10,11 @@ Current SDK settings/proposal write builders support `5.0.0` and `6.0.0` ABI tar
 
 Version-specific areas include:
 
+- basket rebalance proposals
 - allowlist settings
 - self-fee settings
 - auction length settings
+- mutable and immutable fee-recipient tables
 
 ## Why This Matters
 
@@ -25,12 +27,45 @@ startRebalance(address[] newTokens, BasketRange[] newLimits, Prices[] newPrices,
 SDK/Register ABIs can use newer signatures like:
 
 ```solidity
+// v5
 startRebalance(TokenRebalanceParams[] tokens, RebalanceLimits limits, ...)
+
+// v6
+startRebalance(uint256 rebalanceNonce, TokenRebalanceParams[] tokens, RebalanceLimits limits, ..., uint256 deadline)
 ```
 
-Use SDK builders unless you have a specific reason to hand-encode a call.
+Use SDK builders unless you have a specific reason to hand-encode a call. The v6 basket proposal builder reads the current rebalance nonce, encodes the next nonce, and requires an explicit Unix-seconds `deadline` so a stale proposal cannot start a rebalance. It also reads the trade allowlist: with enforcement on, every rebalance token (kept or new) must be allowlisted or the builder throws `INVALID_INPUT`, because `startRebalance` would revert `Folio__TokenNotAllowlisted`. The check runs at build time; governance can still change the allowlist before the proposal executes. The lower-level `buildIndexDtfStartRebalance` args builder does not read the allowlist.
 
-Current rebalance/open-auction and issuance helpers are v5-shaped unless the specific function explicitly accepts a version. Do not assume every write helper supports every deployed Folio version.
+Raw v6 fee-recipient calls require both the mutable and full immutable tables, sorted by address and totalling 100%
+together; the SDK sorts and checks them before encoding. `buildSettingsProposal` reads the current immutable table with
+`sdk.index.getImmutableFeeRecipients` and scales the mutable shares into the remainder.
+
+## Upgrading A 5.0.0 DTF To 6.0.0
+
+The migration is a governance proposal that hands the DTF's `FolioProxyAdmin` to the reviewed `UpgradeSpell_6_0_0`
+and casts it. `sdk.index.buildUpgradeToV6Proposal({ address, chainId, spell })` reads the DTF's admin governance and
+builds the exact sequence: an optimistic governor first registers the 6.0.0 `startRebalance` selector and unregisters
+the 5.0.0 one (the signature changed), then `transferOwnership(spell)` on the proxy admin and `cast(folio, proxyAdmin,
+selectorRegistry)`; standard governance gets the last two calls with a zero registry. `buildUpgradeToV6Calls` is the
+pure form when the addresses are already known (`selectorRegistry` present means optimistic). The spell address is an
+input: no spell is deployed on a public chain yet; the SDK tests reproduce the mainnet sandbox's executed proposals
+byte for byte. The description defaults to "Upgrade to Folio 6.0.0".
+
+Submit it as a standard proposal (`prepareSubmitProposal`) even on an optimistic governor: the registry calls are not
+allowlisted selectors. The spell checks its preconditions only at execution, after the vote, so confirm them before
+proposing: the executing timelock is the DTF's sole `DEFAULT_ADMIN_ROLE` member, the auction length is at least 120
+seconds, no state change is active, the current rebalance's `availableUntil` has passed, and the last auction has
+ended. `getVersionDeployment({ version: "6.0.0" })` tells you whether the chain's registry can serve the upgrade.
+
+## Which Versions A Chain Can Run
+
+`sdk.index.getLatestVersion({ chainId })` and `sdk.index.getVersionDeployment({ chainId, version })` read the
+on-chain `FolioVersionRegistry` (deployer, Folio implementation, deprecation flag). Use them instead of assuming a
+release is live on a chain; `getVersionDeployment` returns `null` for a version that was never registered there.
+Deploys do not need registration (6.0.0 deploys go to `INDEX_DTF_V6_DEPLOYER_ADDRESS`); upgrading an existing DTF does,
+because its proxy admin resolves the implementation through the registry.
+
+Open-auction and issuance helpers remain version-sensitive. Do not assume every write helper supports every deployed Folio version.
 
 ## Address Normalization
 

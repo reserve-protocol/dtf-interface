@@ -19,6 +19,12 @@ export type DtfGovernanceAddressContext = {
   readonly ownerGovernance?: { readonly id: string } | null;
   readonly tradingGovernance?: { readonly id: string } | null;
   readonly legacyAdmins: readonly string[];
+  readonly legacyAdminGovernances?:
+    | readonly {
+        readonly id: string;
+        readonly token: { readonly governance?: { readonly id: string } | null };
+      }[]
+    | null;
   readonly legacyAuctionApprovers: readonly string[];
   readonly stToken: {
     readonly governance?: { readonly id: string } | null;
@@ -62,6 +68,9 @@ export function getProposalGovernanceAddresses(dtf: IndexDtf): readonly Address[
     ...dtf.governance.all.flatMap((authority) => (authority.type === "governance" ? [authority.address] : [])),
     ...(dtf.governance.voteLock?.type === "governance" ? [dtf.governance.voteLock.address] : []),
     ...dtf.roles.admin.legacy,
+    ...dtf.roles.admin.legacyGovernances.flatMap(({ governance, voteLockGovernance }) =>
+      voteLockGovernance ? [governance, voteLockGovernance] : [governance],
+    ),
     ...dtf.roles.rebalance.legacyAuctionApprovers,
     ...(dtf.voteLockVault?.legacyGovernance ?? []),
   ]);
@@ -73,6 +82,9 @@ export function getDtfProposalGovernanceIds(dtf: DtfGovernanceAddressContext): r
     ...(dtf.tradingGovernance ? [dtf.tradingGovernance.id] : []),
     ...(dtf.stToken.governance ? [dtf.stToken.governance.id] : []),
     ...dtf.legacyAdmins,
+    ...(dtf.legacyAdminGovernances ?? []).flatMap(({ id, token }) =>
+      token.governance ? [id, token.governance.id] : [id],
+    ),
     ...dtf.legacyAuctionApprovers,
     ...dtf.stToken.legacyGovernance,
   ]);

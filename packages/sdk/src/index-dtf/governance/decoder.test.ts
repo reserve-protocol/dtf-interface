@@ -59,6 +59,34 @@ describe("Index DTF proposal calldata decoder", () => {
     expect(decoded.unknownCalls).toEqual([]);
   });
 
+  it("decodes Folio 6.0 self-fee, two-table fee recipient and allowlist calls", () => {
+    const calldatas = [
+      encodeFunctionData({ abi: dtfIndexProposalAbi, functionName: "setFolioSelfFee", args: [50000000000000000n] }),
+      encodeFunctionData({
+        abi: dtfIndexProposalAbi,
+        functionName: "setFeeRecipients",
+        args: [[{ recipient: DTF, portion: 600000000000000000n }], [{ recipient: DTF, portion: 400000000000000000n }]],
+      }),
+      encodeFunctionData({ abi: dtfIndexProposalAbi, functionName: "addToAllowlist", args: [[DTF]] }),
+      encodeFunctionData({ abi: dtfIndexProposalAbi, functionName: "setTradeAllowlistEnabled", args: [true] }),
+    ];
+
+    const decoded = decodeIndexDtfProposalCalldatas({
+      targets: calldatas.map(() => DTF),
+      calldatas,
+      contractMap: new Map([[DTF.toLowerCase(), { target: DTF, contract: "Index DTF", abi: dtfIndexProposalAbi }]]),
+    });
+
+    expect(decoded.calls.map((call) => call.functionName)).toEqual([
+      "setFolioSelfFee",
+      "setFeeRecipients",
+      "addToAllowlist",
+      "setTradeAllowlistEnabled",
+    ]);
+    expect(decoded.calls[1]?.params).toHaveLength(2);
+    expect(decoded.unknownCalls).toEqual([]);
+  });
+
   it("decodes optimistic governance and selector registry proposal calls", () => {
     const governance = "0x0000000000000000000000000000000000000002";
     const selectorRegistry = "0x0000000000000000000000000000000000000003";

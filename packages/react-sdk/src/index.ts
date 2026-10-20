@@ -48,6 +48,12 @@ export {
 export type { DtfQueryOptions, DtfQueryOptionsResult, IndexDtfPastOptimisticVotesQueryParams } from "@/query-options";
 export { useIndexDtfDelegates } from "@/index-dtf/use-index-dtf-delegates";
 export { useIndexDtfGuardians } from "@/index-dtf/use-index-dtf-guardians";
+export {
+  indexDtfLegacyVoteLocksQueryOptions,
+  indexDtfVoteLockDependentsQueryOptions,
+  useIndexDtfLegacyVoteLocks,
+  useIndexDtfVoteLockDependents,
+} from "@/index-dtf/use-index-dtf-vote-lock-migration";
 export { useIndexDtfOptimisticGovernance } from "@/index-dtf/use-index-dtf-optimistic-governance";
 export { useIndexDtfOptimisticProposalContext } from "@/index-dtf/use-index-dtf-optimistic-proposal-context";
 export { useIndexDtfOptimisticProposalVoterState } from "@/index-dtf/use-index-dtf-optimistic-proposal-voter-state";
@@ -97,6 +103,14 @@ export {
   indexDtfApprovedRevenueTokensQueryOptions,
   indexDtfBidQuoteQueryOptions,
   indexDtfBidsEnabledQueryOptions,
+  indexDtfMaxAuctionLengthQueryOptions,
+  indexDtfRebalanceNonceQueryOptions,
+  indexDtfSelfFeeQueryOptions,
+  indexDtfImmutableFeeRecipientsQueryOptions,
+  indexDtfTradeAllowlistQueryOptions,
+  indexDtfIsTokenAllowlistedQueryOptions,
+  indexDtfLatestVersionQueryOptions,
+  indexDtfVersionDeploymentQueryOptions,
   indexDtfCompletedRebalanceQueryOptions,
   indexDtfCompletedRebalancesQueryOptions,
   indexDtfCurrentRebalanceQueryOptions,
@@ -190,6 +204,14 @@ export {
   useIndexDtfApprovedRevenueTokens,
   useIndexDtfBidQuote,
   useIndexDtfBidsEnabled,
+  useIndexDtfMaxAuctionLength,
+  useIndexDtfRebalanceNonce,
+  useIndexDtfSelfFee,
+  useIndexDtfImmutableFeeRecipients,
+  useIndexDtfTradeAllowlist,
+  useIndexDtfIsTokenAllowlisted,
+  useIndexDtfLatestVersion,
+  useIndexDtfVersionDeployment,
   useIndexDtfCompletedRebalance,
   useIndexDtfCompletedRebalances,
   useAccountPortfolio,

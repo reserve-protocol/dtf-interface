@@ -67,7 +67,7 @@ const [basket, price] = await Promise.all([
 | `getIssuanceState`      | Wallet balances, allowances, and modern/v5 mint/redeem previews. |
 | `getRedeemMinAmounts`   | Apply slippage bps to expected redeem amounts.                   |
 | `prepareBasketApproval` | ERC20 approval for one basket token.                             |
-| `prepareMint`           | Modern/v5 `mint(shares, receiver, minSharesOut)` call.           |
+| `prepareMint`           | `mint(shares, receiver, minSharesOut)` call; takes `version`.    |
 | `prepareMintPlan`       | Mint plan with optional approvals.                               |
 | `prepareRedeem`         | Redeem call.                                                     |
 
@@ -107,6 +107,30 @@ const plan = sdk.index.prepareMintPlan({
 | `getPlatformFee`           | Platform fee configuration.                        |
 | `getRevenue`               | Revenue view.                                      |
 | `prepareDistributeFees`    | Materialize pending fee shares.                    |
+
+## Folio 6.0 State
+
+On a 6.0 DTF the indexed model already carries `version`, `rebalance.maxAuctionLength`, `rebalance.tradeAllowlist`,
+`fees.immutableRecipients` and `fees.selfFee`. These read the v6 contract directly and fail on a v5 proxy (the immutable-table read probes `folioFeeForSelf` first, so a v5 proxy is an error rather than an empty table); gate them on `getVersion`.
+
+| Method                      | Use                                                                                                                                    |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `getMaxAuctionLength`       | Per-auction length ceiling (`maxAuctionLength()`).                                                                                     |
+| `getRebalanceNonce`         | Current rebalance nonce; the next `startRebalance` must use nonce + 1.                                                                 |
+| `getSelfFee`                | `folioFeeForSelf()` as a D18 `Amount`; `formatted` is a fraction (`"0.05"` = 5%) while the `selfFee` setting takes percent.            |
+| `getImmutableFeeRecipients` | The full immutable table; pass it back unchanged to `setFeeRecipients`.                                                                |
+| `getTradeAllowlist`         | `{ enabled, tokens }` from `tradeAllowlistEnabled()` / `getTokenAllowlist()`.                                                          |
+| `getIsTokenAllowlisted`     | One token's allowlist membership only; pair it with `getTradeAllowlist().enabled`, since with enforcement off every token is tradable. |
+
+## Version Registry
+
+`FolioVersionRegistry` lists the Folio releases each chain can deploy or upgrade to. Addresses live in
+`INDEX_DTF_VERSION_REGISTRY_ADDRESS`; pass `registry` to read a different one (a fork, a staging registry).
+
+| Method                 | Use                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| `getLatestVersion`     | Newest registered release: `{ versionHash, version, deployer, deprecated }`.                     |
+| `getVersionDeployment` | One release by string (`"6.0.0"`): deployer, implementation, deprecated; `null` if unregistered. |
 
 ## Rebalance Liquidity And Health
 

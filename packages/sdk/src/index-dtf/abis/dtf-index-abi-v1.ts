@@ -2419,5 +2419,3 @@ export const dtfIndexAbiV1 = [
     type: "function",
   },
 ] as const;
-
-export default dtfIndexAbiV1;

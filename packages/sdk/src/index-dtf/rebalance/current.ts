@@ -8,6 +8,7 @@ import type { DtfParams } from "@/types/common";
 import type { IndexDtfTotalAssets } from "@/types/index-dtf";
 
 import { dtfIndexAbi } from "@/index-dtf/abis/dtf-index-abi";
+import { folioV6Abi } from "@/index-dtf/abis/folio-v6.generated";
 import { getTotalAssets, getTotalSupply } from "@/index-dtf/dtf/index";
 
 export type IndexDtfCurrentRebalanceState = {
@@ -15,6 +16,20 @@ export type IndexDtfCurrentRebalanceState = {
   readonly totalSupply: bigint;
   readonly totalAssets: IndexDtfTotalAssets;
 };
+
+/**
+ * Reads Folio 6.0's `getRebalanceNonce()`: the nonce of the current rebalance, which the next
+ * `startRebalance` must exceed by exactly one. Reverts on v5 proxies.
+ */
+export async function getIndexDtfRebalanceNonce(client: DtfClient, params: DtfParams): Promise<bigint> {
+  return client.viem.readContract({
+    address: getAddress(params.address),
+    abi: folioV6Abi,
+    functionName: "getRebalanceNonce",
+    chainId: params.chainId,
+    blockNumber: params.blockNumber,
+  });
+}
 
 /**
  * Reads live v5 rebalance state from RPC together with current supply/assets.

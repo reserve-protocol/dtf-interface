@@ -7,11 +7,11 @@ afterEach(() => {
 });
 
 describe("computeYieldDtfApy", () => {
-  // eUSD-shaped example: 4% blended yield, 60/40 split, 2x staker leverage.
+  // 3.4% blended yield, 60/40 revenue split, 2x staker leverage.
   const params = {
     basket: [
-      { symbol: "saUSDC", share: 50 },
-      { symbol: "wcusdcv3", share: 50 },
+      { symbol: "saUSDC", share: 80 },
+      { symbol: "wcusdcv3", share: 20 },
     ],
     collateralYields: { sausdc: 3, wcusdcv3: 5 },
     revenueSplit: { holders: 60, stakers: 40 },
@@ -19,21 +19,33 @@ describe("computeYieldDtfApy", () => {
     stakedUsd: 10_000_000,
   };
 
-  it("weights collateral yields by basket share", () => {
-    expect(computeYieldDtfApy(params).basket).toBe(4);
+  it.each([
+    { firstShare: 90, secondShare: 10, expected: 3.2 },
+    { firstShare: 10, secondShare: 90, expected: 4.8 },
+    { firstShare: 100, secondShare: 0, expected: 3 },
+  ])("weights collateral yields for a $firstShare/$secondShare basket", ({ firstShare, secondShare, expected }) => {
+    expect(
+      computeYieldDtfApy({
+        ...params,
+        basket: [
+          { symbol: "saUSDC", share: firstShare },
+          { symbol: "wcusdcv3", share: secondShare },
+        ],
+      }).basket,
+    ).toBeCloseTo(expected);
   });
 
   it("splits holder APY by revenue share", () => {
-    expect(computeYieldDtfApy(params).holders).toBeCloseTo(2.4);
+    expect(computeYieldDtfApy(params).holders).toBeCloseTo(2.04);
   });
 
   it("levers staker APY by supply over stake", () => {
-    // 4% basket on 20M supply -> 800k revenue; 40% of that on 10M stake = 3.2%.
-    expect(computeYieldDtfApy(params).stakers).toBeCloseTo(3.2);
+    // 3.4% basket on 20M supply -> 680k revenue; 40% on 10M stake = 2.72%.
+    expect(computeYieldDtfApy(params).stakers).toBeCloseTo(2.72);
   });
 
   it("does not lever stakers when nothing is staked", () => {
-    expect(computeYieldDtfApy({ ...params, stakedUsd: 0 }).stakers).toBeCloseTo(1.6);
+    expect(computeYieldDtfApy({ ...params, stakedUsd: 0 }).stakers).toBeCloseTo(1.36);
   });
 
   it("matches symbols case-insensitively and skips unknown collateral", () => {
@@ -50,10 +62,8 @@ describe("computeYieldDtfApy", () => {
 });
 
 describe("COLLATERAL_POOL_MAP", () => {
-  it("has unique pool ids per chain and lowercase symbols", () => {
+  it("uses lowercase collateral symbols", () => {
     for (const map of Object.values(COLLATERAL_POOL_MAP)) {
-      const ids = Object.keys(map);
-      expect(new Set(ids).size).toBe(ids.length);
       for (const symbol of Object.values(map)) {
         expect(symbol).toBe(symbol.toLowerCase());
       }

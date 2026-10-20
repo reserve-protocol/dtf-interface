@@ -523,20 +523,26 @@ export type AuctionBid_OrderBy =
   | 'dtf__deployer'
   | 'dtf__externalRevenue'
   | 'dtf__feeRecipients'
+  | 'dtf__folioFeeForSelf'
   | 'dtf__governanceRevenue'
   | 'dtf__id'
+  | 'dtf__immutableFeeRecipients'
   | 'dtf__mandate'
+  | 'dtf__maxAuctionLength'
   | 'dtf__mintingFee'
   | 'dtf__ownerAddress'
   | 'dtf__priceControl'
   | 'dtf__protocolRevenue'
   | 'dtf__proxyAdmin'
+  | 'dtf__selfRevenue'
   | 'dtf__stTokenAddress'
   | 'dtf__timestamp'
   | 'dtf__totalRevenue'
+  | 'dtf__tradeAllowlistEnabled'
   | 'dtf__trustedFillerEnabled'
   | 'dtf__trustedFillerRegistry'
   | 'dtf__tvlFee'
+  | 'dtf__version'
   | 'dtf__weightControl'
   | 'id'
   | 'sellAmount'
@@ -716,20 +722,26 @@ export type Auction_OrderBy =
   | 'dtf__deployer'
   | 'dtf__externalRevenue'
   | 'dtf__feeRecipients'
+  | 'dtf__folioFeeForSelf'
   | 'dtf__governanceRevenue'
   | 'dtf__id'
+  | 'dtf__immutableFeeRecipients'
   | 'dtf__mandate'
+  | 'dtf__maxAuctionLength'
   | 'dtf__mintingFee'
   | 'dtf__ownerAddress'
   | 'dtf__priceControl'
   | 'dtf__protocolRevenue'
   | 'dtf__proxyAdmin'
+  | 'dtf__selfRevenue'
   | 'dtf__stTokenAddress'
   | 'dtf__timestamp'
   | 'dtf__totalRevenue'
+  | 'dtf__tradeAllowlistEnabled'
   | 'dtf__trustedFillerEnabled'
   | 'dtf__trustedFillerRegistry'
   | 'dtf__tvlFee'
+  | 'dtf__version'
   | 'dtf__weightControl'
   | 'endTime'
   | 'id'
@@ -872,6 +884,14 @@ export type Dtf_Filter = {
   feeRecipients_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   feeRecipients_starts_with?: InputMaybe<Scalars['String']['input']>;
   feeRecipients_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  folioFeeForSelf?: InputMaybe<Scalars['BigInt']['input']>;
+  folioFeeForSelf_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  folioFeeForSelf_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  folioFeeForSelf_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  folioFeeForSelf_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  folioFeeForSelf_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  folioFeeForSelf_not?: InputMaybe<Scalars['BigInt']['input']>;
+  folioFeeForSelf_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   governanceRevenue?: InputMaybe<Scalars['BigInt']['input']>;
   governanceRevenue_gt?: InputMaybe<Scalars['BigInt']['input']>;
   governanceRevenue_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -888,6 +908,33 @@ export type Dtf_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  immutableFeeRecipients?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_contains?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_ends_with?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_gt?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_gte?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  immutableFeeRecipients_lt?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_lte?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_not?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_not_contains?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  immutableFeeRecipients_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_starts_with?: InputMaybe<Scalars['String']['input']>;
+  immutableFeeRecipients_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  legacyAdminGovernances?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyAdminGovernances_?: InputMaybe<Governance_Filter>;
+  legacyAdminGovernances_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyAdminGovernances_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyAdminGovernances_not?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyAdminGovernances_not_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyAdminGovernances_not_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
   legacyAdmins?: InputMaybe<Array<Scalars['String']['input']>>;
   legacyAdmins_contains?: InputMaybe<Array<Scalars['String']['input']>>;
   legacyAdmins_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -900,6 +947,13 @@ export type Dtf_Filter = {
   legacyAuctionApprovers_not?: InputMaybe<Array<Scalars['String']['input']>>;
   legacyAuctionApprovers_not_contains?: InputMaybe<Array<Scalars['String']['input']>>;
   legacyAuctionApprovers_not_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyTradingGovernances?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyTradingGovernances_?: InputMaybe<Governance_Filter>;
+  legacyTradingGovernances_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyTradingGovernances_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyTradingGovernances_not?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyTradingGovernances_not_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  legacyTradingGovernances_not_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
   mandate?: InputMaybe<Scalars['String']['input']>;
   mandate_contains?: InputMaybe<Scalars['String']['input']>;
   mandate_contains_nocase?: InputMaybe<Scalars['String']['input']>;
@@ -920,6 +974,14 @@ export type Dtf_Filter = {
   mandate_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   mandate_starts_with?: InputMaybe<Scalars['String']['input']>;
   mandate_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  maxAuctionLength?: InputMaybe<Scalars['BigInt']['input']>;
+  maxAuctionLength_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  maxAuctionLength_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  maxAuctionLength_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  maxAuctionLength_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  maxAuctionLength_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  maxAuctionLength_not?: InputMaybe<Scalars['BigInt']['input']>;
+  maxAuctionLength_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   mintingFee?: InputMaybe<Scalars['BigInt']['input']>;
   mintingFee_gt?: InputMaybe<Scalars['BigInt']['input']>;
   mintingFee_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -987,6 +1049,14 @@ export type Dtf_Filter = {
   proxyAdmin_not_contains?: InputMaybe<Scalars['Bytes']['input']>;
   proxyAdmin_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>;
   rebalances_?: InputMaybe<Rebalance_Filter>;
+  selfRevenue?: InputMaybe<Scalars['BigInt']['input']>;
+  selfRevenue_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  selfRevenue_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  selfRevenue_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  selfRevenue_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  selfRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  selfRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
+  selfRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   stToken?: InputMaybe<Scalars['String']['input']>;
   stTokenAddress?: InputMaybe<Scalars['Bytes']['input']>;
   stTokenAddress_contains?: InputMaybe<Scalars['Bytes']['input']>;
@@ -1055,6 +1125,16 @@ export type Dtf_Filter = {
   totalRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
   totalRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
   totalRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  tradeAllowlistEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  tradeAllowlistEnabled_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  tradeAllowlistEnabled_not?: InputMaybe<Scalars['Boolean']['input']>;
+  tradeAllowlistEnabled_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  tradeTokenAllowlist?: InputMaybe<Array<Scalars['String']['input']>>;
+  tradeTokenAllowlist_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  tradeTokenAllowlist_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
+  tradeTokenAllowlist_not?: InputMaybe<Array<Scalars['String']['input']>>;
+  tradeTokenAllowlist_not_contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  tradeTokenAllowlist_not_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>;
   tradingGovernance?: InputMaybe<Scalars['String']['input']>;
   tradingGovernance_?: InputMaybe<Governance_Filter>;
   tradingGovernance_contains?: InputMaybe<Scalars['String']['input']>;
@@ -1098,6 +1178,26 @@ export type Dtf_Filter = {
   tvlFee_lte?: InputMaybe<Scalars['BigInt']['input']>;
   tvlFee_not?: InputMaybe<Scalars['BigInt']['input']>;
   tvlFee_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  version?: InputMaybe<Scalars['String']['input']>;
+  version_contains?: InputMaybe<Scalars['String']['input']>;
+  version_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_ends_with?: InputMaybe<Scalars['String']['input']>;
+  version_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_gt?: InputMaybe<Scalars['String']['input']>;
+  version_gte?: InputMaybe<Scalars['String']['input']>;
+  version_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  version_lt?: InputMaybe<Scalars['String']['input']>;
+  version_lte?: InputMaybe<Scalars['String']['input']>;
+  version_not?: InputMaybe<Scalars['String']['input']>;
+  version_not_contains?: InputMaybe<Scalars['String']['input']>;
+  version_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  version_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  version_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  version_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_starts_with?: InputMaybe<Scalars['String']['input']>;
+  version_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   weightControl?: InputMaybe<Scalars['Boolean']['input']>;
   weightControl_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   weightControl_not?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1117,11 +1217,16 @@ export type Dtf_OrderBy =
   | 'deployer'
   | 'externalRevenue'
   | 'feeRecipients'
+  | 'folioFeeForSelf'
   | 'governanceRevenue'
   | 'id'
+  | 'immutableFeeRecipients'
+  | 'legacyAdminGovernances'
   | 'legacyAdmins'
   | 'legacyAuctionApprovers'
+  | 'legacyTradingGovernances'
   | 'mandate'
+  | 'maxAuctionLength'
   | 'mintingFee'
   | 'ownerAddress'
   | 'ownerGovernance'
@@ -1148,6 +1253,7 @@ export type Dtf_OrderBy =
   | 'protocolRevenue'
   | 'proxyAdmin'
   | 'rebalances'
+  | 'selfRevenue'
   | 'stToken'
   | 'stTokenAddress'
   | 'stToken__currentDelegates'
@@ -1184,6 +1290,8 @@ export type Dtf_OrderBy =
   | 'token__transferCount'
   | 'token__type'
   | 'totalRevenue'
+  | 'tradeAllowlistEnabled'
+  | 'tradeTokenAllowlist'
   | 'tradingGovernance'
   | 'tradingGovernance__id'
   | 'tradingGovernance__isOptimistic'
@@ -1207,6 +1315,7 @@ export type Dtf_OrderBy =
   | 'trustedFillerEnabled'
   | 'trustedFillerRegistry'
   | 'tvlFee'
+  | 'version'
   | 'weightControl';
 
 export type DelegateChange_Filter = {
@@ -1819,6 +1928,79 @@ export type Event_OrderBy =
   | 'token__totalSupply'
   | 'token__transferCount'
   | 'token__type';
+
+export type FolioVersion_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<FolioVersion_Filter>>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  deployer?: InputMaybe<Scalars['Bytes']['input']>;
+  deployer_contains?: InputMaybe<Scalars['Bytes']['input']>;
+  deployer_gt?: InputMaybe<Scalars['Bytes']['input']>;
+  deployer_gte?: InputMaybe<Scalars['Bytes']['input']>;
+  deployer_in?: InputMaybe<Array<Scalars['Bytes']['input']>>;
+  deployer_lt?: InputMaybe<Scalars['Bytes']['input']>;
+  deployer_lte?: InputMaybe<Scalars['Bytes']['input']>;
+  deployer_not?: InputMaybe<Scalars['Bytes']['input']>;
+  deployer_not_contains?: InputMaybe<Scalars['Bytes']['input']>;
+  deployer_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>;
+  deprecated?: InputMaybe<Scalars['Boolean']['input']>;
+  deprecated_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  deprecated_not?: InputMaybe<Scalars['Boolean']['input']>;
+  deprecated_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<FolioVersion_Filter>>>;
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  version?: InputMaybe<Scalars['String']['input']>;
+  version_contains?: InputMaybe<Scalars['String']['input']>;
+  version_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_ends_with?: InputMaybe<Scalars['String']['input']>;
+  version_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_gt?: InputMaybe<Scalars['String']['input']>;
+  version_gte?: InputMaybe<Scalars['String']['input']>;
+  version_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  version_lt?: InputMaybe<Scalars['String']['input']>;
+  version_lte?: InputMaybe<Scalars['String']['input']>;
+  version_not?: InputMaybe<Scalars['String']['input']>;
+  version_not_contains?: InputMaybe<Scalars['String']['input']>;
+  version_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  version_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  version_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  version_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  version_starts_with?: InputMaybe<Scalars['String']['input']>;
+  version_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type FolioVersion_OrderBy =
+  | 'blockNumber'
+  | 'deployer'
+  | 'deprecated'
+  | 'id'
+  | 'timestamp'
+  | 'version';
 
 export type GovernanceTimelock_Filter = {
   /** Filter for the block changed event. */
@@ -3704,20 +3886,26 @@ export type RebalanceAuctionBid_OrderBy =
   | 'dtf__deployer'
   | 'dtf__externalRevenue'
   | 'dtf__feeRecipients'
+  | 'dtf__folioFeeForSelf'
   | 'dtf__governanceRevenue'
   | 'dtf__id'
+  | 'dtf__immutableFeeRecipients'
   | 'dtf__mandate'
+  | 'dtf__maxAuctionLength'
   | 'dtf__mintingFee'
   | 'dtf__ownerAddress'
   | 'dtf__priceControl'
   | 'dtf__protocolRevenue'
   | 'dtf__proxyAdmin'
+  | 'dtf__selfRevenue'
   | 'dtf__stTokenAddress'
   | 'dtf__timestamp'
   | 'dtf__totalRevenue'
+  | 'dtf__tradeAllowlistEnabled'
   | 'dtf__trustedFillerEnabled'
   | 'dtf__trustedFillerRegistry'
   | 'dtf__tvlFee'
+  | 'dtf__version'
   | 'dtf__weightControl'
   | 'filler'
   | 'id'
@@ -3942,20 +4130,26 @@ export type Rebalance_OrderBy =
   | 'dtf__deployer'
   | 'dtf__externalRevenue'
   | 'dtf__feeRecipients'
+  | 'dtf__folioFeeForSelf'
   | 'dtf__governanceRevenue'
   | 'dtf__id'
+  | 'dtf__immutableFeeRecipients'
   | 'dtf__mandate'
+  | 'dtf__maxAuctionLength'
   | 'dtf__mintingFee'
   | 'dtf__ownerAddress'
   | 'dtf__priceControl'
   | 'dtf__protocolRevenue'
   | 'dtf__proxyAdmin'
+  | 'dtf__selfRevenue'
   | 'dtf__stTokenAddress'
   | 'dtf__timestamp'
   | 'dtf__totalRevenue'
+  | 'dtf__tradeAllowlistEnabled'
   | 'dtf__trustedFillerEnabled'
   | 'dtf__trustedFillerRegistry'
   | 'dtf__tvlFee'
+  | 'dtf__version'
   | 'dtf__weightControl'
   | 'id'
   | 'inRebalance'
@@ -5607,6 +5801,14 @@ export type TokenDailySnapshot_Filter = {
   dailyRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
   dailyRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
   dailyRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  dailySelfRevenue?: InputMaybe<Scalars['BigInt']['input']>;
+  dailySelfRevenue_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  dailySelfRevenue_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  dailySelfRevenue_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  dailySelfRevenue_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  dailySelfRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  dailySelfRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
+  dailySelfRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   dailyTotalSupply?: InputMaybe<Scalars['BigInt']['input']>;
   dailyTotalSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
   dailyTotalSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -5684,6 +5886,7 @@ export type TokenDailySnapshot_OrderBy =
   | 'dailyMintCount'
   | 'dailyProtocolRevenue'
   | 'dailyRevenue'
+  | 'dailySelfRevenue'
   | 'dailyTotalSupply'
   | 'dailyTransferAmount'
   | 'dailyTransferCount'
@@ -5805,6 +6008,14 @@ export type TokenHourlySnapshot_Filter = {
   hourlyRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
   hourlyRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
   hourlyRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  hourlySelfRevenue?: InputMaybe<Scalars['BigInt']['input']>;
+  hourlySelfRevenue_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  hourlySelfRevenue_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  hourlySelfRevenue_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  hourlySelfRevenue_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  hourlySelfRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  hourlySelfRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
+  hourlySelfRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   hourlyTotalSupply?: InputMaybe<Scalars['BigInt']['input']>;
   hourlyTotalSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
   hourlyTotalSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -5882,6 +6093,7 @@ export type TokenHourlySnapshot_OrderBy =
   | 'hourlyMintCount'
   | 'hourlyProtocolRevenue'
   | 'hourlyRevenue'
+  | 'hourlySelfRevenue'
   | 'hourlyTotalSupply'
   | 'hourlyTransferAmount'
   | 'hourlyTransferCount'
@@ -5971,6 +6183,14 @@ export type TokenMonthlySnapshot_Filter = {
   cumulativeRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
   cumulativeRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
   cumulativeRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeSelfRevenue?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeSelfRevenue_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeSelfRevenue_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeSelfRevenue_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  cumulativeSelfRevenue_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeSelfRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeSelfRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
+  cumulativeSelfRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   currentHolderCount?: InputMaybe<Scalars['BigInt']['input']>;
   currentHolderCount_gt?: InputMaybe<Scalars['BigInt']['input']>;
   currentHolderCount_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -6059,6 +6279,14 @@ export type TokenMonthlySnapshot_Filter = {
   monthlyRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
   monthlyRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
   monthlyRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  monthlySelfRevenue?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlySelfRevenue_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlySelfRevenue_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlySelfRevenue_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  monthlySelfRevenue_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlySelfRevenue_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlySelfRevenue_not?: InputMaybe<Scalars['BigInt']['input']>;
+  monthlySelfRevenue_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   monthlyTotalSupply?: InputMaybe<Scalars['BigInt']['input']>;
   monthlyTotalSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
   monthlyTotalSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -6124,6 +6352,7 @@ export type TokenMonthlySnapshot_OrderBy =
   | 'cumulativeMintAmount'
   | 'cumulativeProtocolRevenue'
   | 'cumulativeRevenue'
+  | 'cumulativeSelfRevenue'
   | 'currentHolderCount'
   | 'id'
   | 'monthlyBurnAmount'
@@ -6135,6 +6364,7 @@ export type TokenMonthlySnapshot_OrderBy =
   | 'monthlyMintCount'
   | 'monthlyProtocolRevenue'
   | 'monthlyRevenue'
+  | 'monthlySelfRevenue'
   | 'monthlyTotalSupply'
   | 'monthlyTransferAmount'
   | 'monthlyTransferCount'
@@ -6718,20 +6948,26 @@ export type Trade_OrderBy =
   | 'dtf__deployer'
   | 'dtf__externalRevenue'
   | 'dtf__feeRecipients'
+  | 'dtf__folioFeeForSelf'
   | 'dtf__governanceRevenue'
   | 'dtf__id'
+  | 'dtf__immutableFeeRecipients'
   | 'dtf__mandate'
+  | 'dtf__maxAuctionLength'
   | 'dtf__mintingFee'
   | 'dtf__ownerAddress'
   | 'dtf__priceControl'
   | 'dtf__protocolRevenue'
   | 'dtf__proxyAdmin'
+  | 'dtf__selfRevenue'
   | 'dtf__stTokenAddress'
   | 'dtf__timestamp'
   | 'dtf__totalRevenue'
+  | 'dtf__tradeAllowlistEnabled'
   | 'dtf__trustedFillerEnabled'
   | 'dtf__trustedFillerRegistry'
   | 'dtf__tvlFee'
+  | 'dtf__version'
   | 'dtf__weightControl'
   | 'end'
   | 'endPrice'
@@ -7425,7 +7661,7 @@ export type GetIndexDtfQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfQuery = { dtf?: { id: string, proxyAdmin: string, timestamp: string, deployer: string, ownerAddress: string, admins: Array<string>, mintingFee: string, tvlFee: string, annualizedTvlFee: string, mandate: string, auctionDelay: string, auctionLength: string, auctionApprovers: Array<string>, auctionLaunchers: Array<string>, brandManagers: Array<string>, totalRevenue: string, protocolRevenue: string, governanceRevenue: string, externalRevenue: string, feeRecipients: string, bidsEnabled?: boolean | null, trustedFillerRegistry?: string | null, trustedFillerEnabled?: boolean | null, weightControl: boolean, priceControl: number, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, tradingGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, stToken?: { id: string, currentDelegates: string, totalDelegates: string, delegatedVotesRaw: string, currentOptimisticDelegates: string, totalOptimisticDelegates: string, optimisticDelegatedVotesRaw: string, legacyGovernance: Array<string>, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, underlying?: { name: string, symbol: string, address: string, decimals: number } | null, governance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, rewards: Array<{ rewardToken: { address: string, name: string, symbol: string, decimals: number } }> } | null } | null };
+export type GetIndexDtfQuery = { dtf?: { id: string, version?: string | null, proxyAdmin: string, timestamp: string, deployer: string, ownerAddress: string, admins: Array<string>, mintingFee: string, tvlFee: string, annualizedTvlFee: string, mandate: string, auctionDelay: string, auctionLength: string, maxAuctionLength?: string | null, tradeAllowlistEnabled?: boolean | null, tradeTokenAllowlist?: Array<string> | null, auctionApprovers: Array<string>, auctionLaunchers: Array<string>, brandManagers: Array<string>, totalRevenue: string, protocolRevenue: string, governanceRevenue: string, externalRevenue: string, selfRevenue?: string | null, feeRecipients: string, immutableFeeRecipients?: string | null, folioFeeForSelf?: string | null, bidsEnabled?: boolean | null, trustedFillerRegistry?: string | null, trustedFillerEnabled?: boolean | null, weightControl: boolean, priceControl: number, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, legacyAdminGovernances?: Array<{ id: string, token: { id: string, governance?: { id: string } | null } }> | null, tradingGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, stToken?: { id: string, currentDelegates: string, totalDelegates: string, delegatedVotesRaw: string, currentOptimisticDelegates: string, totalOptimisticDelegates: string, optimisticDelegatedVotesRaw: string, legacyGovernance: Array<string>, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, underlying?: { name: string, symbol: string, address: string, decimals: number } | null, governance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, rewards: Array<{ rewardToken: { address: string, name: string, symbol: string, decimals: number } }> } | null } | null };
 
 export type GetIndexDtfProposalsQueryVariables = Exact<{
   governanceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
@@ -7449,7 +7685,7 @@ export type GetIndexDtfProposalGovernanceAddressesQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfProposalGovernanceAddressesQuery = { dtf?: { legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null, stToken?: { legacyGovernance: Array<string>, governance?: { id: string } | null } | null } | null };
+export type GetIndexDtfProposalGovernanceAddressesQuery = { dtf?: { legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null, legacyAdminGovernances?: Array<{ id: string, token: { id: string, governance?: { id: string } | null } }> | null, stToken?: { legacyGovernance: Array<string>, governance?: { id: string } | null } | null } | null };
 
 export type IndexDtfProposalContractContextFragment = { id: string, proxyAdmin: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, tradingGovernance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string, optimisticSelectorRegistry?: string | null, timelock: { id: string } } | null } | null };
 
@@ -7531,7 +7767,7 @@ export type GetIndexDtfDirectoryQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfDirectoryQuery = { dtfs: Array<{ id: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, token: { symbol: string, name: string }, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string } | null } | null, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null }> };
+export type GetIndexDtfDirectoryQuery = { dtfs: Array<{ id: string, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, token: { symbol: string, name: string }, stToken?: { id: string, legacyGovernance: Array<string>, governance?: { id: string } | null } | null, ownerGovernance?: { id: string } | null, tradingGovernance?: { id: string } | null, legacyAdminGovernances?: Array<{ id: string, token: { id: string, governance?: { id: string } | null } }> | null }> };
 
 export type GetIndexDtfTopVotersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7539,6 +7775,13 @@ export type GetIndexDtfTopVotersQueryVariables = Exact<{
 
 
 export type GetIndexDtfTopVotersQuery = { delegates: Array<{ address: string, numberVotes: number, numberOptimisticVotes: number, delegatedVotesRaw: string, tokenHoldersRepresentedAmount: number, token: { id: string, token: { symbol: string, name: string, decimals: number }, underlying?: { id: string, symbol: string, name: string, decimals: number } | null } }> };
+
+export type GetIndexDtfVoteLockDependentsQueryVariables = Exact<{
+  voteLock: Scalars['String']['input'];
+}>;
+
+
+export type GetIndexDtfVoteLockDependentsQuery = { dtfs: Array<{ id: string, token: { symbol: string, name: string }, ownerGovernance?: { token: { id: string }, timelock: { id: string } } | null, tradingGovernance?: { token: { id: string }, timelock: { id: string } } | null }> };
 
 export type GetIndexDtfVoteLockVaultsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7636,6 +7879,7 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
     query GetIndexDTF($id: ID!, $block: Block_height) {
   dtf(id: $id, block: $block) {
     id
+    version
     proxyAdmin
     timestamp
     deployer
@@ -7647,6 +7891,9 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
     mandate
     auctionDelay
     auctionLength
+    maxAuctionLength
+    tradeAllowlistEnabled
+    tradeTokenAllowlist
     auctionApprovers
     auctionLaunchers
     brandManagers
@@ -7654,7 +7901,10 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
     protocolRevenue
     governanceRevenue
     externalRevenue
+    selfRevenue
     feeRecipients
+    immutableFeeRecipients
+    folioFeeForSelf
     bidsEnabled
     trustedFillerRegistry
     trustedFillerEnabled
@@ -7686,6 +7936,15 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
       }
     }
     legacyAdmins
+    legacyAdminGovernances {
+      id
+      token {
+        id
+        governance {
+          id
+        }
+      }
+    }
     tradingGovernance {
       id
       name
@@ -7897,6 +8156,15 @@ export const GetIndexDtfProposalGovernanceAddressesDocument = new TypedDocumentS
       id
     }
     legacyAdmins
+    legacyAdminGovernances {
+      id
+      token {
+        id
+        governance {
+          id
+        }
+      }
+    }
     legacyAuctionApprovers
     stToken {
       governance {
@@ -8260,6 +8528,15 @@ export const GetIndexDtfDirectoryDocument = new TypedDocumentString(`
       id
     }
     legacyAdmins
+    legacyAdminGovernances {
+      id
+      token {
+        id
+        governance {
+          id
+        }
+      }
+    }
     legacyAuctionApprovers
   }
 }
@@ -8294,6 +8571,36 @@ export const GetIndexDtfTopVotersDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetIndexDtfTopVotersQuery, GetIndexDtfTopVotersQueryVariables>;
+export const GetIndexDtfVoteLockDependentsDocument = new TypedDocumentString(`
+    query GetIndexDtfVoteLockDependents($voteLock: String!) {
+  dtfs(
+    first: 1000
+    where: {or: [{stToken: $voteLock}, {ownerGovernance_: {token: $voteLock}}, {tradingGovernance_: {token: $voteLock}}]}
+  ) {
+    id
+    token {
+      symbol
+      name
+    }
+    ownerGovernance {
+      token {
+        id
+      }
+      timelock {
+        id
+      }
+    }
+    tradingGovernance {
+      token {
+        id
+      }
+      timelock {
+        id
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetIndexDtfVoteLockDependentsQuery, GetIndexDtfVoteLockDependentsQueryVariables>;
 export const GetIndexDtfVoteLockVaultsDocument = new TypedDocumentString(`
     query GetIndexDtfVoteLockVaults($limit: Int = 1000, $cursor: ID = "") {
   stakingTokens(

@@ -71,6 +71,7 @@ export type IndexDtfData = Omit<IndexDtfFull, "token"> & {
   readonly protocolRevenue: number;
   readonly governanceRevenue: number;
   readonly externalRevenue: number;
+  readonly selfRevenue: number;
 };
 
 export function mapIndexDtfData(dtf: IndexDtfFull): IndexDtfData {
@@ -128,6 +129,7 @@ export function mapIndexDtfData(dtf: IndexDtfFull): IndexDtfData {
     protocolRevenue: dtf.financials.protocolRevenue,
     governanceRevenue: dtf.financials.governanceRevenue,
     externalRevenue: dtf.financials.externalRevenue,
+    selfRevenue: dtf.financials.selfRevenue,
   };
 }
 

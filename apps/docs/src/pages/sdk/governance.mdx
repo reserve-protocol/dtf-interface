@@ -29,13 +29,14 @@ Proposal IDs can be extremely long decimal strings. Keep them as strings in rout
 
 ## Voting And Account State
 
-| Method               | Use                                                |
-| -------------------- | -------------------------------------------------- |
-| `getDelegates`       | Delegate list for a staking/vote-lock token.       |
-| `getGuardians`       | Guardian addresses for Index DTF governance.       |
-| `getLegacyVoteLocks` | Legacy vote-lock governance entries.               |
-| `getVoterState`      | Account voting state for a vote-lock token.        |
-| `getProposerState`   | Account proposal threshold and voting power state. |
+| Method                  | Use                                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| `getDelegates`          | Delegate list for a staking/vote-lock token.                                                  |
+| `getGuardians`          | Guardian addresses for Index DTF governance.                                                  |
+| `getLegacyVoteLocks`    | Previous vote-lock vaults of a DTF, including the vault a replaced admin governor voted with. |
+| `getVoteLockDependents` | DTFs whose owner or trading governance votes with a vault, with the live role check.          |
+| `getVoterState`         | Account voting state for a vote-lock token.                                                   |
+| `getProposerState`      | Account proposal threshold and voting power state.                                            |
 
 ```ts
 const proposalDetail = await sdk.index.getProposal({
@@ -91,12 +92,14 @@ Vote support values are:
 
 The SDK builds proposal payloads from product-shaped inputs.
 
-| Method                        | Use                                                 |
-| ----------------------------- | --------------------------------------------------- |
-| `buildBasketProposal`         | Build a basket/rebalance proposal.                  |
-| `buildBasketSettingsProposal` | Build basket settings changes.                      |
-| `buildDaoSettingsProposal`    | Build vote-lock/DAO settings changes.               |
-| `buildSettingsProposal`       | Build DTF, governance, and shared settings changes. |
+| Method                        | Use                                                                                                                                 |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `buildBasketProposal`         | Build a basket/rebalance proposal.                                                                                                  |
+| `buildBasketSettingsProposal` | Build basket settings changes.                                                                                                      |
+| `buildDaoSettingsProposal`    | Build vote-lock/DAO settings changes.                                                                                               |
+| `buildSettingsProposal`       | Build DTF, governance, and shared settings changes.                                                                                 |
+| `buildUpgradeToV6Proposal`    | Upgrade a 5.0.0 DTF to 6.0.0 through its admin governance (spell address required).                                                 |
+| `buildUpgradeToV6Calls`       | The same upgrade as bare calls when the addresses are already known; see [Contracts & Versions](/index-dtf/contracts-and-versions). |
 
 ```ts
 const proposal = await sdk.index.buildBasketProposal({
@@ -135,6 +138,26 @@ These are direct package exports, not bound `sdk.index` methods:
 | Optimistic governance | `prepareIndexDtfSetOptimisticParams`, `prepareIndexDtfSetProposalThrottle`, `prepareIndexDtfSetLateQuorumVoteExtension`, `prepareIndexDtfRevokeOptimisticProposer`                                         |
 
 Versioned DTF builders require `version: "5.0.0" | "6.0.0"`. Read the DTF version first with `sdk.index.getVersion({ address, chainId })`.
+
+### Folio 6.0 settings
+
+`buildSettingsProposal` accepts three 6.0-only fields; a v5 DTF rejects each by name.
+
+```ts
+const proposal = await sdk.index.buildSettingsProposal({
+  address,
+  chainId,
+  version: "6.0.0",
+  selfFee: 5, // percent of non-DAO fees kept for holders
+  tradeAllowlist: { add: [tokenA], remove: [tokenB], enabled: true },
+  revenueDistribution: { platformFee: 0, governanceShare: 0, deployerShare: 100, additionalRecipients: [] },
+  // immutableFeeRecipients: read from RPC when omitted; pass the table to pin it explicitly
+});
+```
+
+On 6.0.0 a revenue change keeps the immutable table exactly as it is on chain and scales the mutable shares into the
+remainder, so the two tables still total 100%. A DTF whose immutable table already takes 100% cannot distribute a
+mutable share and the builder says so.
 
 ## Optimistic Governance
 

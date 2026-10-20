@@ -334,7 +334,7 @@ async function readStandardProposalVotingPower(
   account: GetIndexDtfProposalVoterStateParams["account"],
   voteStart: number,
 ) {
-  const snapshotTimepoint = BigInt(Math.max(voteStart - 1, 0));
+  const snapshotTimepoint = BigInt(voteStart);
   const publicClient = client.viem.getPublicClient(chainId);
   const [clock] = (await publicClient.multicall({
     allowFailure: false,

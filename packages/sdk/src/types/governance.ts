@@ -547,3 +547,16 @@ export type IndexDtfGovernanceActivity =
   | IndexDtfGovernanceVoteActivity
   | IndexDtfGovernanceProposalActivity
   | IndexDtfGovernanceStakeActivity;
+
+export type GetIndexDtfVoteLockDependentsParams = {
+  readonly chainId: SupportedChainId;
+  readonly voteLock: Address;
+};
+
+export type IndexDtfVoteLockDependent = {
+  readonly address: Address;
+  readonly symbol: string;
+  readonly name: string;
+  // True while the DTF's owner timelock (voting with this vote lock) still holds the Folio admin role.
+  readonly governedByVoteLock: boolean;
+};

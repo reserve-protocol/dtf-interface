@@ -9,18 +9,20 @@ import {
   DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
   INDEX_DTF_DEPLOYER_ADDRESS,
   INDEX_DTF_GOVERNANCE_DEPLOYER_ADDRESS,
+  INDEX_DTF_V6_DEPLOYER_ADDRESS,
 } from "@reserve-protocol/sdk";
 ```
 
 ## Helpers
 
-| Helper                                       | Use                                                  |
-| -------------------------------------------- | ---------------------------------------------------- |
-| `generateIndexDtfDeploymentNonce`            | Generate a deployment nonce.                         |
-| `sdk.index.buildDeployFeeRecipients`         | Build deploy fee-recipient config.                   |
-| `sdk.index.getDeployApprovalAmount`          | Apply an approval buffer to an initial asset amount. |
-| `extractIndexDtfDeployedAddress`             | Extract DTF address from deployment logs.            |
-| `extractIndexDtfDeployedStakingTokenAddress` | Extract staking token address from deployment logs.  |
+| Helper                                       | Use                                                         |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| `generateIndexDtfDeploymentNonce`            | Generate a deployment nonce.                                |
+| `sdk.index.buildDeployFeeRecipients`         | Build deploy fee-recipient config.                          |
+| `sdk.index.getDeployApprovalAmount`          | Apply an approval buffer to an initial asset amount.        |
+| `extractIndexDtfDeployedAddress`             | Extract DTF address from the deployer's logs.               |
+| `getIndexDtfDeployerAddress`                 | Resolve the deployer for `{ chainId, version, deployer? }`. |
+| `extractIndexDtfDeployedStakingTokenAddress` | Extract staking token from the governance deployer's logs.  |
 
 ## Builders
 
@@ -34,11 +36,25 @@ import {
 | `prepareDeployAssetApproval`  | Approval for one deploy asset.                     |
 | `prepareDeployAssetApprovals` | Approval calls for deploy assets.                  |
 
+## Versions
+
+Every DTF deploy builder (`prepareDeploy`, `prepareDeployGoverned` and their plans) takes `version`. `"5.0.0"` deploys
+through the per-chain 5.0.0 `FolioDeployer` (`INDEX_DTF_DEPLOYER_ADDRESS`). `"6.0.0"` deploys through the per-chain
+6.0.0 `FolioDeployer` (`INDEX_DTF_V6_DEPLOYER_ADDRESS`) and takes a v6 `additionalDetails` shape and, for governed
+deploys, one optimistic `governance` table. Pass `deployer` only to target another 6.0.0 deployer (a fork or sandbox).
+The v6 constant does not depend on the chain's `FolioVersionRegistry`: `sdk.index.getLatestVersion({ chainId })` tells
+you whether the registry has registered 6.0.0 yet.
+
+Approvals follow the deployed version. Plans approve whichever deployer the plan resolved;
+`prepareDeployAssetApproval(s)` take `version` and default the spender to that version's deployer, so a 6.0.0 deploy
+never approves the 5.0.0 deployer unless you pass it as `deployer`.
+
 ## Basic Shape
 
 ```ts
 const plan = sdk.index.prepareDeployPlan({
   chainId: 8453,
+  version: "5.0.0",
   basicDetails: {
     name: "Example Index DTF",
     symbol: "eDTF",
@@ -69,6 +85,7 @@ Governed deployments include an existing vote-lock token plus owner and trading 
 ```ts
 const call = sdk.index.prepareDeployGoverned({
   chainId,
+  version: "5.0.0",
   stToken,
   basicDetails,
   additionalDetails,
@@ -91,6 +108,44 @@ const call = sdk.index.prepareDeployGoverned({
   },
 });
 ```
+
+## Folio 6.0 Deployment
+
+```ts
+const call = sdk.index.prepareDeployGoverned({
+  chainId,
+  version: "6.0.0", // deploys through INDEX_DTF_V6_DEPLOYER_ADDRESS[chainId]
+  stToken, // an optimistic vote-lock vault (getPastOptimisticVotes)
+  basicDetails,
+  additionalDetails: {
+    maxAuctionLength: 1800n,
+    feeRecipients,
+    immutableFeeRecipients: [],
+    tvlFee: 0n,
+    mintFee: 0n,
+    selfFee: 0n, // D18 fraction of non-DAO fees kept for holders, at most 1e18
+    mandate: "Example mandate",
+  },
+  flags: DEFAULT_INDEX_DTF_DEPLOY_FLAGS,
+  governance: {
+    optimistic: { vetoDelay: 3600, vetoPeriod: 86400, vetoThreshold: 100000000000000000n },
+    standard: {
+      votingDelay: 0,
+      votingPeriod: 86400,
+      voteExtension: 600,
+      proposalThreshold: 10000000000000000n, // D18 fraction of the vault supply: 1%
+      quorumNumerator: 30000000000000000n, // D18 fraction (the governor's quorum denominator is 1e18): 3%
+    },
+    optimisticSelectors: ["0xc1e54b89"], // startRebalance(uint256,...) on 6.0.0
+    optimisticProposers: [],
+    additionalGuardians: [],
+    timelockDelay: 86400n,
+    proposalThrottleCapacity: 5n,
+  },
+});
+```
+
+Ungoverned v6 deploys use the same `version` and `additionalDetails` with `prepareDeploy`.
 
 ## Approval Buffer
 

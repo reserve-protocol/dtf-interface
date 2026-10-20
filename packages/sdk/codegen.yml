@@ -28,7 +28,9 @@ generates:
       useTypeImports: true
   src/index-dtf/subgraph/dtf.generated.ts:
     # Intentionally tracks the prod Index subgraph schema; prod is the shared runtime tag across supported chains.
-    schema: https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-index-base/prod/gn
+    # INDEX_DTF_SUBGRAPH_SCHEMA points codegen (and graphql:codegen:check) at a candidate deployment before it is
+    # promoted to prod, e.g. .../dtf-index-base/1.11.1-test/gn. The default stays prod so CI keeps checking prod.
+    schema: ${INDEX_DTF_SUBGRAPH_SCHEMA:https://api.goldsky.com/api/public/project_cmgzim3e100095np2gjnbh6ry/subgraphs/dtf-index-base/prod/gn}
     documents:
       - src/index-dtf/subgraph/**/*.graphql
     plugins:

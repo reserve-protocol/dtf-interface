@@ -10,6 +10,7 @@ import type {
   DecodeIndexDtfProposalParams,
   GetIndexDtfDelegatesParams,
   GetIndexDtfGuardiansParams,
+  GetIndexDtfVoteLockDependentsParams,
   GetIndexDtfPriceHistoryParams,
   GetIndexDtfPriceParams,
   GetIndexDtfVersionParams,
@@ -213,6 +214,22 @@ export const dtfQueryKeys = {
       [...dtfQueryKeys.index.all(), "issuance-state", keyParams(params)] as const,
     bidsEnabled: (params?: IndexMethodParams<"getBidsEnabled">) =>
       [...dtfQueryKeys.index.all(), "bids-enabled", keyParams(params)] as const,
+    maxAuctionLength: (params?: IndexMethodParams<"getMaxAuctionLength">) =>
+      [...dtfQueryKeys.index.all(), "max-auction-length", keyParams(params)] as const,
+    rebalanceNonce: (params?: IndexMethodParams<"getRebalanceNonce">) =>
+      [...dtfQueryKeys.index.all(), "rebalance-nonce", keyParams(params)] as const,
+    selfFee: (params?: IndexMethodParams<"getSelfFee">) =>
+      [...dtfQueryKeys.index.all(), "self-fee", keyParams(params)] as const,
+    immutableFeeRecipients: (params?: IndexMethodParams<"getImmutableFeeRecipients">) =>
+      [...dtfQueryKeys.index.all(), "immutable-fee-recipients", keyParams(params)] as const,
+    tradeAllowlist: (params?: IndexMethodParams<"getTradeAllowlist">) =>
+      [...dtfQueryKeys.index.all(), "trade-allowlist", keyParams(params)] as const,
+    isTokenAllowlisted: (params?: IndexMethodParams<"getIsTokenAllowlisted">) =>
+      [...dtfQueryKeys.index.all(), "is-token-allowlisted", keyParams(params)] as const,
+    latestVersion: (params?: IndexMethodParams<"getLatestVersion">) =>
+      [...dtfQueryKeys.index.all(), "latest-version", keyParams(params)] as const,
+    versionDeployment: (params?: IndexMethodParams<"getVersionDeployment">) =>
+      [...dtfQueryKeys.index.all(), "version-deployment", keyParams(params)] as const,
     rebalanceControl: (params?: IndexMethodParams<"getRebalanceControl">) =>
       [...dtfQueryKeys.index.all(), "rebalance-control", keyParams(params)] as const,
     rebalances: (params?: IndexMethodParams<"getRebalances">) =>
@@ -303,6 +320,10 @@ export const dtfQueryKeys = {
         [...dtfQueryKeys.index.governance.all(), "delegates", keyParams(params)] as const,
       guardians: (params?: GetIndexDtfGuardiansParams) =>
         [...dtfQueryKeys.index.governance.all(), "guardians", keyParams(indexDtfGuardiansKeyParams(params))] as const,
+      legacyVoteLocks: (params?: DtfParams) =>
+        [...dtfQueryKeys.index.governance.all(), "legacy-vote-locks", keyParams(params)] as const,
+      voteLockDependents: (params?: GetIndexDtfVoteLockDependentsParams) =>
+        [...dtfQueryKeys.index.governance.all(), "vote-lock-dependents", keyParams(params)] as const,
       voterState: (params?: GetIndexDtfVoterStateParams) =>
         [...dtfQueryKeys.index.governance.all(), "voter-state", keyParams(params)] as const,
       proposerState: (params?: GetIndexDtfProposerStateParams) =>

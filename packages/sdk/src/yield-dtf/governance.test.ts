@@ -85,16 +85,28 @@ describe("getYieldDtfGovernance", () => {
 });
 
 describe("getYieldDtfProposal", () => {
+  it("uses the authoritative governor state when the subgraph still reports ACTIVE", async () => {
+    const readContract = vi.fn(async (): Promise<number> => 7);
+    const client = createProposalClient(readContract);
+
+    const proposal = await getYieldDtfProposal(client, { chainId: 1, proposalId: "42" });
+
+    expect(proposal.state).toBe("EXECUTED");
+    expect(readContract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ address: GOVERNOR, chainId: 1, functionName: "state", args: [42n] }),
+    );
+  });
+
   it("falls back to the subgraph state for proposals unknown to the current governor", async () => {
-    const client = createProposalClient(
-      new BaseError("readContract failed", {
+    const client = createProposalClient(async () => {
+      throw new BaseError("readContract failed", {
         cause: new ContractFunctionRevertedError({
           abi: [],
           functionName: "state",
           message: "Governor: unknown proposal id",
         }),
-      }),
-    );
+      });
+    });
 
     const proposal = await getYieldDtfProposal(client, { chainId: 1, proposalId: "42" });
 
@@ -103,7 +115,9 @@ describe("getYieldDtfProposal", () => {
 
   it("rethrows non-unknown-proposal state read failures", async () => {
     const error = new BaseError("RPC request failed");
-    const client = createProposalClient(error);
+    const client = createProposalClient(async () => {
+      throw error;
+    });
 
     await expect(getYieldDtfProposal(client, { chainId: 1, proposalId: "42" })).rejects.toBe(error);
   });
@@ -358,7 +372,7 @@ function createProposalsClient(
   } as unknown as DtfClient;
 }
 
-function createProposalClient(readError: Error): DtfClient {
+function createProposalClient(readContract: () => Promise<number>): DtfClient {
   return {
     subgraph: {
       queryYield: vi.fn(async () => ({
@@ -397,9 +411,7 @@ function createProposalClient(readError: Error): DtfClient {
       })),
     },
     viem: {
-      readContract: vi.fn(async () => {
-        throw readError;
-      }),
+      readContract,
     },
   } as unknown as DtfClient;
 }

@@ -61,6 +61,10 @@ export type Governance = {
   readonly votingDelay: number;
   readonly votingPeriod: number;
   readonly proposalThreshold: number;
+  /** False while the indexer could not read the governor's ratio (under one token of vote supply); proposalThreshold is then a placeholder. */
+  readonly proposalThresholdExact: boolean;
+  /** Seconds voting stays open after a late quorum; absent on governors without the extension. */
+  readonly voteExtension?: number;
   readonly quorumVotes?: Amount;
   readonly quorumNumerator: number;
   readonly quorumDenominator: number;

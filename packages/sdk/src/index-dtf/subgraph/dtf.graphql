@@ -39,6 +39,8 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
       votingDelay
       votingPeriod
       proposalThreshold
+      proposalThresholdExact
+      lateQuorumVoteExtension
       quorumVotes
       quorumNumerator
       quorumDenominator
@@ -74,6 +76,8 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
       votingDelay
       votingPeriod
       proposalThreshold
+      proposalThresholdExact
+      lateQuorumVoteExtension
       quorumVotes
       quorumNumerator
       quorumDenominator
@@ -144,6 +148,8 @@ query GetIndexDTF($id: ID!, $block: Block_height) {
         votingDelay
         votingPeriod
         proposalThreshold
+        proposalThresholdExact
+        lateQuorumVoteExtension
         quorumVotes
         quorumNumerator
         quorumDenominator

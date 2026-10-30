@@ -1232,6 +1232,7 @@ export type Dtf_OrderBy =
   | 'ownerGovernance'
   | 'ownerGovernance__id'
   | 'ownerGovernance__isOptimistic'
+  | 'ownerGovernance__lateQuorumVoteExtension'
   | 'ownerGovernance__name'
   | 'ownerGovernance__optimisticProposalThrottleCapacity'
   | 'ownerGovernance__optimisticSelectorRegistry'
@@ -1240,6 +1241,7 @@ export type Dtf_OrderBy =
   | 'ownerGovernance__optimisticVetoThreshold'
   | 'ownerGovernance__proposalCount'
   | 'ownerGovernance__proposalThreshold'
+  | 'ownerGovernance__proposalThresholdExact'
   | 'ownerGovernance__proposalsCanceled'
   | 'ownerGovernance__proposalsExecuted'
   | 'ownerGovernance__proposalsQueued'
@@ -1295,6 +1297,7 @@ export type Dtf_OrderBy =
   | 'tradingGovernance'
   | 'tradingGovernance__id'
   | 'tradingGovernance__isOptimistic'
+  | 'tradingGovernance__lateQuorumVoteExtension'
   | 'tradingGovernance__name'
   | 'tradingGovernance__optimisticProposalThrottleCapacity'
   | 'tradingGovernance__optimisticSelectorRegistry'
@@ -1303,6 +1306,7 @@ export type Dtf_OrderBy =
   | 'tradingGovernance__optimisticVetoThreshold'
   | 'tradingGovernance__proposalCount'
   | 'tradingGovernance__proposalThreshold'
+  | 'tradingGovernance__proposalThresholdExact'
   | 'tradingGovernance__proposalsCanceled'
   | 'tradingGovernance__proposalsExecuted'
   | 'tradingGovernance__proposalsQueued'
@@ -2104,6 +2108,7 @@ export type GovernanceTimelock_OrderBy =
   | 'governance'
   | 'governance__id'
   | 'governance__isOptimistic'
+  | 'governance__lateQuorumVoteExtension'
   | 'governance__name'
   | 'governance__optimisticProposalThrottleCapacity'
   | 'governance__optimisticSelectorRegistry'
@@ -2112,6 +2117,7 @@ export type GovernanceTimelock_OrderBy =
   | 'governance__optimisticVetoThreshold'
   | 'governance__proposalCount'
   | 'governance__proposalThreshold'
+  | 'governance__proposalThresholdExact'
   | 'governance__proposalsCanceled'
   | 'governance__proposalsExecuted'
   | 'governance__proposalsQueued'
@@ -2142,6 +2148,14 @@ export type Governance_Filter = {
   isOptimistic_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   isOptimistic_not?: InputMaybe<Scalars['Boolean']['input']>;
   isOptimistic_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  lateQuorumVoteExtension?: InputMaybe<Scalars['BigInt']['input']>;
+  lateQuorumVoteExtension_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  lateQuorumVoteExtension_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  lateQuorumVoteExtension_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  lateQuorumVoteExtension_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  lateQuorumVoteExtension_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  lateQuorumVoteExtension_not?: InputMaybe<Scalars['BigInt']['input']>;
+  lateQuorumVoteExtension_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   name_contains?: InputMaybe<Scalars['String']['input']>;
   name_contains_nocase?: InputMaybe<Scalars['String']['input']>;
@@ -2220,6 +2234,10 @@ export type Governance_Filter = {
   proposalCount_not?: InputMaybe<Scalars['BigInt']['input']>;
   proposalCount_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   proposalThreshold?: InputMaybe<Scalars['BigInt']['input']>;
+  proposalThresholdExact?: InputMaybe<Scalars['Boolean']['input']>;
+  proposalThresholdExact_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  proposalThresholdExact_not?: InputMaybe<Scalars['Boolean']['input']>;
+  proposalThresholdExact_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   proposalThreshold_gt?: InputMaybe<Scalars['BigInt']['input']>;
   proposalThreshold_gte?: InputMaybe<Scalars['BigInt']['input']>;
   proposalThreshold_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
@@ -2359,6 +2377,7 @@ export type Governance_Filter = {
 export type Governance_OrderBy =
   | 'id'
   | 'isOptimistic'
+  | 'lateQuorumVoteExtension'
   | 'name'
   | 'optimisticProposalThrottleCapacity'
   | 'optimisticProposers'
@@ -2368,6 +2387,7 @@ export type Governance_OrderBy =
   | 'optimisticVetoThreshold'
   | 'proposalCount'
   | 'proposalThreshold'
+  | 'proposalThresholdExact'
   | 'proposals'
   | 'proposalsCanceled'
   | 'proposalsExecuted'
@@ -2822,6 +2842,7 @@ export type OptimisticProposalMetadata_OrderBy =
   | 'governance'
   | 'governance__id'
   | 'governance__isOptimistic'
+  | 'governance__lateQuorumVoteExtension'
   | 'governance__name'
   | 'governance__optimisticProposalThrottleCapacity'
   | 'governance__optimisticSelectorRegistry'
@@ -2830,6 +2851,7 @@ export type OptimisticProposalMetadata_OrderBy =
   | 'governance__optimisticVetoThreshold'
   | 'governance__proposalCount'
   | 'governance__proposalThreshold'
+  | 'governance__proposalThresholdExact'
   | 'governance__proposalsCanceled'
   | 'governance__proposalsExecuted'
   | 'governance__proposalsQueued'
@@ -3365,6 +3387,7 @@ export type Proposal_OrderBy =
   | 'governance'
   | 'governance__id'
   | 'governance__isOptimistic'
+  | 'governance__lateQuorumVoteExtension'
   | 'governance__name'
   | 'governance__optimisticProposalThrottleCapacity'
   | 'governance__optimisticSelectorRegistry'
@@ -3373,6 +3396,7 @@ export type Proposal_OrderBy =
   | 'governance__optimisticVetoThreshold'
   | 'governance__proposalCount'
   | 'governance__proposalThreshold'
+  | 'governance__proposalThresholdExact'
   | 'governance__proposalsCanceled'
   | 'governance__proposalsExecuted'
   | 'governance__proposalsQueued'
@@ -5303,6 +5327,7 @@ export type StakingToken_Filter = {
   governance_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   governance_starts_with?: InputMaybe<Scalars['String']['input']>;
   governance_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  governances_?: InputMaybe<Governance_Filter>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -5485,6 +5510,7 @@ export type StakingToken_OrderBy =
   | 'governance'
   | 'governance__id'
   | 'governance__isOptimistic'
+  | 'governance__lateQuorumVoteExtension'
   | 'governance__name'
   | 'governance__optimisticProposalThrottleCapacity'
   | 'governance__optimisticSelectorRegistry'
@@ -5493,6 +5519,7 @@ export type StakingToken_OrderBy =
   | 'governance__optimisticVetoThreshold'
   | 'governance__proposalCount'
   | 'governance__proposalThreshold'
+  | 'governance__proposalThresholdExact'
   | 'governance__proposalsCanceled'
   | 'governance__proposalsExecuted'
   | 'governance__proposalsQueued'
@@ -5502,6 +5529,7 @@ export type StakingToken_OrderBy =
   | 'governance__version'
   | 'governance__votingDelay'
   | 'governance__votingPeriod'
+  | 'governances'
   | 'id'
   | 'legacyGovernance'
   | 'optimisticDelegatedVotes'
@@ -7661,7 +7689,7 @@ export type GetIndexDtfQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfQuery = { dtf?: { id: string, version?: string | null, proxyAdmin: string, timestamp: string, deployer: string, ownerAddress: string, admins: Array<string>, mintingFee: string, tvlFee: string, annualizedTvlFee: string, mandate: string, auctionDelay: string, auctionLength: string, maxAuctionLength?: string | null, tradeAllowlistEnabled?: boolean | null, tradeTokenAllowlist?: Array<string> | null, auctionApprovers: Array<string>, auctionLaunchers: Array<string>, brandManagers: Array<string>, totalRevenue: string, protocolRevenue: string, governanceRevenue: string, externalRevenue: string, selfRevenue?: string | null, feeRecipients: string, immutableFeeRecipients?: string | null, folioFeeForSelf?: string | null, bidsEnabled?: boolean | null, trustedFillerRegistry?: string | null, trustedFillerEnabled?: boolean | null, weightControl: boolean, priceControl: number, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, legacyAdminGovernances?: Array<{ id: string, token: { id: string, governance?: { id: string } | null } }> | null, tradingGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, stToken?: { id: string, currentDelegates: string, totalDelegates: string, delegatedVotesRaw: string, currentOptimisticDelegates: string, totalOptimisticDelegates: string, optimisticDelegatedVotesRaw: string, legacyGovernance: Array<string>, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, underlying?: { name: string, symbol: string, address: string, decimals: number } | null, governance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, rewards: Array<{ rewardToken: { address: string, name: string, symbol: string, decimals: number } }> } | null } | null };
+export type GetIndexDtfQuery = { dtf?: { id: string, version?: string | null, proxyAdmin: string, timestamp: string, deployer: string, ownerAddress: string, admins: Array<string>, mintingFee: string, tvlFee: string, annualizedTvlFee: string, mandate: string, auctionDelay: string, auctionLength: string, maxAuctionLength?: string | null, tradeAllowlistEnabled?: boolean | null, tradeTokenAllowlist?: Array<string> | null, auctionApprovers: Array<string>, auctionLaunchers: Array<string>, brandManagers: Array<string>, totalRevenue: string, protocolRevenue: string, governanceRevenue: string, externalRevenue: string, selfRevenue?: string | null, feeRecipients: string, immutableFeeRecipients?: string | null, folioFeeForSelf?: string | null, bidsEnabled?: boolean | null, trustedFillerRegistry?: string | null, trustedFillerEnabled?: boolean | null, weightControl: boolean, priceControl: number, legacyAdmins: Array<string>, legacyAuctionApprovers: Array<string>, ownerGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, proposalThresholdExact?: boolean | null, lateQuorumVoteExtension?: string | null, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, legacyAdminGovernances?: Array<{ id: string, token: { id: string, governance?: { id: string } | null } }> | null, tradingGovernance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, proposalThresholdExact?: boolean | null, lateQuorumVoteExtension?: string | null, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, stToken?: { id: string, currentDelegates: string, totalDelegates: string, delegatedVotesRaw: string, currentOptimisticDelegates: string, totalOptimisticDelegates: string, optimisticDelegatedVotesRaw: string, legacyGovernance: Array<string>, token: { id: string, address: string, name: string, symbol: string, decimals: number, totalSupply: string, currentHolderCount: string, cumulativeHolderCount: string, transferCount: string, mintCount: string, burnCount: string, totalBurned: string, totalMinted: string }, underlying?: { name: string, symbol: string, address: string, decimals: number } | null, governance?: { id: string, name: string, version: string, votingDelay: string, votingPeriod: string, proposalThreshold: string, proposalThresholdExact?: boolean | null, lateQuorumVoteExtension?: string | null, quorumVotes?: string | null, quorumNumerator?: string | null, quorumDenominator?: string | null, isOptimistic?: boolean | null, optimisticVetoDelay?: string | null, optimisticVetoPeriod?: string | null, optimisticVetoThreshold?: string | null, optimisticProposalThrottleCapacity?: string | null, optimisticSelectorRegistry?: string | null, optimisticProposers?: Array<string> | null, timelock: { id: string, guardians: Array<string>, optimisticProposers?: Array<string> | null, executionDelay: string, type: string } } | null, rewards: Array<{ rewardToken: { address: string, name: string, symbol: string, decimals: number } }> } | null } | null };
 
 export type GetIndexDtfProposalsQueryVariables = Exact<{
   governanceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
@@ -7917,6 +7945,8 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
       votingDelay
       votingPeriod
       proposalThreshold
+      proposalThresholdExact
+      lateQuorumVoteExtension
       quorumVotes
       quorumNumerator
       quorumDenominator
@@ -7952,6 +7982,8 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
       votingDelay
       votingPeriod
       proposalThreshold
+      proposalThresholdExact
+      lateQuorumVoteExtension
       quorumVotes
       quorumNumerator
       quorumDenominator
@@ -8022,6 +8054,8 @@ export const GetIndexDtfDocument = new TypedDocumentString(`
         votingDelay
         votingPeriod
         proposalThreshold
+        proposalThresholdExact
+        lateQuorumVoteExtension
         quorumVotes
         quorumNumerator
         quorumDenominator

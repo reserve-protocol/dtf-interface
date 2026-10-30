@@ -306,6 +306,10 @@ function mapGovernance(governance: SubgraphGovernance): Governance {
     votingDelay: Number(governance.votingDelay),
     votingPeriod: Number(governance.votingPeriod),
     proposalThreshold: mapD18Percentage(governance.proposalThreshold),
+    proposalThresholdExact: governance.proposalThresholdExact === true,
+    ...(governance.lateQuorumVoteExtension === null || governance.lateQuorumVoteExtension === undefined
+      ? {}
+      : { voteExtension: Number(governance.lateQuorumVoteExtension) }),
     ...(governance.quorumVotes === null || governance.quorumVotes === undefined
       ? {}
       : { quorumVotes: mapAmount(governance.quorumVotes) }),

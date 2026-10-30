@@ -534,9 +534,30 @@ describe("Index DTF getters", () => {
       name: "Governor",
       version: "1",
       proposalThreshold: 1,
+      proposalThresholdExact: true,
+      voteExtension: 172_800,
       isOptimistic: false,
     });
     expect(authority.governance.optimistic).toBeUndefined();
+  });
+
+  it("flags a placeholder threshold and leaves out a missing vote extension", () => {
+    const subgraphDtf = createSubgraphDtf();
+    subgraphDtf.ownerGovernance = {
+      ...subgraphDtf.ownerGovernance!,
+      proposalThreshold: "1000000000000000",
+      proposalThresholdExact: false,
+      lateQuorumVoteExtension: null,
+    };
+    const authority = mapIndexDtf(subgraphDtf, 1).governance.admin.primary;
+
+    if (!authority || authority.type !== "governance") {
+      throw new Error("expected governance authority");
+    }
+
+    expect(authority.governance.proposalThreshold).toBe(0.1);
+    expect(authority.governance.proposalThresholdExact).toBe(false);
+    expect(authority.governance).not.toHaveProperty("voteExtension");
   });
 
   it("maps optimistic governance settings from v1.9 subgraph fields", () => {
@@ -674,6 +695,8 @@ function createSubgraphDtf(): NonNullable<GetIndexDtfQuery["dtf"]> {
       votingDelay: "1",
       votingPeriod: "2",
       proposalThreshold: "10000000000000000",
+      proposalThresholdExact: true,
+      lateQuorumVoteExtension: "172800",
       quorumVotes: "1000000000000000000",
       quorumNumerator: "10000000000000000",
       quorumDenominator: "1000000000000000000",

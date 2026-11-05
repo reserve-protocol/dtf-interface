@@ -448,6 +448,7 @@ query GetIndexDtfDelegates($stToken: ID!, $limit: Int = 10) {
     currentOptimisticDelegates
     token {
       totalSupply
+      decimals
     }
     delegates(
       first: $limit

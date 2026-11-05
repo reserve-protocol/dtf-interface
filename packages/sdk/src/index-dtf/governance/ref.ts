@@ -77,10 +77,12 @@ export function createIndexDtfGovernanceRef(client: DtfClient, params: DtfParams
     ) => getOptimisticProposalContext(client, { ...proposal, chainId }),
     getProposalThrottleCharges: (charges: Pick<GetIndexDtfProposalThrottleChargesParams, "account" | "governance">) =>
       getProposalThrottleCharges(client, { ...charges, chainId }),
-    getProposerState: (proposer: Pick<GetIndexDtfProposerStateParams, "account" | "governance" | "timepoint">) =>
-      getProposerState(client, { ...proposer, chainId }),
-    getProposalVotes: (votes: Pick<GetIndexDtfProposalVotesParams, "governance" | "proposalId">) =>
-      getProposalVotes(client, { ...votes, chainId }),
+    getProposerState: (
+      proposer: Pick<GetIndexDtfProposerStateParams, "account" | "governance" | "timepoint" | "voteTokenDecimals">,
+    ) => getProposerState(client, { ...proposer, chainId }),
+    getProposalVotes: (
+      votes: Pick<GetIndexDtfProposalVotesParams, "governance" | "proposalId" | "voteTokenDecimals">,
+    ) => getProposalVotes(client, { ...votes, chainId }),
     getProposalVoterState: (voter: Pick<GetIndexDtfProposalVoterStateParams, "account" | "governance" | "proposal">) =>
       getProposalVoterState(client, { ...voter, chainId }),
     getOptimisticProposalVoterState: (

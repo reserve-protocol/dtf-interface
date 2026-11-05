@@ -32,13 +32,14 @@ export async function getDelegates(client: DtfClient, params: GetIndexDtfDelegat
   }
 
   const voteSupply = BigInt(stakingToken.token.totalSupply);
+  const decimals = stakingToken.token.decimals;
   const delegates: IndexDtfDelegate[] = [];
   const normalDelegates: IndexDtfDelegate[] = [];
   const optimisticDelegates: IndexDtfDelegate[] = [];
 
   for (const delegate of stakingToken.delegates) {
-    const delegatedVotes = mapAmount(delegate.delegatedVotesRaw);
-    const optimisticDelegatedVotes = mapAmount(delegate.optimisticDelegatedVotesRaw);
+    const delegatedVotes = mapAmount(delegate.delegatedVotesRaw, decimals);
+    const optimisticDelegatedVotes = mapAmount(delegate.optimisticDelegatedVotesRaw, decimals);
     const mappedDelegate = {
       address: getAddress(delegate.address),
       delegatedVotes,
@@ -74,7 +75,7 @@ export async function getDelegates(client: DtfClient, params: GetIndexDtfDelegat
     currentNormalDelegates: Number(stakingToken.currentDelegates),
     totalOptimisticDelegates: Number(stakingToken.totalOptimisticDelegates),
     currentOptimisticDelegates: Number(stakingToken.currentOptimisticDelegates),
-    voteSupply: mapAmount(voteSupply),
+    voteSupply: mapAmount(voteSupply, decimals),
   };
 }
 

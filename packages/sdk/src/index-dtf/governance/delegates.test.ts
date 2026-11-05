@@ -15,6 +15,7 @@ describe("Index DTF governance delegates", () => {
         currentOptimisticDelegates: "2",
         token: {
           totalSupply: "10000000000000000000",
+          decimals: 18,
         },
         delegates: [
           {
@@ -152,5 +153,51 @@ describe("Index DTF governance delegates", () => {
         formatted: "10",
       },
     });
+  });
+
+  it("formats delegated votes in the vote token decimals", async () => {
+    const client = {
+      subgraph: {
+        queryIndex: vi.fn(async () => ({
+          stakingToken: {
+            id: "0x0000000000000000000000000000000000000001",
+            totalDelegates: "1",
+            currentDelegates: "1",
+            totalOptimisticDelegates: "1",
+            currentOptimisticDelegates: "1",
+            token: {
+              totalSupply: "1000000",
+              decimals: 6,
+            },
+            delegates: [
+              {
+                address: "0x0000000000000000000000000000000000000002",
+                delegatedVotesRaw: "300000",
+                optimisticDelegatedVotesRaw: "200000",
+                numberVotes: 1,
+                numberOptimisticVotes: 1,
+                hasBeenStandardDelegate: true,
+                hasBeenOptimisticDelegate: true,
+                tokenHoldersRepresentedAmount: 1,
+                optimisticTokenHoldersRepresentedAmount: 1,
+              },
+            ],
+          },
+        })),
+      },
+    } as unknown as DtfClient;
+
+    const delegates = await getDelegates(client, {
+      chainId: 8453,
+      stToken: "0x0000000000000000000000000000000000000001",
+    });
+
+    expect(delegates.delegates[0]).toMatchObject({
+      delegatedVotes: { raw: 300000n, formatted: "0.3" },
+      optimisticDelegatedVotes: { raw: 200000n, formatted: "0.2" },
+      weightedVotes: 30,
+      optimisticWeightedVotes: 20,
+    });
+    expect(delegates.voteSupply).toEqual({ raw: 1000000n, formatted: "1" });
   });
 });

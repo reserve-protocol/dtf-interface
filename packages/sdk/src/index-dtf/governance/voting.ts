@@ -1,4 +1,4 @@
-import { getAddress, type Address } from "viem";
+import { erc20Abi, getAddress, type Address } from "viem";
 
 import type { DtfClient } from "@/client";
 import type {
@@ -38,7 +38,7 @@ export async function getVoterState(
     abi: dtfIndexStakingVaultAbi,
   } as const;
   const publicClient = client.viem.getPublicClient(params.chainId);
-  const [delegate, balance, votingPower, voteSupply] = (await publicClient.multicall({
+  const [delegate, balance, votingPower, voteSupply, decimals] = (await publicClient.multicall({
     allowFailure: false,
     contracts: [
       {
@@ -60,25 +60,31 @@ export async function getVoterState(
         ...baseCall,
         functionName: "totalSupply",
       },
+      {
+        address: stToken,
+        abi: erc20Abi,
+        functionName: "decimals",
+      },
     ],
-  })) as readonly [Address, bigint, bigint, bigint];
+  })) as readonly [Address, bigint, bigint, bigint, number];
   const [optimisticDelegate, optimisticVotingPower] = await readOptionalCurrentOptimisticVoterState(
     client,
     params.chainId,
     stToken,
     account,
   );
-  const mappedOptimisticVotingPower = optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower);
+  const mappedOptimisticVotingPower =
+    optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower, decimals);
 
   return {
     account,
     delegate,
     optimisticDelegate,
-    balance: mapAmount(balance),
-    votingPower: mapAmount(votingPower),
+    balance: mapAmount(balance, decimals),
+    votingPower: mapAmount(votingPower, decimals),
     votingWeight: voteSupply === 0n ? 0 : (Number(votingPower) / Number(voteSupply)) * 100,
     optimisticVotingPower: mappedOptimisticVotingPower,
-    voteSupply: mapAmount(voteSupply),
+    voteSupply: mapAmount(voteSupply, decimals),
     isSelfDelegated: sameAddress(delegate, account),
     isOptimisticSelfDelegated: optimisticDelegate !== null && sameAddress(optimisticDelegate, account),
     hasVotingPower: votingPower > 0n,
@@ -99,7 +105,7 @@ export async function getProposerState(
   } as const;
 
   if (params.timepoint !== undefined) {
-    const [votingPower, proposalThreshold] = (await publicClient.multicall({
+    const [votingPower, proposalThreshold, voteToken] = (await publicClient.multicall({
       allowFailure: false,
       contracts: [
         {
@@ -111,19 +117,24 @@ export async function getProposerState(
           ...baseCall,
           functionName: "proposalThreshold",
         },
+        {
+          ...baseCall,
+          functionName: "token",
+        },
       ],
-    })) as readonly [bigint, bigint];
+    })) as readonly [bigint, bigint, Address];
+    const decimals = params.voteTokenDecimals ?? (await readTokenDecimals(client, params.chainId, voteToken));
 
     return {
       account,
       governance,
-      votingPower: mapAmount(votingPower),
-      proposalThreshold: mapAmount(proposalThreshold),
+      votingPower: mapAmount(votingPower, decimals),
+      proposalThreshold: mapAmount(proposalThreshold, decimals),
       canPropose: votingPower >= proposalThreshold,
     };
   }
 
-  const [clock, proposalThreshold] = (await publicClient.multicall({
+  const [clock, proposalThreshold, voteToken] = (await publicClient.multicall({
     allowFailure: false,
     contracts: [
       {
@@ -134,11 +145,15 @@ export async function getProposerState(
         ...baseCall,
         functionName: "proposalThreshold",
       },
+      {
+        ...baseCall,
+        functionName: "token",
+      },
     ],
-  })) as readonly [number | bigint, bigint];
+  })) as readonly [number | bigint, bigint, Address];
   const clockTimepoint = typeof clock === "bigint" ? clock : BigInt(clock);
   const timepoint = clockTimepoint > 0n ? clockTimepoint - 1n : 0n;
-  const [votingPower] = (await publicClient.multicall({
+  const [votingPower, voteTokenDecimals] = (await publicClient.multicall({
     allowFailure: false,
     contracts: [
       {
@@ -146,14 +161,20 @@ export async function getProposerState(
         functionName: "getVotes",
         args: [account, timepoint],
       },
+      {
+        address: voteToken,
+        abi: erc20Abi,
+        functionName: "decimals",
+      },
     ],
-  })) as readonly [bigint];
+  })) as readonly [bigint, number];
+  const decimals = params.voteTokenDecimals ?? voteTokenDecimals;
 
   return {
     account,
     governance,
-    votingPower: mapAmount(votingPower),
-    proposalThreshold: mapAmount(proposalThreshold),
+    votingPower: mapAmount(votingPower, decimals),
+    proposalThreshold: mapAmount(proposalThreshold, decimals),
     canPropose: votingPower >= proposalThreshold,
   };
 }
@@ -162,22 +183,31 @@ export async function getProposalVotes(
   client: DtfClient,
   params: GetIndexDtfProposalVotesParams,
 ): Promise<IndexDtfProposalVotes> {
-  const [[againstVotes, forVotes, abstainVotes]] = (await client.viem.getPublicClient(params.chainId).multicall({
-    allowFailure: false,
-    contracts: [
-      {
-        address: getAddress(params.governance),
-        abi: dtfIndexGovernanceAbi,
-        functionName: "proposalVotes",
-        args: [BigInt(params.proposalId)],
-      },
-    ],
-  })) as readonly [readonly [bigint, bigint, bigint]];
+  const governance = getAddress(params.governance);
+  const [[againstVotes, forVotes, abstainVotes], voteToken] = (await client.viem
+    .getPublicClient(params.chainId)
+    .multicall({
+      allowFailure: false,
+      contracts: [
+        {
+          address: governance,
+          abi: dtfIndexGovernanceAbi,
+          functionName: "proposalVotes",
+          args: [BigInt(params.proposalId)],
+        },
+        {
+          address: governance,
+          abi: dtfIndexGovernanceAbi,
+          functionName: "token",
+        },
+      ],
+    })) as readonly [readonly [bigint, bigint, bigint], Address];
+  const decimals = params.voteTokenDecimals ?? (await readTokenDecimals(client, params.chainId, voteToken));
 
   return {
-    againstVotes: mapAmount(againstVotes),
-    forVotes: mapAmount(forVotes),
-    abstainVotes: mapAmount(abstainVotes),
+    againstVotes: mapAmount(againstVotes, decimals),
+    forVotes: mapAmount(forVotes, decimals),
+    abstainVotes: mapAmount(abstainVotes, decimals),
   };
 }
 
@@ -199,17 +229,18 @@ async function getStandardProposalVoterState(
   const account = getAddress(params.account);
   const governance = getAddress(params.governance);
   const vote = getAccountProposalVote(params.proposal.votes, account);
-  const votingPower = await readStandardProposalVotingPower(
+  const [votingPower, decimals] = await readStandardProposalVotingPower(
     client,
     params.chainId,
     governance,
+    getAddress(params.proposal.voteToken),
     account,
     params.proposal.voteStart,
   );
 
   return {
     account,
-    votingPower: mapAmount(votingPower),
+    votingPower: mapAmount(votingPower, decimals),
     vote,
     hasVoted: vote !== null,
     hasVotingPower: votingPower > 0n,
@@ -221,14 +252,14 @@ async function getUnifiedOptimisticProposalVoterState(
   params: GetIndexDtfProposalVoterStateParams,
 ): Promise<IndexDtfProposalVoterState> {
   const account = getAddress(params.account);
-  const optimisticVotingPower = await readProposalOptimisticVotingPower(
+  const [optimisticVotingPower, decimals] = await readProposalOptimisticVotingPower(
     client,
     params.chainId,
     account,
     params.proposal,
   );
   const vote = getAccountProposalVote(params.proposal.votes, account);
-  const votingPower = mapAmount(optimisticVotingPower ?? 0n);
+  const votingPower = mapAmount(optimisticVotingPower ?? 0n, decimals);
 
   return {
     account,
@@ -244,7 +275,7 @@ export async function getOptimisticProposalVoterState(
   params: GetIndexDtfOptimisticProposalVoterStateParams,
 ): Promise<IndexDtfOptimisticProposalVoterState> {
   const account = getAddress(params.account);
-  const optimisticVotingPower = await readProposalOptimisticVotingPower(
+  const [optimisticVotingPower, decimals] = await readProposalOptimisticVotingPower(
     client,
     params.chainId,
     account,
@@ -254,7 +285,7 @@ export async function getOptimisticProposalVoterState(
 
   return {
     account,
-    optimisticVotingPower: optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower),
+    optimisticVotingPower: optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower, decimals),
     vote,
     hasVoted: vote !== null,
     hasOptimisticVotingPower: (optimisticVotingPower ?? 0n) > 0n,
@@ -322,21 +353,23 @@ async function readProposalOptimisticVotingPower(
 ) {
   const voteToken = getAddress(proposal.optimistic?.voteToken ?? proposal.voteToken);
   const snapshot = proposal.optimistic?.snapshot ?? BigInt(proposal.voteStart);
-  const timepoint = await getPastVoteTimepoint(client, chainId, voteToken, snapshot);
+  const [timepoint, decimals] = await getPastVoteTimepoint(client, chainId, voteToken, snapshot);
+  const votingPower = await readPastOptimisticVotes(client, chainId, voteToken, account, timepoint);
 
-  return readPastOptimisticVotes(client, chainId, voteToken, account, timepoint);
+  return [votingPower, decimals] as const;
 }
 
 async function readStandardProposalVotingPower(
   client: DtfClient,
   chainId: GetIndexDtfProposalVoterStateParams["chainId"],
   governance: Address,
+  voteToken: Address,
   account: GetIndexDtfProposalVoterStateParams["account"],
   voteStart: number,
 ) {
   const snapshotTimepoint = BigInt(voteStart);
   const publicClient = client.viem.getPublicClient(chainId);
-  const [clock] = (await publicClient.multicall({
+  const [clock, decimals] = (await publicClient.multicall({
     allowFailure: false,
     contracts: [
       {
@@ -344,8 +377,13 @@ async function readStandardProposalVotingPower(
         abi: dtfIndexGovernanceAbi,
         functionName: "clock",
       },
+      {
+        address: voteToken,
+        abi: erc20Abi,
+        functionName: "decimals",
+      },
     ],
-  })) as readonly [number | bigint];
+  })) as readonly [number | bigint, number];
   const clockTimepoint = typeof clock === "bigint" ? clock : BigInt(clock);
   const latestSafeTimepoint = clockTimepoint > 0n ? clockTimepoint - 1n : 0n;
   const timepoint = snapshotTimepoint > latestSafeTimepoint ? latestSafeTimepoint : snapshotTimepoint;
@@ -361,7 +399,7 @@ async function readStandardProposalVotingPower(
     ],
   })) as readonly [bigint];
 
-  return votingPower;
+  return [votingPower, decimals] as const;
 }
 
 async function getPastVoteTimepoint(
@@ -370,7 +408,7 @@ async function getPastVoteTimepoint(
   voteToken: Address,
   snapshotTimepoint: bigint,
 ) {
-  const [clock] = (await client.viem.getPublicClient(chainId).multicall({
+  const [clock, decimals] = (await client.viem.getPublicClient(chainId).multicall({
     allowFailure: false,
     contracts: [
       {
@@ -378,12 +416,30 @@ async function getPastVoteTimepoint(
         abi: dtfIndexStakingVaultAbi,
         functionName: "clock",
       },
+      {
+        address: voteToken,
+        abi: erc20Abi,
+        functionName: "decimals",
+      },
     ],
-  })) as readonly [number | bigint];
+  })) as readonly [number | bigint, number];
   const clockTimepoint = typeof clock === "bigint" ? clock : BigInt(clock);
   const latestSafeTimepoint = clockTimepoint > 0n ? clockTimepoint - 1n : 0n;
 
-  return snapshotTimepoint > latestSafeTimepoint ? latestSafeTimepoint : snapshotTimepoint;
+  return [snapshotTimepoint > latestSafeTimepoint ? latestSafeTimepoint : snapshotTimepoint, decimals] as const;
+}
+
+async function readTokenDecimals(
+  client: DtfClient,
+  chainId: GetIndexDtfProposalVotesParams["chainId"],
+  token: Address,
+): Promise<number> {
+  return client.viem.readContract({
+    chainId,
+    address: token,
+    abi: erc20Abi,
+    functionName: "decimals",
+  });
 }
 
 async function readPastOptimisticVotes(

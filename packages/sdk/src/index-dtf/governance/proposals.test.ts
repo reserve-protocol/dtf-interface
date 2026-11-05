@@ -129,6 +129,9 @@ describe("Index DTF governance proposals", () => {
       expect(proposal.votes).toEqual([
         { voter: target, choice: "FOR", weight: { raw: 2500000n, formatted: decimals === 6 ? "2.5" : "0.025" } },
       ]);
+      expect(proposal.voteTokenDecimals).toBe(decimals);
+      expect(proposal.votingState.threshold.targetVotes).toEqual(proposal.quorumVotes);
+      expect(proposal.votingState.threshold.currentVotes).toEqual(proposal.forWeightedVotes);
       expect(proposal.state).toBe("ACTIVE");
       expect(proposal.decoded.unknownCalls).toEqual([]);
       expect(proposal.decoded.calls).toHaveLength(1);

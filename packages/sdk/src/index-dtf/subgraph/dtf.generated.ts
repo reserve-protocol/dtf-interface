@@ -7747,7 +7747,7 @@ export type GetIndexDtfDelegatesQueryVariables = Exact<{
 }>;
 
 
-export type GetIndexDtfDelegatesQuery = { stakingToken?: { id: string, totalDelegates: string, currentDelegates: string, totalOptimisticDelegates: string, currentOptimisticDelegates: string, token: { totalSupply: string }, delegates: Array<{ address: string, delegatedVotesRaw: string, optimisticDelegatedVotesRaw: string, numberVotes: number, numberOptimisticVotes: number, hasBeenStandardDelegate: boolean, hasBeenOptimisticDelegate: boolean, tokenHoldersRepresentedAmount: number, optimisticTokenHoldersRepresentedAmount: number }> } | null };
+export type GetIndexDtfDelegatesQuery = { stakingToken?: { id: string, totalDelegates: string, currentDelegates: string, totalOptimisticDelegates: string, currentOptimisticDelegates: string, token: { totalSupply: string, decimals: number }, delegates: Array<{ address: string, delegatedVotesRaw: string, optimisticDelegatedVotesRaw: string, numberVotes: number, numberOptimisticVotes: number, hasBeenStandardDelegate: boolean, hasBeenOptimisticDelegate: boolean, tokenHoldersRepresentedAmount: number, optimisticTokenHoldersRepresentedAmount: number }> } | null };
 
 export type GetIndexDtfRebalancesQueryVariables = Exact<{
   dtf: Scalars['String']['input'];
@@ -8360,6 +8360,7 @@ export const GetIndexDtfDelegatesDocument = new TypedDocumentString(`
     currentOptimisticDelegates
     token {
       totalSupply
+      decimals
     }
     delegates(
       first: $limit

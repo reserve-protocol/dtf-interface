@@ -276,7 +276,8 @@ async function readVoteLockState(
     maxWithdraw: mapAmount(maxWithdrawResult.result, underlying.decimals),
     shareBalance: mapAmount(shareBalanceResult.result, underlying.decimals),
     exchangeRate: mapAmount(exchangeRateResult.result, underlying.decimals),
-    optimisticVotingPower: optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower),
+    optimisticVotingPower:
+      optimisticVotingPower === null ? null : mapAmount(optimisticVotingPower, underlying.decimals),
     hasOptimisticVotingPower: (optimisticVotingPower ?? 0n) > 0n,
     unstakingDelay: unstakingDelayResult.result,
     unstakingManager: unstakingManagerResult.result,

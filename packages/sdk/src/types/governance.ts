@@ -82,6 +82,8 @@ export type GetIndexDtfOptimisticProposalContextParams = {
   readonly voteToken?: Address;
   readonly snapshot?: bigint;
   readonly vetoThreshold?: bigint;
+  /** Skips the vote token `decimals()` read when the caller already knows it. */
+  readonly voteTokenDecimals?: number;
 };
 
 export type GetIndexDtfLegacyVoteLocksParams =
@@ -107,12 +109,16 @@ export type GetIndexDtfProposerStateParams = {
   readonly governance: Address;
   readonly account: Address;
   readonly timepoint?: bigint;
+  /** Skips the extra vote token `decimals()` read when the caller already knows it. */
+  readonly voteTokenDecimals?: number;
 };
 
 export type GetIndexDtfProposalVotesParams = {
   readonly chainId: SupportedChainId;
   readonly governance: Address;
   readonly proposalId: string | bigint;
+  /** Skips the extra vote token `decimals()` read when the caller already knows it. */
+  readonly voteTokenDecimals?: number;
 };
 
 export type GetIndexDtfProposalVoterStateParams = {
@@ -214,6 +220,8 @@ export type IndexDtfProposalSummary = {
   readonly forWeightedVotes: Amount;
   readonly againstWeightedVotes: Amount;
   readonly abstainWeightedVotes: Amount;
+  /** Decimals of the vote token; vote weights, quorum and thresholds use them. Treated as 18 when missing. */
+  readonly voteTokenDecimals?: number;
   readonly isOptimistic?: boolean;
   readonly wasChallenged?: boolean;
   readonly challengedProposalId?: string;
@@ -246,6 +254,7 @@ export type IndexDtfProposalVotingSnapshot = {
   readonly forWeightedVotes: Amount;
   readonly againstWeightedVotes: Amount;
   readonly abstainWeightedVotes: Amount;
+  readonly voteTokenDecimals?: number;
   readonly isOptimistic?: boolean;
   readonly vetoThreshold?: bigint;
   readonly optimistic?: IndexDtfOptimisticProposalContext;

@@ -1,5 +1,18 @@
 # @reserve-protocol/sdk
 
+## 0.8.1
+
+### Patch Changes
+
+- b72d19b: Decode proposals to every `GovernanceSpell_09_18_2026` deployment (the 2% and 1% threshold redeployments on Ethereum, Base and BSC) and OPEN's `GovernanceSpell_10_21_2026`, so a preview names them without the explorer ABI fallback.
+- e5341f3: Index DTF governance amounts now use the decimals of the vote token. Before, the SDK formatted them with 18 decimals, so a DAO with a 6-decimal vote token (for example a vote-lock vault on USDC) showed a quorum of 0.00000000000003 instead of 0.03. Raw values did not change.
+
+  - Proposals, proposal lists and voting snapshots get a `voteTokenDecimals` field from the subgraph. `getProposalState` uses it for the threshold amounts and uses 18 when it is missing.
+  - `getVoterState`, `getProposalVoterState`, `getOptimisticProposalVoterState`, `getOptimisticVotes`, `getPastOptimisticVotes` and `getOptimisticProposalContext` read `decimals()` in the same multicall as their other reads.
+  - `getDelegates` reads the vote token decimals from the subgraph.
+  - The vote-lock state formats `optimisticVotingPower` with the vault decimals.
+  - `getProposalVotes`, `getProposerState` and `getOptimisticProposalContext` accept an optional `voteTokenDecimals`. Without it, `getProposalVotes` and `getProposerState` with a `timepoint` make one more `decimals()` call.
+
 ## 0.8.0
 
 ### Minor Changes

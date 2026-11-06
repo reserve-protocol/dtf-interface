@@ -108,6 +108,33 @@ const EXTRA_PROPOSAL_CONTRACTS: readonly {
     abi: governanceSpell09182026Abi,
     addresses: INDEX_DTF_GOVERNANCE_SPELL_09_18_2026_ADDRESS,
   },
+  // Redeployments of the same spell with a 2% and then a 1% proposal threshold; proposals can target any of them.
+  {
+    contract: "Governance Spell 09_18_2026",
+    abi: governanceSpell09182026Abi,
+    addresses: {
+      1: "0xC72fD080F4CF5Ce6a3314192888419f45c562d87",
+      8453: "0x24a4B37F9c40fB0E80ec436Df2e9989FBAFa8bB7",
+      56: "0xE19ae8D1f3FFf987aaEaa65248BAB3A0d1FDC809",
+    },
+  },
+  {
+    contract: "Governance Spell 09_18_2026",
+    abi: governanceSpell09182026Abi,
+    addresses: {
+      1: "0xeE6066Df6E27F142b921FD38e6766a9D6aF35c2f",
+      8453: "0x971c890ACb9EeB084f292996Be667bB9A2889AE9",
+      56: "0x281EDD83b9b3C7cD05E260EF7E17A9734731A52B",
+    },
+  },
+  // OPEN's migration spell: other governance parameters, the same functions.
+  {
+    contract: "Governance Spell 10_21_2026",
+    abi: governanceSpell09182026Abi,
+    addresses: {
+      1: "0xaf029ad44Cc44fB2AefFF84029dd0c29D5Ea8D87",
+    },
+  },
   {
     contract: "Upgrade Spell 6.0.0",
     abi: upgradeSpell600Abi,

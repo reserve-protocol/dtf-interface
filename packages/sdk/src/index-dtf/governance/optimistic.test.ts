@@ -14,8 +14,11 @@ const MAX_UINT256 = (1n << 256n) - 1n;
 
 describe("Index DTF optimistic governance", () => {
   it("reads optimistic proposal veto context", async () => {
-    const multicall = vi.fn(async () => [100n, "0x0000000000000000000000000000000000000002"]);
-    const readContract = vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(100000000000000000000n);
+    const multicall = vi
+      .fn()
+      .mockResolvedValueOnce([100n, "0x0000000000000000000000000000000000000002"])
+      .mockResolvedValueOnce([100000000000000000000n, 18]);
+    const readContract = vi.fn().mockResolvedValueOnce(true);
     const client = {
       viem: {
         getPublicClient: vi.fn(() => ({ multicall })),
@@ -60,6 +63,38 @@ describe("Index DTF optimistic governance", () => {
         ],
       }),
     );
+    expect(multicall).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        contracts: [
+          expect.objectContaining({ functionName: "getPastTotalSupply", args: [100n] }),
+          expect.objectContaining({ address: "0x0000000000000000000000000000000000000002", functionName: "decimals" }),
+        ],
+      }),
+    );
+  });
+
+  it("formats optimistic proposal veto context in the vote token decimals", async () => {
+    const multicall = vi.fn().mockResolvedValueOnce([1000000n, 6]);
+    const client = {
+      viem: {
+        getPublicClient: vi.fn(() => ({ multicall })),
+        readContract: vi.fn(),
+      },
+    } as unknown as DtfClient;
+
+    const context = await getOptimisticProposalContext(client, {
+      chainId: 8453,
+      governance: "0x0000000000000000000000000000000000000001",
+      proposalId: "42",
+      isOptimistic: true,
+      voteToken: "0x0000000000000000000000000000000000000002",
+      snapshot: 100n,
+      vetoThreshold: 50000000000000000n,
+    });
+
+    expect(context?.snapshotSupply).toEqual({ raw: 1000000n, formatted: "1" });
+    expect(context?.vetoThresholdVotes).toEqual({ raw: 50000n, formatted: "0.05" });
   });
 
   it("does not infer proposal-specific veto threshold from current governor params", async () => {
@@ -100,6 +135,7 @@ describe("Index DTF optimistic governance", () => {
       voteToken: "0x0000000000000000000000000000000000000002",
       snapshot: 100n,
       vetoThreshold: 200000000000000000n,
+      voteTokenDecimals: 18,
     });
 
     expect(getPublicClient).not.toHaveBeenCalled();
@@ -157,6 +193,7 @@ describe("Index DTF optimistic governance", () => {
       voteToken: "0x0000000000000000000000000000000000000002",
       snapshot: 100n,
       vetoThreshold: 1n,
+      voteTokenDecimals: 18,
     });
 
     expect(context?.vetoThresholdVotes).toEqual({
@@ -615,14 +652,13 @@ describe("Index DTF optimistic governance", () => {
 
   it("reads current and past optimistic voting power from the vote token", async () => {
     const getBlock = vi.fn(async () => ({ timestamp: 1_000n }));
-    const readContract = vi
+    const multicall = vi
       .fn()
-      .mockResolvedValueOnce(3000000000000000000n)
-      .mockResolvedValueOnce(2000000000000000000n);
+      .mockResolvedValueOnce([3000000000000000000n, 18])
+      .mockResolvedValueOnce([2000000000000000000n, 18]);
     const client = {
       viem: {
-        getPublicClient: vi.fn(() => ({ getBlock })),
-        readContract,
+        getPublicClient: vi.fn(() => ({ getBlock, multicall })),
       },
     } as unknown as DtfClient;
     const params = {
@@ -639,12 +675,34 @@ describe("Index DTF optimistic governance", () => {
       raw: 2000000000000000000n,
       formatted: "2",
     });
-    expect(readContract).toHaveBeenNthCalledWith(
+    expect(multicall).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        functionName: "getPastOptimisticVotes",
-        args: ["0x0000000000000000000000000000000000000002", 999n],
+        contracts: [
+          expect.objectContaining({
+            functionName: "getPastOptimisticVotes",
+            args: ["0x0000000000000000000000000000000000000002", 999n],
+          }),
+          expect.objectContaining({ functionName: "decimals" }),
+        ],
       }),
     );
+  });
+
+  it("formats optimistic votes in the vote token decimals", async () => {
+    const multicall = vi.fn().mockResolvedValueOnce([300000n, 6]);
+    const client = {
+      viem: {
+        getPublicClient: vi.fn(() => ({ multicall })),
+      },
+    } as unknown as DtfClient;
+
+    await expect(
+      getOptimisticVotes(client, {
+        chainId: 8453,
+        voteToken: "0x0000000000000000000000000000000000000001",
+        account: "0x0000000000000000000000000000000000000002",
+      }),
+    ).resolves.toEqual({ raw: 300000n, formatted: "0.3" });
   });
 });

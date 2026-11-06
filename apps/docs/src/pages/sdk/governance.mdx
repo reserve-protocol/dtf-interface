@@ -27,6 +27,8 @@ const proposal = await sdk.index.getProposal({
 
 Proposal IDs can be extremely long decimal strings. Keep them as strings in routes and UI state.
 
+Vote amounts (votes, quorum, thresholds, voting power, delegated votes) use the decimals of the vote token, not a fixed 18. A vote-lock vault on USDC has 6 decimals. Proposal reads set `voteTokenDecimals` on the proposal. `getProposalVotes` and `getProposerState` with a `timepoint` read the token `decimals()` in one more call; pass `voteTokenDecimals` to skip it.
+
 ## Voting And Account State
 
 | Method                  | Use                                                                                           |

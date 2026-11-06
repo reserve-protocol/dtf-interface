@@ -1,4 +1,4 @@
-import { getAddress, type Address, type Hex } from "viem";
+import { erc20Abi, getAddress, type Address, type Hex } from "viem";
 
 import type { DtfClient } from "@/client";
 import type { Amount } from "@/types/common";
@@ -91,14 +91,14 @@ export async function getOptimisticProposalContext(
     throw new Error("Missing optimistic proposal context values");
   }
 
-  const snapshotSupply = await client.viem.readContract({
-    chainId: params.chainId,
-    address: token,
-    abi: dtfIndexStakingVaultAbi,
-    functionName: "getPastTotalSupply",
-    args: [snapshot],
-  });
-  const mappedSnapshotSupply = mapAmount(snapshotSupply);
+  const [snapshotSupply, decimals] = await readSnapshotSupply(
+    client,
+    params.chainId,
+    token,
+    snapshot,
+    params.voteTokenDecimals,
+  );
+  const mappedSnapshotSupply = mapAmount(snapshotSupply, decimals);
   const vetoThresholdVotes = getOptimisticVetoThresholdVotes({
     snapshotSupply: mappedSnapshotSupply,
     vetoThreshold,
@@ -110,7 +110,7 @@ export async function getOptimisticProposalContext(
     snapshot,
     snapshotSupply: mappedSnapshotSupply,
     vetoThreshold,
-    vetoThresholdVotes: mapAmount(vetoThresholdVotes),
+    vetoThresholdVotes: mapAmount(vetoThresholdVotes, decimals),
   };
 }
 
@@ -244,15 +244,25 @@ export async function getProposalThrottleCharges(
 }
 
 export async function getOptimisticVotes(client: DtfClient, params: GetIndexDtfOptimisticVotesParams): Promise<Amount> {
-  const votes = await client.viem.readContract({
-    chainId: params.chainId,
-    address: getAddress(params.voteToken),
-    abi: dtfIndexStakingVaultOptimisticAbi,
-    functionName: "getOptimisticVotes",
-    args: [getAddress(params.account)],
-  });
+  const voteToken = getAddress(params.voteToken);
+  const [votes, decimals] = (await client.viem.getPublicClient(params.chainId).multicall({
+    allowFailure: false,
+    contracts: [
+      {
+        address: voteToken,
+        abi: dtfIndexStakingVaultOptimisticAbi,
+        functionName: "getOptimisticVotes",
+        args: [getAddress(params.account)],
+      },
+      {
+        address: voteToken,
+        abi: erc20Abi,
+        functionName: "decimals",
+      },
+    ],
+  })) as readonly [bigint, number];
 
-  return mapAmount(votes);
+  return mapAmount(votes, decimals);
 }
 
 export async function getPastOptimisticVotes(
@@ -260,15 +270,49 @@ export async function getPastOptimisticVotes(
   params: GetIndexDtfPastOptimisticVotesParams,
 ): Promise<Amount> {
   const timepoint = params.timepoint ?? (await getLatestBlockTimepoint(client.viem, params.chainId));
-  const votes = await client.viem.readContract({
-    chainId: params.chainId,
-    address: getAddress(params.voteToken),
-    abi: dtfIndexStakingVaultOptimisticAbi,
-    functionName: "getPastOptimisticVotes",
-    args: [getAddress(params.account), timepoint],
-  });
+  const voteToken = getAddress(params.voteToken);
+  const [votes, decimals] = (await client.viem.getPublicClient(params.chainId).multicall({
+    allowFailure: false,
+    contracts: [
+      {
+        address: voteToken,
+        abi: dtfIndexStakingVaultOptimisticAbi,
+        functionName: "getPastOptimisticVotes",
+        args: [getAddress(params.account), timepoint],
+      },
+      {
+        address: voteToken,
+        abi: erc20Abi,
+        functionName: "decimals",
+      },
+    ],
+  })) as readonly [bigint, number];
 
-  return mapAmount(votes);
+  return mapAmount(votes, decimals);
+}
+
+async function readSnapshotSupply(
+  client: DtfClient,
+  chainId: GetIndexDtfOptimisticProposalContextParams["chainId"],
+  token: Address,
+  snapshot: bigint,
+  voteTokenDecimals: number | undefined,
+): Promise<readonly [bigint, number]> {
+  const supplyCall = {
+    address: token,
+    abi: dtfIndexStakingVaultAbi,
+    functionName: "getPastTotalSupply",
+    args: [snapshot],
+  } as const;
+
+  if (voteTokenDecimals !== undefined) {
+    return [await client.viem.readContract({ chainId, ...supplyCall }), voteTokenDecimals];
+  }
+
+  return (await client.viem.getPublicClient(chainId).multicall({
+    allowFailure: false,
+    contracts: [supplyCall, { address: token, abi: erc20Abi, functionName: "decimals" }],
+  })) as readonly [bigint, number];
 }
 
 function getRoleMemberCalls(timelock: Address, role: Hex, count: bigint) {

@@ -225,6 +225,7 @@ async function withOptimisticContext<T extends ParsedIndexDtfProposal>(
       voteToken: proposal.voteToken,
       snapshot: BigInt(proposal.voteStart),
       vetoThreshold: proposal.vetoThreshold,
+      ...(proposal.voteTokenDecimals === undefined ? {} : { voteTokenDecimals: proposal.voteTokenDecimals }),
     });
 
     if (!optimistic) {

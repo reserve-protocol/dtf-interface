@@ -44,6 +44,7 @@ type ProposalVoteStateInput = Pick<
   | "vetoThreshold"
   | "voteEnd"
   | "voteStart"
+  | "voteTokenDecimals"
 > & {
   readonly optimistic?: Partial<
     Pick<IndexDtfOptimisticProposalContext, "snapshotSupply" | "vetoThreshold" | "vetoThresholdVotes">
@@ -113,7 +114,8 @@ export function getZeroValues(length: number): bigint[] {
 }
 
 export function getProposalState(proposal: ProposalVoteStateInput, timestamp = getCurrentTime()): ProposalVotingState {
-  const state = createInitialVotingState(proposal.state);
+  const voteTokenDecimals = proposal.voteTokenDecimals ?? 18;
+  const state = createInitialVotingState(proposal.state, voteTokenDecimals);
 
   const isOptimistic = proposal.isOptimistic === true;
   const optimisticVetoThresholdVotes = isOptimistic ? getOptimisticVetoVotes(proposal) : undefined;
@@ -183,6 +185,7 @@ export function getProposalState(proposal: ProposalVoteStateInput, timestamp = g
       : proposal.forWeightedVotes.raw + proposal.abstainWeightedVotes.raw,
     targetVotes: isOptimistic ? optimisticVetoThresholdVotes : quorumVotes,
     reached: isOptimistic ? state.vetoReached : state.participationQuorumReached,
+    decimals: voteTokenDecimals,
   });
 
   if (totalVotes > 0n) {
@@ -215,7 +218,7 @@ export function withVoteState<T extends ProposalVoteStateInput>(
   };
 }
 
-function createInitialVotingState(state: ProposalState): MutableProposalVotingState {
+function createInitialVotingState(state: ProposalState, decimals: number): MutableProposalVotingState {
   return {
     state,
     deadline: null,
@@ -224,7 +227,7 @@ function createInitialVotingState(state: ProposalState): MutableProposalVotingSt
     participationQuorumReached: false,
     vetoReached: false,
     threshold: {
-      currentVotes: mapAmount(0n),
+      currentVotes: mapAmount(0n, decimals),
       progress: 0,
       reached: false,
       hasTarget: false,
@@ -239,14 +242,16 @@ function getVotingThresholdState({
   currentVotes,
   targetVotes,
   reached,
+  decimals,
 }: {
   readonly currentVotes: bigint;
   readonly targetVotes: bigint | undefined;
   readonly reached: boolean;
+  readonly decimals: number;
 }): ProposalVotingState["threshold"] {
   if (targetVotes === undefined || targetVotes === MAX_UINT256) {
     return {
-      currentVotes: mapAmount(currentVotes),
+      currentVotes: mapAmount(currentVotes, decimals),
       progress: 0,
       reached: false,
       hasTarget: false,
@@ -254,8 +259,8 @@ function getVotingThresholdState({
   }
 
   return {
-    currentVotes: mapAmount(currentVotes),
-    targetVotes: mapAmount(targetVotes),
+    currentVotes: mapAmount(currentVotes, decimals),
+    targetVotes: mapAmount(targetVotes, decimals),
     progress: targetVotes > 0n ? getVotePercentage(currentVotes, targetVotes) : reached ? 100 : 0,
     reached,
     hasTarget: true,

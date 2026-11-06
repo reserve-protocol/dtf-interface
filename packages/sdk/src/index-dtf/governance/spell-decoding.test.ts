@@ -101,4 +101,39 @@ describe("spell proposal decoding", () => {
       ["Governance Spell 09_18_2026", "retireOldStakingVault"],
     ]);
   });
+
+  // Later deployments of the same spell (2% and 1% thresholds) and OPEN's 10_21_2026 spell share its ABI.
+  it.each([
+    [8453, "0x24a4B37F9c40fB0E80ec436Df2e9989FBAFa8bB7", "Governance Spell 09_18_2026"],
+    [8453, "0x971c890ACb9EeB084f292996Be667bB9A2889AE9", "Governance Spell 09_18_2026"],
+    [1, "0xeE6066Df6E27F142b921FD38e6766a9D6aF35c2f", "Governance Spell 09_18_2026"],
+    [56, "0x281EDD83b9b3C7cD05E260EF7E17A9734731A52B", "Governance Spell 09_18_2026"],
+    [1, "0xaf029ad44Cc44fB2AefFF84029dd0c29D5Ea8D87", "Governance Spell 10_21_2026"],
+  ] as const)("names a retire call to the spell at %s %s", (chainId, spell, name) => {
+    const decoded = decodeIndexDtfProposalCalldatas({
+      targets: [spell],
+      calldatas: [
+        encodeFunctionData({
+          abi: governanceSpell09182026Abi,
+          functionName: "retireOldStakingVault",
+          args: [OLD_VAULT],
+        }),
+      ],
+      contractMap: buildProposalContractMap({
+        chainId,
+        dtf: {
+          address: DTF,
+          proxyAdmin: PROXY_ADMIN,
+          legacyAdminGovernance: [],
+          legacyTradingGovernance: [],
+          stakingToken: { address: ST_TOKEN, legacyGovernance: [] },
+        },
+      }),
+    });
+
+    expect(decoded.unknownCalls).toEqual([]);
+    expect(decoded.calls.map(({ contract, functionName }) => [contract, functionName])).toEqual([
+      [name, "retireOldStakingVault"],
+    ]);
+  });
 });

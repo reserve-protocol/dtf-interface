@@ -178,7 +178,7 @@ describe("Index DTF getters", () => {
       if (functionName === "getFeeDetails") return [recipient, 15n, 100n, 0n];
       throw new Error(`unexpected contract read: ${functionName}`);
     });
-    const multicall = vi.fn(async () => ["Token", "TOK", 18]);
+    const multicall = vi.fn(async () => ["Token", "TOK", 18].map((result) => ({ status: "success", result })));
     vi.stubGlobal("fetch", fetch);
     const client = createDtfClient({
       apiBaseUrl: "https://api.example",
@@ -608,7 +608,9 @@ describe("Index DTF getters", () => {
       [usdc, weth],
       [1_000_000n, 2_000_000_000_000_000_000n],
     ]);
-    const multicall = vi.fn(async () => ["USD Coin", "USDC", 6, "Wrapped Ether", "WETH", 18]);
+    const multicall = vi.fn(async () =>
+      ["USD Coin", "USDC", 6, "Wrapped Ether", "WETH", 18].map((result) => ({ status: "success", result })),
+    );
     const client = createDtfClient({
       chains: {
         1: {

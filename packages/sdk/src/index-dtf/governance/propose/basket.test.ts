@@ -596,7 +596,7 @@ function testClient(
               return contracts.map(({ address, functionName }) => {
                 const value = metadata[address.toLowerCase()]?.[functionName];
                 if (value === undefined) throw new Error(`Unexpected token read: ${address}.${functionName}`);
-                return value;
+                return { status: "success", result: value };
               });
             },
           ),

@@ -8,7 +8,7 @@ import { createIndexDtfNamespace, createIndexDtfRef } from "@/index-dtf/index";
 describe("Index DTF namespace", () => {
   it("passes blockNumber to ref basket shorthand", async () => {
     const readContract = vi.fn(async () => [["0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"], [1_000_000n]]);
-    const multicall = vi.fn(async () => ["USD Coin", "USDC", 6]);
+    const multicall = vi.fn(async () => ["USD Coin", "USDC", 6].map((result) => ({ status: "success", result })));
     const client = createDtfClient({
       chains: {
         1: {

@@ -1,5 +1,11 @@
 # @reserve-protocol/sdk
 
+## 0.8.2
+
+### Patch Changes
+
+- fc1f0c3: Support legacy ERC20 tokens that return bytes32 names or symbols when reading token metadata, while preserving failures for invalid metadata and decimals.
+
 ## 0.8.1
 
 ### Patch Changes

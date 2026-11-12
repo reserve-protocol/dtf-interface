@@ -1,5 +1,12 @@
 # @reserve-protocol/react-sdk
 
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [fc1f0c3]
+  - @reserve-protocol/sdk@0.8.2
+
 ## 0.8.1
 
 ### Patch Changes
